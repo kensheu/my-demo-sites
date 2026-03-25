@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餐點價格異動紀錄</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #ffffff;
+  --bg-2:        #f5f5f4;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #a8a29e;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: #f3f2ef;
+  min-height: 100vh;
+}
+
+.page { max-width: 1080px; margin: 0 auto; padding: 28px 20px 48px; }
+
+.page-header { margin-bottom: 22px; }
+.page-title  { font-size: 19px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.page-sub    { font-size: 12px; color: var(--text-3); }
+
+.top-row {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+}
+.rest-picker { display: flex; align-items: center; gap: 8px; }
+
+select {
+  padding: 6px 28px 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 20px;
+}
+.tab {
+  padding: 9px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px;
+  white-space: nowrap;
+  transition: color .12s;
+  user-select: none;
+}
+.tab:hover { color: var(--text-2); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 500; }
+.tab-hint { font-size: 11px; font-weight: 400; color: var(--text-3); margin-left: 4px; }
+.tab.active .tab-hint { color: #93c5fd; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ─── Card ─── */
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+.card-head {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+}
+.card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+
+/* ─── Month Nav ─── */
+.month-nav { display: flex; align-items: center; gap: 6px; }
+.month-nav span {
+  font-size: 14px; font-weight: 500; color: var(--text);
+  min-width: 88px; text-align: center;
+}
+.btn-nav {
+  padding: 4px 11px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 12px;
+}
+.btn-nav:hover:not(:disabled) { background: var(--bg-2); }
+.btn-nav:disabled { opacity: .3; cursor: default; }
+
+/* ─── Summary bar ─── */
+.summary-bar {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border-2);
+  background: var(--bg-2);
+}
+.s-item { font-size: 12px; color: var(--text-3); }
+.s-item strong { font-weight: 600; }
+
+/* ─── Table ─── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+.tbl th {
+  padding: 9px 12px;
+  text-align: left;
+  font-size: 11px; font-weight: 500; letter-spacing: .04em;
+  color: var(--text-3);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.tbl th.r, .tbl td.r { text-align: right; }
+.tbl td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-2);
+  color: var(--text);
+  vertical-align: middle;
+}
+.tbl td.num { color: var(--text-2); font-variant-numeric: tabular-nums; }
+/* 料號欄：窄、灰色、等寬數字 */
+.tbl td.id-cell {
+  color: var(--text-3);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tbody tr:hover td { background: #fafaf9; }
+
+/* row highlight by status */
+.row-chg td { background: #fffdf0; }
+.row-chg:hover td { background: #fefce8 !important; }
+.row-new td { background: #f6fef9; }
+.row-new:hover td { background: #dcfce7 !important; }
+.row-out td { opacity: .65; background: #fef2f2; }
+.row-out:hover td { opacity: .8; background: #fee2e2 !important; }
+
+.name-out { color: var(--text-3); text-decoration: line-through; }
+.row-note { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+/* ─── Badges ─── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 9px;
+  border-radius: 100px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.b-new { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.b-chg { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.b-out { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bdr); }
+.b-ok  { background: var(--bg-2); color: var(--text-3); border: 1px solid var(--border); }
+
+/* ─── Legend row ─── */
+.legend-row {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-2);
+  background: var(--bg-2);
+}
+.lg-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-2); }
+
+/* ─── Tip box ─── */
+.tip {
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12px; line-height: 1.7;
+  color: var(--text-2);
+  margin-top: 14px;
+}
+.tip strong { color: var(--blue-text); font-weight: 500; }
+
+/* ─── VIEW B ─── */
+.filter-bar {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border-2);
+}
+.filter-lbl { font-size: 12px; color: var(--text-3); }
+
+.pill {
+  padding: 4px 13px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--bg); color: var(--text-2);
+  transition: all .12s;
+  user-select: none;
+}
+.pill:hover { border-color: #a8a29e; color: var(--text); }
+.pill.on { background: var(--text); color: #fff; border-color: var(--text); }
+
+.search-box {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  width: 190px;
+  outline: none;
+  color: var(--text);
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
+.search-box::placeholder { color: var(--text-3); }
+
+.dot-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-2);
+}
+.dl-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-2); }
+.lg-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.lg-dot.price  { background: #16a34a; }
+.lg-dot.name   { background: #2563eb; }
+.lg-dot.status { background: #dc2626; }
+.lg-dot.sys    { background: #9ca3af; }
+
+/* date group */
+.tl-group-hd {
+  padding: 7px 16px 5px;
+  font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--text-3);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border-2);
+  text-transform: uppercase;
+}
+
+/* timeline item */
+.tl-item {
+  display: flex; gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-2);
+  transition: background .1s;
+}
+.tl-item:last-child { border-bottom: none; }
+.tl-item:hover { background: var(--bg-2); }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dot.price  { background: #16a34a; }
+.dot.name   { background: #2563eb; }
+.dot.status { background: #dc2626; }
+.dot.sys    { background: #9ca3af; }
+
+.tl-content { flex: 1; min-width: 0; }
+.tl-top     { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+.tl-name    { font-size: 13px; font-weight: 500; color: var(--text); }
+.tl-tag {
+  font-size: 11px; padding: 1px 8px; border-radius: 100px;
+  background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border);
+}
+
+.tl-diff {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+.diff-before {
+  padding: 1px 8px;
+  background: var(--red-bg); color: var(--red);
+  border: 1px solid var(--red-bdr); border-radius: 4px;
+  font-size: 12px;
+}
+.diff-after {
+  padding: 1px 8px;
+  background: var(--green-bg); color: var(--green);
+  border: 1px solid var(--green-bdr); border-radius: 4px;
+  font-size: 12px;
+}
+.diff-arrow { color: var(--text-3); font-size: 12px; }
+
+.tl-meta {
+  font-size: 11px; color: var(--text-3);
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+/* 料號 chip in timeline */
+.id-chip {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--text-3);
+  background: var(--bg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.src-badge {
+  display: inline-block; padding: 1px 7px;
+  border-radius: 3px; font-size: 10px; font-weight: 500;
+}
+.src-manual { background: #e0f2fe; color: #0369a1; }
+.src-system { background: var(--bg-3); color: var(--text-3); }
+
+.empty { padding: 40px 16px; text-align: center; color: var(--text-3); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">餐點價格異動紀錄</div>
+    <div class="page-sub">採購部 ・ 月份快照核對 &amp; 稽核追溯</div>
+  </div>
+
+  <div class="top-row">
+    <div class="rest-picker">
+      <span style="font-size:12px;color:var(--text-3)">餐廳</span>
+      <select id="rest-select" onchange="onRestChange()">
+        <option value="A">XX 早餐店</option>
+        <option value="B">OO 雞飯專門店</option>
+      </select>
+    </div>
+    <div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchView('A')">
+      月份快照<span class="tab-hint">（採購日常核對）</span>
+    </div>
+    <div class="tab" onclick="switchView('B')">
+      事件流水帳<span class="tab-hint">（稽核 / 追溯）</span>
+    </div>
+  </div>
+
+  <!-- ══ VIEW A：月份快照 ══ -->
+  <div class="view active" id="vA">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title" id="snap-title">XX 早餐店 ── 月份價格快照</div>
+        <div class="month-nav">
+          <button class="btn-nav" id="btn-prev" onclick="pm(-1)">← 上月</button>
+          <span id="mlabel">2026年 3月</span>
+          <button class="btn-nav" id="btn-next" onclick="pm(1)">下月 →</button>
+        </div>
+      </div>
+      <div class="summary-bar" id="snap-summary"></div>
+      <table class="tbl">
+        <thead><tr id="snap-thead-row"></tr></thead>
+        <tbody id="snap-body"></tbody>
+      </table>
+      <div class="legend-row">
+        <div class="lg-item"><span class="badge b-new">新增</span>本月新加入的品項</div>
+        <div class="lg-item"><span class="badge b-chg">異動</span>價格、品名或狀態有變更</div>
+        <div class="lg-item"><span class="badge b-out">菜單無</span>已從菜單移除</div>
+        <div class="lg-item"><span class="badge b-ok">無異動</span>與上月相同</div>
+      </div>
+    </div>
+    <div class="tip">
+      <strong>月份快照邏輯</strong>：對應採購原本的 Excel 每月一個 sheet ──
+      可以看到<strong>這個月全部品項的完整價格清單</strong>，包含沒有異動的品項。
+      Badge 顏色讓你不用逐行比對就能一眼看出哪幾筆有變動；
+      <strong>料號</strong>確保就算品名改了也能認出是同一個品項（如 A005 起司蛋餅→起司雙層蛋餅）；左右翻月等同以前切換 sheet。
+    </div>
+  </div>
+
+  <!-- ══ VIEW B：事件流水帳 ══ -->
+  <div class="view" id="vB">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title" id="tl-title">XX 早餐店 ── 異動事件記錄</div>
+        <input class="search-box" id="tl-search" placeholder="搜尋品名或料號…" oninput="renderTL()">
+      </div>
+      <div class="filter-bar">
+        <span class="filter-lbl">篩選類型：</span>
+        <div class="pill on"  onclick="filterTL(this,'all')">全部</div>
+        <div class="pill"     onclick="filterTL(this,'price')">成本 / 售價</div>
+        <div class="pill"     onclick="filterTL(this,'name')">品名異動</div>
+        <div class="pill"     onclick="filterTL(this,'status')">上下架</div>
+        <div class="pill"     onclick="filterTL(this,'sys')">系統自動</div>
+      </div>
+      <div class="dot-legend">
+        <div class="dl-item"><div class="lg-dot price"></div>成本 / 售價異動</div>
+        <div class="dl-item"><div class="lg-dot name"></div>品名異動</div>
+        <div class="dl-item"><div class="lg-dot status"></div>上下架 / 新增</div>
+        <div class="dl-item"><div class="lg-dot sys"></div>系統自動（依成本變更日觸發）</div>
+      </div>
+      <div id="tl-body"></div>
+    </div>
+    <div class="tip">
+      <strong>稽核 / 追溯視角</strong>：適合查「某個品項什麼時候調價、誰改的」，
+      清楚呈現<strong>異動前後的值</strong>。搜尋框支援品名或料號，
+      輸入 <strong>A005</strong> 可一次撈出同品項的所有歷史（含改名前後）。
+      系統自動事件（灰色）由採購預設的成本變更日觸發，不需人工操作。
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   常數 & 狀態
+═══════════════════════════════════════════════ */
+const YEAR   = 2026;
+const MONTHS = ['1月','2月','3月','4月'];
+const MIN_M  = 0, MAX_M = 3;
+
+let curM    = 2;
+let curRest = 'A';
+let curTLF  = 'all';
+
+const RNAMES = { A:'XX 早餐店', B:'OO 雞飯專門店' };
+
+// 只列終端售價欄（成本價、店內價是固定欄，獨立渲染）
+const PRICE_COLS = {
+  A: ['終端售價'],
+  B: ['聯發科終端價','聯寶終端價'],
+};
+
+/* ═══════════════════════════════════════════════
+   月份快照資料
+   id: 料號（系統唯一識別碼，跨品名改名保持不變）
+   st: 'ok' | 'new' | 'chg' | 'out'
+   p:  price 陣列，對應 PRICE_COLS
+═══════════════════════════════════════════════ */
+const snapData = {
+  A: {
+    0: [
+      {id:'A001', n:'奶油厚片',     c:18, s:40, p:[40],  st:'ok'},
+      {id:'A002', n:'原味蛋餅',     c:15, s:35, p:[35],  st:'ok'},
+      {id:'A003', n:'蛋餅',         c:22, s:45, p:[45],  st:'ok'},
+      {id:'A004', n:'火腿蛋餅',     c:50, s:50, p:[50],  st:'ok'},
+      {id:'A005', n:'起司蛋餅',     c:22, s:50, p:[50],  st:'ok'},
+      {id:'A006', n:'鮪魚蛋餅',     c:24, s:55, p:[55],  st:'ok'},
+      {id:'A007', n:'燻雞蛋餅',     c:26, s:60, p:[60],  st:'ok'},
+      {id:'A008', n:'培根蛋餅',     c:25, s:55, p:[55],  st:'ok'},
+      {id:'A009', n:'玉米蛋餅',     c:20, s:45, p:[45],  st:'ok'},
+      {id:'A010', n:'BLT 三明治',   c:30, s:65, p:[65],  st:'ok'},
+      {id:'A011', n:'鮮奶茶（中）', c:12, s:30, p:[30],  st:'ok'},
+      {id:'A012', n:'紅茶（中）',   c: 8, s:25, p:[25],  st:'ok'},
+    ],
+    1: [
+      {id:'A001', n:'奶油厚片',     c:18, s:40, p:[40],  st:'ok'},
+      {id:'A002', n:'原味蛋餅',     c:15, s:35, p:[35],  st:'ok'},
+      {id:'A003', n:'蛋餅',         c:22, s:45, p:[45],  st:'ok'},
+      {id:'A004', n:'火腿蛋餅',     c:50, s:50, p:[50],  st:'ok'},
+      {id:'A005', n:'起司蛋餅',     c:22, s:50, p:[50],  st:'ok'},
+      {id:'A006', n:'鮪魚蛋餅',     c:24, s:55, p:[55],  st:'ok'},
+      {id:'A007', n:'燻雞蛋餅',     c:26, s:60, p:[60],  st:'ok'},
+      {id:'A008', n:'培根蛋餅',     c:25, s:55, p:[55],  st:'ok'},
+      {id:'A009', n:'玉米蛋餅',     c:20, s:45, p:[45],  st:'ok'},
+      {id:'A010', n:'BLT 三明治',   c:30, s:65, p:[65],  st:'ok'},
+      {id:'A011', n:'鮮奶茶（中）', c:12, s:30, p:[30],  st:'ok'},
+      {id:'A012', n:'紅茶（中）',   c: 8, s:25, p:[25],  st:'ok'},
+    ],
+    2: [
+      {id:'A001', n:'奶油厚片',       c:18, s:40, p:[40],  st:'ok'},
+      {id:'A002', n:'原味蛋餅',       c:15, s:35, p:[35],  st:'ok'},
+      {id:'A003', n:'總匯蛋餅',       c:22, s:55, p:[55],  st:'chg',
+       note:'品名改名 + 售價調漲（原：蛋餅，原售價 45）'},
+      {id:'A004', n:'火腿蛋餅',       c:60, s:50, p:[50],  st:'chg',
+       note:'成本調漲（原成本 50 → 60）'},
+      {id:'A005', n:'起司雙層蛋餅',   c:22, s:50, p:[50],  st:'chg',
+       note:'品名異動（原：起司蛋餅）・3/15 下架後 3/18 改名重新上架，同料號 A005'},
+      {id:'A006', n:'鮪魚蛋餅',       c:24, s:55, p:[55],  st:'ok'},
+      {id:'A007', n:'燻雞蛋餅',       c:26, s:60, p:[60],  st:'ok'},
+      {id:'A008', n:'培根蛋餅',       c:25, s:55, p:[55],  st:'ok'},
+      {id:'A009', n:'玉米蛋餅',       c:20, s:45, p:[45],  st:'ok'},
+      {id:'A010', n:'BLT 三明治',     c:30, s:65, p:[65],  st:'ok'},
+      {id:'A011', n:'鮮奶茶（中）',   c:12, s:30, p:[30],  st:'ok'},
+      {id:'A012', n:'紅茶（中）',     c: 8, s:25, p:[25],  st:'ok'},
+      {id:'A013', n:'冰美式（中）',   c:10, s:35, p:[35],  st:'new'},
+    ],
+    3: [
+      {id:'A001', n:'奶油厚片',       c:18, s:40, p:[40],  st:'ok'},
+      {id:'A002', n:'原味蛋餅',       c:15, s:35, p:[35],  st:'ok'},
+      {id:'A003', n:'總匯蛋餅',       c:38, s:55, p:[55],  st:'chg',
+       note:'系統依成本變更日自動套用（原 30 → 38）'},
+      {id:'A004', n:'火腿蛋餅',       c:32, s:50, p:[50],  st:'chg',
+       note:'系統依成本變更日自動套用（原 25 → 32）'},
+      {id:'A005', n:'起司雙層蛋餅',   c:22, s:50, p:[50],  st:'ok'},
+      {id:'A006', n:'鮪魚蛋餅',       c:24, s:55, p:[55],  st:'ok'},
+      {id:'A007', n:'燻雞蛋餅',       c:26, s:60, p:[60],  st:'ok'},
+      {id:'A008', n:'培根蛋餅',       c:25, s:55, p:[55],  st:'ok'},
+      {id:'A009', n:'玉米蛋餅',       c:20, s:45, p:[45],  st:'ok'},
+      {id:'A010', n:'BLT 三明治',     c:30, s:65, p:[65],  st:'ok'},
+      {id:'A011', n:'鮮奶茶（中）',   c:12, s:30, p:[30],  st:'ok'},
+      {id:'A012', n:'紅茶（中）',     c: 8, s:25, p:[25],  st:'ok'},
+      {id:'A013', n:'冰美式（中）',   c:10, s:35, p:[35],  st:'ok'},
+    ],
+  },
+
+  B: {
+    0: [
+      {id:'B001', n:'蔥油雞飯',       c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B002', n:'椒麻涼拌雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B003', n:'酸辣涼拌雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B004', n:'塔香三杯雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B005', n:'花雕酒香雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B006', n:'四川紅油雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B007', n:'泰式打拋豬飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B008', n:'左宗棠雞飯',     c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B009', n:'紹興醉雞飯',     c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B010', n:'蒜泥灼白肉飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B011', n:'蔥爆炒牛肉飯',   c:96, s:120, p:[120,125], st:'ok'},
+    ],
+    1: [
+      {id:'B001', n:'蔥油雞飯',       c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B002', n:'椒麻涼拌雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B003', n:'酸辣涼拌雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B004', n:'塔香三杯雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B005', n:'花雕酒香雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B006', n:'四川紅油雞飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B007', n:'泰式打拋豬飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B008', n:'左宗棠雞飯',     c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B009', n:'紹興醉雞飯',     c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B010', n:'蒜泥灼白肉飯',   c:96, s:120, p:[120,125], st:'ok'},
+      {id:'B011', n:'蔥爆炒牛肉飯',   c:96, s:120, p:[120,125], st:'ok'},
+    ],
+    2: [
+      {id:'B001', n:'蔥油雞飯',           c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B002', n:'椒麻涼拌雞飯',       c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B004', n:'塔香三杯雞飯',       c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B006', n:'紅油雞飯',           c:96,  s:120, p:[120,125], st:'chg',
+       note:'改名（原：四川紅油雞飯）'},
+      {id:'B008', n:'左宗棠雞飯',         c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B009', n:'紹興醉雞飯',         c:120, s:150, p:[150,155], st:'chg',
+       note:'調漲（原成本 96、店內 120、終端 120/125）'},
+      {id:'B011', n:'蔥爆牛柳飯',         c:96,  s:120, p:[120,125], st:'chg',
+       note:'改名（原：蔥爆炒牛肉飯）'},
+      {id:'B012', n:'古早味炸排骨飯',     c:96,  s:120, p:[120,125], st:'new'},
+      {id:'B013', n:'無敵香酥大雞腿飯',   c:96,  s:120, p:[120,125], st:'new'},
+      {id:'B003', n:'酸辣涼拌雞飯',       c:96,  s:120, p:[120,125], st:'out', note:'菜單無'},
+      {id:'B005', n:'花雕酒香雞飯',       c:96,  s:120, p:[120,125], st:'out', note:'菜單無'},
+      {id:'B007', n:'泰式打拋豬飯',       c:96,  s:120, p:[120,125], st:'out', note:'菜單無'},
+      {id:'B010', n:'蒜泥灼白肉飯',       c:96,  s:120, p:[120,125], st:'out', note:'菜單無'},
+    ],
+    3: [
+      {id:'B001', n:'蔥油雞飯',         c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B002', n:'椒麻涼拌雞飯',     c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B004', n:'塔香三杯雞飯',     c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B006', n:'紅油雞飯',         c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B008', n:'左宗棠雞飯',       c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B009', n:'紹興醉雞飯',       c:120, s:150, p:[150,155], st:'ok'},
+      {id:'B011', n:'蔥爆牛柳飯',       c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B012', n:'古早味炸排骨飯',   c:96,  s:120, p:[120,125], st:'ok'},
+      {id:'B013', n:'無敵香酥大雞腿飯', c:96,  s:120, p:[120,125], st:'ok'},
+    ],
+  },
+};
+
+/* ═══════════════════════════════════════════════
+   事件流水帳資料
+   type: 'price' | 'name' | 'status' | 'sys'
+   src:  'manual' | 'system'
+═══════════════════════════════════════════════ */
+const tlData = {
+  A: [
+    {id:'A003', date:'2026/3/1',  time:'09:15', n:'總匯蛋餅',       type:'name',
+     desc:'品名異動', before:'蛋餅', after:'總匯蛋餅', by:'內部人員1', src:'manual'},
+    {id:'A003', date:'2026/3/1',  time:'09:15', n:'總匯蛋餅',       type:'price',
+     desc:'售價調漲', before:'45元', after:'55元', by:'內部人員1', src:'manual'},
+    {id:'A004', date:'2026/3/10', time:'14:30', n:'火腿蛋餅',       type:'price',
+     desc:'成本調漲', before:'50元', after:'60元', by:'XX 店家', src:'manual'},
+    {id:'A013', date:'2026/3/13', time:'11:00', n:'冰美式（中）',   type:'status',
+     desc:'新增品項並上架', before:'—', after:'上架', by:'內部人員1', src:'manual'},
+    // A005：下架 → 改名 → 重新上架（同料號串連）
+    {id:'A005', date:'2026/3/15', time:'11:20', n:'起司蛋餅',       type:'status',
+     desc:'下架', before:'上架', after:'下架', by:'內部人員2', src:'manual'},
+    {id:'A005', date:'2026/3/18', time:'09:00', n:'起司雙層蛋餅',   type:'name',
+     desc:'品名異動', before:'起司蛋餅', after:'起司雙層蛋餅', by:'內部人員2', src:'manual'},
+    {id:'A005', date:'2026/3/18', time:'09:00', n:'起司雙層蛋餅',   type:'status',
+     desc:'重新上架', before:'下架', after:'上架', by:'內部人員2', src:'manual'},
+    // 系統依成本變更日觸發
+    {id:'A003', date:'2026/4/1',  time:'00:05', n:'總匯蛋餅',       type:'sys',
+     desc:'成本依變更日（4/1）自動套用', before:'30元', after:'38元', by:'SYSTEM', src:'system'},
+    {id:'A004', date:'2026/4/1',  time:'00:05', n:'火腿蛋餅',       type:'sys',
+     desc:'成本依變更日（4/1）自動套用', before:'25元', after:'32元', by:'SYSTEM', src:'system'},
+  ],
+  B: [
+    {id:'B006', date:'2026/3/1',  time:'09:00', n:'紅油雞飯',           type:'name',
+     desc:'品名異動', before:'四川紅油雞飯', after:'紅油雞飯', by:'採購人員', src:'manual'},
+    {id:'B009', date:'2026/3/1',  time:'09:00', n:'紹興醉雞飯',         type:'price',
+     desc:'成本 & 終端價調漲', before:'成本 96 / 終端 120/125', after:'成本 120 / 終端 150/155', by:'採購人員', src:'manual'},
+    {id:'B011', date:'2026/3/1',  time:'09:00', n:'蔥爆牛柳飯',         type:'name',
+     desc:'品名異動', before:'蔥爆炒牛肉飯', after:'蔥爆牛柳飯', by:'採購人員', src:'manual'},
+    {id:'B012', date:'2026/3/1',  time:'09:00', n:'古早味炸排骨飯',     type:'status',
+     desc:'新增品項並上架', before:'—', after:'上架', by:'採購人員', src:'manual'},
+    {id:'B013', date:'2026/3/1',  time:'09:00', n:'無敵香酥大雞腿飯',   type:'status',
+     desc:'新增品項並上架', before:'—', after:'上架', by:'採購人員', src:'manual'},
+    {id:'B003', date:'2026/3/1',  time:'09:00', n:'酸辣涼拌雞飯',       type:'status',
+     desc:'菜單無，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
+    {id:'B005', date:'2026/3/1',  time:'09:00', n:'花雕酒香雞飯',       type:'status',
+     desc:'菜單無，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
+    {id:'B007', date:'2026/3/1',  time:'09:00', n:'泰式打拋豬飯',       type:'status',
+     desc:'菜單無，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
+    {id:'B010', date:'2026/3/1',  time:'09:00', n:'蒜泥灼白肉飯',       type:'status',
+     desc:'菜單無，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
+    {id:'—',    date:'2026/4/1',  time:'00:05', n:'（系統排程）',         type:'sys',
+     desc:'成本依變更日（4/1）自動套用', before:'—', after:'全品項成本更新', by:'SYSTEM', src:'system'},
+  ],
+};
+
+/* ═══════════════════════════════════════════════
+   Render：月份快照
+═══════════════════════════════════════════════ */
+const BADGE = { new:'b-new 新增', chg:'b-chg 異動', out:'b-out 菜單無', ok:'b-ok 無異動' };
+
+// 只在換餐廳時呼叫，固定欄寬避免換月位移
+function renderSnapHead() {
+  const pCols = PRICE_COLS[curRest];
+  const termW = curRest === 'B' ? 86 : 90; // 終端售價欄寬
+  document.getElementById('snap-thead-row').innerHTML =
+    `<th style="width:68px">料號</th>` +
+    `<th>餐點名稱</th>` +
+    `<th class="r" style="width:62px">成本價</th>` +
+    `<th class="r" style="width:62px">店內價</th>` +
+    pCols.map(c => `<th class="r" style="width:${termW}px">${c}</th>`).join('') +
+    `<th style="width:76px">異動標記</th>`;
+}
+
+function renderSnap() {
+  const rname = RNAMES[curRest];
+  document.getElementById('snap-title').textContent = rname + ' ── 月份價格快照';
+  document.getElementById('mlabel').textContent = YEAR + '年 ' + MONTHS[curM];
+  document.getElementById('btn-prev').disabled = curM === MIN_M;
+  document.getElementById('btn-next').disabled = curM === MAX_M;
+
+  const rows = snapData[curRest][curM] || [];
+
+  // summary
+  const cnt = { new:0, chg:0, out:0, ok:0 };
+  rows.forEach(r => cnt[r.st]++);
+  document.getElementById('snap-summary').innerHTML =
+    `<span class="s-item">共 <strong>${rows.length}</strong> 筆</span>` +
+    (cnt.new ? `<span class="s-item"><strong style="color:var(--green)">${cnt.new}</strong> 新增</span>` : '') +
+    (cnt.chg ? `<span class="s-item"><strong style="color:var(--orange)">${cnt.chg}</strong> 異動</span>` : '') +
+    (cnt.out ? `<span class="s-item"><strong style="color:var(--red)">${cnt.out}</strong> 菜單無</span>` : '') +
+    `<span class="s-item"><strong>${cnt.ok}</strong> 無異動</span>`;
+
+  // tbody
+  const pCols = PRICE_COLS[curRest];
+  document.getElementById('snap-body').innerHTML = rows.map(r => {
+    const [bc, bl] = BADGE[r.st].split(' ');
+    const rowCls   = r.st !== 'ok' ? ` class="row-${r.st}"` : '';
+    const nameCls  = r.st === 'out' ? ' class="name-out"' : '';
+    const noteHtml = r.note ? `<div class="row-note">${r.note}</div>` : '';
+    const pCells   = r.p.map(v => `<td class="num r">${v}</td>`).join('');
+    return `<tr${rowCls}>
+      <td class="id-cell">${r.id}</td>
+      <td><span${nameCls}>${r.n}</span>${noteHtml}</td>
+      <td class="num r">${r.c}</td>
+      <td class="num r">${r.s}</td>
+      ${pCells}
+      <td><span class="badge ${bc}">${bl}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   Render：事件流水帳
+═══════════════════════════════════════════════ */
+const DOT_CLS = { price:'price', name:'name', status:'status', sys:'sys' };
+
+function renderTL() {
+  document.getElementById('tl-title').textContent = RNAMES[curRest] + ' ── 異動事件記錄';
+
+  const q = (document.getElementById('tl-search').value || '').trim().toLowerCase();
+  let data = tlData[curRest] || [];
+
+  if (curTLF !== 'all') data = data.filter(d => d.type === curTLF);
+  if (q) data = data.filter(d =>
+    d.n.toLowerCase().includes(q) ||
+    d.id.toLowerCase().includes(q)
+  );
+
+  if (!data.length) {
+    document.getElementById('tl-body').innerHTML = '<div class="empty">無符合條件的異動紀錄</div>';
+    return;
+  }
+
+  const groups = {};
+  data.forEach(d => { (groups[d.date] = groups[d.date] || []).push(d); });
+
+  let html = '';
+  for (const [date, items] of Object.entries(groups)) {
+    html += `<div class="tl-group-hd">${date}</div>`;
+    items.forEach(d => {
+      const srcBadge = d.src === 'system'
+        ? '<span class="src-badge src-system">系統自動</span>'
+        : '<span class="src-badge src-manual">人工操作</span>';
+      html += `<div class="tl-item">
+  <div class="dot ${DOT_CLS[d.type] || 'sys'}"></div>
+  <div class="tl-content">
+    <div class="tl-top">
+      <span class="tl-name">${d.n}</span>
+      <span class="tl-tag">${d.desc}</span>
+    </div>
+    <div class="tl-diff">
+      <span class="diff-before">${d.before}</span>
+      <span class="diff-arrow">→</span>
+      <span class="diff-after">${d.after}</span>
+    </div>
+    <div class="tl-meta">
+      <span>${d.date}&nbsp;${d.time}</span>
+      <span>・</span>
+      <span class="id-chip">${d.id}</span>
+      <span>・</span>
+      <span>${d.by}</span>
+      <span>・</span>
+      ${srcBadge}
+    </div>
+  </div>
+</div>`;
+    });
+  }
+  document.getElementById('tl-body').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════
+   事件處理
+═══════════════════════════════════════════════ */
+function pm(d) {
+  curM = Math.max(MIN_M, Math.min(MAX_M, curM + d));
+  renderSnap();
+}
+
+function switchView(v) {
+  document.querySelectorAll('.tab').forEach((t, i) =>
+    t.classList.toggle('active', (i===0 && v==='A') || (i===1 && v==='B'))
+  );
+  document.getElementById('vA').classList.toggle('active', v === 'A');
+  document.getElementById('vB').classList.toggle('active', v === 'B');
+}
+
+function filterTL(el, f) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  curTLF = f;
+  renderTL();
+}
+
+function onRestChange() {
+  curRest = document.getElementById('rest-select').value;
+  renderSnapHead();
+  renderSnap();
+  renderTL();
+}
+
+renderSnapHead();
+renderSnap();
+renderTL();
+</script>
+</body>
+</html>
