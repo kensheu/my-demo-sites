@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>首頁公告系統 Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --tag-update: #2563eb;
+      --tag-maintenance: #d97706;
+      --tag-event: #16a34a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      min-height: 100vh;
+    }
+
+    /* ───── 頂部角色切換 ───── */
+    .role-switcher {
+      background: var(--gray-900);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 24px;
+      height: 44px;
+      font-size: 13px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    }
+    .role-switcher span { color: var(--gray-400); margin-right: 4px; }
+    .role-btn {
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--gray-600);
+      background: transparent;
+      color: var(--gray-300);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all .2s;
+    }
+    .role-btn.active, .role-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* ───── 各視圖容器 ───── */
+    .view { display: none; }
+    .view.active { display: flex; flex-direction: column; min-height: calc(100vh - 44px); }
+
+    /* ============================================================
+       A. 內部後台
+    ============================================================ */
+    .admin-layout {
+      display: flex;
+      flex: 1;
+    }
+    .admin-sidebar {
+      width: 220px;
+      background: var(--gray-800);
+      color: #fff;
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+    .admin-sidebar .logo {
+      padding: 0 20px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--gray-700);
+      margin-bottom: 12px;
+    }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--gray-300);
+      border-left: 3px solid transparent;
+      transition: all .2s;
+    }
+    .sidebar-item:hover { background: var(--gray-700); }
+    .sidebar-item.active { background: var(--gray-700); border-left-color: var(--primary); color: #fff; }
+
+    .admin-main {
+      flex: 1;
+      padding: 28px;
+      overflow-y: auto;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 700; }
+    .page-subtitle { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all .2s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-outline { background: #fff; color: var(--gray-700); border: 1px solid var(--gray-300); }
+    .btn-outline:hover { background: var(--gray-50); }
+    .btn-danger { background: #fee2e2; color: var(--danger); }
+    .btn-danger:hover { background: #fecaca; }
+    .btn-success { background: #dcfce7; color: var(--success); }
+    .btn-success:hover { background: #bbf7d0; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+    /* 公告列表 */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title { font-size: 14px; font-weight: 600; }
+
+    /* 篩選列 */
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--gray-100);
+      background: var(--gray-50);
+      flex-wrap: wrap;
+    }
+    .filter-row input, .filter-row select {
+      padding: 7px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      color: var(--gray-700);
+      background: #fff;
+    }
+    .filter-row input:focus, .filter-row select:focus { border-color: var(--primary); }
+    .filter-row input { flex: 1; min-width: 180px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      padding: 11px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    td {
+      padding: 13px 20px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--gray-100);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--gray-50); }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 18px;
+    }
+    .tag-update { background: #dbeafe; color: var(--tag-update); }
+    .tag-maintenance { background: #fef3c7; color: var(--tag-maintenance); }
+    .tag-event { background: #dcfce7; color: var(--tag-event); }
+
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .dot-active { background: var(--success); }
+    .dot-draft { background: var(--gray-400); }
+    .dot-scheduled { background: var(--warning); }
+    .dot-expired { background: var(--danger); }
+
+    .action-btns { display: flex; gap: 6px; }
+
+    /* ───── 新增/編輯 Modal ───── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      transform: translateY(20px);
+      transition: transform .25s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { font-size: 16px; font-weight: 700; }
+    .close-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: var(--gray-100);
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--gray-500);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .close-btn:hover { background: var(--gray-200); }
+
+    .modal-body { padding: 24px; }
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 7px;
+      color: var(--gray-700);
+    }
+    .form-label .required { color: var(--danger); margin-left: 2px; }
+    .form-control {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+      color: var(--gray-800);
+    }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    textarea.form-control { min-height: 100px; resize: vertical; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .schedule-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--gray-700);
+    }
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--gray-300);
+      border-radius: 22px;
+      transition: .3s;
+      cursor: pointer;
+    }
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      left: 3px; top: 3px;
+      width: 16px; height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: .3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+    .schedule-fields { margin-top: 12px; display: none; }
+    .schedule-fields.show { display: block; }
+
+    .upload-zone {
+      border: 2px dashed var(--gray-300);
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      color: var(--gray-500);
+      font-size: 13px;
+    }
+    .upload-zone:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+    .upload-zone .upload-icon { font-size: 28px; margin-bottom: 6px; }
+
+    .display-checkboxes { display: flex; gap: 16px; flex-wrap: wrap; }
+    .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+    .checkbox-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--primary); }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* ============================================================
+       B. 訂餐前台
+    ============================================================ */
+    .frontend-layout { flex: 1; background: #f0f4f8; }
+    .frontend-nav {
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .frontend-nav .nav-logo { font-size: 18px; font-weight: 800; color: var(--primary); }
+    .frontend-nav .nav-links { display: flex; gap: 24px; font-size: 14px; }
+    .frontend-nav .nav-links a { color: var(--gray-600); text-decoration: none; }
+    .frontend-nav .nav-links a.active { color: var(--primary); font-weight: 600; }
+    .frontend-nav .nav-right { display: flex; align-items: center; gap: 12px; }
+    .bell-btn {
+      position: relative;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .badge {
+      position: absolute;
+      top: -2px; right: -2px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      width: 17px; height: 17px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #fff;
+    }
+
+    .frontend-hero {
+      background: linear-gradient(135deg, #1e40af, #2563eb 60%, #3b82f6);
+      color: #fff;
+      padding: 40px 32px 32px;
+    }
+    .frontend-hero h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+    .frontend-hero p { font-size: 14px; opacity: .8; }
+
+    .frontend-content { padding: 28px 32px; }
+
+    /* 公告橫幅 (前台) */
+    .announce-banner {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .announce-banner .banner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .banner-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .announce-list { display: flex; flex-direction: column; gap: 0; }
+    .announce-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .announce-item:last-child { border-bottom: none; }
+    .announce-item:hover { background: var(--gray-50); margin: 0 -8px; padding: 12px 8px; border-radius: 8px; }
+    .unread-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .read-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: transparent;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .announce-item .ann-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 3px;
+    }
+    .announce-item.is-read .ann-title { font-weight: 400; color: var(--gray-600); }
+    .announce-item .ann-meta { font-size: 12px; color: var(--gray-400); display: flex; gap: 8px; }
+
+    .view-all-link { font-size: 13px; color: var(--primary); text-decoration: none; cursor: pointer; }
+    .view-all-link:hover { text-decoration: underline; }
+
+    /* 彈出公告 Modal */
+    .popup-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    .popup-overlay.open { opacity: 1; pointer-events: all; }
+    .popup-card {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.22);
+      overflow: hidden;
+      transform: scale(.96);
+      transition: transform .2s;
+    }
+    .popup-overlay.open .popup-card { transform: scale(1); }
+    .popup-top {
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: #fff;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .popup-top h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .popup-top .popup-meta { font-size: 12px; opacity: .75; }
+    .close-white {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.2);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .close-white:hover { background: rgba(255,255,255,.35); }
+    .popup-body { padding: 22px 24px; }
+    .popup-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #bfdbfe, #dbeafe);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-400);
+      font-size: 14px;
+    }
+    .popup-text { font-size: 14px; line-height: 1.7; color: var(--gray-700); }
+    .popup-attachment {
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: var(--gray-50);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    .popup-attachment:hover { background: var(--primary-light); }
+    .popup-footer {
+      padding: 14px 24px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dont-show {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--gray-500); cursor: pointer;
+    }
+    .dont-show input { accent-color: var(--primary); }
+
+    .sidebar-badge {
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* 公告通知列 */
+    .announce-notifications {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .notify-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      border-left: 4px solid var(--primary);
+    }
+    .notify-card.unread { border-left-color: var(--primary); }
+    .notify-card.read { border-left-color: var(--gray-300); opacity: .75; }
+    .notify-card.maint { border-left-color: var(--warning); }
+    .notify-card.event { border-left-color: var(--success); }
+    .notify-inner {
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .notify-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .notify-icon.update { background: #dbeafe; }
+    .notify-icon.maint { background: #fef3c7; }
+    .notify-icon.event { background: #dcfce7; }
+    .notify-body { flex: 1; min-width: 0; }
+    .notify-body h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .notify-card.read .notify-body h4 { font-weight: 400; color: var(--gray-600); }
+    .notify-body p { font-size: 13px; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .notify-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+    .notify-time { font-size: 11px; color: var(--gray-400); }
+    .mark-read-btn {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      color: var(--gray-500);
+      cursor: pointer;
+    }
+    .mark-read-btn:hover { background: var(--gray-100); }
+    .new-label {
+      background: #dbeafe;
+      color: var(--primary);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+
+    /* 分頁 tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--gray-100);
+      border-radius: 10px;
+      padding: 4px;
+      width: fit-content;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding: 7px 18px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-500);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-btn.active { background: #fff; color: var(--gray-800); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    /* ───── 通用空狀態 ───── */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--gray-400);
+    }
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* 已讀進度 */
+    .read-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    .progress-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--gray-200);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 6px;
+      transition: width .5s ease;
+    }
+
+    /* 取餐通知 */
+    .pickup-banner {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      border-left: 4px solid #f59e0b;
+    }
+    .pickup-banner .banner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .pickup-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .pickup-item:last-child { border-bottom: none; }
+    .pickup-icon-wrap {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: #fef3c7;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .pickup-item .pi-body { flex: 1; min-width: 0; }
+    .pickup-item .pi-title { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 2px; }
+    .pickup-item.is-read .pi-title { font-weight: 400; color: var(--gray-500); }
+    .pickup-item .pi-sub { font-size: 12px; color: var(--gray-400); }
+    .pickup-status {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .ps-ready { background: #dcfce7; color: #16a34a; }
+    .ps-picked { background: var(--gray-100); color: var(--gray-400); }
+    .auto-tag {
+      font-size: 10px;
+      color: var(--gray-400);
+      background: var(--gray-100);
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    /* 全部公告 Modal */
+    .ann-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 3500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .ann-modal-overlay.open { opacity: 1; pointer-events: all; }
+    .ann-modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 560px;
+      height: 75vh;
+      max-height: 75vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.22);
+      transform: translateY(16px);
+      transition: transform .25s;
+    }
+    .ann-modal-overlay.open .ann-modal { transform: translateY(0); }
+    .ann-modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .ann-modal-header h3 { font-size: 16px; font-weight: 700; }
+    .ann-modal-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--gray-100);
+      background: var(--gray-50);
+      flex-shrink: 0;
+    }
+    .ann-modal-body { overflow-y: auto; flex: 1; min-height: 0; }
+    .ann-modal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--gray-100);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .ann-modal-item:last-child { border-bottom: none; }
+    .ann-modal-item:hover { background: var(--gray-50); }
+    .ann-modal-item.is-read { opacity: .7; }
+    .ann-modal-item .am-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--primary); flex-shrink: 0; margin-top: 6px;
+    }
+    .ann-modal-item.is-read .am-dot { background: transparent; }
+    .ann-modal-item .am-body { flex: 1; min-width: 0; }
+    .ann-modal-item .am-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .ann-modal-item.is-read .am-title { font-weight: 400; color: var(--gray-600); }
+    .ann-modal-item .am-desc { font-size: 12px; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ann-modal-item .am-meta { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
+
+    /* 通知下拉 */
+    .bell-wrap { position: relative; }
+    .notif-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 340px;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18);
+      z-index: 500;
+      overflow: hidden;
+    }
+    .notif-dropdown.open { display: block; }
+    .notif-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .notif-header span { font-size: 14px; font-weight: 700; }
+    .notif-list { max-height: 320px; overflow-y: auto; }
+    .notif-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .notif-row:last-child { border-bottom: none; }
+    .notif-row:hover { background: var(--gray-50); }
+    .notif-row.is-read { opacity: .65; }
+    .notif-row .n-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .notif-row.is-read .n-dot { background: transparent; }
+    .notif-row .n-body { flex: 1; min-width: 0; }
+    .notif-row .n-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .notif-row.is-read .n-title { font-weight: 400; }
+    .notif-row .n-desc { font-size: 12px; color: var(--gray-400); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .notif-empty { text-align: center; padding: 32px; color: var(--gray-400); font-size: 13px; }
+    @media (max-width: 900px) {
+      .form-row { grid-template-columns: 1fr; }
+      .admin-sidebar { display: none; }
+      .frontend-hero { padding: 24px 18px 20px; }
+      .frontend-content { padding: 16px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ───── 角色切換列 ───── -->
+<div class="role-switcher">
+  <span>切換視角：</span>
+  <button class="role-btn active" onclick="switchView('admin')">🛠 內部後台</button>
+  <button class="role-btn" onclick="switchView('frontend')">🛒 訂餐前台</button>
+</div>
+
+<!-- ════════════════════════════════════
+     A. 內部後台
+════════════════════════════════════ -->
+<div class="view active" id="view-admin">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="logo">⚙️ 內部管理後台</div>
+      <div class="sidebar-item" id="admin-nav-notify" onclick="switchAdminPage('notify')" style="flex-direction:column;align-items:flex-start;gap:3px">
+        <div style="display:flex;align-items:center;gap:8px;width:100%">🔔 公告通知 <span class="sidebar-badge" id="admin-sidebar-badge" style="background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">2</span></div>
+        <div style="font-size:10px;color:var(--gray-400);font-weight:400;padding-left:22px">內部後台與餐廳後台同款</div>
+      </div>
+      <div class="sidebar-item active" id="admin-nav-manage" onclick="switchAdminPage('manage')">📢 公告管理</div>
+    </aside>
+
+    <main class="admin-main">
+
+      <!-- ── 公告通知頁 ── -->
+      <!-- 此頁面設計與餐廳後台公告通知頁相同 -->
+      <div id="admin-page-notify" style="display:none">
+        <div class="page-header">
+          <div>
+            <div class="page-title">公告通知</div>
+            <div class="page-subtitle">系統發布給內部後台的公告</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:12px;color:var(--gray-500)" id="admin-unread-count">2 則未讀</span>
+            <button class="btn btn-outline btn-sm" onclick="adminMarkAllRead()">全部標為已讀</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchAdminTab(this,'all')">全部</button>
+          <button class="tab-btn" onclick="switchAdminTab(this,'unread')">未讀</button>
+          <button class="tab-btn" onclick="switchAdminTab(this,'update')">更新通知</button>
+          <button class="tab-btn" onclick="switchAdminTab(this,'maint')">維護公告</button>
+        </div>
+        <div class="announce-notifications" id="admin-notify-list"></div>
+      </div>
+
+      <!-- ── 公告管理頁 ── -->
+      <div id="admin-page-manage">
+      <div class="page-header">
+        <div>
+          <div class="page-title">公告管理</div>
+          <div class="page-subtitle">管理並排程所有公告內容</div>
+        </div>
+        <button class="btn btn-primary" onclick="openAdminModal()">＋ 新增公告</button>
+      </div>
+
+      <!-- 公告列表 -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">公告列表</span>
+        </div>
+
+        <div class="filter-row">
+          <input type="text" id="mf-search" placeholder="🔍 搜尋公告標題…" oninput="renderManageTable()" />
+          <select id="mf-cat" onchange="renderManageTable()">
+            <option value="">全部分類</option>
+            <option value="update">更新通知</option>
+            <option value="maint">維護公告</option>
+            <option value="event">活動訊息</option>
+          </select>
+          <select id="mf-status" onchange="renderManageTable()">
+            <option value="">全部狀態</option>
+            <option value="active">發布中</option>
+            <option value="draft">草稿</option>
+            <option value="scheduled">排程待發</option>
+            <option value="expired">已到期</option>
+          </select>
+          <select id="mf-loc" onchange="renderManageTable()">
+            <option value="">顯示位置</option>
+            <option value="admin">內部後台</option>
+            <option value="fe">訂餐前台</option>
+          </select>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>標題</th>
+              <th>分類</th>
+              <th>顯示位置</th>
+              <th>排程時間</th>
+              <th>已讀率</th>
+              <th>狀態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="manage-tbody"></tbody>
+        </table>
+      </div>
+      </div><!-- /admin-page-manage -->
+    </main>
+  </div>
+</div>
+
+<!-- 刪除確認 Modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3 style="color:var(--danger)">⚠️ 確認刪除</h3>
+      <button class="close-btn" onclick="closeConfirm()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:24px">
+      <p style="font-size:14px;color:var(--gray-700);line-height:1.6">確定要刪除公告<br><strong id="confirm-title" style="color:var(--gray-900)"></strong><br>嗎？此操作無法復原。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeConfirm()">取消</button>
+      <button class="btn btn-primary" style="background:var(--danger);border-color:var(--danger)" onclick="confirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 公告通知詳情 Popup -->
+<div class="popup-overlay" id="notify-popup">
+  <div class="popup-card">
+    <div class="popup-top">
+      <div>
+        <div style="font-size:11px;opacity:.7;margin-bottom:4px" id="notify-popup-tag">📢 更新通知</div>
+        <h3 id="notify-popup-title"></h3>
+        <div class="popup-meta" id="notify-popup-time"></div>
+      </div>
+      <button class="close-white" onclick="closeNotifyPopup()">✕</button>
+    </div>
+    <div class="popup-body">
+      <div class="popup-text" id="notify-popup-text"></div>
+    </div>
+    <div class="popup-footer" style="justify-content:flex-end">
+      <button class="btn btn-primary" onclick="closeNotifyPopup()">我知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     B. 訂餐前台
+════════════════════════════════════ -->
+<div class="view" id="view-frontend">
+  <div class="frontend-layout">
+    <nav class="frontend-nav">
+      <div class="nav-logo">🍱 BTW_企業訂餐平台</div>
+      <div class="nav-links">
+        <a href="#" class="active">首頁</a>
+        <a href="#">探索餐廳</a>
+        <a href="#">我的訂單</a>
+      </div>
+      <div class="nav-right">
+        <div class="bell-wrap">
+          <div class="bell-btn" onclick="toggleNotifDropdown()">🔔<span class="badge" id="fe-badge">2</span></div>
+          <div class="notif-dropdown" id="notif-dropdown">
+            <div class="notif-header">
+              <span>通知</span>
+              <div style="display:flex;gap:12px">
+                <a class="view-all-link" onclick="feMarkAllRead()">全部標為已讀</a>
+                <a class="view-all-link" onclick="openAnnModal(event)">查看全部</a>
+              </div>
+            </div>
+            <div class="notif-list" id="notif-list"></div>
+            <div style="padding:8px 16px 6px;font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:.05em;border-top:1px solid var(--gray-100);background:var(--gray-50)">🛎 取餐通知</div>
+            <div class="notif-list" id="notif-pickup-list"></div>
+          </div>
+        </div>
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">王</div>
+      </div>
+    </nav>
+
+    <div class="frontend-hero">
+      <h1>午安，王小明！</h1>
+      <p>今天想吃什麼？從 120+ 家餐廳中探索美食</p>
+    </div>
+
+    <div class="frontend-content">
+      <!-- 公告區塊 -->
+      <div class="announce-banner">
+        <div class="banner-header">
+          <div class="banner-title">📢 最新公告 <span id="fe-banner-badge" class="badge" style="position:static;background:var(--primary);border:none;display:none"></span></div>
+          <a class="view-all-link" onclick="showAllAnnounce(event)">查看全部</a>
+        </div>
+        <div class="announce-list" id="fe-announce-list">
+          <!-- 由 JS 渲染 -->
+        </div>
+      </div>
+
+      <!-- 取餐通知區塊 -->
+      <div class="pickup-banner">
+        <div class="banner-header">
+          <div class="banner-title" style="display:flex;align-items:center;gap:8px">
+            🛎 取餐通知
+            <span class="auto-tag">系統自動發送</span>
+            <span id="pickup-badge" class="badge" style="position:static;background:#f59e0b;border:none;display:none"></span>
+          </div>
+          <a class="view-all-link" onclick="openAnnModal(event,'pickup')">查看全部</a>
+        </div>
+        <div id="pickup-list"><!-- 由 JS 渲染 --></div>
+      </div>
+
+      <!-- 其他首頁內容（示意） -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div class="card" style="padding:20px;text-align:center;color:var(--gray-400)">
+          <div style="font-size:32px;margin-bottom:8px">🥗</div>
+          <div style="font-size:13px;font-weight:600;color:var(--gray-700)">今日推薦</div>
+          <div style="font-size:12px;margin-top:4px">熱門餐廳精選</div>
+        </div>
+        <div class="card" style="padding:20px;text-align:center;color:var(--gray-400)">
+          <div style="font-size:32px;margin-bottom:8px">🔥</div>
+          <div style="font-size:13px;font-weight:600;color:var(--gray-700)">熱銷餐點</div>
+          <div style="font-size:12px;margin-top:4px">本週最受歡迎</div>
+        </div>
+        <div class="card" style="padding:20px;text-align:center;color:var(--gray-400)">
+          <div style="font-size:32px;margin-bottom:8px">⚡</div>
+          <div style="font-size:13px;font-weight:600;color:var(--gray-700)">快速訂餐</div>
+          <div style="font-size:12px;margin-top:4px">重複上次訂單</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 通知中心 Modal（前台） -->
+<div class="ann-modal-overlay" id="ann-modal-overlay">
+  <div class="ann-modal">
+    <div class="ann-modal-header">
+      <h3>🔔 通知中心</h3>
+      <button class="close-btn" onclick="closeAnnModal()">✕</button>
+    </div>
+    <!-- 主分頁：公告 / 取餐通知 -->
+    <div style="display:flex;border-bottom:2px solid var(--gray-100);padding:0 24px;gap:0">
+      <button id="main-tab-ann" onclick="switchMainTab('ann')" style="padding:12px 18px;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer">📢 公告</button>
+      <button id="main-tab-pickup" onclick="switchMainTab('pickup')" style="padding:12px 18px;border:none;background:transparent;font-size:14px;font-weight:500;color:var(--gray-400);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer">🛎 取餐通知</button>
+    </div>
+    <!-- 公告頁 -->
+    <div id="ann-panel" style="min-height:0">
+      <div class="ann-modal-tabs">
+        <button class="tab-btn active" onclick="switchAnnTab(this,'all')">全部</button>
+        <button class="tab-btn" onclick="switchAnnTab(this,'unread')">未讀</button>
+        <button class="tab-btn" onclick="switchAnnTab(this,'update')">更新通知</button>
+        <button class="tab-btn" onclick="switchAnnTab(this,'maintenance')">維護公告</button>
+        <button class="tab-btn" onclick="switchAnnTab(this,'event')">活動訊息</button>
+      </div>
+      <div class="ann-modal-body" id="ann-modal-list"></div>
+    </div>
+    <!-- 取餐通知頁 -->
+    <div id="pickup-panel" style="display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0">
+      <div class="ann-modal-body" id="pickup-modal-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     新增/編輯公告 Modal（內部後台）
+════════════════════════════════════ -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">新增公告</h3>
+      <button class="close-btn" onclick="closeAdminModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">公告標題 <span class="required">*</span></label>
+        <input class="form-control" type="text" placeholder="請輸入公告標題" id="modal-input-title" />
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">公告分類 <span class="required">*</span></label>
+          <select class="form-control" id="modal-input-category">
+            <option value="update">更新通知</option>
+            <option value="maintenance">維護公告</option>
+            <option value="event">活動訊息</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">顯示位置 <span class="required">*</span></label>
+          <div style="margin-top:4px">
+            <div class="display-checkboxes">
+              <label class="checkbox-item"><input type="checkbox" id="loc-admin" checked /> 內部後台</label>
+              <label class="checkbox-item"><input type="checkbox" id="loc-frontend" checked /> 訂餐前台</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:18px">
+        <label class="form-label">公告內容 <span class="required">*</span></label>
+        <textarea class="form-control" id="modal-input-content" placeholder="請輸入公告內容..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">圖片上傳</label>
+        <div class="upload-zone" onclick="this.nextElementSibling.click()">
+          <div class="upload-icon">🖼</div>
+          點擊或拖曳上傳圖片（支援 JPG、PNG，最大 5MB）
+        </div>
+        <input type="file" style="display:none" accept="image/*" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">附件上傳</label>
+        <div class="upload-zone" onclick="this.nextElementSibling.click()">
+          <div class="upload-icon">📎</div>
+          點擊或拖曳上傳附件（支援 PDF、XLSX，最大 10MB）
+        </div>
+        <input type="file" style="display:none" accept=".pdf,.xlsx,.xls,.doc,.docx" />
+      </div>
+      <div class="form-group">
+        <label class="schedule-toggle">
+          <label class="toggle-switch">
+            <input type="checkbox" id="schedule-toggle" onchange="toggleSchedule(this)" />
+            <span class="toggle-slider"></span>
+          </label>
+          啟用排程
+        </label>
+        <div class="schedule-fields" id="schedule-fields">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">發布時間</label>
+            <input class="form-control" type="datetime-local" id="modal-input-schedule" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;margin-top:14px">
+            <label class="form-label">到期時間</label>
+            <input class="form-control" type="datetime-local" id="modal-input-expire" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAdminModal()">取消</button>
+      <button class="btn btn-outline" onclick="submitAnnouncement('draft')">儲存草稿</button>
+      <button class="btn btn-primary" onclick="submitAnnouncement('active')">發布公告</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     前台彈出公告 Popup
+════════════════════════════════════ -->
+<div class="popup-overlay" id="fe-popup">
+  <div class="popup-card">
+    <div class="popup-top">
+      <div>
+        <div style="font-size:11px;opacity:.7;margin-bottom:4px" id="popup-tag-line">📢 更新通知</div>
+        <h3 id="popup-title">系統版本 v3.5 更新說明</h3>
+        <div class="popup-meta" id="popup-meta">2026/03/24 · 系統管理員</div>
+      </div>
+      <button class="close-white" onclick="closePopup()">✕</button>
+    </div>
+    <div class="popup-body">
+      <div class="popup-img">[ 公告示意圖片區域 ]</div>
+      <div class="popup-text" id="popup-text">
+        本次系統版本 <strong>v3.5</strong> 更新包含以下功能優化：<br><br>
+        • 訂單追蹤頁面全面改版，新增即時狀態更新<br>
+        • 餐廳評分系統調整，支援更細緻的評分選項<br>
+        • 修復數項已知問題，提升整體系統穩定性<br><br>
+        如有任何問題，請聯繫客服。
+      </div>
+      <div class="popup-attachment">
+        📎 v3.5_更新說明文件.pdf
+        <span style="margin-left:auto;font-size:11px;color:var(--gray-400)">下載</span>
+      </div>
+    </div>
+    <div class="popup-footer" style="justify-content:space-between;align-items:center">
+      <span id="popup-counter" style="font-size:12px;color:var(--gray-400)"></span>
+      <button class="btn btn-primary" onclick="popupAck()">我知道了</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── 公告管理資料 ───
+  const manageAnnouncements = [
+    { id: 0, title: '系統版本 v3.5 更新說明', desc: '新增多項功能優化...', category: 'update', categoryLabel: '更新通知', locations: ['admin', 'fe'], schedule: '2026/03/24 09:00', readRate: 72, status: 'active' },
+    { id: 1, title: '3/28 凌晨系統維護公告', desc: '預計 01:00–04:00 暫停服務...', category: 'maint', categoryLabel: '維護公告', locations: ['fe'], schedule: '2026/03/28 00:00', readRate: 38, status: 'scheduled' },
+    { id: 2, title: '清明節週末訂餐優惠活動', desc: '4/4–4/6 全館享九折優惠...', category: 'event', categoryLabel: '活動訊息', locations: ['fe'], schedule: '2026/04/04 00:00', readRate: null, status: 'scheduled' },
+    { id: 3, title: '春節假期訂餐暫停公告', desc: '1/27–2/4 暫停接單服務', category: 'maint', categoryLabel: '維護公告', locations: ['admin', 'fe'], schedule: '2026/01/27', readRate: 95, status: 'expired' },
+  ];
+
+  const statusMap = {
+    active:    { dot: 'dot-active',    label: '發布中' },
+    scheduled: { dot: 'dot-scheduled', label: '排程待發' },
+    expired:   { dot: 'dot-expired',   label: '已到期' },
+    draft:     { dot: 'dot-draft',     label: '草稿' },
+  };
+
+  function renderManageTable() {
+    const tbody = document.getElementById('manage-tbody');
+    const search = (document.getElementById('mf-search')?.value || '').toLowerCase();
+    const cat    = document.getElementById('mf-cat')?.value || '';
+    const status = document.getElementById('mf-status')?.value || '';
+    const loc    = document.getElementById('mf-loc')?.value || '';
+
+    const filtered = manageAnnouncements.filter(a => {
+      if (search && !a.title.toLowerCase().includes(search)) return false;
+      if (cat && a.category !== cat) return false;
+      if (status && a.status !== status) return false;
+      if (loc && !(a.locations || []).includes(loc)) return false;
+      return true;
+    });
+
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📭</div><p>沒有符合條件的公告</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = filtered.map(a => {
+      const s = statusMap[a.status];
+      const readCell = a.readRate !== null
+        ? `<div class="read-progress"><div class="progress-bar-wrap"><div class="progress-bar" style="width:${a.readRate}%"></div></div><span style="white-space:nowrap">${a.readRate}%</span></div>`
+        : `<span style="color:var(--gray-400)">—</span>`;
+      const actionBtns = a.status === 'expired'
+        ? `<button class="btn btn-success btn-sm">重新發布</button>`
+        : `<button class="btn btn-outline btn-sm" onclick="openAdminModal(${a.id})">編輯</button>`;
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:600;font-size:13px;${a.status==='expired'?'color:var(--gray-400)':''}">${a.title}</div>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:2px">${a.desc}</div>
+          </td>
+          <td><span class="tag tag-${a.category}">${a.categoryLabel}</span></td>
+          <td><span style="font-size:12px;color:var(--gray-500)">${(a.locations||[]).map(l=>({'admin':'內部後台','fe':'訂餐前台'}[l]||l)).join('、')}</span></td>
+          <td style="font-size:12px;color:${a.status==='expired'?'var(--gray-400)':'var(--gray-600)'}">${a.schedule}</td>
+          <td>${readCell}</td>
+          <td><span class="status-dot"><span class="dot ${s.dot}"></span>${s.label}</span></td>
+          <td>
+            <div class="action-btns">
+              ${actionBtns}
+              <button class="btn btn-danger btn-sm" onclick="askDelete(${a.id})">刪除</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  let pendingDeleteId = null;
+
+  function askDelete(id) {
+    pendingDeleteId = id;
+    const ann = manageAnnouncements.find(a => a.id === id);
+    document.getElementById('confirm-title').textContent = `「${ann.title}」`;
+    document.getElementById('confirm-modal').classList.add('open');
+  }
+
+  function confirmDelete() {
+    const idx = manageAnnouncements.findIndex(a => a.id === pendingDeleteId);
+    if (idx !== -1) manageAnnouncements.splice(idx, 1);
+    closeConfirm();
+    renderManageTable();
+  }
+
+  function closeConfirm() {
+    document.getElementById('confirm-modal').classList.remove('open');
+    pendingDeleteId = null;
+  }
+
+  // ─── 內部後台公告資料 ───
+  const adminAnnouncements = [
+    { id: 99, title: '📋 公告系統 Demo 測試說明', category: 'update', label: '更新通知', icon: '📋', time: '剛剛', read: false, text:
+`本次 Demo 包含以下功能，歡迎逐一測試：
+
+【內部後台】
+・公告通知：查看、標為已讀、依分類篩選、點開詳情
+・公告管理：新增、刪除公告（含確認視窗）
+・新增公告時可設定顯示位置、排程、到期時間
+
+【訂餐前台】
+・進入前台時，未讀公告會自動依序彈出
+・首頁最新公告區塊顯示未讀數與 NEW 標籤
+・右上角鈴鐺可開啟通知清單
+・「查看全部」可開啟完整公告列表並依分類篩選
+
+【建議測試流程】
+1. 在公告管理新增一則公告，勾選「訂餐前台」與「內部後台」，按發布
+2. 確認公告通知頁角標增加，點開查看內容
+3. 切換到訂餐前台，確認公告自動彈出
+4. 試試鈴鐺、查看全部與各篩選功能
+5. 回到公告管理刪除剛才新增的公告` },
+    { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: 'update', label: '更新通知', icon: '🔄', time: '10 分鐘前', read: false, text: '本次更新包含訂單追蹤改版、評分調整及問題修復，請重新登入以套用新功能。' },
+    { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: 'maint', label: '維護公告', icon: '🔧', time: '2 小時前', read: false, text: '3月28日 01:00–04:00 進行系統例行維護，期間後台功能暫停使用。' },
+    { id: 2, title: '春節假期系統暫停公告', category: 'update', label: '更新通知', icon: '📌', time: '2026/01/20', read: true, text: '1/27–2/4 春節假期系統暫停服務，緊急問題請聯繫值班人員。' },
+  ];
+
+  let adminFilter = 'all';
+
+  function renderAdmin() {
+    const list = document.getElementById('admin-notify-list');
+    const items = adminAnnouncements.filter(a => {
+      if (adminFilter === 'unread') return !a.read;
+      if (adminFilter === 'update') return a.category === 'update';
+      if (adminFilter === 'maint') return a.category === 'maint';
+      return true;
+    });
+    if (items.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>目前沒有公告</p></div>`;
+    } else {
+      list.innerHTML = items.map(a => `
+        <div class="notify-card ${a.read ? 'read' : 'unread'} ${a.category === 'maint' ? 'maint' : ''}" onclick="openNotifyPopup(${a.id})" style="cursor:pointer">
+          <div class="notify-inner">
+            <div class="notify-icon ${a.category}">${a.icon}</div>
+            <div class="notify-body">
+              <h4>${a.title} ${!a.read ? '<span class="new-label" style="vertical-align:middle">未讀</span>' : ''}</h4>
+              <p>${a.text}</p>
+              <div style="font-size:11px;color:var(--gray-400);margin-top:6px">
+                <span class="tag tag-${a.category === 'update' ? 'update' : a.category === 'maint' ? 'maintenance' : 'event'}" style="font-size:10px">${a.label}</span>
+              </div>
+            </div>
+            <div class="notify-right">
+              <span class="notify-time">${a.time}</span>
+              ${!a.read ? `<button class="mark-read-btn" onclick="event.stopPropagation();adminMarkRead(${a.id})">標為已讀</button>` : '<span style="font-size:11px;color:var(--gray-400)">已讀</span>'}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    updateAdminCount();
+  }
+
+  const catTagMap = { update: '更新通知', maint: '維護公告', event: '活動訊息' };
+
+  function openNotifyPopup(id) {
+    const a = adminAnnouncements.find(x => x.id === id);
+    document.getElementById('notify-popup-tag').textContent = '📢 ' + (catTagMap[a.category] || '公告');
+    document.getElementById('notify-popup-title').textContent = a.title;
+    document.getElementById('notify-popup-time').textContent = a.time + ' · 系統管理員';
+    document.getElementById('notify-popup-text').innerHTML = a.text.replace(/\n/g, '<br>');
+    document.getElementById('notify-popup').classList.add('open');
+    a.read = true;
+    renderAdmin();
+  }
+
+  function adminMarkRead(id) {
+    adminAnnouncements.find(x => x.id === id).read = true;
+    renderAdmin();
+  }
+
+  function adminMarkAllRead() {
+    adminAnnouncements.forEach(a => a.read = true);
+    renderAdmin();
+  }
+
+  function updateAdminCount() {
+    const count = adminAnnouncements.filter(a => !a.read).length;
+    document.getElementById('admin-unread-count').textContent = count > 0 ? `${count} 則未讀` : '全部已讀';
+    const badge = document.getElementById('admin-sidebar-badge');
+    if (badge) { badge.textContent = count; badge.style.display = count > 0 ? '' : 'none'; }
+  }
+
+  function switchAdminTab(btn, filter) {
+    document.querySelectorAll('#admin-page-notify .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    adminFilter = filter;
+    renderAdmin();
+  }
+
+  let adminPopupQueue = [];
+
+  function showAdminUnreadQueue() {
+    adminPopupQueue = adminAnnouncements.filter(a => !a.read).map(a => a.id);
+    if (adminPopupQueue.length) {
+      setTimeout(() => openNotifyPopupQueued(), 400);
+    }
+  }
+
+  function openNotifyPopupQueued() {
+    if (!adminPopupQueue.length) return;
+    openNotifyPopup(adminPopupQueue.shift());
+  }
+
+  function closeNotifyPopup() {
+    document.getElementById('notify-popup').classList.remove('open');
+    if (adminPopupQueue.length) {
+      setTimeout(() => openNotifyPopupQueued(), 300);
+    }
+  }
+
+  function switchAdminPage(page) {
+    document.getElementById('admin-page-notify').style.display = page === 'notify' ? 'block' : 'none';
+    document.getElementById('admin-page-manage').style.display = page === 'manage' ? 'block' : 'none';
+    document.getElementById('admin-nav-notify').classList.toggle('active', page === 'notify');
+    document.getElementById('admin-nav-manage').classList.toggle('active', page === 'manage');
+    if (page === 'notify') renderAdmin();
+    if (page === 'manage') renderManageTable();
+  }
+
+  // ─── 前台公告資料 ───
+  const feAnnouncements = [
+    { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: '更新通知', time: '03/24', read: false, text: '本次系統版本 v3.5 更新包含訂單追蹤改版、評分系統調整及數項問題修復。', attach: true },
+    { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: '維護公告', time: '03/23', read: false, text: '3月28日 01:00–04:00 將進行系統維護，期間暫停接單，請提前安排。', attach: false },
+    { id: 2, manageRef: 2, title: '清明節週末訂餐優惠活動', category: '活動訊息', time: '03/20', read: true, text: '4/4–4/6 全館享九折優惠，並贈送限定小點！', attach: false },
+  ];
+
+
+  // ─── 視圖切換 ───
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (name === 'frontend') { renderFE(); showUnreadQueue(); }
+  }
+
+  // ─── 前台渲染 ───
+  function renderFE() {
+    const list = document.getElementById('fe-announce-list');
+    list.innerHTML = feAnnouncements.map(a => `
+      <div class="announce-item ${a.read ? 'is-read' : ''}" onclick="openPopup(${a.id})">
+        <span class="${a.read ? 'read-dot' : 'unread-dot'}"></span>
+        <div style="flex:1;min-width:0">
+          <div class="ann-title">${a.title}</div>
+          <div class="ann-meta">
+            <span class="tag tag-${catClass(a.category)}" style="font-size:10px;padding:1px 7px">${a.category}</span>
+            <span>${a.time}</span>
+          </div>
+        </div>
+        ${!a.read ? '<span class="new-label">NEW</span>' : ''}
+      </div>
+    `).join('');
+    updateFEBadge();
+    renderPickup();
+  }
+
+  function catClass(c) {
+    if (c === '更新通知') return 'update';
+    if (c === '維護公告') return 'maintenance';
+    return 'event';
+  }
+
+  function updateFEBadge() {
+    const annUnread = feAnnouncements.filter(a => !a.read).length;
+    const pickupUnread = pickupNotifications.filter(p => !p.read && p.status === 'ready').length;
+    const bellCount = annUnread + pickupUnread;
+    const badge = document.getElementById('fe-badge');
+    badge.textContent = bellCount;
+    badge.style.display = bellCount > 0 ? 'flex' : 'none';
+    const bannerBadge = document.getElementById('fe-banner-badge');
+    if (bannerBadge) {
+      bannerBadge.textContent = annUnread;
+      bannerBadge.style.display = annUnread > 0 ? 'inline-flex' : 'none';
+    }
+  }
+
+  function renderNotifDropdown() {
+    const list = document.getElementById('notif-list');
+    list.innerHTML = feAnnouncements.length
+      ? feAnnouncements.map(a => `
+          <div class="notif-row ${a.read ? 'is-read' : ''}" onclick="openPopupFromNotif(${a.id})">
+            <span class="n-dot"></span>
+            <div class="n-body">
+              <div class="n-title">${a.title}</div>
+              <div class="n-desc">${a.text}</div>
+            </div>
+            <span style="font-size:11px;color:var(--gray-400);flex-shrink:0;margin-top:2px">${a.time}</span>
+          </div>`).join('')
+      : `<div class="notif-empty">目前沒有公告</div>`;
+
+    const plist = document.getElementById('notif-pickup-list');
+    plist.innerHTML = pickupNotifications.length
+      ? pickupNotifications.map(p => `
+          <div class="notif-row ${p.status==='picked' ? 'is-read' : ''}">
+            <span class="n-dot" style="background:${p.status==='ready'?'#f59e0b':'transparent'}"></span>
+            <div class="n-body">
+              <div class="n-title">${p.status==='ready'?'餐點已可取餐':'已取餐'} — ${p.restaurant}</div>
+              <div class="n-desc">${p.item}　${p.order}</div>
+            </div>
+            <span style="font-size:11px;color:var(--gray-400);flex-shrink:0;margin-top:2px">${p.time}</span>
+          </div>`).join('')
+      : `<div class="notif-empty">目前沒有取餐通知</div>`;
+  }
+
+  function toggleNotifDropdown() {
+    const dd = document.getElementById('notif-dropdown');
+    const isOpen = dd.classList.toggle('open');
+    if (isOpen) renderNotifDropdown();
+  }
+
+  function closeNotifDropdown() {
+    document.getElementById('notif-dropdown').classList.remove('open');
+  }
+
+  function openPopupFromNotif(id) {
+    closeNotifDropdown();
+    openPopup(id);
+  }
+
+  function feMarkAllRead() {
+    feAnnouncements.forEach(a => a.read = true);
+    renderNotifDropdown();
+    updateFEBadge();
+    renderFE();
+  }
+
+  // 點外部關閉下拉
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.bell-wrap');
+    if (wrap && !wrap.contains(e.target)) closeNotifDropdown();
+  });
+
+  // ─── 取餐通知資料（模擬系統自動產生）───
+  const pickupNotifications = [
+    { id: 0, order: '#20240324-001', restaurant: '美味便當店', item: '雞腿便當 x1', time: '11:45', read: false, status: 'ready' },
+    { id: 1, order: '#20240324-002', restaurant: '素食廚房', item: '素食套餐 x2', time: '12:10', read: true, status: 'picked' },
+    { id: 2, order: '#20240323-089', restaurant: '好吃麵館', item: '牛肉麵 x1', time: '昨天 12:30', read: true, status: 'picked' },
+  ];
+
+  function renderPickupItem(p, showConfirmBtn = false) {
+    const dimmed = p.status === 'picked';
+    const confirmBtn = (showConfirmBtn && p.status === 'ready')
+      ? `<button onclick="confirmPickup(${p.id})" style="margin-left:8px;font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid #f59e0b;background:#fffbeb;color:#b45309;cursor:pointer;white-space:nowrap">模擬系統確認</button>`
+      : '';
+    return `
+      <div class="pickup-item ${dimmed ? 'is-read' : ''}">
+        <div class="pickup-icon-wrap">${p.status === 'ready' ? '🛎' : '✅'}</div>
+        <div class="pi-body">
+          <div class="pi-title">${p.status === 'ready' ? '您的餐點已可取餐' : '已取餐'} — ${p.restaurant}</div>
+          <div class="pi-sub">${p.item}　訂單 ${p.order}　${p.time}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span class="pickup-status ${p.status === 'ready' ? 'ps-ready' : 'ps-picked'}">${p.status === 'ready' ? '待取餐' : '已取餐'}</span>
+          ${confirmBtn}
+        </div>
+      </div>`;
+  }
+
+  function confirmPickup(id) {
+    const p = pickupNotifications.find(x => x.id === id);
+    if (!p) return;
+    p.status = 'picked';
+    p.read = true;
+    renderPickup();
+    renderPickupModal();
+    renderNotifDropdown();
+    updateFEBadge();
+  }
+
+  function renderPickup() {
+    // 首頁只顯示最新一筆未讀
+    const list = document.getElementById('pickup-list');
+    const unreadItems = pickupNotifications.filter(p => !p.read && p.status === 'ready');
+    list.innerHTML = unreadItems.length
+      ? renderPickupItem(unreadItems[0], true)
+      : `<div style="font-size:13px;color:var(--gray-400);padding:8px 0">目前沒有待取餐通知</div>`;
+    const badge = document.getElementById('pickup-badge');
+    badge.textContent = unreadItems.length;
+    badge.style.display = unreadItems.length > 0 ? 'flex' : 'none';
+  }
+
+  function renderPickupModal() {
+    const list = document.getElementById('pickup-modal-list');
+    list.innerHTML = pickupNotifications.length
+      ? pickupNotifications.map(p => renderPickupItem(p, true)).join('')
+      : `<div class="empty-state"><div class="empty-icon">🛎</div><p>目前沒有取餐通知</p></div>`;
+  }
+
+
+  let annMainTab = 'ann';
+  function switchMainTab(tab) {
+    annMainTab = tab;
+    document.getElementById('ann-panel').style.display = tab === 'ann' ? 'flex' : 'none';
+    document.getElementById('ann-panel').style.flexDirection = 'column';
+    document.getElementById('pickup-panel').style.display = tab === 'pickup' ? 'flex' : 'none';
+    const annBtn = document.getElementById('main-tab-ann');
+    const pickBtn = document.getElementById('main-tab-pickup');
+    annBtn.style.color = tab === 'ann' ? 'var(--primary)' : 'var(--gray-400)';
+    annBtn.style.borderBottomColor = tab === 'ann' ? 'var(--primary)' : 'transparent';
+    annBtn.style.fontWeight = tab === 'ann' ? '600' : '500';
+    pickBtn.style.color = tab === 'pickup' ? 'var(--primary)' : 'var(--gray-400)';
+    pickBtn.style.borderBottomColor = tab === 'pickup' ? 'var(--primary)' : 'transparent';
+    pickBtn.style.fontWeight = tab === 'pickup' ? '600' : '500';
+    if (tab === 'pickup') renderPickupModal();
+  }
+
+  // ─── 前台 Popup ───
+  let popupQueue = [];
+
+  function openPopup(id) {
+    const a = feAnnouncements.find(x => x.id === id);
+    if (!a) return;
+    document.getElementById('popup-title').textContent = a.title;
+    document.getElementById('popup-tag-line').textContent = '📢 ' + a.category;
+    document.getElementById('popup-meta').textContent = '今天 · 系統管理員';
+    document.getElementById('popup-text').innerHTML = a.text.replace(/\n/g, '<br>');
+    const total = popupQueue.length + 1;
+    const current = (feAnnouncements.filter(x => !x.read).length - popupQueue.length);
+    document.getElementById('popup-counter').textContent =
+      total > 1 ? `(${current}/${current + popupQueue.length})` : '';
+    document.getElementById('fe-popup').classList.add('open');
+    a.read = true;
+  }
+
+  function showUnreadQueue() {
+    popupQueue = feAnnouncements.filter(a => !a.read).map(a => a.id);
+    if (popupQueue.length) openPopup(popupQueue.shift());
+  }
+
+  function popupAck() {
+    document.getElementById('fe-popup').classList.remove('open');
+    renderFE();
+    if (popupQueue.length) {
+      setTimeout(() => openPopup(popupQueue.shift()), 300);
+    }
+  }
+
+  function closePopup() {
+    document.getElementById('fe-popup').classList.remove('open');
+    popupQueue = [];
+    renderFE();
+  }
+
+  let annModalFilter = 'all';
+
+  function openAnnModal(e, tab) {
+    if (e) e.stopPropagation();
+    closeNotifDropdown();
+    annModalFilter = 'all';
+    document.querySelectorAll('#ann-panel .tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+    renderAnnModal();
+    document.getElementById('ann-modal-overlay').classList.add('open');
+    switchMainTab(tab || 'ann');
+  }
+
+  function closeAnnModal() {
+    document.getElementById('ann-modal-overlay').classList.remove('open');
+  }
+
+  function switchAnnTab(btn, filter) {
+    document.querySelectorAll('#ann-modal-overlay .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    annModalFilter = filter;
+    renderAnnModal();
+  }
+
+  function renderAnnModal() {
+    const items = feAnnouncements.filter(a => {
+      if (annModalFilter === 'unread') return !a.read;
+      if (annModalFilter === 'update') return catClass(a.category) === 'update';
+      if (annModalFilter === 'maintenance') return catClass(a.category) === 'maintenance';
+      if (annModalFilter === 'event') return catClass(a.category) === 'event';
+      return true;
+    });
+    const list = document.getElementById('ann-modal-list');
+    if (!items.length) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>沒有符合的公告</p></div>`;
+      return;
+    }
+    list.innerHTML = items.map(a => `
+      <div class="ann-modal-item ${a.read ? 'is-read' : ''}" onclick="openPopupFromAnnModal(${a.id})">
+        <span class="am-dot"></span>
+        <div class="am-body">
+          <div class="am-title">${a.title}</div>
+          <div class="am-desc">${a.text}</div>
+          <div class="am-meta">
+            <span class="tag tag-${catClass(a.category)}" style="font-size:10px;padding:1px 7px">${a.category}</span>
+            <span style="font-size:11px;color:var(--gray-400)">${a.time}</span>
+            ${!a.read ? '<span class="new-label">NEW</span>' : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openPopupFromAnnModal(id) {
+    closeAnnModal();
+    setTimeout(() => openPopup(id), 200);
+  }
+
+  function showAllAnnounce(e) {
+    openAnnModal(e);
+  }
+
+
+  // ─── 後台 Modal ───
+  let editingManageId = null;
+
+  function openAdminModal(editId) {
+    editingManageId = (editId !== undefined && editId !== null) ? editId : null;
+    const isEdit = editingManageId !== null;
+    document.getElementById('modal-title').textContent = isEdit ? '編輯公告' : '新增公告';
+
+    if (isEdit) {
+      const a = manageAnnouncements.find(x => x.id === editingManageId);
+      document.getElementById('modal-input-title').value = a.title;
+      document.getElementById('modal-input-category').value = a.category;
+      document.getElementById('modal-input-content').value = a.desc || '';
+      document.getElementById('loc-admin').checked = (a.locations || []).includes('admin');
+      document.getElementById('loc-frontend').checked = (a.locations || []).includes('fe');
+      // 排程
+      const hasSchedule = a.schedule && a.schedule !== '立即發布';
+      document.getElementById('schedule-toggle').checked = hasSchedule;
+      toggleSchedule(document.getElementById('schedule-toggle'));
+      document.getElementById('modal-input-schedule').value = '';
+      document.getElementById('modal-input-expire').value = '';
+    } else {
+      document.getElementById('modal-input-title').value = '';
+      document.getElementById('modal-input-category').value = 'update';
+      document.getElementById('modal-input-content').value = '';
+      document.getElementById('loc-admin').checked = true;
+      document.getElementById('loc-frontend').checked = true;
+      document.getElementById('schedule-toggle').checked = false;
+      toggleSchedule(document.getElementById('schedule-toggle'));
+      document.getElementById('modal-input-schedule').value = '';
+      document.getElementById('modal-input-expire').value = '';
+    }
+
+    // 重設驗證樣式
+    ['modal-input-title','modal-input-content'].forEach(id => {
+      document.getElementById(id).style.borderColor = '';
+    });
+
+    document.getElementById('admin-modal').classList.add('open');
+  }
+
+  function submitAnnouncement(status) {
+    const title = document.getElementById('modal-input-title').value.trim();
+    const content = document.getElementById('modal-input-content').value.trim();
+    if (!title) {
+      document.getElementById('modal-input-title').focus();
+      document.getElementById('modal-input-title').style.borderColor = 'var(--danger)';
+      return;
+    }
+    if (!content) {
+      document.getElementById('modal-input-content').focus();
+      document.getElementById('modal-input-content').style.borderColor = 'var(--danger)';
+      return;
+    }
+
+    const catEl = document.getElementById('modal-input-category');
+    const catValue = catEl.value;
+    const catLabel = catEl.options[catEl.selectedIndex].text;
+
+    const locs = [];
+    if (document.getElementById('loc-admin').checked) locs.push('內部後台');
+    if (document.getElementById('loc-frontend').checked) locs.push('訂餐前台');
+
+    const scheduleOn = document.getElementById('schedule-toggle').checked;
+    const scheduleVal = document.getElementById('modal-input-schedule').value;
+    const expireVal = document.getElementById('modal-input-expire').value;
+    let scheduleStr = '立即發布';
+    let finalStatus = status;
+    if (scheduleOn && scheduleVal) {
+      const fmt = v => { const d = new Date(v); return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+      scheduleStr = fmt(scheduleVal) + (expireVal ? ` ~ ${fmt(expireVal)}` : '');
+      if (status === 'active') finalStatus = 'scheduled';
+    }
+
+    const descStr = content.slice(0, 30) + (content.length > 30 ? '...' : '');
+
+    if (editingManageId !== null) {
+      // 編輯模式：更新現有資料
+      const idx = manageAnnouncements.findIndex(x => x.id === editingManageId);
+      if (idx !== -1) {
+        manageAnnouncements[idx] = {
+          ...manageAnnouncements[idx],
+          title,
+          desc: descStr,
+          category: catValue,
+          categoryLabel: catLabel,
+          locations: locs,
+          schedule: scheduleStr,
+          status: finalStatus,
+        };
+      }
+    } else {
+      // 新增模式
+      const newId = manageAnnouncements.length ? Math.max(...manageAnnouncements.map(a => a.id)) + 1 : 0;
+      manageAnnouncements.unshift({
+        id: newId,
+        title,
+        desc: descStr,
+        category: catValue,
+        categoryLabel: catLabel,
+        locations: locs,
+        schedule: scheduleStr,
+        readRate: null,
+        status: finalStatus,
+      });
+    }
+
+    const catLabelMap = { update: '更新通知', maint: '維護公告', event: '活動訊息' };
+    const catAdminMap = { update: 'update', maint: 'maint', event: 'event' };
+    const iconMap     = { update: '🔄', maint: '🔧', event: '🎉' };
+
+    if (editingManageId === null) {
+      // 新增模式：立即發布才同步到前台 / 通知頁
+      if (finalStatus === 'active') {
+        const newManageId = manageAnnouncements[0].id;
+        if (document.getElementById('loc-frontend').checked) {
+          const feId = feAnnouncements.length ? Math.max(...feAnnouncements.map(a => a.id)) + 1 : 0;
+          feAnnouncements.unshift({ id: feId, manageRef: newManageId, title, category: catLabelMap[catValue], time: '剛剛', read: false, text: content, attach: false });
+        }
+        if (document.getElementById('loc-admin').checked) {
+          const adId = adminAnnouncements.length ? Math.max(...adminAnnouncements.map(a => a.id)) + 1 : 0;
+          adminAnnouncements.unshift({ id: adId, manageRef: newManageId, title, category: catAdminMap[catValue], label: catLabelMap[catValue], icon: iconMap[catValue], time: '剛剛', read: false, text: content });
+        }
+      }
+    } else {
+      // 編輯模式：用 manageRef 找到對應的前台 / 後台通知並更新
+      const fe = feAnnouncements.find(a => a.manageRef === editingManageId);
+      if (fe) { fe.title = title; fe.category = catLabelMap[catValue]; fe.text = content; }
+
+      const ad = adminAnnouncements.find(a => a.manageRef === editingManageId);
+      if (ad) { ad.title = title; ad.category = catAdminMap[catValue]; ad.label = catLabelMap[catValue]; ad.icon = iconMap[catValue]; ad.text = content; }
+    }
+
+    // 刷新所有視圖
+    updateFEBadge();
+    updateAdminCount();
+    renderFE();
+    renderAdmin();
+    renderManageTable();
+
+    closeAdminModal();
+    switchAdminPage('manage');
+  }
+
+  function closeAdminModal() {
+    document.getElementById('admin-modal').classList.remove('open');
+    document.getElementById('modal-input-title').value = '';
+    document.getElementById('modal-input-title').style.borderColor = '';
+    document.getElementById('modal-input-content').value = '';
+    document.getElementById('modal-input-content').style.borderColor = '';
+    document.getElementById('modal-input-category').selectedIndex = 0;
+    document.getElementById('loc-admin').checked = true;
+    document.getElementById('loc-frontend').checked = true;
+    document.getElementById('schedule-toggle').checked = false;
+    document.getElementById('schedule-fields').classList.remove('show');
+    document.getElementById('modal-input-schedule').value = '';
+    document.getElementById('modal-input-expire').value = '';
+  }
+
+  function toggleSchedule(el) {
+    const fields = document.getElementById('schedule-fields');
+    fields.classList.toggle('show', el.checked);
+  }
+
+  // 點空白關閉 Modal
+  document.getElementById('admin-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeAdminModal();
+  });
+  document.getElementById('fe-popup').addEventListener('click', function(e) {
+    if (e.target === this) popupAck();
+  });
+  document.getElementById('confirm-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirm();
+  });
+  document.getElementById('notify-popup').addEventListener('click', function(e) {
+    if (e.target === this) closeNotifyPopup();
+  });
+  document.getElementById('ann-modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAnnModal();
+  });
+
+  // 初始化：預設顯示公告通知頁，並自動彈出未讀公告
+  switchAdminPage('notify');
+  showAdminUnreadQueue();
+</script>
+</body>
+</html>

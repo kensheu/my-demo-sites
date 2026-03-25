@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Sites</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #111;
+    }
+    p {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 32px;
+    }
+    .demo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .demo-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #111;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .demo-link:hover {
+      border-color: #4f8ef7;
+      box-shadow: 0 2px 8px rgba(79,142,247,0.12);
+    }
+    .icon {
+      font-size: 24px;
+      width: 40px;
+      text-align: center;
+    }
+    .demo-link .info .title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .demo-link .info .desc {
+      font-size: 13px;
+      color: #999;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Demo Sites</h1>
+    <p>請選擇要測試的功能頁面</p>
+    <div class="demo-list">
+      <a class="demo-link" href="announcement.html">
+        <div class="icon">📢</div>
+        <div class="info">
+          <div class="title">公告管理</div>
+          <div class="desc">Announcement</div>
+        </div>
+      </a>
+      <a class="demo-link" href="complaint.html">
+        <div class="icon">📋</div>
+        <div class="info">
+          <div class="title">投訴管理</div>
+          <div class="desc">Complaint</div>
+        </div>
+      </a>
+      <a class="demo-link" href="issue-and-ecr.html">
+        <div class="icon">🔧</div>
+        <div class="info">
+          <div class="title">問題與 ECR</div>
+          <div class="desc">Issue & ECR</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

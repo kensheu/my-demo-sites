@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客訴管理系統</title>
+  <style>
+    :root {
+      --primary: #e05a2b;
+      --primary-light: #fef0eb;
+      --primary-dark: #c44d22;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --info: #2980b9;
+      --purple: #8e44ad;
+      --gray: #95a5a6;
+      --danger: #e74c3c;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --border: #e0e0e0;
+      --bg: #f5f6fa;
+      --white: #ffffff;
+      --radius: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .site-header {
+      background: var(--primary);
+      color: white;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      box-shadow: 0 2px 8px rgba(224,90,43,0.3);
+    }
+    .site-header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+    .role-switch {
+      display: flex;
+      gap: 4px;
+      background: rgba(0,0,0,0.15);
+      padding: 4px;
+      border-radius: 20px;
+    }
+    .role-btn {
+      padding: 5px 16px;
+      border: none;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      color: rgba(255,255,255,0.75);
+    }
+    .role-btn.active { background: white; color: var(--primary); font-weight: 600; }
+    .main-container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      background: white;
+      padding: 6px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      color: var(--text-light);
+      font-family: inherit;
+    }
+    .tab-btn.active { background: var(--primary); color: white; font-weight: 600; }
+    .tab-btn:hover:not(.active) { background: var(--bg); color: var(--text); }
+    .panel { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+    .form-section { margin-bottom: 24px; }
+    .form-section h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: 500; color: var(--text); }
+    label .req { color: var(--danger); margin-left: 2px; }
+    input[type="text"], input[type="date"], input[type="number"], select, textarea {
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      color: var(--text);
+      transition: border-color 0.2s;
+      outline: none;
+      background: white;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 100px; }
+    .pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill-item { position: relative; cursor: pointer; }
+    .pill-item input[type="radio"], .pill-item input[type="checkbox"] { display: none; }
+    .pill-item span {
+      display: block;
+      padding: 7px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-light);
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .pill-item:has(input:checked) span {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .photo-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg);
+    }
+    .photo-upload-area:hover { border-color: var(--primary); background: var(--primary-light); }
+    .photo-upload-area input { display: none; }
+    .photo-upload-area .upload-hint { font-size: 13px; color: var(--text-light); margin-top: 6px; }
+    .photo-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .photo-thumb {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    .photo-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .photo-thumb .rm-photo {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 18px;
+      height: 18px;
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      font-family: inherit;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #229954; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .s-submitted    { background: #f0f0f0; color: #555; }
+    .s-accepted     { background: #e3f0fb; color: var(--info); }
+    .s-investigating{ background: #fef6e4; color: var(--warning); }
+    .s-compensating { background: #f3e8ff; color: var(--purple); }
+    .s-closed       { background: #e8f8f0; color: var(--success); }
+    /* Progress bar */
+    .status-progress { display: flex; align-items: flex-start; margin: 16px 0 8px; }
+    .prog-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+    .prog-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 13px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .prog-step.done:not(:last-child)::after { background: var(--primary); }
+    .prog-step.active:not(:last-child)::after { background: var(--border); }
+    .step-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      z-index: 1;
+      position: relative;
+      color: var(--text-light);
+    }
+    .prog-step.done .step-dot { background: var(--primary); border-color: var(--primary); color: white; }
+    .prog-step.active .step-dot {
+      background: white;
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    .step-lbl { font-size: 11px; color: var(--text-light); margin-top: 6px; text-align: center; white-space: nowrap; }
+    .prog-step.done .step-lbl, .prog-step.active .step-lbl { color: var(--primary); font-weight: 600; }
+    /* Cards */
+    .c-list { display: flex; flex-direction: column; gap: 12px; }
+    .c-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+    .c-card:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(224,90,43,0.1); }
+    .c-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .c-card-id { font-size: 13px; font-weight: 700; color: var(--primary); }
+    .c-card-body { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .c-card-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .c-card-meta { font-size: 12px; color: var(--text-light); }
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      background: var(--bg);
+      border-radius: var(--radius);
+    }
+    .filter-bar select, .filter-bar input[type="date"] { padding: 7px 10px; font-size: 13px; min-width: 120px; }
+    .filter-bar .btn { padding: 7px 16px; font-size: 13px; }
+    /* Table */
+    .adm-table { width: 100%; border-collapse: collapse; }
+    .adm-table th {
+      background: var(--bg);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid var(--border);
+    }
+    .adm-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .adm-table tr:last-child td { border-bottom: none; }
+    .adm-table tr:hover td { background: var(--bg); cursor: pointer; }
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 24px 16px;
+    }
+    .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 780px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      overflow: hidden;
+      margin: auto 0;
+    }
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 { font-size: 17px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-light); padding: 4px; line-height: 1; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 24px; }
+    /* Detail */
+    .det-section { margin-bottom: 24px; }
+    .det-section h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .det-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+    .det-item label { display: block; font-size: 11px; color: var(--text-light); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .det-item .val { font-size: 14px; color: var(--text); font-weight: 500; }
+    /* Log */
+    .log-list { display: flex; flex-direction: column; gap: 6px; }
+    .log-row {
+      display: flex;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .log-time { color: var(--text-light); white-space: nowrap; min-width: 110px; font-size: 12px; }
+    .log-body { flex: 1; }
+    .log-action { font-weight: 600; color: var(--text); }
+    .log-note { color: var(--text-light); margin-top: 2px; font-size: 12px; }
+    .log-by { color: var(--primary); font-size: 12px; margin-top: 2px; }
+    /* Compensation */
+    .comp-box { background: #fafafa; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .comp-done {
+      background: #e8f8f0;
+      border: 1.5px solid #a3d9b9;
+      border-radius: 6px;
+      padding: 12px 16px;
+    }
+    .comp-done-title { font-size: 12px; font-weight: 700; color: var(--success); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .comp-done-body { font-size: 14px; line-height: 1.7; }
+    /* Add log form */
+    .add-log-box { background: var(--bg); border-radius: var(--radius); padding: 14px; margin-top: 14px; }
+    .add-log-box h4 { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+    /* Info box */
+    .info-note { background: #e3f0fb; border: 1px solid #aecde8; border-radius: 6px; padding: 10px 14px; font-size: 13px; color: #1a6a9e; margin-bottom: 20px; }
+    /* Empty state */
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-light); }
+    .empty-state .ei { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #2c3e50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 999;
+      display: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    /* Sidebar layout */
+    .member-layout { display: flex; gap: 20px; align-items: flex-start; }
+    .sidebar {
+      width: 160px;
+      flex-shrink: 0;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 8px;
+    }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+    .sidebar-item:hover { background: var(--bg); color: var(--text); }
+    .sidebar-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .content-area { flex: 1; min-width: 0; }
+    @media (max-width: 640px) {
+      .form-grid, .det-grid { grid-template-columns: 1fr; }
+      .site-header h1 { font-size: 15px; }
+      .adm-table th:nth-child(3), .adm-table td:nth-child(3) { display: none; }
+      .member-layout { flex-direction: column; }
+      .sidebar { width: 100%; display: flex; gap: 4px; }
+      .sidebar-item { flex: 1; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>🍱 客訴管理系統</h1>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button onclick="resetData()" style="padding:5px 12px;border:1px solid rgba(255,255,255,0.4);border-radius:6px;background:transparent;color:rgba(255,255,255,0.8);font-size:12px;cursor:pointer;font-family:inherit" title="清除所有資料並還原預設">🗑 重設資料</button>
+    <div class="role-switch">
+      <button class="role-btn active" id="btnMember" onclick="switchRole('member')">會員前台</button>
+      <button class="role-btn" id="btnAdmin" onclick="switchRole('admin')">管理後台</button>
+    </div>
+  </div>
+</header>
+
+<div class="main-container">
+
+  <!-- 會員前台 -->
+  <div id="memberView">
+    <div class="member-layout">
+      <!-- 側邊欄 -->
+      <div class="sidebar">
+        <button class="sidebar-item active" id="sideM0" onclick="showMTab('orders')">📦 我的訂單</button>
+        <button class="sidebar-item" id="sideM2" onclick="showMTab('mylist')">📋 我的客訴</button>
+      </div>
+
+      <!-- 內容區 -->
+      <div class="content-area">
+        <!-- 我的訂單 -->
+        <div id="panelOrders" class="panel">
+          <div id="ordersBody"></div>
+        </div>
+
+        <!-- 提出客訴（由我要客訴按鈕進入，不顯示於側邊欄） -->
+        <div id="panelSubmit" class="panel" style="display:none">
+          <div style="margin-bottom:16px">
+            <button class="btn btn-secondary btn-sm" onclick="showMTab('orders')">← 返回我的訂單</button>
+          </div>
+          <div id="orderBanner" class="info-note">
+            📦 訂單 <strong id="bannerOrderId"></strong>（<span id="bannerLoc"></span>）已自動帶入，請填寫客訴內容。
+          </div>
+          <form id="cForm" onsubmit="submitComplaint(event)">
+            <div class="form-section">
+              <h3>訂單資訊</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>訂單編號</label>
+                  <input type="text" id="fOrderId" readonly style="background:var(--bg);color:var(--text-light);cursor:default">
+                </div>
+                <div class="form-group">
+                  <label>據點</label>
+                  <select id="fLocation" disabled style="background:var(--bg);color:var(--text-light);cursor:default">
+                    <option value="">請選擇據點</option>
+                    <option>據點A</option>
+                    <option>據點B</option>
+                    <option>據點C</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <h3>客訴內容</h3>
+              <div class="form-group" style="margin-bottom:16px">
+                <label>客訴類型 <span class="req">*</span></label>
+                <div class="pill-group">
+                  <label class="pill-item"><input type="radio" name="cType" value="quality" required><span>🍽 餐點品質／異物</span></label>
+                  <label class="pill-item"><input type="radio" name="cType" value="delivery"><span>🚚 遲送或未送達</span></label>
+                  <label class="pill-item"><input type="radio" name="cType" value="quantity"><span>📦 數量或品項錯誤</span></label>
+                  <label class="pill-item"><input type="radio" name="cType" value="other"><span>❓ 其他</span></label>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:16px">
+                <label>問題說明 <span class="req">*</span></label>
+                <textarea id="fDesc" rows="4" placeholder="請詳細描述您遇到的問題…" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>附件照片（選填，最多 3 張）</label>
+                <div class="photo-upload-area" onclick="document.getElementById('fPhotos').click()">
+                  <div style="font-size:28px">📷</div>
+                  <p class="upload-hint">點擊上傳照片（支援 JPG / PNG）</p>
+                  <input type="file" id="fPhotos" accept="image/*" multiple onchange="addPhotos(this)">
+                </div>
+                <div class="photo-previews" id="photoPreviews"></div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="showMTab('orders')">取消</button>
+              <button type="submit" class="btn btn-primary">提出客訴</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 我的客訴 -->
+        <div id="panelMyList" class="panel" style="display:none">
+          <div id="myListBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 管理後台 -->
+  <div id="adminView" style="display:none">
+    <div class="tab-bar">
+      <button class="tab-btn active">📋 案件列表</button>
+    </div>
+    <div class="panel">
+      <div class="filter-bar">
+        <select id="fLoc" onchange="applyFilter()">
+          <option value="">所有據點</option>
+          <option>據點A</option>
+          <option>據點B</option>
+          <option>據點C</option>
+        </select>
+        <select id="fType" onchange="applyFilter()">
+          <option value="">所有類型</option>
+          <option value="quality">餐點品質／異物</option>
+          <option value="delivery">遲送或未送達</option>
+          <option value="quantity">數量或品項錯誤</option>
+          <option value="other">其他</option>
+        </select>
+        <select id="fStat" onchange="applyFilter()">
+          <option value="">所有狀態</option>
+          <option value="submitted">提報</option>
+          <option value="accepted">受理中</option>
+          <option value="investigating">調查中</option>
+          <option value="compensating">補償處理</option>
+          <option value="closed">結案</option>
+        </select>
+        <input type="date" id="fFrom" onchange="applyFilter()">
+        <input type="date" id="fTo" onchange="applyFilter()">
+        <button class="btn btn-secondary" onclick="clearFilter()">清除篩選</button>
+      </div>
+      <div id="adminListBody"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="onOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">客訴詳情</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div style="padding:14px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── Constants ────────────────────────────────────────────────
+const STATUSES = [
+  { key: 'submitted',     label: '提報',    icon: '📨', cls: 's-submitted' },
+  { key: 'accepted',      label: '受理中',  icon: '👁', cls: 's-accepted' },
+  { key: 'investigating', label: '調查中',  icon: '🔍', cls: 's-investigating' },
+  { key: 'compensating',  label: '補償處理', icon: '💰', cls: 's-compensating' },
+  { key: 'closed',        label: '結案',    icon: '✅', cls: 's-closed' },
+];
+const TYPES = {
+  quality:  { label: '餐點品質／異物', icon: '🍽' },
+  delivery: { label: '遲送或未送達',   icon: '🚚' },
+  quantity: { label: '數量或品項錯誤', icon: '📦' },
+  other:    { label: '其他',           icon: '❓' },
+};
+const MEMBERS = {
+  M001: { name: '張小明', phone: '0912-345-678' },
+  M002: { name: '李美華', phone: '0923-456-789' },
+  M003: { name: '王大偉', phone: '0934-567-890' },
+};
+const ME = 'M001';
+let complaints = [];
+let uploadedPhotos = [];
+let currentRole = 'member';
+
+// ─── Storage ──────────────────────────────────────────────────
+function save() { localStorage.setItem('cmp_v1', JSON.stringify(complaints)); }
+function load() {
+  const raw = localStorage.getItem('cmp_v1');
+  if (raw) { complaints = JSON.parse(raw); }
+  else { complaints = defaultData(); save(); }
+}
+
+function daysAgo(n) {
+  const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString();
+}
+
+function defaultData() {
+  return [
+    {
+      id: 'CMP-001', orderId: 'ORD-20250301-042', location: '據點A',
+      memberId: 'M001', type: 'quality',
+      description: '餐點中發現疑似蟲子的異物，且餐點有明顯異味，完全無法食用。',
+      photos: [], status: 'investigating',
+      createdAt: daysAgo(8), updatedAt: daysAgo(2), compensation: null,
+      logs: [
+        { time: daysAgo(8), action: '提報', operator: '張小明', note: '會員自行提出客訴' },
+        { time: daysAgo(7), action: '受理', operator: '客服 陳小姐', note: '已確認訂單，轉品管部門調查' },
+        { time: daysAgo(2), action: '狀態更新：調查中', operator: '品管 王先生', note: '正向供應商確認食材來源' },
+      ]
+    },
+    {
+      id: 'CMP-002', orderId: 'ORD-20250305-017', location: '據點B',
+      memberId: 'M002', type: 'delivery',
+      description: '訂單預計 12:30 送達，遲至 13:45 才收到，外送員態度不佳。',
+      photos: [], status: 'compensating',
+      createdAt: daysAgo(5), updatedAt: daysAgo(1),
+      compensation: { type: 'coupon', couponCode: 'COMP-K8X2F', amount: 100, expiry: '2025-04-30', note: '致歉折價券 $100', refundStatus: null, refundAmount: 0, refundTime: null },
+      logs: [
+        { time: daysAgo(5), action: '提報', operator: '李美華', note: '會員自行提出客訴' },
+        { time: daysAgo(4), action: '受理', operator: '客服 陳小姐', note: '調閱配送紀錄確認延遲屬實' },
+        { time: daysAgo(2), action: '狀態更新：調查中', operator: '客服 陳小姐', note: '外送員車輛故障確認' },
+        { time: daysAgo(1), action: '補償處理', operator: '客服主管 林先生', note: '核發 $100 折價券' },
+      ]
+    },
+    {
+      id: 'CMP-003', orderId: 'ORD-20250308-089', location: '據點C',
+      memberId: 'M003', type: 'quantity',
+      description: '點了 3 份套餐只收到 2 份，少了一份雞腿便當（$120）。',
+      photos: [], status: 'closed',
+      createdAt: daysAgo(3), updatedAt: daysAgo(0),
+      compensation: { type: 'refund', couponCode: null, amount: 0, expiry: null, note: '退款 $120 至原付款帳戶', refundStatus: 'completed', refundAmount: 120, refundTime: daysAgo(0) },
+      logs: [
+        { time: daysAgo(3), action: '提報', operator: '王大偉', note: '會員自行提出客訴' },
+        { time: daysAgo(3), action: '受理', operator: '客服 張先生', note: '確認訂單數量確實短少' },
+        { time: daysAgo(2), action: '狀態更新：調查中', operator: '客服 張先生', note: '與門市確認備餐紀錄' },
+        { time: daysAgo(1), action: '補償處理', operator: '財務 劉小姐', note: '申請退款 $120' },
+        { time: daysAgo(0), action: '結案', operator: '客服主管 林先生', note: '退款已入帳，會員確認收到' },
+      ]
+    },
+    {
+      id: 'CMP-004', orderId: 'ORD-20250309-024', location: '據點A',
+      memberId: 'M001', type: 'other',
+      description: '餐點包裝嚴重破損，湯品溢出，導致其他餐點受污染。',
+      photos: [], status: 'accepted',
+      createdAt: daysAgo(1), updatedAt: daysAgo(0), compensation: null,
+      logs: [
+        { time: daysAgo(1), action: '提報', operator: '張小明', note: '會員自行提出客訴' },
+        { time: daysAgo(0), action: '受理', operator: '客服 陳小姐', note: '已受理，轉交相關部門' },
+      ]
+    },
+    {
+      id: 'CMP-005', orderId: 'ORD-20250310-055', location: '據點B',
+      memberId: 'M002', type: 'quality',
+      description: '食物中發現碎玻璃，已造成口腔輕微受傷，情況嚴重。',
+      photos: [], status: 'submitted',
+      createdAt: daysAgo(0), updatedAt: daysAgo(0), compensation: null,
+      logs: [
+        { time: daysAgo(0), action: '提報', operator: '李美華', note: '會員自行提出客訴' },
+      ]
+    },
+  ];
+}
+
+// ─── Role / Tab ────────────────────────────────────────────────
+function switchRole(role) {
+  currentRole = role;
+  document.getElementById('btnMember').classList.toggle('active', role === 'member');
+  document.getElementById('btnAdmin').classList.toggle('active', role === 'admin');
+  document.getElementById('memberView').style.display = role === 'member' ? '' : 'none';
+  document.getElementById('adminView').style.display  = role === 'admin'  ? '' : 'none';
+  if (role === 'admin') renderAdminList();
+  else { renderOrders(); showMTab('orders'); }
+}
+function showMTab(tab) {
+  document.getElementById('panelOrders').style.display = tab === 'orders' ? '' : 'none';
+  document.getElementById('panelSubmit').style.display = tab === 'submit' ? '' : 'none';
+  document.getElementById('panelMyList').style.display = tab === 'mylist' ? '' : 'none';
+  document.getElementById('sideM0').classList.toggle('active', tab === 'orders');
+  document.getElementById('sideM2').classList.toggle('active', tab === 'mylist');
+  if (tab === 'mylist') renderMyList();
+  if (tab === 'orders') renderOrders();
+}
+
+// ─── Photo upload ─────────────────────────────────────────────
+function addPhotos(input) {
+  const files = Array.from(input.files);
+  files.forEach(f => {
+    if (uploadedPhotos.length >= 3) { showToast('最多上傳 3 張照片'); return; }
+    const reader = new FileReader();
+    reader.onload = e => resizeImg(e.target.result, 500, 500, d => {
+      uploadedPhotos.push({ name: f.name, dataUrl: d });
+      renderThumbs();
+    });
+    reader.readAsDataURL(f);
+  });
+  input.value = '';
+}
+function resizeImg(src, mw, mh, cb) {
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(mw / img.width, mh / img.height, 1);
+    const c = document.createElement('canvas');
+    c.width = img.width * s; c.height = img.height * s;
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    cb(c.toDataURL('image/jpeg', 0.72));
+  };
+  img.src = src;
+}
+function renderThumbs() {
+  document.getElementById('photoPreviews').innerHTML = uploadedPhotos.map((p, i) => `
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" alt="${p.name}">
+      <button class="rm-photo" onclick="removePhoto(${i})">✕</button>
+    </div>`).join('');
+}
+function removePhoto(i) { uploadedPhotos.splice(i, 1); renderThumbs(); }
+
+// ─── Submit ───────────────────────────────────────────────────
+function submitComplaint(e) {
+  e.preventDefault();
+  const typeEl = document.querySelector('input[name="cType"]:checked');
+  if (!typeEl) { showToast('請選擇客訴類型'); return; }
+  const c = {
+    id: genId(),
+    orderId: document.getElementById('fOrderId').value.trim(),
+    location: document.getElementById('fLocation').value,
+    memberId: ME,
+    type: typeEl.value,
+    description: document.getElementById('fDesc').value.trim(),
+    photos: [...uploadedPhotos],
+    status: 'submitted',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    compensation: null,
+    logs: [{ time: new Date().toISOString(), action: '提報', operator: MEMBERS[ME].name, note: '會員自行提出客訴' }]
+  };
+  complaints.unshift(c);
+  save();
+  resetCForm();
+  showToast('✅ 客訴已成功提出，我們將盡快處理！');
+  showMTab('orders');
+}
+function resetCForm() {
+  document.getElementById('cForm').reset();
+  uploadedPhotos = [];
+  renderThumbs();
+}
+
+// ─── Orders data ──────────────────────────────────────────────
+const ORDERS = [
+  { id: 'ORD-20250318-007', location: '據點C', date: '2025-03-18', items: ['雞腿便當 x2', '飲料 x1'], total: 210 },
+  { id: 'ORD-20250315-019', location: '據點B', date: '2025-03-15', items: ['排骨飯 x1', '湯 x1'], total: 130 },
+  { id: 'ORD-20250309-024', location: '據點A', date: '2025-03-09', items: ['雞排飯 x1', '飲料 x2'], total: 220 },
+  { id: 'ORD-20250301-042', location: '據點A', date: '2025-03-01', items: ['招牌便當 x3'], total: 360 },
+];
+
+function renderOrders() {
+  const el = document.getElementById('ordersBody');
+  const complained = id => complaints.some(c => c.orderId === id && c.memberId === ME);
+  el.innerHTML = `<div class="c-list">${ORDERS.map(o => {
+    const done = complained(o.id);
+    return `<div class="c-card" style="cursor:default">
+      <div class="c-card-head">
+        <span class="c-card-id">${o.id}</span>
+        <span class="c-card-meta">${o.date}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:4px">
+        <div>
+          <div class="c-card-meta">${o.location}　${o.items.join('、')}</div>
+          <div style="margin-top:6px;font-size:14px;font-weight:600">合計 $${o.total}</div>
+        </div>
+        <div style="flex-shrink:0">
+          ${done
+            ? `<span class="badge s-investigating" style="white-space:nowrap">已提出客訴</span>`
+            : `<button class="btn btn-primary btn-sm" onclick="startComplaint('${o.id}','${o.location}')">我要客訴</button>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function startComplaint(orderId, location) {
+  showMTab('submit');
+  document.getElementById('fOrderId').value = orderId;
+  document.getElementById('fLocation').value = location;
+  document.getElementById('bannerOrderId').textContent = orderId;
+  document.getElementById('bannerLoc').textContent = location;
+}
+
+// ─── Member: My list ──────────────────────────────────────────
+function renderMyList() {
+  const el = document.getElementById('myListBody');
+  const mine = complaints.filter(c => c.memberId === ME);
+  if (!mine.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">📭</div><p>目前沒有客訴紀錄</p></div>`; return;
+  }
+  el.innerHTML = `<div class="c-list">${mine.map(c => cardHtml(c, false)).join('')}</div>`;
+}
+function cardHtml(c, isAdmin) {
+  const st = STATUSES.find(s => s.key === c.status);
+  const tp = TYPES[c.type];
+  const mem = MEMBERS[c.memberId];
+  return `<div class="c-card" onclick="openModal('${c.id}',${isAdmin})">
+    <div class="c-card-head">
+      <span class="c-card-id">${c.id}</span>
+      <span class="badge ${st.cls}">${st.icon} ${st.label}</span>
+    </div>
+    <div class="c-card-body">
+      <div>
+        <div class="c-card-title">${tp.icon} ${tp.label}</div>
+        <div class="c-card-meta">${c.location} · 訂單 ${c.orderId}${isAdmin ? ' · ' + (mem ? mem.name : c.memberId) : ''}</div>
+        <div class="c-card-meta" style="margin-top:4px">${c.description.slice(0,60)}${c.description.length>60?'…':''}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-light)">提報：${fmtDate(c.createdAt)}</div>
+  </div>`;
+}
+
+// ─── Admin list ───────────────────────────────────────────────
+function renderAdminList(list) {
+  if (list === undefined) list = complaints;
+  const el = document.getElementById('adminListBody');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">🔍</div><p>沒有符合條件的案件</p></div>`; return;
+  }
+  el.innerHTML = `<table class="adm-table">
+    <thead><tr>
+      <th>案件編號</th><th>據點</th><th>會員</th><th>類型</th><th>狀態</th><th>提報時間</th><th style="text-align:center">補償</th>
+    </tr></thead>
+    <tbody>${list.map(c => {
+      const st = STATUSES.find(s => s.key === c.status);
+      const tp = TYPES[c.type];
+      const mem = MEMBERS[c.memberId];
+      return `<tr onclick="openModal('${c.id}',true)">
+        <td><strong style="color:var(--primary)">${c.id}</strong></td>
+        <td>${c.location}</td>
+        <td>${mem ? mem.name : c.memberId}</td>
+        <td>${tp.icon} ${tp.label}</td>
+        <td><span class="badge ${st.cls}">${st.icon} ${st.label}</span></td>
+        <td>${fmtShort(c.createdAt)}</td>
+        <td style="text-align:center">${c.compensation ? '✅' : '—'}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+function applyFilter() {
+  const loc  = document.getElementById('fLoc').value;
+  const type = document.getElementById('fType').value;
+  const stat = document.getElementById('fStat').value;
+  const from = document.getElementById('fFrom').value;
+  const to   = document.getElementById('fTo').value;
+  renderAdminList(complaints.filter(c =>
+    (!loc  || c.location === loc) &&
+    (!type || c.type === type) &&
+    (!stat || c.status === stat) &&
+    (!from || c.createdAt >= from) &&
+    (!to   || c.createdAt.slice(0,10) <= to)
+  ));
+}
+function clearFilter() {
+  ['fLoc','fType','fStat','fFrom','fTo'].forEach(id => document.getElementById(id).value = '');
+  renderAdminList();
+}
+
+// ─── Modal ────────────────────────────────────────────────────
+function openModal(id, isAdmin) {
+  const c = complaints.find(x => x.id === id); if (!c) return;
+  const st   = STATUSES.find(s => s.key === c.status);
+  const tp   = TYPES[c.type];
+  const mem  = MEMBERS[c.memberId] || { name: c.memberId, phone: '—' };
+  const sidx = STATUSES.findIndex(s => s.key === c.status);
+
+  document.getElementById('modalTitle').textContent = `客訴詳情 ${c.id}`;
+
+  let h = '';
+
+  // Progress bar
+  h += `<div class="det-section"><h3>處理進度</h3>
+    <div class="status-progress">${STATUSES.map((s,i) => {
+      const cls = i < sidx ? 'done' : i === sidx ? 'active' : '';
+      return `<div class="prog-step ${cls}">
+        <div class="step-dot">${i < sidx ? '✓' : i+1}</div>
+        <div class="step-lbl">${s.label}</div>
+      </div>`;
+    }).join('')}</div>
+  </div>`;
+
+  // Info
+  h += `<div class="det-section"><h3>訂單與會員資訊</h3>
+    <div class="det-grid">
+      <div class="det-item"><label>案件編號</label><div class="val">${c.id}</div></div>
+      <div class="det-item"><label>提報時間</label><div class="val">${fmtDate(c.createdAt)}</div></div>
+      <div class="det-item"><label>訂單編號</label><div class="val">${c.orderId}</div></div>
+      <div class="det-item"><label>據點</label><div class="val">${c.location}</div></div>
+      ${isAdmin ? `<div class="det-item"><label>會員姓名</label><div class="val">${mem.name}</div></div>
+      <div class="det-item"><label>聯絡電話</label><div class="val">${mem.phone}</div></div>` : ''}
+    </div>
+  </div>`;
+
+  // Complaint content
+  h += `<div class="det-section"><h3>客訴內容</h3>
+    <div class="det-grid" style="margin-bottom:12px">
+      <div class="det-item"><label>客訴類型</label><div class="val">${tp.icon} ${tp.label}</div></div>
+      <div class="det-item"><label>目前狀態</label><div class="val"><span class="badge ${st.cls}">${st.icon} ${st.label}</span></div></div>
+    </div>
+    <div class="det-item" style="margin-bottom:${c.photos&&c.photos.length?'12px':'0'}">
+      <label>問題說明</label>
+      <div class="val" style="margin-top:6px;line-height:1.7;background:var(--bg);padding:12px;border-radius:6px">${esc(c.description)}</div>
+    </div>
+    ${c.photos&&c.photos.length ? `<div class="det-item" style="margin-top:12px"><label>附件照片</label>
+      <div class="photo-previews" style="margin-top:8px">${c.photos.map(p=>`<div class="photo-thumb"><img src="${p.dataUrl}" alt="${p.name}"></div>`).join('')}</div>
+    </div>` : ''}
+  </div>`;
+
+  // Admin: status mgmt
+  if (isAdmin) {
+    h += `<div class="det-section"><h3>狀態管理</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <select id="selStatus" style="flex:1;min-width:160px">
+          ${STATUSES.map(s=>`<option value="${s.key}"${s.key===c.status?' selected':''}>${s.icon} ${s.label}</option>`).join('')}
+        </select>
+        <input type="text" id="inpStatusNote" placeholder="備註說明（選填）" style="flex:2;min-width:180px">
+        <button class="btn btn-primary" onclick="updateStatus('${c.id}')">更新狀態</button>
+      </div>
+    </div>`;
+
+    // Compensation
+    h += `<div class="det-section"><h3>補償操作</h3><div class="comp-box">
+      ${c.compensation ? compResultHtml(c) : compFormHtml(c.id)}
+    </div></div>`;
+  }
+
+  // Logs
+  h += `<div class="det-section"><h3>處理紀錄</h3>
+    <div class="log-list">${[...c.logs].reverse().map(l=>`
+      <div class="log-row">
+        <div class="log-time">${fmtDate(l.time)}</div>
+        <div class="log-body">
+          <div class="log-action">${esc(l.action)}</div>
+          ${l.note ? `<div class="log-note">${esc(l.note)}</div>` : ''}
+          <div class="log-by">— ${esc(l.operator)}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    ${isAdmin ? `<div class="add-log-box"><h4>新增處理紀錄</h4>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input type="text" id="inpLogAct" placeholder="處理動作" style="flex:1;min-width:150px">
+        <input type="text" id="inpLogNote" placeholder="詳細說明（選填）" style="flex:2;min-width:180px">
+        <button class="btn btn-secondary" onclick="addLog('${c.id}')">新增</button>
+      </div></div>` : ''}
+  </div>`;
+
+  document.getElementById('modalBody').innerHTML = h;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function compFormHtml(id) {
+  return `<div style="margin-bottom:14px">
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:8px">補償方式</label>
+    <div class="pill-group">
+      <label class="pill-item"><input type="radio" name="compType" value="coupon" onchange="toggleComp()"><span>🎟 發折價券</span></label>
+      <label class="pill-item"><input type="radio" name="compType" value="refund" onchange="toggleComp()"><span>💳 退款</span></label>
+    </div>
+  </div>
+  <div id="couponFields" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="form-group"><label>折扣金額（元）</label><input type="number" id="inpCouponAmt" placeholder="例：100" min="1"></div>
+      <div class="form-group"><label>有效期限</label><input type="date" id="inpCouponExp"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>備註</label><input type="text" id="inpCouponNote" placeholder="補償說明"></div>
+    </div>
+    <button class="btn btn-success" onclick="applyComp('${id}','coupon')">🎟 核發折價券</button>
+  </div>
+  <div id="refundFields" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="form-group"><label>退款金額（元）</label><input type="number" id="inpRefundAmt" placeholder="例：120" min="1"></div>
+      <div class="form-group"><label>退款狀態</label>
+        <select id="inpRefundStat"><option value="pending">待處理</option><option value="processing">處理中</option><option value="completed">已完成</option></select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1"><label>備註</label><input type="text" id="inpRefundNote" placeholder="退款說明"></div>
+    </div>
+    <button class="btn btn-success" onclick="applyComp('${id}','refund')">💳 建立退款</button>
+  </div>`;
+}
+
+function compResultHtml(c) {
+  const cp = c.compensation;
+  const smap = { pending:'待處理', processing:'處理中', completed:'已完成' };
+  if (cp.type === 'coupon') {
+    return `<div class="comp-done">
+      <div class="comp-done-title">🎟 已核發折價券</div>
+      <div class="comp-done-body">券號：<strong>${cp.couponCode}</strong><br>金額：<strong>$${cp.amount}</strong>　有效期限：${cp.expiry}<br>${cp.note ? '備註：' + esc(cp.note) : ''}</div>
+    </div>`;
+  } else {
+    return `<div class="comp-done" style="margin-bottom:12px">
+      <div class="comp-done-title">💳 退款追蹤</div>
+      <div class="comp-done-body">退款金額：<strong>$${cp.refundAmount}</strong>　狀態：<strong>${smap[cp.refundStatus]||cp.refundStatus}</strong>${cp.refundTime ? '　完成：'+fmtDate(cp.refundTime) : ''}<br>${cp.note ? '備註：'+esc(cp.note) : ''}</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <label style="font-size:13px;font-weight:500;white-space:nowrap">更新退款狀態：</label>
+      <select id="selRefundUpd" style="flex:1">
+        <option value="pending"${cp.refundStatus==='pending'?' selected':''}>待處理</option>
+        <option value="processing"${cp.refundStatus==='processing'?' selected':''}>處理中</option>
+        <option value="completed"${cp.refundStatus==='completed'?' selected':''}>已完成</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="updateRefund('${c.id}')">更新</button>
+    </div>`;
+  }
+}
+
+function toggleComp() {
+  const v = document.querySelector('input[name="compType"]:checked')?.value;
+  document.getElementById('couponFields').style.display = v==='coupon' ? '' : 'none';
+  document.getElementById('refundFields').style.display = v==='refund' ? '' : 'none';
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function onOverlayClick(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+// ─── Admin actions ────────────────────────────────────────────
+function updateStatus(id) {
+  const c = complaints.find(x => x.id === id); if (!c) return;
+  const ns = document.getElementById('selStatus').value;
+  const note = document.getElementById('inpStatusNote').value.trim();
+  if (ns === c.status) { showToast('狀態未變更'); return; }
+  const lbl = STATUSES.find(s => s.key === ns)?.label;
+  c.status = ns;
+  c.updatedAt = new Date().toISOString();
+  c.logs.push({ time: new Date().toISOString(), action: `狀態更新：${lbl}`, operator: '客服人員', note });
+  save(); showToast(`✅ 狀態已更新為「${lbl}」`);
+  refresh(id);
+}
+
+function applyComp(id, type) {
+  const c = complaints.find(x => x.id === id); if (!c) return;
+  if (type === 'coupon') {
+    const amt = parseInt(document.getElementById('inpCouponAmt').value);
+    const exp = document.getElementById('inpCouponExp').value;
+    const note = document.getElementById('inpCouponNote').value.trim();
+    if (!amt || amt <= 0) { showToast('請輸入有效金額'); return; }
+    if (!exp) { showToast('請選擇有效期限'); return; }
+    const code = genCoupon();
+    c.compensation = { type:'coupon', couponCode:code, amount:amt, expiry:exp, note, refundStatus:null, refundAmount:0, refundTime:null };
+    c.logs.push({ time:new Date().toISOString(), action:'補償處理', operator:'客服人員', note:`核發折價券 ${code}，$${amt}，有效至 ${exp}` });
+    showToast(`🎟 折價券已核發：${code}`);
+  } else {
+    const amt = parseInt(document.getElementById('inpRefundAmt').value);
+    const stat = document.getElementById('inpRefundStat').value;
+    const note = document.getElementById('inpRefundNote').value.trim();
+    if (!amt || amt <= 0) { showToast('請輸入有效退款金額'); return; }
+    const smap = { pending:'待處理', processing:'處理中', completed:'已完成' };
+    c.compensation = { type:'refund', couponCode:null, amount:0, expiry:null, note, refundStatus:stat, refundAmount:amt, refundTime: stat==='completed' ? new Date().toISOString() : null };
+    c.logs.push({ time:new Date().toISOString(), action:'補償處理', operator:'客服人員', note:`建立退款 $${amt}，狀態：${smap[stat]}` });
+    showToast(`💳 退款已建立：$${amt}`);
+  }
+  if (c.status !== 'compensating' && c.status !== 'closed') {
+    c.status = 'compensating';
+    c.logs.push({ time:new Date().toISOString(), action:'狀態更新：補償處理', operator:'系統', note:'補償操作後自動更新' });
+  }
+  c.updatedAt = new Date().toISOString();
+  save(); refresh(id);
+}
+
+function updateRefund(id) {
+  const c = complaints.find(x => x.id === id); if (!c || !c.compensation) return;
+  const ns = document.getElementById('selRefundUpd').value;
+  c.compensation.refundStatus = ns;
+  if (ns === 'completed') c.compensation.refundTime = new Date().toISOString();
+  const smap = { pending:'待處理', processing:'處理中', completed:'已完成' };
+  c.logs.push({ time:new Date().toISOString(), action:'更新退款狀態', operator:'財務人員', note:`退款狀態更新為：${smap[ns]}` });
+  c.updatedAt = new Date().toISOString();
+  save(); showToast('✅ 退款狀態已更新'); refresh(id);
+}
+
+function addLog(id) {
+  const act = document.getElementById('inpLogAct').value.trim();
+  if (!act) { showToast('請輸入處理動作'); return; }
+  const note = document.getElementById('inpLogNote').value.trim();
+  const c = complaints.find(x => x.id === id); if (!c) return;
+  c.logs.push({ time:new Date().toISOString(), action:act, operator:'客服人員', note });
+  c.updatedAt = new Date().toISOString();
+  save(); showToast('✅ 處理紀錄已新增'); refresh(id);
+}
+
+function refresh(id) {
+  closeModal();
+  if (currentRole === 'admin') renderAdminList();
+  else renderMyList();
+  setTimeout(() => openModal(id, currentRole === 'admin'), 80);
+}
+
+// ─── Utils ────────────────────────────────────────────────────
+function genId() {
+  const d = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const n = String(complaints.length + 1).padStart(3,'0');
+  return `CMP-${d}-${n}`;
+}
+function genCoupon() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return 'COMP-' + Array.from({length:5}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'})
+       + ' ' + d.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtShort(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'});
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function resetData() {
+  if (!confirm('確定要清除所有資料並還原為預設範例？')) return;
+  localStorage.removeItem('cmp_v1');
+  complaints = defaultData();
+  save();
+  renderMyList();
+  renderAdminList();
+  showToast('✅ 資料已重設');
+}
+
+// ─── Init ─────────────────────────────────────────────────────
+load();
+renderOrders();
+</script>
+</body>
+</html>

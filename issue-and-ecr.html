@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>問題回報 & ECR 專區</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --warning: #d97706;
+      --ecr: #7c3aed;
+      --ecr-dark: #6d28d9;
+      --ecr-light: #ede9fe;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,.1), 0 4px 6px rgba(0,0,0,.05);
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif; background: var(--gray-100); color: var(--gray-800); min-height: 100vh; }
+
+    /* HEADER */
+    header { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #7c3aed 100%); color: #fff; padding: 36px 24px 28px; text-align: center; position: relative; overflow: hidden; }
+    header::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events:none; }
+    header h1 { font-size:2rem; font-weight:700; letter-spacing:.02em; position:relative; }
+    header p  { margin-top:8px; opacity:.85; font-size:.95rem; position:relative; }
+    .header-chips { display:flex; gap:10px; justify-content:center; margin-top:14px; position:relative; }
+    .header-chip { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); color:#fff; padding:4px 14px; border-radius:20px; font-size:.82rem; }
+
+    /* TAB BAR */
+    .tab-bar { display:flex; background:#fff; border-bottom:1px solid var(--gray-200); padding:0 16px; gap:2px; box-shadow:var(--shadow); position:sticky; top:0; z-index:100; overflow-x:auto; }
+    .tab-group-label { display:flex; align-items:center; padding:0 10px; font-size:.75rem; font-weight:700; color:var(--gray-400); letter-spacing:.06em; white-space:nowrap; border-right:1px solid var(--gray-200); margin-right:4px; }
+    .tab-btn { padding:14px 18px; border:none; background:none; cursor:pointer; font-size:.88rem; font-weight:500; color:var(--gray-500); border-bottom:3px solid transparent; transition:all .2s; white-space:nowrap; }
+    .tab-btn:hover { color:var(--primary); }
+    .tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+    .tab-btn.ecr-tab:hover { color:var(--ecr); }
+    .tab-btn.ecr-tab.active { color:var(--ecr); border-bottom-color:var(--ecr); }
+
+    /* LAYOUT */
+    .container { max-width:960px; margin:0 auto; padding:32px 16px; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* CARD */
+    .card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow-md); margin-bottom:24px; overflow:hidden; }
+    .card-header { background:var(--gray-50); border-bottom:1px solid var(--gray-200); padding:16px 24px; display:flex; align-items:center; gap:10px; }
+    .card-header .badge { background:var(--primary); color:#fff; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; flex-shrink:0; }
+    .card-header .badge.ecr-badge { background:var(--ecr); }
+    .card-header h2 { font-size:1rem; font-weight:600; color:var(--gray-800); }
+    .card-body { padding:24px; }
+
+    /* ECR card accent */
+    .ecr-card { border: 2px solid #c4b5fd; }
+    .ecr-card .card-header { background:#f5f3ff; border-bottom-color:#c4b5fd; }
+
+    /* FORM */
+    .form-grid { display:grid; gap:20px; }
+    .form-grid.cols-2 { grid-template-columns:1fr 1fr; }
+    .form-grid.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+    @media(max-width:640px) { .form-grid.cols-2,.form-grid.cols-3 { grid-template-columns:1fr; } }
+    .form-group { display:flex; flex-direction:column; gap:6px; }
+    .form-group.full { grid-column:1/-1; }
+    label { font-size:.85rem; font-weight:600; color:var(--gray-700); }
+    label .req { color:var(--danger); margin-left:2px; }
+    label .hint { font-weight:400; color:var(--gray-400); font-size:.8rem; margin-left:4px; }
+    input[type="text"],input[type="date"],input[type="time"],input[type="number"],select,textarea { width:100%; padding:9px 12px; border:1px solid var(--gray-300); border-radius:6px; font-size:.9rem; color:var(--gray-800); background:#fff; transition:border-color .15s,box-shadow .15s; font-family:inherit; }
+    input:focus,select:focus,textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.15); }
+    .ecr-focus:focus { border-color:var(--ecr) !important; box-shadow:0 0 0 3px rgba(124,58,237,.15) !important; }
+    textarea { resize:vertical; min-height:80px; line-height:1.6; }
+
+    /* check / radio pills */
+    .check-group { display:flex; flex-wrap:wrap; gap:10px; }
+    .check-item { display:flex; align-items:center; padding:6px 14px; border:1px solid var(--gray-300); border-radius:20px; cursor:pointer; transition:all .15s; font-size:.88rem; user-select:none; }
+    .check-item input[type="radio"], .check-item input[type="checkbox"] { display:none; }
+    .check-item:hover { border-color:var(--primary); background:var(--primary-light); }
+    .check-item:has(input:checked) { border-color:var(--primary); background:var(--primary-light); font-weight:600; }
+    .ecr-check-item:hover { border-color:var(--ecr); background:var(--ecr-light); }
+    .ecr-check-item:has(input:checked) { border-color:var(--ecr); background:var(--ecr-light); font-weight:600; }
+
+    /* severity / priority buttons */
+    .sev-group { display:flex; gap:8px; flex-wrap:wrap; }
+    .sev-btn,.pri-btn { padding:7px 16px; border-radius:20px; border:2px solid transparent; cursor:pointer; font-size:.85rem; font-weight:600; transition:all .15s; }
+    .sev-btn[data-sev="critical"] { background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
+    .sev-btn[data-sev="high"]     { background:#ffedd5; color:#9a3412; border-color:#fdba74; }
+    .sev-btn[data-sev="medium"]   { background:#fef9c3; color:#854d0e; border-color:#fde047; }
+    .sev-btn[data-sev="low"]      { background:#dcfce7; color:#166534; border-color:#86efac; }
+    .sev-btn.active,.pri-btn.active { transform:scale(1.05); box-shadow:var(--shadow-md); }
+    .sev-btn[data-sev="critical"].active { border-color:#ef4444; }
+    .sev-btn[data-sev="high"].active     { border-color:#f97316; }
+    .sev-btn[data-sev="medium"].active   { border-color:#eab308; }
+    .sev-btn[data-sev="low"].active      { border-color:#22c55e; }
+    .pri-btn[data-pri="urgent"] { background:#fce7f3; color:#9d174d; border-color:#f9a8d4; }
+    .pri-btn[data-pri="high"]   { background:#ffedd5; color:#9a3412; border-color:#fdba74; }
+    .pri-btn[data-pri="normal"] { background:#dbeafe; color:#1e40af; border-color:#93c5fd; }
+    .pri-btn[data-pri="low"]    { background:#dcfce7; color:#166534; border-color:#86efac; }
+    .pri-btn[data-pri="urgent"].active { border-color:#ec4899; }
+    .pri-btn[data-pri="high"].active   { border-color:#f97316; }
+    .pri-btn[data-pri="normal"].active { border-color:#3b82f6; }
+    .pri-btn[data-pri="low"].active    { border-color:#22c55e; }
+
+    /* file upload */
+    .upload-zone { border:2px dashed var(--gray-300); border-radius:var(--radius); padding:28px; text-align:center; cursor:pointer; transition:all .2s; background:var(--gray-50); }
+    .upload-zone:hover { border-color:var(--primary); background:var(--primary-light); }
+    .upload-zone.ecr-zone:hover { border-color:var(--ecr); background:var(--ecr-light); }
+    .upload-zone p { font-size:.88rem; color:var(--gray-500); }
+    .upload-zone span { font-weight:600; }
+    .file-list { margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+    .file-chip { display:flex; align-items:center; gap:6px; border-radius:20px; padding:4px 10px; font-size:.82rem; }
+    .file-chip.blue { background:var(--primary-light); color:var(--primary); border:1px solid #93c5fd; }
+    .file-chip.purple { background:var(--ecr-light); color:var(--ecr); border:1px solid #c4b5fd; }
+    .file-chip button { border:none; background:none; cursor:pointer; color:currentColor; font-size:1rem; line-height:1; }
+
+    /* BUTTONS */
+    .btn-row { display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap; margin-top:8px; }
+    .btn { padding:10px 24px; border-radius:6px; border:none; cursor:pointer; font-size:.9rem; font-weight:600; transition:all .15s; font-family:inherit; }
+    .btn-primary { background:var(--primary); color:#fff; }
+    .btn-primary:hover { background:var(--primary-dark); box-shadow:var(--shadow-md); }
+    .btn-ecr { background:var(--ecr); color:#fff; }
+    .btn-ecr:hover { background:var(--ecr-dark); box-shadow:var(--shadow-md); }
+    .btn-outline { background:#fff; color:var(--primary); border:2px solid var(--primary); }
+    .btn-outline:hover { background:var(--primary-light); }
+    .btn-outline-ecr { background:#fff; color:var(--ecr); border:2px solid var(--ecr); }
+    .btn-outline-ecr:hover { background:var(--ecr-light); }
+    .btn-ghost { background:var(--gray-100); color:var(--gray-700); }
+    .btn-ghost:hover { background:var(--gray-200); }
+    .btn-success { background:var(--success); color:#fff; }
+    .btn-success:hover { background:#15803d; box-shadow:var(--shadow-md); }
+
+    /* TABLE */
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    th { background:var(--gray-50); text-align:left; padding:10px 14px; font-weight:600; color:var(--gray-600); border-bottom:2px solid var(--gray-200); white-space:nowrap; }
+    td { padding:12px 14px; border-bottom:1px solid var(--gray-100); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:var(--gray-50); }
+
+    /* TAGS */
+    .tag { display:inline-block; padding:2px 9px; border-radius:12px; font-size:.78rem; font-weight:600; }
+    .tag-critical { background:#fee2e2; color:#991b1b; }
+    .tag-high     { background:#ffedd5; color:#9a3412; }
+    .tag-medium   { background:#fef9c3; color:#854d0e; }
+    .tag-low      { background:#dcfce7; color:#166534; }
+    .tag-urgent   { background:#fce7f3; color:#9d174d; }
+    .tag-normal   { background:#dbeafe; color:#1e40af; }
+
+    .status-tag { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:12px; font-size:.78rem; font-weight:600; }
+    .status-dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+    /* issue statuses */
+    .status-open     { background:#ede9fe; color:#5b21b6; }
+    .status-progress { background:#fef9c3; color:#854d0e; }
+    .status-resolved { background:#dcfce7; color:#166534; }
+    .status-closed   { background:var(--gray-100); color:var(--gray-600); }
+    /* ecr statuses */
+    .status-draft     { background:#f3f4f6; color:#4b5563; }
+    .status-pending   { background:#ede9fe; color:#5b21b6; }
+    .status-reviewing { background:#fef9c3; color:#854d0e; }
+    .status-approved  { background:#dcfce7; color:#166534; }
+    .status-rejected  { background:#fee2e2; color:#991b1b; }
+    .status-impl      { background:#dbeafe; color:#1e40af; }
+    .status-done      { background:#d1fae5; color:#065f46; }
+
+    .action-btn { padding:4px 10px; border-radius:5px; border:1px solid var(--gray-300); background:#fff; cursor:pointer; font-size:.8rem; color:var(--gray-700); transition:all .15s; }
+    .action-btn:hover { background:var(--primary-light); color:var(--primary); border-color:#93c5fd; }
+    .action-btn.ecr-action:hover { background:var(--ecr-light); color:var(--ecr); border-color:#c4b5fd; }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:12px; width:100%; max-width:720px; box-shadow:var(--shadow-lg); position:relative; animation:slideIn .2s ease; }
+    @keyframes slideIn { from { transform:translateY(-20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    .modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--gray-200); }
+    .modal-header h3 { font-size:1.1rem; font-weight:700; }
+    .modal-header.ecr-header { border-bottom-color:#c4b5fd; }
+    .modal-close { background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--gray-500); padding:4px; }
+    .modal-close:hover { color:var(--gray-800); }
+    .modal-body { padding:24px; }
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:500px) { .detail-grid { grid-template-columns:1fr; } }
+    .detail-item { display:flex; flex-direction:column; gap:4px; }
+    .detail-item.full { grid-column:1/-1; }
+    .detail-label { font-size:.78rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:.05em; }
+    .detail-value { font-size:.9rem; color:var(--gray-800); line-height:1.5; }
+    .modal-footer { padding:16px 24px; border-top:1px solid var(--gray-200); display:flex; justify-content:flex-end; gap:10px; }
+
+    /* DEV / REVIEW SECTION */
+    .dev-card { border:2px solid #a3e635; }
+    .dev-card .card-header { background:#f7fee7; border-bottom-color:#bbf7d0; }
+    .dev-badge { background:#15803d !important; }
+    .review-card { border:2px solid #c4b5fd; }
+    .review-card .card-header { background:#f5f3ff; border-bottom-color:#c4b5fd; }
+
+    /* STATS */
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+    @media(max-width:640px) { .stats-row { grid-template-columns:repeat(2,1fr); } }
+    .stat-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 20px; display:flex; align-items:center; gap:14px; }
+    .stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+    .stat-num   { font-size:1.6rem; font-weight:700; line-height:1; }
+    .stat-label { font-size:.8rem; color:var(--gray-500); margin-top:2px; }
+
+    /* SEARCH BAR */
+    .search-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+    .search-bar input { flex:1; min-width:180px; }
+    .search-bar select { min-width:140px; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align:center; padding:60px 20px; color:var(--gray-400); }
+    .empty-state p { font-size:.95rem; margin-top:12px; }
+
+    /* PROGRESS */
+    .progress-wrap { background:var(--gray-200); border-radius:99px; height:6px; overflow:hidden; margin-top:8px; }
+    .progress-bar  { height:100%; border-radius:99px; transition:width .5s; }
+    .progress-bar.blue   { background:var(--primary); }
+    .progress-bar.purple { background:var(--ecr); }
+
+    /* GUIDE */
+    .guide-list { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .guide-list li { display:flex; align-items:flex-start; gap:12px; padding:12px 16px; background:var(--gray-50); border-radius:8px; border-left:3px solid var(--primary); font-size:.9rem; line-height:1.5; }
+    .guide-list.ecr-guide li { border-left-color:var(--ecr); }
+    .guide-num { color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0; margin-top:1px; }
+
+    /* WORKFLOW */
+    .workflow { display:flex; align-items:center; gap:0; flex-wrap:wrap; margin:12px 0; }
+    .wf-step { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .wf-dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:700; border:2px solid; }
+    .wf-label { font-size:.72rem; color:var(--gray-500); white-space:nowrap; }
+    .wf-arrow { font-size:1rem; color:var(--gray-300); margin:0 4px; margin-bottom:18px; }
+    .wf-dot.done     { background:#dcfce7; color:#166534; border-color:#22c55e; }
+    .wf-dot.active   { background:var(--ecr-light); color:var(--ecr); border-color:var(--ecr); }
+    .wf-dot.pending  { background:var(--gray-100); color:var(--gray-400); border-color:var(--gray-300); }
+
+    .required-note { font-size:.82rem; color:var(--gray-400); margin-bottom:4px; }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:32px; right:32px; background:var(--gray-900); color:#fff; padding:14px 20px; border-radius:var(--radius); box-shadow:var(--shadow-lg); font-size:.9rem; transform:translateY(80px); opacity:0; transition:all .3s ease; z-index:9999; display:flex; align-items:center; gap:10px; max-width:340px; }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast.success { background:var(--success); }
+    .toast.error   { background:var(--danger); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🐛 問題回報 &amp; ECR 專區</h1>
+  <div class="header-chips">
+    <span class="header-chip">📝 問題回報 (Bug / Defect)</span>
+    <span class="header-chip">🔄 ECR 工程變更申請</span>
+  </div>
+</header>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <span class="tab-group-label">問題單</span>
+  <button class="tab-btn active"  onclick="switchTab('report')">📝 新增問題單</button>
+  <button class="tab-btn"         onclick="switchTab('list')">📋 問題清單</button>
+  <span class="tab-group-label" style="margin-left:8px">ECR</span>
+  <button class="tab-btn ecr-tab" onclick="switchTab('ecr-form')">🔄 新增 ECR</button>
+  <button class="tab-btn ecr-tab" onclick="switchTab('ecr-list')">📑 ECR 清單</button>
+  <button class="tab-btn"         onclick="switchTab('guide')" style="margin-left:auto">📖 填寫指南</button>
+</div>
+
+<!-- ══════════════ TAB: 新增問題單 ══════════════ -->
+<div id="tab-report" class="tab-panel active">
+<div class="container">
+  <p class="required-note"><span style="color:var(--danger)">*</span> 為必填欄位</p>
+
+  <div class="card">
+    <div class="card-header"><div class="badge">1</div><h2>問題單分類</h2></div>
+    <div class="card-body">
+      <div class="form-grid cols-3">
+        <div class="form-group">
+          <label>部門 <span class="req">*</span></label>
+          <input type="text" id="f-department" placeholder="例：研發部、QA、PM" />
+        </div>
+        <div class="form-group">
+          <label>填寫人 <span class="req">*</span></label>
+          <input type="text" id="f-reporter" placeholder="例：王小明" />
+        </div>
+        <div class="form-group">
+          <label>專案名稱 <span class="req">*</span></label>
+          <select id="f-project" onchange="syncModules('f-project','f-module')">
+            <option value="">請選擇...</option>
+            <option>訂餐前台</option>
+            <option>內部後台</option>
+            <option>店家後台</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>模組 <span class="req">*</span></label>
+          <select id="f-module">
+            <option value="">請先選擇專案...</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>問題摘要 <span class="req">*</span> <span class="hint">（建議包含頁面名稱或功能規格名稱）</span></label>
+          <input type="text" id="f-summary" placeholder="例：[訂單列表] 篩選日期後，資料不如預期顯示全部訂單" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="badge">2</div><h2>問題詳細資訊</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>嚴重程度 <span class="req">*</span></label>
+          <div class="sev-group" id="severity-group">
+            <button class="sev-btn" data-sev="critical" onclick="setSeverity('critical')">🔴 Critical 嚴重</button>
+            <button class="sev-btn" data-sev="high"     onclick="setSeverity('high')">🟠 High 高</button>
+            <button class="sev-btn active" data-sev="medium" onclick="setSeverity('medium')">🟡 Medium 中</button>
+            <button class="sev-btn" data-sev="low"      onclick="setSeverity('low')">🟢 Low 低</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>問題類型 <span class="req">*</span></label>
+          <div class="check-group">
+            <label class="check-item"><input type="radio" name="issue-type" value="error" /> 程式錯誤 (Error)</label>
+            <label class="check-item"><input type="radio" name="issue-type" value="data" /> 資料錯誤 (Failed)</label>
+            <label class="check-item"><input type="radio" name="issue-type" value="ui" /> 畫面異常</label>
+            <label class="check-item"><input type="radio" name="issue-type" value="perf" /> 效能問題</label>
+            <label class="check-item"><input type="radio" name="issue-type" value="layout" /> 版面問題</label>
+            <label class="check-item"><input type="radio" name="issue-type" value="spec" /> 規格異動</label>
+          </div>
+        </div>
+        <div class="form-grid cols-2">
+          <div class="form-group">
+            <label>哪一支網頁／程式 <span class="req">*</span></label>
+            <input type="text" id="f-page" placeholder="例：/order/list.aspx" />
+          </div>
+          <div class="form-group">
+            <label>發生時間 <span class="req">*</span></label>
+            <div style="display:flex;gap:8px">
+              <input type="date" id="f-date" style="flex:1" />
+              <input type="time" id="f-time" style="width:150px" />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>進行了什麼操作 <span class="req">*</span></label>
+          <textarea id="f-action" placeholder="請描述操作步驟" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>發生了什麼問題 <span class="req">*</span> <span class="hint">（實際結果 vs 預期結果）</span></label>
+          <textarea id="f-problem" placeholder="【實際結果】&#10;【預期結果】" rows="4"></textarea>
+        </div>
+        <div class="form-grid cols-2">
+          <div class="form-group">
+            <label>以前有沒有發生過？</label>
+            <div class="check-group">
+              <label class="check-item"><input type="radio" name="happened-before" value="yes" /> 有</label>
+              <label class="check-item"><input type="radio" name="happened-before" value="no" /> 沒有</label>
+              <label class="check-item"><input type="radio" name="happened-before" value="unknown" checked /> 不確定</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>其他人有沒有發生過？</label>
+            <div class="check-group">
+              <label class="check-item"><input type="radio" name="others-affected" value="yes" /> 有</label>
+              <label class="check-item"><input type="radio" name="others-affected" value="no" /> 無</label>
+              <label class="check-item"><input type="radio" name="others-affected" value="unknown" checked /> 未確認</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="badge">3</div><h2>測試環境資訊</h2></div>
+    <div class="card-body">
+      <div class="form-grid cols-3">
+        <div class="form-group">
+          <label>作業系統 <span class="req">*</span></label>
+          <select id="f-os">
+            <option value="">請選擇...</option>
+            <option>Windows 11</option><option>Windows 10</option><option>macOS Sonoma</option><option>macOS Ventura</option><option>iOS 17</option><option>Android 14</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>瀏覽器 <span class="req">*</span></label>
+          <select id="f-browser">
+            <option value="">請選擇...</option>
+            <option>Chrome 124</option><option>Chrome 123</option><option>Edge 124</option><option>Firefox 126</option><option>Safari 17</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>裝置型號 <span class="hint">（OEM 問題追蹤用）</span></label>
+          <input type="text" id="f-device" placeholder="例：Dell XPS 15 9530" />
+        </div>
+        <div class="form-group full">
+          <label>正常環境資訊 <span class="hint">（沒問題的環境也應記錄）</span></label>
+          <input type="text" id="f-ok-env" placeholder="例：macOS Safari 17 — 無問題" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="badge">4</div><h2>附件與重現資訊</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>截圖 / 錄影附件</label>
+          <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--gray-400);margin-bottom:6px"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+            <p>拖曳或 <span style="color:var(--primary)">點擊上傳</span>（PNG、JPG、MP4）</p>
+          </div>
+          <input type="file" id="file-input" multiple accept="image/*,video/*" style="display:none" onchange="handleFiles(this.files,'file-list','blue')" />
+          <div class="file-list" id="file-list"></div>
+        </div>
+        <div class="form-group">
+          <label>重現問題步驟</label>
+          <textarea id="f-repro" placeholder="1. 登入帳號&#10;2. 進入頁面&#10;3. ..." rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>測試資料 <span class="hint">（如可提供）</span></label>
+          <textarea id="f-testdata" placeholder="帳號：test@example.com&#10;訂單編號：ORD-2024-00123" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-body" style="padding:16px 24px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.88rem;font-weight:600;color:var(--gray-700)">問題單完整度</span>
+        <span id="completeness-text" style="font-size:.88rem;color:var(--primary);font-weight:600">0%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar blue" id="progress-bar" style="width:0%"></div></div>
+      <p id="missing-hint" style="font-size:.8rem;color:var(--gray-400);margin-top:6px"></p>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="resetForm()">重設</button>
+    <button class="btn btn-ghost" id="cancel-edit-btn" onclick="cancelEditIssue()" style="display:none;color:var(--danger);border:1px solid var(--danger)">取消編輯</button>
+    <button class="btn btn-outline" onclick="saveDraft()">儲存草稿</button>
+    <button class="btn btn-success" onclick="submitForm()">✓ 提交問題單</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ TAB: 問題清單 ══════════════ -->
+<div id="tab-list" class="tab-panel">
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-icon" style="background:var(--primary-light)">📊</div><div><div class="stat-num" id="stat-total">0</div><div class="stat-label">全部</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#ede9fe">🟣</div><div><div class="stat-num" id="stat-open">0</div><div class="stat-label">待處理</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fef9c3">🟡</div><div><div class="stat-num" id="stat-progress">0</div><div class="stat-label">處理中</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#dcfce7">🟢</div><div><div class="stat-num" id="stat-resolved">0</div><div class="stat-label">已解決</div></div></div>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="🔍 搜尋問題摘要..." oninput="renderList()" />
+    <select id="filter-severity" onchange="renderList()">
+      <option value="">全部嚴重度</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+    </select>
+    <select id="filter-status" onchange="renderList()">
+      <option value="">全部狀態</option><option value="open">待處理</option><option value="progress">處理中</option><option value="resolved">已解決</option><option value="closed">已關閉</option>
+    </select>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>摘要</th><th>模組</th><th>嚴重度</th><th>類型</th><th>狀態</th><th>回報時間</th><th>操作</th></tr></thead>
+        <tbody id="issue-tbody"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state" style="display:none">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+        <p>目前沒有問題單</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ TAB: 填寫指南 ══════════════ -->
+<div id="tab-guide" class="tab-panel">
+<div class="container">
+  <div class="card">
+    <div class="card-header"><div class="badge">📋</div><h2>問題單分類 — 開單前應確認</h2></div>
+    <div class="card-body">
+      <ul class="guide-list">
+        <li><div class="guide-num" style="background:var(--primary)">1</div><div>確認屬於<strong>哪一個專案底下的哪一個模組</strong></div></li>
+        <li><div class="guide-num" style="background:var(--primary)">2</div><div>摘要應附上<strong>該網頁的名稱</strong>，甚至檔名或功能規格名稱</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="badge">📝</div><h2>問題單必填資訊 — 資訊不完整，解決速度和品質難以保證</h2></div>
+    <div class="card-body">
+      <ul class="guide-list">
+        <li><div class="guide-num" style="background:var(--primary)">1</div><div>哪一支網頁／程式（URL、檔名）</div></li>
+        <li><div class="guide-num" style="background:var(--primary)">2</div><div>進行了什麼操作（詳細步驟）</div></li>
+        <li><div class="guide-num" style="background:var(--primary)">3</div><div>什麼時間發生</div></li>
+        <li><div class="guide-num" style="background:var(--primary)">4</div><div>發生了什麼問題（實際結果 vs 預期結果）</div></li>
+        <li><div class="guide-num" style="background:var(--primary)">5</div><div>以前有沒發生過</div></li>
+        <li><div class="guide-num" style="background:var(--primary)">6</div><div>其他人有沒發生過</div></li>
+        <li><div class="guide-num" style="background:var(--primary)">7</div><div>是 <strong>Error（程式掛了）</strong>、<strong>Failed（資料錯誤）</strong>、<strong>畫面不如預期</strong>、<strong>速度太慢</strong>、<strong>版面問題</strong>、還是<strong>規格異動</strong></div></li>
+        <li><div class="guide-num" style="background:var(--primary)">8</div><div>測試環境的 OS、Browser 版本；<strong>沒問題的環境也應提供</strong></div></li>
+        <li><div class="guide-num" style="background:var(--primary)">9</div><div>擷取畫面，甚至錄製操作流程</div></li>
+        <li><div class="guide-num" style="background:var(--primary)">10</div><div>協助重現問題的資訊</div></li>
+        <li><div class="guide-num" style="background:var(--primary)">11</div><div>如果可以，最好能提供測試資料</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="card dev-card">
+    <div class="card-header"><div class="badge dev-badge">IT</div><h2>IT/工程師 修復後應提供的資訊</h2></div>
+    <div class="card-body">
+      <ul class="guide-list">
+        <li><div class="guide-num" style="background:var(--success)">1</div><div>問題原因</div></li>
+        <li><div class="guide-num" style="background:var(--success)">2</div><div>修復方式</div></li>
+        <li><div class="guide-num" style="background:var(--success)">3</div><div>可正常運作的畫面截圖或錄製流程檔</div></li>
+        <li><div class="guide-num" style="background:var(--success)">4</div><div>針對問題原因撰寫的 <strong>Unit Test 程式碼</strong>及測試結果</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── ECR 指南 ── -->
+  <div style="margin-top:40px;padding-top:32px;border-top:2px solid var(--ecr);"></div>
+
+  <div class="card" style="border:1px solid #c4b5fd">
+    <div class="card-header" style="background:#f5f3ff;border-bottom-color:#c4b5fd">
+      <div class="badge" style="background:var(--ecr)">🔄</div>
+      <h2>什麼情況下開 ECR？</h2>
+    </div>
+    <div class="card-body">
+      <p style="margin-bottom:14px;font-size:.9rem;color:var(--gray-600)">ECR 是<strong>需求或規格層面的變更申請</strong>，與問題單不同：</p>
+      <ul class="guide-list ecr-guide">
+        <li><div class="guide-num" style="background:var(--ecr)">✓</div><div>想<strong>新增功能</strong>，或對現有功能做不在原規格內的修改</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">✓</div><div>現行<strong>流程或 UI</strong> 需要調整，但系統本身並沒有壞</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">✓</div><div>變更<strong>影響範圍較大</strong>，需要 PM / SA 評估與核准才能進行</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">✓</div><div>涉及<strong>多個模組或系統</strong>的連動修改</div></li>
+      </ul>
+      <p style="margin-top:14px;font-size:.85rem;color:var(--gray-500);padding:10px 14px;background:var(--gray-50);border-radius:6px;border-left:3px solid var(--ecr)">
+        💡 <strong>簡單判斷法：</strong>系統按照規格運作，但你覺得「規格應該要不一樣」→ 開 ECR；系統沒按規格運作 → 開問題單
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="border:1px solid #c4b5fd">
+    <div class="card-header" style="background:#f5f3ff;border-bottom-color:#c4b5fd">
+      <div class="badge" style="background:var(--ecr)">📝</div>
+      <h2>ECR 必填資訊 — 資訊愈完整，評估速度愈快</h2>
+    </div>
+    <div class="card-body">
+      <ul class="guide-list ecr-guide">
+        <li><div class="guide-num" style="background:var(--ecr)">1</div><div><strong>變更標題</strong>：格式建議 <code>[模組] 簡述想做什麼</code>，讓人一眼看懂</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">2</div><div><strong>變更類型</strong>：需求新增 / 需求修改 / 規格調整 / 流程調整 / UI 調整 / 效能 / 安全性</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">3</div><div><strong>優先級</strong>：Urgent（影響上線） / High / Normal / Low，如實填寫，勿全填最高</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">4</div><div><strong>變更原因</strong>：說明<strong>為什麼要改</strong>，背景、用戶回饋或業務需求</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">5</div><div><strong>現行作法 (As-Is)</strong>：目前系統怎麼運作，截圖更好</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">6</div><div><strong>變更後作法 (To-Be)</strong>：期望的結果，盡量附上流程說明或 wireframe</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">7</div><div><strong>影響頁面</strong>：列出所有會受影響的頁面或 API，漏填可能遺漏評估範圍</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">8</div><div><strong>驗收標準 (AC)</strong>：列出可驗收的條件，讓 IT 知道做到什麼程度算完成</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="border:2px solid #c4b5fd">
+    <div class="card-header" style="background:#f5f3ff;border-bottom-color:#c4b5fd">
+      <div class="badge" style="background:var(--ecr)">PM</div>
+      <h2>PM / SA 審核時應填寫</h2>
+    </div>
+    <div class="card-body">
+      <ul class="guide-list ecr-guide">
+        <li><div class="guide-num" style="background:var(--ecr)">1</div><div><strong>審核結果</strong>：核准 / 退回 / 需討論，不能空著不填</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">2</div><div><strong>審核意見</strong>：退回時務必說明原因，核准時可補充調整重點</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">3</div><div><strong>指派給</strong>：核准後填入負責實施的 IT 人員</div></li>
+        <li><div class="guide-num" style="background:var(--ecr)">4</div><div><strong>期望完成日期</strong>：給 IT 明確的交付時間參考</div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ TAB: 新增 ECR ══════════════ -->
+<div id="tab-ecr-form" class="tab-panel">
+<div class="container">
+  <p class="required-note"><span style="color:var(--danger)">*</span> 為必填欄位</p>
+
+  <!-- ECR SECTION 1: 基本資訊 -->
+  <div class="card ecr-card">
+    <div class="card-header"><div class="badge ecr-badge">1</div><h2>ECR 基本資訊</h2></div>
+    <div class="card-body">
+      <div class="form-grid cols-3">
+        <div class="form-group">
+          <label>專案名稱 <span class="req">*</span></label>
+          <select id="e-project" class="ecr-focus" onchange="syncModules('e-project','e-module')">
+            <option value="">請選擇...</option>
+            <option>訂餐前台</option>
+            <option>內部後台</option>
+            <option>店家後台</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>影響模組 <span class="req">*</span></label>
+          <select id="e-module" class="ecr-focus">
+            <option value="">請先選擇專案...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>申請日期 <span class="req">*</span></label>
+          <input type="date" id="e-date" class="ecr-focus" />
+        </div>
+        <div class="form-group">
+          <label>部門 <span class="req">*</span></label>
+          <input type="text" id="e-department" class="ecr-focus" placeholder="例：研發部、PM、QA" />
+        </div>
+        <div class="form-group">
+          <label>填寫人 <span class="req">*</span></label>
+          <input type="text" id="e-requester" class="ecr-focus" placeholder="例：王小明 / PM-Alice" />
+        </div>
+        <div class="form-group">
+          <label>相關問題單編號 <span class="hint">（若有）</span></label>
+          <input type="text" id="e-related-issue" class="ecr-focus" placeholder="例：#002" />
+        </div>
+        <div class="form-group">
+          <label>目標版本 <span class="hint">（若有）</span></label>
+          <input type="text" id="e-version" class="ecr-focus" placeholder="例：v2.5.0" />
+        </div>
+        <div class="form-group full">
+          <label>變更標題 <span class="req">*</span></label>
+          <input type="text" id="e-title" class="ecr-focus" placeholder="例：[訂單管理] 新增批次匯出訂單為 Excel 功能" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECR SECTION 2: 變更內容 -->
+  <div class="card ecr-card">
+    <div class="card-header"><div class="badge ecr-badge">2</div><h2>變更內容說明</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>變更類型 <span class="req">*</span></label>
+          <div class="check-group">
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="new-req" /> 需求新增</label>
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="mod-req" /> 需求修改</label>
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="spec" /> 規格調整</label>
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="flow" /> 流程調整</label>
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="ui" /> UI/UX 調整</label>
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="perf" /> 效能優化</label>
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="sec" /> 安全性改善</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>優先級 <span class="req">*</span></label>
+          <div class="sev-group" id="priority-group">
+            <button class="pri-btn" data-pri="urgent" onclick="setPriority('urgent')">🔴 Urgent</button>
+            <button class="pri-btn" data-pri="high"   onclick="setPriority('high')">🟠 High</button>
+            <button class="pri-btn active" data-pri="normal" onclick="setPriority('normal')">🔵 Normal</button>
+            <button class="pri-btn" data-pri="low"    onclick="setPriority('low')">🟢 Low</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>變更原因 <span class="req">*</span> <span class="hint">（Why — 為何需要此變更？）</span></label>
+          <textarea id="e-reason" class="ecr-focus" rows="4" placeholder="例：客戶反映每次匯出訂單需逐筆下載，效率低落；競品已提供批次匯出功能，影響客戶續約意願。"></textarea>
+        </div>
+        <div class="form-group">
+          <label>現行作法 <span class="req">*</span> <span class="hint">（As-Is — 目前的規格或行為）</span></label>
+          <textarea id="e-asis" class="ecr-focus" rows="4" placeholder="例：目前訂單列表僅支援單筆點擊下載 PDF，無批次選取或 Excel 匯出功能。"></textarea>
+        </div>
+        <div class="form-group">
+          <label>變更後作法 <span class="req">*</span> <span class="hint">（To-Be — 期望的新規格或行為）</span></label>
+          <textarea id="e-tobe" class="ecr-focus" rows="5" placeholder="例：&#10;1. 訂單列表新增多選 checkbox&#10;2. 工具列出現「匯出 Excel」按鈕（可選欄位）&#10;3. 最多一次匯出 1,000 筆，超過提示分批處理&#10;4. 匯出後顯示下載進度 bar"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECR SECTION 3: 影響評估 -->
+  <div class="card ecr-card">
+    <div class="card-header"><div class="badge ecr-badge">3</div><h2>影響範圍評估</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>影響的頁面 / 程式 <span class="req">*</span></label>
+          <textarea id="e-impact-pages" class="ecr-focus" rows="3" placeholder="例：&#10;- /order/list.aspx（新增 checkbox 與匯出按鈕）&#10;- /order/export-api（新增匯出 API）&#10;- 權限設定頁（新增「匯出訂單」權限）"></textarea>
+        </div>
+        <div class="form-group">
+          <label>影響程度</label>
+          <div class="check-group">
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-impact" value="high" /> 高（核心功能大幅更動）</label>
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-impact" value="medium" checked /> 中（局部功能修改）</label>
+            <label class="check-item ecr-check-item"><input type="radio" name="ecr-impact" value="low" /> 低（介面微調）</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>期望完成日期</label>
+          <input type="date" id="e-deadline" class="ecr-focus" />
+        </div>
+        <div class="form-group">
+          <label>相依性 <span class="hint">（其他需先完成的功能或問題單）</span></label>
+          <input type="text" id="e-dependency" class="ecr-focus" placeholder="例：需先完成 #018 權限模組重構" />
+        </div>
+        <div class="form-group">
+          <label>測試重點 <span class="hint">（驗收標準 / AC）</span></label>
+          <textarea id="e-ac" class="ecr-focus" rows="4" placeholder="例：&#10;✓ 可選取 1~1,000 筆訂單進行匯出&#10;✓ Excel 包含：訂單編號、日期、金額、狀態&#10;✓ 超過 1,000 筆顯示提示&#10;✓ 無對應權限者按鈕為灰色"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECR SECTION 4: 附件 -->
+  <div class="card ecr-card">
+    <div class="card-header"><div class="badge ecr-badge">4</div><h2>參考文件與附件</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>附件上傳 <span class="hint">（UI 草稿、規格文件、參考截圖）</span></label>
+          <div class="upload-zone ecr-zone" onclick="document.getElementById('ecr-file-input').click()">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--gray-400);margin-bottom:6px"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+            <p>拖曳或 <span style="color:var(--ecr)">點擊上傳</span>（PDF、PNG、DOCX、XLSX）</p>
+          </div>
+          <input type="file" id="ecr-file-input" multiple style="display:none" onchange="handleFiles(this.files,'ecr-file-list','purple')" />
+          <div class="file-list" id="ecr-file-list"></div>
+        </div>
+        <div class="form-group">
+          <label>備註</label>
+          <textarea id="e-note" class="ecr-focus" rows="3" placeholder="其他補充說明..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECR 完整度 -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-body" style="padding:16px 24px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.88rem;font-weight:600;color:var(--gray-700)">ECR 完整度</span>
+        <span id="ecr-completeness-text" style="font-size:.88rem;color:var(--ecr);font-weight:600">0%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar purple" id="ecr-progress-bar" style="width:0%"></div></div>
+      <p id="ecr-missing-hint" style="font-size:.8rem;color:var(--gray-400);margin-top:6px"></p>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="resetEcrForm()">重設</button>
+    <button class="btn btn-ghost" id="cancel-ecr-edit-btn" onclick="cancelEditEcr()" style="display:none;color:var(--danger);border:1px solid var(--danger)">取消編輯</button>
+    <button class="btn btn-outline-ecr" onclick="saveEcrDraft()">儲存草稿</button>
+    <button class="btn btn-ecr" onclick="submitEcr()">🔄 提交 ECR</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ TAB: ECR 清單 ══════════════ -->
+<div id="tab-ecr-list" class="tab-panel">
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-icon" style="background:var(--ecr-light)">📑</div><div><div class="stat-num" id="ecr-stat-total">0</div><div class="stat-label">全部</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#ede9fe">⏳</div><div><div class="stat-num" id="ecr-stat-pending">0</div><div class="stat-label">待審核</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#dcfce7">✅</div><div><div class="stat-num" id="ecr-stat-approved">0</div><div class="stat-label">已核准</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#dbeafe">🔨</div><div><div class="stat-num" id="ecr-stat-impl">0</div><div class="stat-label">實施中</div></div></div>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="ecr-search" placeholder="🔍 搜尋 ECR 標題..." oninput="renderEcrList()" />
+    <select id="ecr-filter-type" onchange="renderEcrList()">
+      <option value="">全部類型</option>
+      <option value="new-req">需求新增</option><option value="mod-req">需求修改</option><option value="spec">規格調整</option>
+      <option value="flow">流程調整</option><option value="ui">UI/UX 調整</option><option value="perf">效能優化</option><option value="sec">安全性改善</option>
+    </select>
+    <select id="ecr-filter-status" onchange="renderEcrList()">
+      <option value="">全部狀態</option>
+      <option value="draft">草稿</option><option value="pending">待審核</option><option value="reviewing">審核中</option>
+      <option value="approved">已核准</option><option value="rejected">已退回</option><option value="impl">實施中</option><option value="done">已完成</option>
+    </select>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>變更標題</th><th>模組</th><th>類型</th><th>優先級</th><th>狀態</th><th>申請人</th><th>申請日期</th><th>操作</th></tr></thead>
+        <tbody id="ecr-tbody"></tbody>
+      </table>
+      <div class="empty-state" id="ecr-empty-state" style="display:none">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+        <p>目前沒有 ECR，請先新增！</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ ISSUE MODAL ══════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modal-title">問題詳情</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body">
+      <div class="detail-grid" id="modal-content"></div>
+      <!-- Dev 回填區 -->
+      <div id="modal-dev-section" style="display:none;border-top:2px solid #bbf7d0;margin-top:20px;padding-top:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+          <span style="font-size:.95rem;font-weight:700;color:var(--success)">🛠 IT/工程師 修復資訊回填</span>
+          <span style="font-size:.8rem;color:var(--gray-400)">（儲存後狀態自動更新為已解決）</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>問題原因</label>
+            <textarea id="modal-root-cause" rows="3" placeholder="說明根本原因..."></textarea>
+          </div>
+          <div class="form-group full">
+            <label>修復方式</label>
+            <textarea id="modal-fix" rows="3" placeholder="說明修復方法及修改的檔案/行號..."></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Unit Test 程式碼</label>
+            <textarea id="modal-unittest" rows="5" style="font-family:monospace;font-size:.82rem" placeholder="貼上測試程式碼..."></textarea>
+          </div>
+          <div class="form-group full">
+            <label>修復驗證 <span class="hint">（截圖或錄影連結）</span></label>
+            <input type="text" id="modal-verify" placeholder="附上可正常運作的截圖或錄製流程連結" />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+          <button class="btn btn-ghost" onclick="cancelDevFill()">取消</button>
+          <button class="btn btn-success" onclick="saveDevFill()">✓ 儲存並標記為已解決</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">關閉</button>
+      <button class="btn btn-outline" onclick="editIssueFromModal()" style="border-color:#6366f1;color:#6366f1">✏️ 編輯</button>
+      <button class="btn btn-outline" onclick="deleteIssueFromModal()" style="border-color:var(--danger);color:var(--danger)">🗑 刪除</button>
+      <button class="btn btn-outline" id="modal-dev-btn" onclick="toggleDevFill()" style="border-color:var(--success);color:var(--success)">🛠 IT/工程師 回填</button>
+      <select id="modal-status-select" onchange="changeStatus(this.value)" style="padding:7px 14px;border:1px solid var(--gray-300);border-radius:var(--radius);font-size:.88rem;cursor:pointer;background:#fff">
+        <option value="open">待處理</option>
+        <option value="progress">處理中</option>
+        <option value="resolved">已解決</option>
+        <option value="closed">已關閉</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ECR MODAL ══════════════ -->
+<div class="modal-overlay" id="ecr-modal-overlay" onclick="closeEcrModal(event)">
+  <div class="modal">
+    <div class="modal-header ecr-header">
+      <h3 id="ecr-modal-title">ECR 詳情</h3>
+      <button class="modal-close" onclick="closeEcrModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-grid" id="ecr-modal-content"></div>
+      <!-- 審核回覆區 -->
+      <div id="ecr-review-section" style="display:none;border-top:2px solid #c4b5fd;margin-top:20px;padding-top:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+          <span style="font-size:.95rem;font-weight:700;color:var(--ecr)">📋 PM/SA 審核回覆</span>
+          <span style="font-size:.8rem;color:var(--gray-400)">（儲存後狀態依審核結果自動更新）</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>審核結果</label>
+            <div class="check-group">
+              <label class="check-item ecr-check-item"><input type="radio" name="modal-ecr-review" value="approved" /> ✅ 核准</label>
+              <label class="check-item ecr-check-item"><input type="radio" name="modal-ecr-review" value="rejected" /> ❌ 退回</label>
+              <label class="check-item ecr-check-item"><input type="radio" name="modal-ecr-review" value="discuss" /> 💬 需討論</label>
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>審核意見</label>
+            <textarea id="modal-review-comment" rows="3" placeholder="例：整體方向可行，但匯出上限建議改為 500 筆，請修正後重新提交。"></textarea>
+          </div>
+          <div class="form-group">
+            <label>指派給</label>
+            <input type="text" id="modal-assignee" placeholder="例：IT-Bob" />
+          </div>
+          <div class="form-group">
+            <label>核准完成日期</label>
+            <input type="date" id="modal-approved-date" />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+          <button class="btn btn-ghost" onclick="cancelEcrReview()">取消</button>
+          <button class="btn btn-ecr" onclick="saveEcrReview()">✓ 儲存審核結果</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEcrModal()">關閉</button>
+      <button class="btn btn-outline" onclick="editEcrFromModal()" style="border-color:#6366f1;color:#6366f1">✏️ 編輯</button>
+      <button class="btn btn-outline" onclick="deleteEcrFromModal()" style="border-color:var(--danger);color:var(--danger)">🗑 刪除</button>
+      <button class="btn btn-outline" id="ecr-review-btn" onclick="toggleEcrReview()" style="border-color:var(--ecr);color:var(--ecr)">📋 PM/SA 審核回覆</button>
+      <select id="ecr-modal-status-select" onchange="changeEcrStatus(this.value)" style="padding:7px 14px;border:1px solid var(--gray-300);border-radius:var(--radius);font-size:.88rem;cursor:pointer;background:#fff">
+        <option value="draft">草稿</option>
+        <option value="pending">待審核</option>
+        <option value="reviewing">審核中</option>
+        <option value="approved">已核准</option>
+        <option value="rejected">已退回</option>
+        <option value="impl">實施中</option>
+        <option value="done">已完成</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════ SHARED ════
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'list') renderList();
+  if (name === 'ecr-list') renderEcrList();
+}
+
+function handleFiles(files, listId, color) {
+  Array.from(files).forEach(f => {
+    const chip = document.createElement('div');
+    chip.className = `file-chip ${color}`;
+    chip.innerHTML = `📎 ${f.name} <button onclick="this.parentElement.remove()">×</button>`;
+    document.getElementById(listId).appendChild(chip);
+  });
+}
+
+// ════ 專案模組連動 ════
+const projectModules = {
+  '訂餐前台': ['首頁', '我的訂單'],
+  '內部後台': ['首頁', '據點管理', '餐點管理', '訂單管理', '據點訂單明細', '會員管理', '折價券管理', '使用者管理', '上稿管理', '統計報表', '對帳維護', '檔案瀏覽'],
+  '店家後台': ['首頁', '訂單檢索', '使用者檢索', '餐廳管理', '對帳作業', '檔案上傳', 'QA'],
+};
+
+function syncModules(projectId, moduleId) {
+  const project = document.getElementById(projectId).value;
+  const moduleSel = document.getElementById(moduleId);
+  const modules = projectModules[project] || [];
+  moduleSel.innerHTML = modules.length
+    ? '<option value="">請選擇模組...</option>' + modules.map(m => `<option>${m}</option>`).join('')
+    : '<option value="">請先選擇專案...</option>';
+}
+
+// ════ ISSUE TRACKER ════
+let issues = JSON.parse(localStorage.getItem('issues') || '[]');
+let currentIssueId = null;
+let currentSeverity = 'medium';
+
+const typeLabels  = { error:'程式錯誤', data:'資料錯誤', ui:'畫面異常', perf:'效能問題', layout:'版面問題', spec:'規格異動' };
+const issueStatusNext  = { open:'progress', progress:'resolved', resolved:'closed', closed:'open' };
+const issueStatusLabel = { open:'待處理', progress:'處理中', resolved:'已解決', closed:'已關閉' };
+
+function setSeverity(sev) {
+  currentSeverity = sev;
+  document.querySelectorAll('.sev-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.sev-btn[data-sev="${sev}"]`).classList.add('active');
+}
+
+const issueRequiredFields = [
+  { id:'f-project', label:'專案名稱' }, { id:'f-module', label:'模組' },
+  { id:'f-summary', label:'問題摘要' },
+  { id:'f-page', label:'哪一支網頁' }, { id:'f-date', label:'發生時間' },
+  { id:'f-action', label:'進行了什麼操作' }, { id:'f-problem', label:'發生了什麼問題' },
+  { id:'f-os', label:'作業系統' }, { id:'f-browser', label:'瀏覽器' },
+];
+
+function updateCompleteness() {
+  const filled = issueRequiredFields.filter(f => document.getElementById(f.id)?.value.trim());
+  const hasType = document.querySelector('input[name="issue-type"]:checked');
+  const total = issueRequiredFields.length + 1;
+  const count = filled.length + (hasType ? 1 : 0);
+  const pct = Math.round(count / total * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('completeness-text').textContent = pct + '%';
+  const missing = issueRequiredFields.filter(f => !document.getElementById(f.id)?.value.trim()).map(f => f.label);
+  if (!hasType) missing.push('問題類型');
+  document.getElementById('missing-hint').textContent = missing.length ? '尚未填寫：' + missing.join('、') : '✓ 必填資訊已完整！';
+}
+
+document.querySelectorAll('#tab-report input, #tab-report select, #tab-report textarea').forEach(el => {
+  el.addEventListener('input', updateCompleteness);
+  el.addEventListener('change', updateCompleteness);
+});
+
+function submitForm() {
+  const missing = issueRequiredFields.filter(f => !document.getElementById(f.id).value.trim());
+  const hasType = document.querySelector('input[name="issue-type"]:checked');
+  if (missing.length || !hasType) { showToast('請填寫所有必填欄位！', 'error'); updateCompleteness(); return; }
+  const issue = {
+    id: Date.now(), project: document.getElementById('f-project').value,
+    module: document.getElementById('f-module').value,
+    summary: document.getElementById('f-summary').value, severity: currentSeverity, type: hasType.value,
+    page: document.getElementById('f-page').value, date: document.getElementById('f-date').value,
+    time: document.getElementById('f-time').value, action: document.getElementById('f-action').value,
+    problem: document.getElementById('f-problem').value,
+    happenedBefore: document.querySelector('input[name="happened-before"]:checked')?.value,
+    othersAffected: document.querySelector('input[name="others-affected"]:checked')?.value,
+    os: document.getElementById('f-os').value, browser: document.getElementById('f-browser').value,
+    device: document.getElementById('f-device').value, okEnv: document.getElementById('f-ok-env').value,
+    repro: document.getElementById('f-repro').value,
+    testdata: document.getElementById('f-testdata').value,
+    rootCause: '', fix: '', unitTest: '', verify: '', status: 'open',
+    createdAt: new Date().toLocaleString('zh-TW'),
+  };
+  if (editingIssueId) {
+    const idx = issues.findIndex(i => i.id === editingIssueId);
+    if (idx !== -1) {
+      issue.id        = editingIssueId;
+      issue.rootCause = issues[idx].rootCause;
+      issue.fix       = issues[idx].fix;
+      issue.unitTest  = issues[idx].unitTest;
+      issue.verify    = issues[idx].verify;
+      issue.status    = issues[idx].status;
+      issue.createdAt = issues[idx].createdAt;
+      issues[idx] = issue;
+    }
+    editingIssueId = null;
+    document.querySelector('#tab-report .btn-success').textContent = '✓ 提交問題單';
+    showToast('問題單已更新！', 'success');
+  } else {
+    issues.unshift(issue);
+    showToast('問題單提交成功！', 'success');
+  }
+  localStorage.setItem('issues', JSON.stringify(issues));
+  resetForm();
+  renderList();
+}
+
+function saveDraft() { showToast('草稿已儲存（實際功能待整合後端）'); }
+
+function resetForm() {
+  document.querySelectorAll('#tab-report input[type="text"],#tab-report input[type="date"],#tab-report input[type="time"],#tab-report select,#tab-report textarea').forEach(el => el.value = '');
+  document.querySelectorAll('#tab-report input[type="radio"]').forEach(el => el.checked = false);
+  document.getElementById('file-list').innerHTML = '';
+  setSeverity('medium');
+  updateCompleteness();
+}
+
+function renderList() {
+  const q    = document.getElementById('search-input').value.toLowerCase();
+  const sev  = document.getElementById('filter-severity').value;
+  const stat = document.getElementById('filter-status').value;
+  const filtered = issues.filter(i => (!q || i.summary.toLowerCase().includes(q)) && (!sev || i.severity === sev) && (!stat || i.status === stat));
+  document.getElementById('stat-total').textContent    = issues.length;
+  document.getElementById('stat-open').textContent     = issues.filter(i => i.status === 'open').length;
+  document.getElementById('stat-progress').textContent = issues.filter(i => i.status === 'progress').length;
+  document.getElementById('stat-resolved').textContent = issues.filter(i => i.status === 'resolved').length;
+  const tbody = document.getElementById('issue-tbody');
+  tbody.innerHTML = '';
+  document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(issue => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="color:var(--gray-400);font-size:.82rem">#${String(issues.length - issues.indexOf(issue)).padStart(3,'0')}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${issue.summary}">${issue.summary}</td>
+      <td>${issue.module}</td>
+      <td><span class="tag tag-${issue.severity}">${issue.severity}</span></td>
+      <td>${typeLabels[issue.type] || issue.type}</td>
+      <td><span class="status-tag status-${issue.status}"><span class="status-dot"></span>${issueStatusLabel[issue.status]}</span></td>
+      <td style="font-size:.82rem;color:var(--gray-500)">${issue.createdAt}</td>
+      <td><button class="action-btn" onclick="openModal(${issue.id})">查看</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function openModal(id) {
+  const issue = issues.find(i => i.id === id);
+  if (!issue) return;
+  currentIssueId = id;
+  document.getElementById('modal-title').textContent = issue.summary;
+  document.getElementById('modal-status-select').value = issue.status;
+  const yesNo = v => v === 'yes' ? '是' : v === 'no' ? '否（只有我）' : '未確認';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="detail-item"><div class="detail-label">專案</div><div class="detail-value">${issue.project}</div></div>
+    <div class="detail-item"><div class="detail-label">模組</div><div class="detail-value">${issue.module}</div></div>
+    <div class="detail-item"><div class="detail-label">嚴重度</div><div class="detail-value"><span class="tag tag-${issue.severity}">${issue.severity}</span></div></div>
+    <div class="detail-item"><div class="detail-label">問題類型</div><div class="detail-value">${typeLabels[issue.type]||issue.type}</div></div>
+    <div class="detail-item"><div class="detail-label">狀態</div><div class="detail-value"><span class="status-tag status-${issue.status}">${issueStatusLabel[issue.status]}</span></div></div>
+<div class="detail-item full"><div class="detail-label">網頁／程式</div><div class="detail-value">${issue.page}</div></div>
+    <div class="detail-item"><div class="detail-label">發生時間</div><div class="detail-value">${issue.date} ${issue.time}</div></div>
+    <div class="detail-item"><div class="detail-label">以前發生過？</div><div class="detail-value">${yesNo(issue.happenedBefore)}</div></div>
+    <div class="detail-item full"><div class="detail-label">操作步驟</div><div class="detail-value" style="white-space:pre-wrap">${issue.action}</div></div>
+    <div class="detail-item full"><div class="detail-label">問題描述</div><div class="detail-value" style="white-space:pre-wrap">${issue.problem}</div></div>
+    <div class="detail-item"><div class="detail-label">OS</div><div class="detail-value">${issue.os}</div></div>
+    <div class="detail-item"><div class="detail-label">瀏覽器</div><div class="detail-value">${issue.browser}</div></div>
+${issue.repro ? `<div class="detail-item full"><div class="detail-label">重現步驟</div><div class="detail-value" style="white-space:pre-wrap">${issue.repro}</div></div>` : ''}
+    ${issue.rootCause ? `<div class="detail-item full" style="border-top:2px solid #bbf7d0;padding-top:12px;margin-top:4px"><div class="detail-label" style="color:var(--success)">🛠 問題原因</div><div class="detail-value" style="white-space:pre-wrap">${issue.rootCause}</div></div>` : ''}
+    ${issue.fix ? `<div class="detail-item full"><div class="detail-label" style="color:var(--success)">🛠 修復方式</div><div class="detail-value" style="white-space:pre-wrap">${issue.fix}</div></div>` : ''}
+    ${issue.unitTest ? `<div class="detail-item full"><div class="detail-label" style="color:var(--success)">🛠 Unit Test</div><div class="detail-value" style="font-family:monospace;font-size:.82rem;background:var(--gray-900);color:#a3e635;padding:12px;border-radius:6px;white-space:pre-wrap">${issue.unitTest}</div></div>` : ''}`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay') || e.currentTarget?.classList.contains('modal-close'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function changeStatus(val) {
+  const issue = issues.find(i => i.id === currentIssueId);
+  if (!issue) return;
+  issue.status = val;
+  localStorage.setItem('issues', JSON.stringify(issues));
+  renderList();
+  showToast(`狀態已更新為：${issueStatusLabel[val]}`, 'success');
+}
+
+let editingIssueId = null;
+
+function editIssue(id) {
+  const issue = issues.find(i => i.id === id);
+  if (!issue) return;
+  editingIssueId = id;
+  document.getElementById('f-project').value  = issue.project;
+  document.getElementById('f-module').value   = issue.module;
+  document.getElementById('f-summary').value  = issue.summary;
+  setSeverity(issue.severity);
+  const typeEl = document.querySelector(`input[name="issue-type"][value="${issue.type}"]`);
+  if (typeEl) typeEl.checked = true;
+  document.getElementById('f-page').value     = issue.page;
+  document.getElementById('f-date').value     = issue.date;
+  document.getElementById('f-time').value     = issue.time;
+  document.getElementById('f-action').value   = issue.action;
+  document.getElementById('f-problem').value  = issue.problem;
+  const hb = document.querySelector(`input[name="happened-before"][value="${issue.happenedBefore}"]`);
+  if (hb) hb.checked = true;
+  const oa = document.querySelector(`input[name="others-affected"][value="${issue.othersAffected}"]`);
+  if (oa) oa.checked = true;
+  document.getElementById('f-os').value       = issue.os;
+  document.getElementById('f-browser').value  = issue.browser;
+  document.getElementById('f-device').value   = issue.device   || '';
+  document.getElementById('f-ok-env').value   = issue.okEnv    || '';
+  document.getElementById('f-repro').value    = issue.repro    || '';
+  document.getElementById('f-testdata').value = issue.testdata || '';
+  document.querySelector('#tab-report .btn-success').textContent = '✏️ 更新問題單';
+  document.getElementById('cancel-edit-btn').style.display = '';
+  updateCompleteness();
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-report').classList.add('active');
+  document.querySelector('.tab-btn[onclick="switchTab(\'report\')"]').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function deleteIssue(id) {
+  if (!confirm('確定要刪除這筆問題單？')) return;
+  issues = issues.filter(i => i.id !== id);
+  localStorage.setItem('issues', JSON.stringify(issues));
+  renderList();
+  showToast('問題單已刪除', 'success');
+}
+
+function cancelEditIssue() {
+  const id = editingIssueId;
+  editingIssueId = null;
+  document.querySelector('#tab-report .btn-success').textContent = '✓ 提交問題單';
+  document.getElementById('cancel-edit-btn').style.display = 'none';
+  resetForm();
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-list').classList.add('active');
+  document.querySelector('.tab-btn[onclick="switchTab(\'list\')"]').classList.add('active');
+  renderList();
+  openModal(id);
+}
+
+function editIssueFromModal() {
+  const id = currentIssueId;
+  document.getElementById('modal-overlay').classList.remove('open');
+  editIssue(id);
+}
+
+function deleteIssueFromModal() {
+  if (!confirm('確定要刪除這筆問題單？')) return;
+  issues = issues.filter(i => i.id !== currentIssueId);
+  localStorage.setItem('issues', JSON.stringify(issues));
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderList();
+  showToast('問題單已刪除', 'success');
+}
+
+// ── DEV FILL ─────────────────────────────────────────────────────
+function toggleDevFill() {
+  const section = document.getElementById('modal-dev-section');
+  const btn = document.getElementById('modal-dev-btn');
+  const issue = issues.find(i => i.id === currentIssueId);
+  if (section.style.display === 'none') {
+    document.getElementById('modal-root-cause').value = issue.rootCause || '';
+    document.getElementById('modal-fix').value        = issue.fix       || '';
+    document.getElementById('modal-unittest').value   = issue.unitTest  || '';
+    document.getElementById('modal-verify').value     = issue.verify    || '';
+    section.style.display = 'block';
+    btn.textContent = '▲ 收起回填區';
+    section.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  } else {
+    section.style.display = 'none';
+    btn.textContent = '🛠 IT/工程師 回填';
+  }
+}
+
+function cancelDevFill() {
+  document.getElementById('modal-dev-section').style.display = 'none';
+  document.getElementById('modal-dev-btn').textContent = '🛠 IT/工程師 回填';
+}
+
+function saveDevFill() {
+  const issue = issues.find(i => i.id === currentIssueId);
+  if (!issue) return;
+  issue.rootCause = document.getElementById('modal-root-cause').value;
+  issue.fix       = document.getElementById('modal-fix').value;
+  issue.unitTest  = document.getElementById('modal-unittest').value;
+  issue.verify    = document.getElementById('modal-verify').value;
+  issue.status    = 'resolved';
+  localStorage.setItem('issues', JSON.stringify(issues));
+  renderList();
+  showToast('IT/工程師 回填已儲存，問題已標記為解決！', 'success');
+  openModal(currentIssueId);
+}
+
+// ════ ECR ════
+let ecrs = JSON.parse(localStorage.getItem('ecrs') || '[]');
+let currentEcrId = null;
+let currentPriority = 'normal';
+
+const ecrTypeLabels = { 'new-req':'需求新增', 'mod-req':'需求修改', spec:'規格調整', flow:'流程調整', ui:'UI/UX 調整', perf:'效能優化', sec:'安全性改善' };
+const ecrStatusNext  = { draft:'pending', pending:'reviewing', reviewing:'approved', approved:'impl', impl:'done', done:'draft', rejected:'pending' };
+const ecrStatusLabel = { draft:'草稿', pending:'待審核', reviewing:'審核中', approved:'已核准', rejected:'已退回', impl:'實施中', done:'已完成' };
+
+function setPriority(pri) {
+  currentPriority = pri;
+  document.querySelectorAll('.pri-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.pri-btn[data-pri="${pri}"]`).classList.add('active');
+}
+
+const ecrRequiredFields = [
+  { id:'e-project', label:'專案名稱' }, { id:'e-module', label:'影響模組' },
+  { id:'e-date', label:'申請日期' }, { id:'e-requester', label:'申請人' },
+  { id:'e-title', label:'變更標題' }, { id:'e-reason', label:'變更原因' },
+  { id:'e-asis', label:'現行作法' }, { id:'e-tobe', label:'變更後作法' },
+  { id:'e-impact-pages', label:'影響頁面' },
+];
+
+function updateEcrCompleteness() {
+  const filled = ecrRequiredFields.filter(f => document.getElementById(f.id)?.value.trim());
+  const hasType = document.querySelector('input[name="ecr-type"]:checked');
+  const total = ecrRequiredFields.length + 1;
+  const count = filled.length + (hasType ? 1 : 0);
+  const pct = Math.round(count / total * 100);
+  document.getElementById('ecr-progress-bar').style.width = pct + '%';
+  document.getElementById('ecr-completeness-text').textContent = pct + '%';
+  const missing = ecrRequiredFields.filter(f => !document.getElementById(f.id)?.value.trim()).map(f => f.label);
+  if (!hasType) missing.push('變更類型');
+  document.getElementById('ecr-missing-hint').textContent = missing.length ? '尚未填寫：' + missing.join('、') : '✓ 必填資訊已完整！';
+}
+
+document.querySelectorAll('#tab-ecr-form input, #tab-ecr-form select, #tab-ecr-form textarea').forEach(el => {
+  el.addEventListener('input', updateEcrCompleteness);
+  el.addEventListener('change', updateEcrCompleteness);
+});
+
+function submitEcr() {
+  const missing = ecrRequiredFields.filter(f => !document.getElementById(f.id).value.trim());
+  const hasType = document.querySelector('input[name="ecr-type"]:checked');
+  if (missing.length || !hasType) { showToast('請填寫所有必填欄位！', 'error'); updateEcrCompleteness(); return; }
+  const ecr = {
+    id: Date.now(), project: document.getElementById('e-project').value,
+    module: document.getElementById('e-module').value, date: document.getElementById('e-date').value,
+    requester: document.getElementById('e-requester').value,
+    relatedIssue: document.getElementById('e-related-issue').value,
+    version: document.getElementById('e-version').value,
+    title: document.getElementById('e-title').value, type: hasType.value,
+    priority: currentPriority, reason: document.getElementById('e-reason').value,
+    asis: document.getElementById('e-asis').value, tobe: document.getElementById('e-tobe').value,
+    impactPages: document.getElementById('e-impact-pages').value,
+    impactLevel: document.querySelector('input[name="ecr-impact"]:checked')?.value || 'medium',
+    deadline: document.getElementById('e-deadline').value,
+    dependency: document.getElementById('e-dependency').value, ac: document.getElementById('e-ac').value,
+    note: document.getElementById('e-note').value,
+    reviewResult: '', reviewComment: '', assignee: '', approvedDate: '',
+    status: 'pending', createdAt: new Date().toLocaleString('zh-TW'),
+  };
+  if (editingEcrId) {
+    const idx = ecrs.findIndex(e => e.id === editingEcrId);
+    if (idx !== -1) {
+      ecr.id           = editingEcrId;
+      ecr.reviewResult = ecrs[idx].reviewResult;
+      ecr.reviewComment= ecrs[idx].reviewComment;
+      ecr.assignee     = ecrs[idx].assignee;
+      ecr.approvedDate = ecrs[idx].approvedDate;
+      ecr.status       = ecrs[idx].status;
+      ecr.createdAt    = ecrs[idx].createdAt;
+      ecrs[idx] = ecr;
+    }
+    editingEcrId = null;
+    document.querySelector('#tab-ecr-form .btn-ecr').textContent = '🔄 提交 ECR';
+    showToast('ECR 已更新！', 'success');
+  } else {
+    ecrs.unshift(ecr);
+    showToast('ECR 提交成功！', 'success');
+  }
+  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  resetEcrForm();
+  renderEcrList();
+}
+
+function saveEcrDraft() { showToast('草稿已儲存（實際功能待整合後端）'); }
+
+function resetEcrForm() {
+  document.querySelectorAll('#tab-ecr-form input[type="text"],#tab-ecr-form input[type="date"],#tab-ecr-form input[type="number"],#tab-ecr-form select,#tab-ecr-form textarea').forEach(el => el.value = '');
+  document.querySelectorAll('#tab-ecr-form input[type="radio"]').forEach(el => el.checked = false);
+  document.getElementById('ecr-file-list').innerHTML = '';
+  setPriority('normal');
+  updateEcrCompleteness();
+}
+
+function renderEcrList() {
+  const q    = document.getElementById('ecr-search').value.toLowerCase();
+  const type = document.getElementById('ecr-filter-type').value;
+  const stat = document.getElementById('ecr-filter-status').value;
+  const filtered = ecrs.filter(e => (!q || e.title.toLowerCase().includes(q)) && (!type || e.type === type) && (!stat || e.status === stat));
+  document.getElementById('ecr-stat-total').textContent    = ecrs.length;
+  document.getElementById('ecr-stat-pending').textContent  = ecrs.filter(e => e.status === 'pending').length;
+  document.getElementById('ecr-stat-approved').textContent = ecrs.filter(e => e.status === 'approved').length;
+  document.getElementById('ecr-stat-impl').textContent     = ecrs.filter(e => e.status === 'impl').length;
+  const tbody = document.getElementById('ecr-tbody');
+  tbody.innerHTML = '';
+  document.getElementById('ecr-empty-state').style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(ecr => {
+    const priTagMap = { urgent:'tag-critical', high:'tag-high', normal:'tag-normal', low:'tag-low' };
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="color:var(--gray-400);font-size:.82rem">ECR-${String(ecrs.length - ecrs.indexOf(ecr)).padStart(3,'0')}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ecr.title}">${ecr.title}</td>
+      <td>${ecr.module}</td>
+      <td style="font-size:.82rem">${ecrTypeLabels[ecr.type]||ecr.type}</td>
+      <td><span class="tag ${priTagMap[ecr.priority]||''}">${ecr.priority}</span></td>
+      <td><span class="status-tag status-${ecr.status}"><span class="status-dot"></span>${ecrStatusLabel[ecr.status]}</span></td>
+      <td style="font-size:.82rem">${ecr.requester}</td>
+      <td style="font-size:.82rem;color:var(--gray-500)">${ecr.date}</td>
+      <td><button class="action-btn ecr-action" onclick="openEcrModal(${ecr.id})">查看</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function openEcrModal(id) {
+  const ecr = ecrs.find(e => e.id === id);
+  if (!ecr) return;
+  currentEcrId = id;
+  document.getElementById('ecr-modal-title').textContent = ecr.title;
+  document.getElementById('ecr-modal-status-select').value = ecr.status;
+  const priLabel = { urgent:'🔴 Urgent', high:'🟠 High', normal:'🔵 Normal', low:'🟢 Low' };
+  const impactLabel = { high:'高', medium:'中', low:'低' };
+  document.getElementById('ecr-modal-content').innerHTML = `
+    <div class="detail-item"><div class="detail-label">專案</div><div class="detail-value">${ecr.project}</div></div>
+    <div class="detail-item"><div class="detail-label">模組</div><div class="detail-value">${ecr.module}</div></div>
+    <div class="detail-item"><div class="detail-label">變更類型</div><div class="detail-value">${ecrTypeLabels[ecr.type]||ecr.type}</div></div>
+    <div class="detail-item"><div class="detail-label">優先級</div><div class="detail-value">${priLabel[ecr.priority]||ecr.priority}</div></div>
+    <div class="detail-item"><div class="detail-label">狀態</div><div class="detail-value"><span class="status-tag status-${ecr.status}">${ecrStatusLabel[ecr.status]}</span></div></div>
+    <div class="detail-item"><div class="detail-label">申請人</div><div class="detail-value">${ecr.requester}</div></div>
+    <div class="detail-item"><div class="detail-label">申請日期</div><div class="detail-value">${ecr.date}</div></div>
+    <div class="detail-item"><div class="detail-label">目標版本</div><div class="detail-value">${ecr.version||'—'}</div></div>
+    ${ecr.relatedIssue ? `<div class="detail-item"><div class="detail-label">相關問題單</div><div class="detail-value">${ecr.relatedIssue}</div></div>` : ''}
+    <div class="detail-item full"><div class="detail-label">變更原因</div><div class="detail-value" style="white-space:pre-wrap">${ecr.reason}</div></div>
+    <div class="detail-item full"><div class="detail-label">現行作法 (As-Is)</div><div class="detail-value" style="white-space:pre-wrap">${ecr.asis}</div></div>
+    <div class="detail-item full"><div class="detail-label">變更後作法 (To-Be)</div><div class="detail-value" style="white-space:pre-wrap">${ecr.tobe}</div></div>
+    <div class="detail-item full"><div class="detail-label">影響頁面</div><div class="detail-value" style="white-space:pre-wrap">${ecr.impactPages}</div></div>
+    <div class="detail-item"><div class="detail-label">影響程度</div><div class="detail-value">${impactLabel[ecr.impactLevel]||ecr.impactLevel}</div></div>
+${ecr.deadline ? `<div class="detail-item"><div class="detail-label">期望完成日</div><div class="detail-value">${ecr.deadline}</div></div>` : ''}
+    ${ecr.ac ? `<div class="detail-item full"><div class="detail-label">驗收標準 (AC)</div><div class="detail-value" style="white-space:pre-wrap">${ecr.ac}</div></div>` : ''}
+    ${ecr.dependency ? `<div class="detail-item full"><div class="detail-label">相依性</div><div class="detail-value">${ecr.dependency}</div></div>` : ''}
+    ${ecr.reviewResult ? `<div class="detail-item full" style="border-top:2px solid #c4b5fd;padding-top:12px;margin-top:4px"><div class="detail-label" style="color:var(--ecr)">📋 審核結果</div><div class="detail-value">${{approved:'✅ 核准',rejected:'❌ 退回',discuss:'💬 需討論'}[ecr.reviewResult]||ecr.reviewResult}</div></div>` : ''}
+    ${ecr.reviewComment ? `<div class="detail-item full"><div class="detail-label" style="color:var(--ecr)">審核意見</div><div class="detail-value" style="white-space:pre-wrap">${ecr.reviewComment}</div></div>` : ''}
+    ${ecr.assignee ? `<div class="detail-item"><div class="detail-label">指派給</div><div class="detail-value">${ecr.assignee}</div></div>` : ''}`;
+  document.getElementById('ecr-modal-overlay').classList.add('open');
+}
+
+function closeEcrModal(e) {
+  if (!e || e.target === document.getElementById('ecr-modal-overlay') || e.currentTarget?.classList.contains('modal-close'))
+    document.getElementById('ecr-modal-overlay').classList.remove('open');
+}
+
+// ── ECR REVIEW FILL ──────────────────────────────────────────────
+function toggleEcrReview() {
+  const section = document.getElementById('ecr-review-section');
+  const btn = document.getElementById('ecr-review-btn');
+  const ecr = ecrs.find(e => e.id === currentEcrId);
+  if (section.style.display === 'none') {
+    const rv = ecr.reviewResult || '';
+    document.querySelectorAll('input[name="modal-ecr-review"]').forEach(r => r.checked = r.value === rv);
+    document.getElementById('modal-review-comment').value = ecr.reviewComment || '';
+    document.getElementById('modal-assignee').value       = ecr.assignee      || '';
+    document.getElementById('modal-approved-date').value  = ecr.approvedDate  || '';
+    section.style.display = 'block';
+    btn.textContent = '▲ 收起審核區';
+    section.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  } else {
+    section.style.display = 'none';
+    btn.textContent = '📋 PM/SA 審核回覆';
+  }
+}
+
+function cancelEcrReview() {
+  document.getElementById('ecr-review-section').style.display = 'none';
+  document.getElementById('ecr-review-btn').textContent = '📋 PM/SA 審核回覆';
+}
+
+function saveEcrReview() {
+  const ecr = ecrs.find(e => e.id === currentEcrId);
+  if (!ecr) return;
+  const result = document.querySelector('input[name="modal-ecr-review"]:checked')?.value || '';
+  ecr.reviewResult  = result;
+  ecr.reviewComment = document.getElementById('modal-review-comment').value;
+  ecr.assignee      = document.getElementById('modal-assignee').value;
+  ecr.approvedDate  = document.getElementById('modal-approved-date').value;
+  if (result === 'approved') ecr.status = 'approved';
+  else if (result === 'rejected') ecr.status = 'rejected';
+  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  renderEcrList();
+  showToast('審核結果已儲存！', 'success');
+  openEcrModal(currentEcrId);
+}
+
+function changeEcrStatus(val) {
+  const ecr = ecrs.find(e => e.id === currentEcrId);
+  if (!ecr) return;
+  ecr.status = val;
+  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  renderEcrList();
+  showToast(`ECR 狀態已更新為：${ecrStatusLabel[val]}`, 'success');
+}
+
+let editingEcrId = null;
+
+function editEcr(id) {
+  const ecr = ecrs.find(e => e.id === id);
+  if (!ecr) return;
+  editingEcrId = id;
+  document.getElementById('e-project').value       = ecr.project;
+  document.getElementById('e-module').value        = ecr.module;
+  document.getElementById('e-date').value          = ecr.date;
+  document.getElementById('e-requester').value     = ecr.requester;
+  document.getElementById('e-related-issue').value = ecr.relatedIssue || '';
+  document.getElementById('e-version').value       = ecr.version      || '';
+  document.getElementById('e-title').value         = ecr.title;
+  document.getElementById('e-reason').value        = ecr.reason;
+  document.getElementById('e-asis').value          = ecr.asis;
+  document.getElementById('e-tobe').value          = ecr.tobe;
+  document.getElementById('e-impact-pages').value  = ecr.impactPages;
+  document.getElementById('e-deadline').value      = ecr.deadline     || '';
+  document.getElementById('e-dependency').value    = ecr.dependency   || '';
+  document.getElementById('e-ac').value            = ecr.ac           || '';
+  document.getElementById('e-note').value          = ecr.note         || '';
+  const typeEl = document.querySelector(`input[name="ecr-type"][value="${ecr.type}"]`);
+  if (typeEl) typeEl.checked = true;
+  const impEl = document.querySelector(`input[name="ecr-impact"][value="${ecr.impactLevel}"]`);
+  if (impEl) impEl.checked = true;
+  setPriority(ecr.priority || 'normal');
+  document.querySelector('#tab-ecr-form .btn-ecr').textContent = '✏️ 更新 ECR';
+  document.getElementById('cancel-ecr-edit-btn').style.display = '';
+  updateEcrCompleteness();
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-ecr-form').classList.add('active');
+  document.querySelector('.tab-btn[onclick="switchTab(\'ecr-form\')"]').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function deleteEcr(id) {
+  if (!confirm('確定要刪除這筆 ECR？')) return;
+  ecrs = ecrs.filter(e => e.id !== id);
+  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  renderEcrList();
+  showToast('ECR 已刪除', 'success');
+}
+
+function cancelEditEcr() {
+  const id = editingEcrId;
+  editingEcrId = null;
+  document.querySelector('#tab-ecr-form .btn-ecr').textContent = '🔄 提交 ECR';
+  document.getElementById('cancel-ecr-edit-btn').style.display = 'none';
+  resetEcrForm();
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-ecr-list').classList.add('active');
+  document.querySelector('.tab-btn[onclick="switchTab(\'ecr-list\')"]').classList.add('active');
+  renderEcrList();
+  openEcrModal(id);
+}
+
+function editEcrFromModal() {
+  const id = currentEcrId;
+  document.getElementById('ecr-modal-overlay').classList.remove('open');
+  editEcr(id);
+}
+
+function deleteEcrFromModal() {
+  if (!confirm('確定要刪除這筆 ECR？')) return;
+  ecrs = ecrs.filter(e => e.id !== currentEcrId);
+  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  document.getElementById('ecr-modal-overlay').classList.remove('open');
+  renderEcrList();
+  showToast('ECR 已刪除', 'success');
+}
+
+// ════ DEMO DATA ════
+if (issues.length === 0) {
+  issues = [
+    { id:1, project:'內部後台', module:'訂單管理', summary:'[訂單管理] 搜尋條件重置後仍保留上次查詢結果', severity:'high', type:'ui', page:'/order/list', date:'2025-03-10', time:'14:32', action:'1. 進入訂單管理\n2. 輸入條件查詢\n3. 點擊「重置」', problem:'【實際】資料未清空，仍顯示上次結果\n【預期】應顯示全部訂單', happenedBefore:'no', othersAffected:'yes', os:'Windows 11', browser:'Chrome 124', device:'', okEnv:'', files:[], repro:'任何帳號皆可重現', testdata:'', rootCause:'重置按鈕只清空輸入框，未重新呼叫 API', fix:'重置時同步觸發無條件查詢', unitTest:'', verify:'', status:'resolved', createdAt:'2025/03/10 14:35:00' },
+    { id:2, project:'店家後台', module:'訂單檢索', summary:'[訂單檢索] 日期範圍選擇器在 Safari 無法開啟', severity:'critical', type:'error', page:'/store/orders', date:'2025-03-12', time:'10:15', action:'1. 使用 Safari 登入店家後台\n2. 進入訂單檢索\n3. 點擊日期範圍欄位', problem:'【實際】日期選擇器無反應，console 顯示 TypeError\n【預期】應正常開啟日曆元件', happenedBefore:'unknown', othersAffected:'yes', os:'macOS Sonoma', browser:'Safari 17', device:'MacBook Pro', okEnv:'Chrome / Edge 正常', files:[], repro:'Safari 環境必現', testdata:'', rootCause:'', fix:'', unitTest:'', verify:'', status:'progress', createdAt:'2025/03/12 10:20:00' },
+    { id:3, project:'訂餐前台', module:'我的訂單', summary:'[我的訂單] 取消訂單後狀態未即時更新', severity:'medium', type:'data', page:'/orders/my', date:'2025-03-13', time:'16:00', action:'1. 登入前台\n2. 進入我的訂單\n3. 點擊取消某筆訂單', problem:'【實際】狀態仍顯示「處理中」，需重新整理才更新\n【預期】取消後應立即顯示「已取消」', happenedBefore:'no', othersAffected:'unknown', os:'iOS 17', browser:'Safari 17', device:'iPhone 15', okEnv:'', files:[], repro:'', testdata:'測試帳號：user01@test.com', rootCause:'', fix:'', unitTest:'', verify:'', status:'open', createdAt:'2025/03/13 16:05:00' },
+  ];
+  localStorage.setItem('issues', JSON.stringify(issues));
+}
+
+if (ecrs.length === 0) {
+  ecrs = [
+    { id:101, project:'內部後台', module:'折價券管理', date:'2025-03-11', requester:'PM-Alice', relatedIssue:'', version:'v2.5.0', title:'[折價券管理] 新增批次停用折價券功能', type:'new-req', priority:'high', reason:'活動結束後需逐一停用折價券，作業耗時且易有遺漏', asis:'只能單筆進入編輯頁停用', tobe:'清單頁新增多選 checkbox，工具列提供「批次停用」按鈕', impactPages:'/coupon/list\n/coupon/api/batch-disable', impactLevel:'medium', deadline:'2025-04-15', dependency:'', ac:'✓ 可多選折價券\n✓ 批次停用後狀態即時更新\n✓ 操作結果以 toast 顯示', note:'', reviewResult:'approved', reviewComment:'方向可行，請確認權限控管', assignee:'IT-Bob', approvedDate:'2025-03-15', status:'impl', createdAt:'2025/03/11 09:00:00' },
+    { id:102, project:'店家後台', module:'餐廳管理', date:'2025-03-14', requester:'SA-Carol', relatedIssue:'#002', version:'v3.1.0', title:'[餐廳管理] 營業時間設定支援分時段多組設定', type:'mod-req', priority:'normal', reason:'部分店家有午休或不同時段不同菜單需求，現行單一時段無法滿足', asis:'每間餐廳只能設定一組開始/結束時間', tobe:'改為可新增多組時段（最多5組），每組可獨立啟停', impactPages:'/restaurant/setting\n/restaurant/api/hours', impactLevel:'medium', deadline:'2025-04-30', dependency:'', ac:'✓ 可新增最多5組時段\n✓ 各時段可獨立啟用/停用\n✓ 前台依時段判斷是否開放訂餐', note:'', reviewResult:'discuss', reviewComment:'需確認前台訂餐邏輯如何對應', assignee:'', approvedDate:'', status:'reviewing', createdAt:'2025/03/14 14:00:00' },
+    { id:103, project:'訂餐前台', module:'首頁', date:'2025-03-15', requester:'PM-Alice', relatedIssue:'', version:'', title:'[首頁] 新增「最近訂過」快速再訂區塊', type:'ui', priority:'low', reason:'用戶回饋希望能快速重複上次訂單，減少重新選餐時間', asis:'首頁無個人化推薦，需自行瀏覽餐廳', tobe:'登入後首頁顯示最近3筆訂單的餐廳，一鍵進入點餐', impactPages:'/home\n/api/user/recent-orders', impactLevel:'low', deadline:'', dependency:'', ac:'✓ 僅登入用戶顯示\n✓ 顯示最多3筆最近餐廳\n✓ 點擊直接進入該餐廳點餐頁', note:'', reviewResult:'', reviewComment:'', assignee:'', approvedDate:'', status:'pending', createdAt:'2025/03/15 10:30:00' },
+  ];
+  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+}
+
+// init
+updateCompleteness();
+updateEcrCompleteness();
+</script>
+</body>
+</html>
