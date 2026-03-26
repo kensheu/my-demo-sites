@@ -11,7 +11,7 @@ https://kensheu.github.io/my-demo-sites/
 - [首頁公告 demo](https://kensheu.github.io/my-demo-sites/announcement.html)
 - [客訴管理 demo](https://kensheu.github.io/my-demo-sites/complaint.html)
 - [問題單與 ECR 請求 demo](https://kensheu.github.io/my-demo-sites/issue-and-ecr.html)
-- [餐點價格異動紀錄 demo](https://kensheu.github.io/my-demo-sites/price-change-log.html)
+- [採購部首頁 demo](https://kensheu.github.io/my-demo-sites/purchasing-home.html)（包含兩個子頁面：[店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)、[餐點調價歷史紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)）
 
 ---
 
