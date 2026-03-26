@@ -375,7 +375,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
       <div class="legend-row">
         <div class="lg-item"><span class="badge b-new">新增</span>本月新加入的品項</div>
         <div class="lg-item"><span class="badge b-chg">異動</span>價格、品名或狀態有變更</div>
-        <div class="lg-item"><span class="badge b-out">菜單無</span>已從菜單移除</div>
+        <div class="lg-item"><span class="badge b-out">已下架</span>已從菜單移除</div>
         <div class="lg-item"><span class="badge b-ok">無異動</span>與上月相同</div>
       </div>
     </div>
@@ -553,10 +553,10 @@ const snapData = {
        note:'改名（原：蔥爆炒牛肉飯）'},
       {id:'B012', n:'古早味炸排骨飯',     c:96,  s:120, p:[120,125], st:'new'},
       {id:'B013', n:'無敵香酥大雞腿飯',   c:96,  s:120, p:[120,125], st:'new'},
-      {id:'B003', n:'酸辣涼拌雞飯',       c:96,  s:120, p:[120,125], st:'out', note:'菜單無'},
-      {id:'B005', n:'花雕酒香雞飯',       c:96,  s:120, p:[120,125], st:'out', note:'菜單無'},
-      {id:'B007', n:'泰式打拋豬飯',       c:96,  s:120, p:[120,125], st:'out', note:'菜單無'},
-      {id:'B010', n:'蒜泥灼白肉飯',       c:96,  s:120, p:[120,125], st:'out', note:'菜單無'},
+      {id:'B003', n:'酸辣涼拌雞飯',       c:96,  s:120, p:[120,125], st:'out', note:'已下架'},
+      {id:'B005', n:'花雕酒香雞飯',       c:96,  s:120, p:[120,125], st:'out', note:'已下架'},
+      {id:'B007', n:'泰式打拋豬飯',       c:96,  s:120, p:[120,125], st:'out', note:'已下架'},
+      {id:'B010', n:'蒜泥灼白肉飯',       c:96,  s:120, p:[120,125], st:'out', note:'已下架'},
     ],
     3: [
       {id:'B001', n:'蔥油雞飯',         c:96,  s:120, p:[120,125], st:'ok'},
@@ -612,13 +612,13 @@ const tlData = {
     {id:'B013', date:'2026/3/1',  time:'09:00', n:'無敵香酥大雞腿飯',   type:'status',
      desc:'新增品項並上架', before:'—', after:'上架', by:'採購人員', src:'manual'},
     {id:'B003', date:'2026/3/1',  time:'09:00', n:'酸辣涼拌雞飯',       type:'status',
-     desc:'菜單無，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
+     desc:'已下架，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
     {id:'B005', date:'2026/3/1',  time:'09:00', n:'花雕酒香雞飯',       type:'status',
-     desc:'菜單無，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
+     desc:'已下架，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
     {id:'B007', date:'2026/3/1',  time:'09:00', n:'泰式打拋豬飯',       type:'status',
-     desc:'菜單無，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
+     desc:'已下架，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
     {id:'B010', date:'2026/3/1',  time:'09:00', n:'蒜泥灼白肉飯',       type:'status',
-     desc:'菜單無，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
+     desc:'已下架，標記移除', before:'上架', after:'移除', by:'採購人員', src:'manual'},
     {id:'—',    date:'2026/4/1',  time:'00:05', n:'（系統排程）',         type:'sys',
      desc:'成本依變更日（4/1）自動套用', before:'—', after:'全品項成本更新', by:'SYSTEM', src:'system'},
   ],
@@ -627,7 +627,7 @@ const tlData = {
 /* ═══════════════════════════════════════════════
    Render：月份快照
 ═══════════════════════════════════════════════ */
-const BADGE = { new:'b-new 新增', chg:'b-chg 異動', out:'b-out 菜單無', ok:'b-ok 無異動' };
+const BADGE = { new:'b-new 新增', chg:'b-chg 異動', out:'b-out 已下架', ok:'b-ok 無異動' };
 
 // 只在換餐廳時呼叫，固定欄寬避免換月位移
 function renderSnapHead() {
@@ -658,7 +658,7 @@ function renderSnap() {
     `<span class="s-item">共 <strong>${rows.length}</strong> 筆</span>` +
     (cnt.new ? `<span class="s-item"><strong style="color:var(--green)">${cnt.new}</strong> 新增</span>` : '') +
     (cnt.chg ? `<span class="s-item"><strong style="color:var(--orange)">${cnt.chg}</strong> 異動</span>` : '') +
-    (cnt.out ? `<span class="s-item"><strong style="color:var(--red)">${cnt.out}</strong> 菜單無</span>` : '') +
+    (cnt.out ? `<span class="s-item"><strong style="color:var(--red)">${cnt.out}</strong> 已下架</span>` : '') +
     `<span class="s-item"><strong>${cnt.ok}</strong> 無異動</span>`;
 
   // tbody

@@ -1,6 +1,6 @@
 # My Demo Sites
 
-展示用測試頁面，包含三個功能模組。
+展示用測試頁面，包含四個功能模組。
 
 ## 線上網址
 
@@ -11,6 +11,7 @@ https://kensheu.github.io/my-demo-sites/
 - [首頁公告 demo](https://kensheu.github.io/my-demo-sites/announcement.html)
 - [客訴管理 demo](https://kensheu.github.io/my-demo-sites/complaint.html)
 - [問題單與 ECR 請求 demo](https://kensheu.github.io/my-demo-sites/issue-and-ecr.html)
+- [餐點價格異動紀錄 demo](https://kensheu.github.io/my-demo-sites/price-change-log.html)
 
 ---
 
@@ -66,6 +67,8 @@ https://kensheu.github.io/my-demo-sites/
     - 問題單狀態更新或回填後，填寫人需收到通知
     - 新 ECR 提交後，主管需收到審核通知
     - ECR 審核結果出爐後，填寫人需收到通知
+- 範本功能（可行的話）：
+    - 問題單與 ECR 皆支援儲存為範本，下次可快速套用常用欄位
 
 - 問題單 — 填寫區：
     - 必填欄位：
@@ -107,3 +110,21 @@ https://kensheu.github.io/my-demo-sites/
     - ECR 狀態：草稿、待審核、審核中、已核准、已退回、實施中、已完成
     - 編輯、刪除 ECR
     - 主管回填審核結果（核准 / 退回 / 需討論）與審核意見
+
+---
+
+### 餐點價格異動紀錄
+
+- 共用操作：
+    - 店家切換
+    - 月份切換（上 / 下一月）
+- 價格快照頁：
+    - 顯示當月全部品項完整價格清單
+    - 欄位：料號、餐點名稱、成本價、店內價、終端售價、異動標記
+    - 異動標記：新增、異動、已下架、無異動
+    - 統計數量（共幾筆、各標記數量）
+- 異動事件紀錄頁（流水帳）：
+    - 依日期分組呈現每筆異動，顯示異動前後的值
+    - 每筆紀錄包含：料號、餐點名稱、異動描述、日期、時間、操作人員、來源（人工操作 / 系統自動）
+    - 依異動類型篩選（成本 / 售價異動、品名異動、上下架 / 新增）
+    - 搜尋品名或料號
