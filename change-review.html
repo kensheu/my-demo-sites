@@ -413,7 +413,7 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 
     <div class="toolbar">
       <div class="pill on" onclick="filterType(this,'')">全部</div>
-      <div class="pill" onclick="filterType(this,'price')">調價</div>
+      <div class="pill" onclick="filterType(this,'price')">成本調整</div>
       <div class="pill" onclick="filterType(this,'name')">改名</div>
       <div class="pill" onclick="filterType(this,'new')">新增品項</div>
       <div class="pill" onclick="filterType(this,'out')">下架</div>
@@ -470,15 +470,12 @@ let pendingData = [
     rest: 'OO 雞飯專門店',
     date: '2026/3/24',
     type: 'price',
-    typeLabel: '調價',
+    typeLabel: '成本調整',
     itemId: 'B009',
     itemName: '紹興醉雞飯',
     evidence: '菜單照片_OO雞飯_2026-03-24.jpg',
     evidenceSize: '1.2 MB',
     changes: [
-      { field: '店內價', before: '120', after: '150' },
-      { field: '終端售價（聯發科）', before: '120', after: '150' },
-      { field: '終端售價（聯寶）', before: '125', after: '155' },
       { field: '成本價', before: '96', after: '120', note: '依抽成 80% 自動計算' },
     ],
     effDate: '2026-04-01',
@@ -495,8 +492,6 @@ let pendingData = [
     evidenceSize: '0.8 MB',
     changes: [
       { field: '餐點名稱', before: '起司蛋餅', after: '起司雙層蛋餅' },
-      { field: '店內價', before: '50', after: '50', unchanged: true },
-      { field: '終端售價', before: '50', after: '50', unchanged: true },
     ],
     effDate: '2026-04-01',
   },
@@ -512,8 +507,6 @@ let pendingData = [
     evidenceSize: '0.8 MB',
     changes: [
       { field: '餐點名稱', before: '—', after: '冰美式（中）' },
-      { field: '店內價', before: '—', after: '35' },
-      { field: '終端售價', before: '—', after: '35' },
       { field: '成本價', before: '—', after: '28', note: '依抽成 80% 自動計算' },
     ],
     effDate: '2026-03-27',
@@ -538,7 +531,7 @@ const doneData = [
     rest: 'XX 早餐店',
     date: '2026/3/10',
     type: 'price',
-    typeLabel: '調價',
+    typeLabel: '成本調整',
     itemName: '原味蛋餅 售價調整',
     status: 'rejected',
     by: '採購人員1',
