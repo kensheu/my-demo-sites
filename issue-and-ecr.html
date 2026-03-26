@@ -251,6 +251,16 @@
     .toast.show { transform:translateY(0); opacity:1; }
     .toast.success { background:var(--success); }
     .toast.error   { background:var(--danger); }
+
+    /* ECR TYPE MANAGER MODAL */
+    .ecr-cat-row { display:flex; align-items:center; gap:8px; padding:7px 10px; border:1px solid var(--gray-200); border-radius:6px; margin-bottom:6px; background:#fff; cursor:default; transition:border-color .15s, background .15s; }
+    .ecr-cat-row.drag-over { border-color:var(--ecr); background:var(--ecr-light); }
+    .ecr-cat-row.dragging  { opacity:.4; }
+    .ecr-cat-drag { color:var(--gray-400); font-size:14px; cursor:grab; padding:0 2px; flex-shrink:0; }
+    .ecr-cat-input { flex:1; border:1px solid transparent; border-radius:4px; padding:4px 8px; font-size:.88rem; background:transparent; color:var(--gray-800); font-family:inherit; }
+    .ecr-cat-input:focus { outline:none; border-color:var(--ecr); background:#fff; box-shadow:0 0 0 3px rgba(124,58,237,.12); }
+    .ecr-cat-del { border:none; background:none; cursor:pointer; color:var(--gray-400); font-size:1rem; line-height:1; padding:2px 4px; border-radius:4px; flex-shrink:0; }
+    .ecr-cat-del:hover { color:var(--danger); background:#fee2e2; }
   </style>
 </head>
 <body>
@@ -648,16 +658,11 @@
     <div class="card-body">
       <div class="form-grid">
         <div class="form-group">
-          <label>變更類型 <span class="req">*</span></label>
-          <div class="check-group">
-            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="new-req" /> 需求新增</label>
-            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="mod-req" /> 需求修改</label>
-            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="spec" /> 規格調整</label>
-            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="flow" /> 流程調整</label>
-            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="ui" /> UI/UX 調整</label>
-            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="perf" /> 效能優化</label>
-            <label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="sec" /> 安全性改善</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label style="margin-bottom:0">變更類型 <span class="req">*</span></label>
+            <button type="button" class="btn btn-ghost" style="padding:4px 10px;font-size:.8rem;border:1px solid var(--gray-300)" onclick="openEcrCatModal()">⚙ 管理類型</button>
           </div>
+          <div class="check-group" id="ecr-type-radio-group"></div>
         </div>
         <div class="form-group">
           <label>優先級 <span class="req">*</span></label>
@@ -773,8 +778,6 @@
     <input type="text" id="ecr-search" placeholder="🔍 搜尋 ECR 標題..." oninput="renderEcrList()" />
     <select id="ecr-filter-type" onchange="renderEcrList()">
       <option value="">全部類型</option>
-      <option value="new-req">需求新增</option><option value="mod-req">需求修改</option><option value="spec">規格調整</option>
-      <option value="flow">流程調整</option><option value="ui">UI/UX 調整</option><option value="perf">效能優化</option><option value="sec">安全性改善</option>
     </select>
     <select id="ecr-filter-status" onchange="renderEcrList()">
       <option value="">全部狀態</option>
@@ -905,6 +908,28 @@
         <option value="impl">實施中</option>
         <option value="done">已完成</option>
       </select>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ECR 類型管理 MODAL ══════════════ -->
+<div class="modal-overlay" id="ecr-cat-modal" onclick="closeEcrCatModal(event)">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header ecr-header">
+      <h3>⚙ 管理 ECR 變更類型</h3>
+      <button class="modal-close" onclick="closeEcrCatModal()">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px">
+      <p style="font-size:.82rem;color:var(--gray-500);margin-bottom:14px">拖移 ⠿ 調整順序；點擊名稱可改名；按 ✕ 刪除（有 ECR 使用中時無法刪除）。</p>
+      <div id="ecr-cat-list"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" id="new-ecr-type-input" placeholder="輸入新類型名稱…" style="flex:1" onkeydown="if(event.key==='Enter')addEcrType()" class="ecr-focus" />
+        <button type="button" class="btn btn-outline-ecr" onclick="addEcrType()" style="white-space:nowrap">新增</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost" onclick="closeEcrCatModal()">取消</button>
+      <button type="button" class="btn btn-ecr" onclick="saveEcrTypes()">儲存並關閉</button>
     </div>
   </div>
 </div>
@@ -1235,7 +1260,146 @@ let ecrs = JSON.parse(localStorage.getItem('ecrs') || '[]');
 let currentEcrId = null;
 let currentPriority = 'normal';
 
-const ecrTypeLabels = { 'new-req':'需求新增', 'mod-req':'需求修改', spec:'規格調整', flow:'流程調整', ui:'UI/UX 調整', perf:'效能優化', sec:'安全性改善' };
+// ── ECR 類型動態管理 ──────────────────────────────────────────────
+let ecrTypes = JSON.parse(localStorage.getItem('ecrTypes') || 'null') ||
+  ['需求新增', '需求修改', '規格調整', '流程調整', 'UI/UX 調整', '效能優化', '安全性改善'];
+
+// 動態產生 ecrTypeLabels（用類型名稱本身當 key，同時維持舊資料相容）
+function buildEcrTypeLabels() {
+  const map = {};
+  ecrTypes.forEach(t => { map[t] = t; });
+  // 舊資料相容：把舊 key 對應到最接近的新類型名稱
+  const legacyMap = { 'new-req':'需求新增', 'mod-req':'需求修改', spec:'規格調整', flow:'流程調整', ui:'UI/UX 調整', perf:'效能優化', sec:'安全性改善' };
+  Object.assign(map, legacyMap);
+  return map;
+}
+let ecrTypeLabels = buildEcrTypeLabels();
+
+// 填充所有使用 ECR 類型的下拉 / radio
+function populateEcrTypeSelects() {
+  ecrTypeLabels = buildEcrTypeLabels();
+
+  // 1. 新增 ECR 表單：radio group
+  const radioGroup = document.getElementById('ecr-type-radio-group');
+  if (radioGroup) {
+    const checkedVal = document.querySelector('input[name="ecr-type"]:checked')?.value || '';
+    radioGroup.innerHTML = ecrTypes.map(t =>
+      `<label class="check-item ecr-check-item"><input type="radio" name="ecr-type" value="${t}"${t === checkedVal ? ' checked' : ''} /> ${t}</label>`
+    ).join('');
+    // 重新繫結 completeness 監聽
+    radioGroup.querySelectorAll('input').forEach(el => {
+      el.addEventListener('change', updateEcrCompleteness);
+    });
+  }
+
+  // 2. ECR 清單篩選 select
+  const filterSel = document.getElementById('ecr-filter-type');
+  if (filterSel) {
+    const prev = filterSel.value;
+    filterSel.innerHTML = '<option value="">全部類型</option>' +
+      ecrTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+    if (ecrTypes.includes(prev)) filterSel.value = prev;
+  }
+}
+
+// ── ECR 類型管理 Modal ────────────────────────────────────────────
+let ecrTypeDragSrcIdx = null;
+
+function openEcrCatModal() {
+  renderEcrCatList();
+  document.getElementById('ecr-cat-modal').classList.add('open');
+}
+
+function closeEcrCatModal(e) {
+  if (!e || e.target === document.getElementById('ecr-cat-modal') || e.currentTarget?.classList.contains('modal-close'))
+    document.getElementById('ecr-cat-modal').classList.remove('open');
+}
+
+function renderEcrCatList() {
+  const el = document.getElementById('ecr-cat-list');
+  if (!ecrTypes.length) {
+    el.innerHTML = '<div style="font-size:.88rem;color:var(--gray-400);padding:10px 0">尚無類型，請於下方新增。</div>';
+    return;
+  }
+  el.innerHTML = ecrTypes.map((t, i) => `
+    <div class="ecr-cat-row" draggable="true" data-idx="${i}"
+      ondragstart="ecrTypeDragStart(event,${i})"
+      ondragover="ecrTypeDragOver(event,${i})"
+      ondragleave="ecrTypeDragLeave(event)"
+      ondrop="ecrTypeDrop(event,${i})"
+      ondragend="ecrTypeDragEnd(event)">
+      <span class="ecr-cat-drag">⠿</span>
+      <input class="ecr-cat-input" type="text" id="ecr-type-input-${i}" value="${t}" />
+      <button class="ecr-cat-del" title="刪除" onclick="removeEcrType(${i})">✕</button>
+    </div>`).join('');
+}
+
+function ecrTypeDragStart(e, idx) {
+  ecrTypeDragSrcIdx = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function ecrTypeDragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.ecr-cat-row').forEach(r => r.classList.remove('drag-over'));
+  if (idx !== ecrTypeDragSrcIdx) e.currentTarget.classList.add('drag-over');
+}
+function ecrTypeDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function ecrTypeDrop(e, idx) {
+  e.preventDefault();
+  document.querySelectorAll('.ecr-cat-row').forEach(r => r.classList.remove('drag-over', 'dragging'));
+  if (ecrTypeDragSrcIdx === null || ecrTypeDragSrcIdx === idx) return;
+  const moved = ecrTypes.splice(ecrTypeDragSrcIdx, 1)[0];
+  ecrTypes.splice(idx, 0, moved);
+  ecrTypeDragSrcIdx = null;
+  renderEcrCatList();
+}
+function ecrTypeDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.ecr-cat-row').forEach(r => r.classList.remove('drag-over'));
+  ecrTypeDragSrcIdx = null;
+}
+
+function removeEcrType(i) {
+  const typeName = ecrTypes[i];
+  const usedCount = ecrs.filter(e => e.type === typeName).length;
+  if (usedCount > 0) {
+    alert(`「${typeName}」目前有 ${usedCount} 筆 ECR 使用中，無法刪除。\n請先修改相關 ECR 的類型。`);
+    return;
+  }
+  ecrTypes.splice(i, 1);
+  renderEcrCatList();
+}
+
+function addEcrType() {
+  const input = document.getElementById('new-ecr-type-input');
+  const val = input.value.trim();
+  if (!val) return;
+  if (ecrTypes.includes(val)) { alert(`「${val}」類型已存在`); return; }
+  ecrTypes.push(val);
+  input.value = '';
+  renderEcrCatList();
+}
+
+function saveEcrTypes() {
+  // 讀取所有輸入框，更新類型名稱並同步 ECR 資料
+  document.querySelectorAll('#ecr-cat-list .ecr-cat-row').forEach((row, i) => {
+    const input = row.querySelector('input');
+    const newName = input ? input.value.trim() : '';
+    if (newName && ecrTypes[i] !== undefined && newName !== ecrTypes[i]) {
+      const oldName = ecrTypes[i];
+      ecrs.forEach(e => { if (e.type === oldName) e.type = newName; });
+      ecrTypes[i] = newName;
+    }
+  });
+  localStorage.setItem('ecrTypes', JSON.stringify(ecrTypes));
+  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  document.getElementById('ecr-cat-modal').classList.remove('open');
+  populateEcrTypeSelects();
+  renderEcrList();
+  showToast('ECR 變更類型已儲存！', 'success');
+}
 const ecrStatusNext  = { draft:'pending', pending:'reviewing', reviewing:'approved', approved:'impl', impl:'done', done:'draft', rejected:'pending' };
 const ecrStatusLabel = { draft:'草稿', pending:'待審核', reviewing:'審核中', approved:'已核准', rejected:'已退回', impl:'實施中', done:'已完成' };
 
@@ -1462,7 +1626,9 @@ function editEcr(id) {
   document.getElementById('e-dependency').value    = ecr.dependency   || '';
   document.getElementById('e-ac').value            = ecr.ac           || '';
   document.getElementById('e-note').value          = ecr.note         || '';
-  const typeEl = document.querySelector(`input[name="ecr-type"][value="${ecr.type}"]`);
+  // 支援舊資料的 key（如 'new-req'）透過 ecrTypeLabels 轉換
+  const resolvedType = ecrTypeLabels[ecr.type] || ecr.type;
+  const typeEl = document.querySelector(`input[name="ecr-type"][value="${resolvedType}"]`);
   if (typeEl) typeEl.checked = true;
   const impEl = document.querySelector(`input[name="ecr-impact"][value="${ecr.impactLevel}"]`);
   if (impEl) impEl.checked = true;
@@ -1535,6 +1701,7 @@ if (ecrs.length === 0) {
 
 // init
 updateCompleteness();
+populateEcrTypeSelects();
 updateEcrCompleteness();
 </script>
 </body>

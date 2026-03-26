@@ -229,6 +229,47 @@
 
     .action-btns { display: flex; gap: 6px; }
 
+    /* ───── 分類管理 Modal ───── */
+    .ann-cat-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 2500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .ann-cat-modal-overlay.open { opacity: 1; pointer-events: all; }
+    .ann-cat-modal-overlay .modal {
+      max-width: 400px;
+    }
+    .ann-cat-modal-overlay.open .modal { transform: translateY(0); }
+
+    .cat-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border: 1px solid var(--gray-200);
+      border-radius: 6px; margin-bottom: 6px;
+      background: #fff; cursor: default; user-select: none;
+      transition: background .1s, border-color .1s;
+    }
+    .cat-row.drag-over { border-color: var(--primary); background: var(--primary-light); }
+    .cat-row.dragging  { opacity: .4; }
+    .cat-drag-handle { color: var(--gray-400); font-size: 14px; cursor: grab; padding: 0 2px; }
+    .cat-row-input {
+      flex: 1; border: none !important; outline: none !important;
+      background: transparent !important; font-size: 13px; color: var(--gray-800);
+      padding: 0 !important; box-shadow: none !important;
+    }
+    .cat-row-input:focus { border-bottom: 1px solid var(--primary) !important; }
+    .cat-del-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--gray-400); font-size: 15px; padding: 0 2px; line-height: 1;
+    }
+    .cat-del-btn:hover { color: var(--danger); }
+
     /* ───── 新增/編輯 Modal ───── */
     .modal-overlay {
       position: fixed; inset: 0;
@@ -891,11 +932,9 @@
             <button class="btn btn-outline btn-sm" onclick="adminMarkAllRead()">全部標為已讀</button>
           </div>
         </div>
-        <div class="tabs">
+        <div class="tabs" id="admin-notify-tabs">
           <button class="tab-btn active" onclick="switchAdminTab(this,'all')">全部</button>
           <button class="tab-btn" onclick="switchAdminTab(this,'unread')">未讀</button>
-          <button class="tab-btn" onclick="switchAdminTab(this,'update')">更新通知</button>
-          <button class="tab-btn" onclick="switchAdminTab(this,'maint')">維護公告</button>
         </div>
         <div class="announce-notifications" id="admin-notify-list"></div>
       </div>
@@ -907,7 +946,10 @@
           <div class="page-title">公告管理</div>
           <div class="page-subtitle">管理並排程所有公告內容</div>
         </div>
-        <button class="btn btn-primary" onclick="openAdminModal()">＋ 新增公告</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" onclick="openCatManager()">⚙ 管理分類</button>
+          <button class="btn btn-primary" onclick="openAdminModal()">＋ 新增公告</button>
+        </div>
       </div>
 
       <!-- 公告列表 -->
@@ -920,9 +962,6 @@
           <input type="text" id="mf-search" placeholder="🔍 搜尋公告標題…" oninput="renderManageTable()" />
           <select id="mf-cat" onchange="renderManageTable()">
             <option value="">全部分類</option>
-            <option value="update">更新通知</option>
-            <option value="maint">維護公告</option>
-            <option value="event">活動訊息</option>
           </select>
           <select id="mf-status" onchange="renderManageTable()">
             <option value="">全部狀態</option>
@@ -1094,12 +1133,9 @@
     </div>
     <!-- 公告頁 -->
     <div id="ann-panel" style="min-height:0">
-      <div class="ann-modal-tabs">
+      <div class="ann-modal-tabs" id="ann-modal-tabs">
         <button class="tab-btn active" onclick="switchAnnTab(this,'all')">全部</button>
         <button class="tab-btn" onclick="switchAnnTab(this,'unread')">未讀</button>
-        <button class="tab-btn" onclick="switchAnnTab(this,'update')">更新通知</button>
-        <button class="tab-btn" onclick="switchAnnTab(this,'maintenance')">維護公告</button>
-        <button class="tab-btn" onclick="switchAnnTab(this,'event')">活動訊息</button>
       </div>
       <div class="ann-modal-body" id="ann-modal-list"></div>
     </div>
@@ -1128,9 +1164,6 @@
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label">公告分類 <span class="required">*</span></label>
           <select class="form-control" id="modal-input-category">
-            <option value="update">更新通知</option>
-            <option value="maintenance">維護公告</option>
-            <option value="event">活動訊息</option>
           </select>
         </div>
         <div class="form-group" style="margin-bottom:0">
@@ -1225,13 +1258,54 @@
   </div>
 </div>
 
+<!-- ════════════════════════════════════
+     分類管理 Modal
+════════════════════════════════════ -->
+<div class="ann-cat-modal-overlay" id="cat-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>管理分類</h3>
+      <button class="close-btn" onclick="closeCatModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--gray-500);margin-bottom:14px">拖移 <span style="font-size:14px">⠿</span> 調整順序；點擊名稱可改名；按 ✕ 刪除（需先移走公告）。</p>
+      <div id="ann-cat-list"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" class="form-control" id="new-cat-input" placeholder="輸入新分類名稱…" style="flex:1" onkeydown="if(event.key==='Enter')addAnnCat()">
+        <button class="btn btn-primary" onclick="addAnnCat()">新增</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeCatModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveAnnCats()">儲存並關閉</button>
+    </div>
+  </div>
+</div>
+
 <script>
+  // ─── 分類資料（動態管理） ───
+  let annCats = ['更新通知', '維護公告', '活動訊息'];
+
+  // 依分類索引取得固定 CSS class（第 0 → update, 1 → maintenance, 2 → event，其餘 → ann-extra）
+  const CAT_CSS = ['update', 'maintenance', 'event'];
+  function catClass(catName) {
+    const idx = annCats.indexOf(catName);
+    return CAT_CSS[idx] !== undefined ? CAT_CSS[idx] : 'update';
+  }
+
+  // 分類對應圖示（依索引）
+  const CAT_ICONS = ['🔄', '🔧', '🎉'];
+  function catIcon(catName) {
+    const idx = annCats.indexOf(catName);
+    return CAT_ICONS[idx] !== undefined ? CAT_ICONS[idx] : '📢';
+  }
+
   // ─── 公告管理資料 ───
   const manageAnnouncements = [
-    { id: 0, title: '系統版本 v3.5 更新說明', desc: '新增多項功能優化...', category: 'update', categoryLabel: '更新通知', locations: ['admin', 'fe'], schedule: '2026/03/24 09:00', readRate: 72, status: 'active' },
-    { id: 1, title: '3/28 凌晨系統維護公告', desc: '預計 01:00–04:00 暫停服務...', category: 'maint', categoryLabel: '維護公告', locations: ['fe'], schedule: '2026/03/28 00:00', readRate: 38, status: 'scheduled' },
-    { id: 2, title: '清明節週末訂餐優惠活動', desc: '4/4–4/6 全館享九折優惠...', category: 'event', categoryLabel: '活動訊息', locations: ['fe'], schedule: '2026/04/04 00:00', readRate: null, status: 'scheduled' },
-    { id: 3, title: '春節假期訂餐暫停公告', desc: '1/27–2/4 暫停接單服務', category: 'maint', categoryLabel: '維護公告', locations: ['admin', 'fe'], schedule: '2026/01/27', readRate: 95, status: 'expired' },
+    { id: 0, title: '系統版本 v3.5 更新說明', desc: '新增多項功能優化...', category: '更新通知', locations: ['admin', 'fe'], schedule: '2026/03/24 09:00', readRate: 72, status: 'active' },
+    { id: 1, title: '3/28 凌晨系統維護公告', desc: '預計 01:00–04:00 暫停服務...', category: '維護公告', locations: ['fe'], schedule: '2026/03/28 00:00', readRate: 38, status: 'scheduled' },
+    { id: 2, title: '清明節週末訂餐優惠活動', desc: '4/4–4/6 全館享九折優惠...', category: '活動訊息', locations: ['fe'], schedule: '2026/04/04 00:00', readRate: null, status: 'scheduled' },
+    { id: 3, title: '春節假期訂餐暫停公告', desc: '1/27–2/4 暫停接單服務', category: '維護公告', locations: ['admin', 'fe'], schedule: '2026/01/27', readRate: 95, status: 'expired' },
   ];
 
   const statusMap = {
@@ -1274,7 +1348,7 @@
             <div style="font-weight:600;font-size:13px;${a.status==='expired'?'color:var(--gray-400)':''}">${a.title}</div>
             <div style="font-size:11px;color:var(--gray-400);margin-top:2px">${a.desc}</div>
           </td>
-          <td><span class="tag tag-${a.category}">${a.categoryLabel}</span></td>
+          <td><span class="tag tag-${catClass(a.category)}">${a.category}</span></td>
           <td><span style="font-size:12px;color:var(--gray-500)">${(a.locations||[]).map(l=>({'admin':'內部後台','fe':'訂餐前台'}[l]||l)).join('、')}</span></td>
           <td style="font-size:12px;color:${a.status==='expired'?'var(--gray-400)':'var(--gray-600)'}">${a.schedule}</td>
           <td>${readCell}</td>
@@ -1312,7 +1386,7 @@
 
   // ─── 內部後台公告資料 ───
   const adminAnnouncements = [
-    { id: 99, title: '📋 公告系統 Demo 測試說明', category: 'update', label: '更新通知', icon: '📋', time: '剛剛', read: false, text:
+    { id: 99, title: '📋 公告系統 Demo 測試說明', category: '更新通知', icon: '📋', time: '剛剛', read: false, text:
 `本次 Demo 包含以下功能，歡迎逐一測試：
 
 【內部後台】
@@ -1332,9 +1406,9 @@
 3. 切換到訂餐前台，確認公告自動彈出
 4. 試試鈴鐺、查看全部與各篩選功能
 5. 回到公告管理刪除剛才新增的公告` },
-    { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: 'update', label: '更新通知', icon: '🔄', time: '10 分鐘前', read: false, text: '本次更新包含訂單追蹤改版、評分調整及問題修復，請重新登入以套用新功能。' },
-    { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: 'maint', label: '維護公告', icon: '🔧', time: '2 小時前', read: false, text: '3月28日 01:00–04:00 進行系統例行維護，期間後台功能暫停使用。' },
-    { id: 2, title: '春節假期系統暫停公告', category: 'update', label: '更新通知', icon: '📌', time: '2026/01/20', read: true, text: '1/27–2/4 春節假期系統暫停服務，緊急問題請聯繫值班人員。' },
+    { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: '更新通知', icon: '🔄', time: '10 分鐘前', read: false, text: '本次更新包含訂單追蹤改版、評分調整及問題修復，請重新登入以套用新功能。' },
+    { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: '維護公告', icon: '🔧', time: '2 小時前', read: false, text: '3月28日 01:00–04:00 進行系統例行維護，期間後台功能暫停使用。' },
+    { id: 2, title: '春節假期系統暫停公告', category: '更新通知', icon: '📌', time: '2026/01/20', read: true, text: '1/27–2/4 春節假期系統暫停服務，緊急問題請聯繫值班人員。' },
   ];
 
   let adminFilter = 'all';
@@ -1343,22 +1417,21 @@
     const list = document.getElementById('admin-notify-list');
     const items = adminAnnouncements.filter(a => {
       if (adminFilter === 'unread') return !a.read;
-      if (adminFilter === 'update') return a.category === 'update';
-      if (adminFilter === 'maint') return a.category === 'maint';
+      if (adminFilter !== 'all' && adminFilter !== 'unread') return a.category === adminFilter;
       return true;
     });
     if (items.length === 0) {
       list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>目前沒有公告</p></div>`;
     } else {
       list.innerHTML = items.map(a => `
-        <div class="notify-card ${a.read ? 'read' : 'unread'} ${a.category === 'maint' ? 'maint' : ''}" onclick="openNotifyPopup(${a.id})" style="cursor:pointer">
+        <div class="notify-card ${a.read ? 'read' : 'unread'} ${catClass(a.category) === 'maintenance' ? 'maint' : ''}" onclick="openNotifyPopup(${a.id})" style="cursor:pointer">
           <div class="notify-inner">
-            <div class="notify-icon ${a.category}">${a.icon}</div>
+            <div class="notify-icon ${catClass(a.category)}">${a.icon}</div>
             <div class="notify-body">
               <h4>${a.title} ${!a.read ? '<span class="new-label" style="vertical-align:middle">未讀</span>' : ''}</h4>
               <p>${a.text}</p>
               <div style="font-size:11px;color:var(--gray-400);margin-top:6px">
-                <span class="tag tag-${a.category === 'update' ? 'update' : a.category === 'maint' ? 'maintenance' : 'event'}" style="font-size:10px">${a.label}</span>
+                <span class="tag tag-${catClass(a.category)}" style="font-size:10px">${a.category}</span>
               </div>
             </div>
             <div class="notify-right">
@@ -1372,11 +1445,9 @@
     updateAdminCount();
   }
 
-  const catTagMap = { update: '更新通知', maint: '維護公告', event: '活動訊息' };
-
   function openNotifyPopup(id) {
     const a = adminAnnouncements.find(x => x.id === id);
-    document.getElementById('notify-popup-tag').textContent = '📢 ' + (catTagMap[a.category] || '公告');
+    document.getElementById('notify-popup-tag').textContent = '📢 ' + (a.category || '公告');
     document.getElementById('notify-popup-title').textContent = a.title;
     document.getElementById('notify-popup-time').textContent = a.time + ' · 系統管理員';
     document.getElementById('notify-popup-text').innerHTML = a.text.replace(/\n/g, '<br>');
@@ -1477,10 +1548,51 @@
     renderPickup();
   }
 
-  function catClass(c) {
-    if (c === '更新通知') return 'update';
-    if (c === '維護公告') return 'maintenance';
-    return 'event';
+  // ─── 動態填充分類下拉 & Tabs ───
+  function populateCatSelects() {
+    // 篩選 select（管理表格）
+    const mfCat = document.getElementById('mf-cat');
+    if (mfCat) {
+      const prev = mfCat.value;
+      mfCat.innerHTML = '<option value="">全部分類</option>' +
+        annCats.map(c => `<option value="${c}"${c === prev ? ' selected' : ''}>${c}</option>`).join('');
+    }
+    // 新增/編輯 modal 分類下拉
+    const modalCat = document.getElementById('modal-input-category');
+    if (modalCat) {
+      const prev = modalCat.value;
+      modalCat.innerHTML = annCats.map(c => `<option value="${c}"${c === prev ? ' selected' : ''}>${c}</option>`).join('');
+    }
+  }
+
+  function populateCatTabs() {
+    // 後台通知頁 tabs
+    const adminTabs = document.getElementById('admin-notify-tabs');
+    if (adminTabs) {
+      // 保留「全部」和「未讀」，動態加分類 tabs
+      const fixed = adminTabs.querySelectorAll('button');
+      // 移除舊的分類 tabs（保留前兩顆）
+      adminTabs.querySelectorAll('button.cat-tab').forEach(b => b.remove());
+      annCats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'tab-btn cat-tab';
+        btn.textContent = cat;
+        btn.onclick = function() { switchAdminTab(this, cat); };
+        adminTabs.appendChild(btn);
+      });
+    }
+    // 前台公告 modal tabs
+    const annTabs = document.getElementById('ann-modal-tabs');
+    if (annTabs) {
+      annTabs.querySelectorAll('button.cat-tab').forEach(b => b.remove());
+      annCats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'tab-btn cat-tab';
+        btn.textContent = cat;
+        btn.onclick = function() { switchAnnTab(this, cat); };
+        annTabs.appendChild(btn);
+      });
+    }
   }
 
   function updateFEBadge() {
@@ -1690,9 +1802,7 @@
   function renderAnnModal() {
     const items = feAnnouncements.filter(a => {
       if (annModalFilter === 'unread') return !a.read;
-      if (annModalFilter === 'update') return catClass(a.category) === 'update';
-      if (annModalFilter === 'maintenance') return catClass(a.category) === 'maintenance';
-      if (annModalFilter === 'event') return catClass(a.category) === 'event';
+      if (annModalFilter !== 'all' && annModalFilter !== 'unread') return a.category === annModalFilter;
       return true;
     });
     const list = document.getElementById('ann-modal-list');
@@ -1737,7 +1847,7 @@
     if (isEdit) {
       const a = manageAnnouncements.find(x => x.id === editingManageId);
       document.getElementById('modal-input-title').value = a.title;
-      document.getElementById('modal-input-category').value = a.category;
+      document.getElementById('modal-input-category').value = a.category; // 現在直接是中文分類名
       document.getElementById('modal-input-content').value = a.desc || '';
       document.getElementById('loc-admin').checked = (a.locations || []).includes('admin');
       document.getElementById('loc-frontend').checked = (a.locations || []).includes('fe');
@@ -1749,7 +1859,7 @@
       document.getElementById('modal-input-expire').value = '';
     } else {
       document.getElementById('modal-input-title').value = '';
-      document.getElementById('modal-input-category').value = 'update';
+      document.getElementById('modal-input-category').value = annCats[0] || '';
       document.getElementById('modal-input-content').value = '';
       document.getElementById('loc-admin').checked = true;
       document.getElementById('loc-frontend').checked = true;
@@ -1782,12 +1892,11 @@
     }
 
     const catEl = document.getElementById('modal-input-category');
-    const catValue = catEl.value;
-    const catLabel = catEl.options[catEl.selectedIndex].text;
+    const catValue = catEl.value; // 現在直接是中文分類名
 
     const locs = [];
-    if (document.getElementById('loc-admin').checked) locs.push('內部後台');
-    if (document.getElementById('loc-frontend').checked) locs.push('訂餐前台');
+    if (document.getElementById('loc-admin').checked) locs.push('admin');
+    if (document.getElementById('loc-frontend').checked) locs.push('fe');
 
     const scheduleOn = document.getElementById('schedule-toggle').checked;
     const scheduleVal = document.getElementById('modal-input-schedule').value;
@@ -1811,7 +1920,6 @@
           title,
           desc: descStr,
           category: catValue,
-          categoryLabel: catLabel,
           locations: locs,
           schedule: scheduleStr,
           status: finalStatus,
@@ -1825,7 +1933,6 @@
         title,
         desc: descStr,
         category: catValue,
-        categoryLabel: catLabel,
         locations: locs,
         schedule: scheduleStr,
         readRate: null,
@@ -1833,30 +1940,26 @@
       });
     }
 
-    const catLabelMap = { update: '更新通知', maint: '維護公告', event: '活動訊息' };
-    const catAdminMap = { update: 'update', maint: 'maint', event: 'event' };
-    const iconMap     = { update: '🔄', maint: '🔧', event: '🎉' };
-
     if (editingManageId === null) {
       // 新增模式：立即發布才同步到前台 / 通知頁
       if (finalStatus === 'active') {
         const newManageId = manageAnnouncements[0].id;
         if (document.getElementById('loc-frontend').checked) {
           const feId = feAnnouncements.length ? Math.max(...feAnnouncements.map(a => a.id)) + 1 : 0;
-          feAnnouncements.unshift({ id: feId, manageRef: newManageId, title, category: catLabelMap[catValue], time: '剛剛', read: false, text: content, attach: false });
+          feAnnouncements.unshift({ id: feId, manageRef: newManageId, title, category: catValue, time: '剛剛', read: false, text: content, attach: false });
         }
         if (document.getElementById('loc-admin').checked) {
           const adId = adminAnnouncements.length ? Math.max(...adminAnnouncements.map(a => a.id)) + 1 : 0;
-          adminAnnouncements.unshift({ id: adId, manageRef: newManageId, title, category: catAdminMap[catValue], label: catLabelMap[catValue], icon: iconMap[catValue], time: '剛剛', read: false, text: content });
+          adminAnnouncements.unshift({ id: adId, manageRef: newManageId, title, category: catValue, icon: catIcon(catValue), time: '剛剛', read: false, text: content });
         }
       }
     } else {
       // 編輯模式：用 manageRef 找到對應的前台 / 後台通知並更新
       const fe = feAnnouncements.find(a => a.manageRef === editingManageId);
-      if (fe) { fe.title = title; fe.category = catLabelMap[catValue]; fe.text = content; }
+      if (fe) { fe.title = title; fe.category = catValue; fe.text = content; }
 
       const ad = adminAnnouncements.find(a => a.manageRef === editingManageId);
-      if (ad) { ad.title = title; ad.category = catAdminMap[catValue]; ad.label = catLabelMap[catValue]; ad.icon = iconMap[catValue]; ad.text = content; }
+      if (ad) { ad.title = title; ad.category = catValue; ad.icon = catIcon(catValue); ad.text = content; }
     }
 
     // 刷新所有視圖
@@ -1876,7 +1979,8 @@
     document.getElementById('modal-input-title').style.borderColor = '';
     document.getElementById('modal-input-content').value = '';
     document.getElementById('modal-input-content').style.borderColor = '';
-    document.getElementById('modal-input-category').selectedIndex = 0;
+    if (document.getElementById('modal-input-category').options.length > 0)
+      document.getElementById('modal-input-category').selectedIndex = 0;
     document.getElementById('loc-admin').checked = true;
     document.getElementById('loc-frontend').checked = true;
     document.getElementById('schedule-toggle').checked = false;
@@ -1906,8 +2010,122 @@
   document.getElementById('ann-modal-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeAnnModal();
   });
+  document.getElementById('cat-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeCatModal();
+  });
+
+  // ─── 分類管理 ───
+  let catDragSrcIdx = null;
+  // 用來暫存編輯中的分類（取消時可復原）
+  let annCatsEditing = [];
+
+  function openCatManager() {
+    annCatsEditing = [...annCats];
+    renderCatManager();
+    document.getElementById('cat-modal').classList.add('open');
+  }
+
+  function closeCatModal() {
+    document.getElementById('cat-modal').classList.remove('open');
+    document.getElementById('new-cat-input').value = '';
+  }
+
+  function renderCatManager() {
+    const el = document.getElementById('ann-cat-list');
+    if (!annCatsEditing.length) {
+      el.innerHTML = `<div style="font-size:13px;color:var(--gray-500);padding:12px 0">尚無分類，請於下方新增。</div>`;
+      return;
+    }
+    el.innerHTML = annCatsEditing.map((cat, i) => `
+      <div class="cat-row" draggable="true" data-idx="${i}"
+        ondragstart="annCatDragStart(event,${i})"
+        ondragover="annCatDragOver(event,${i})"
+        ondragleave="annCatDragLeave(event)"
+        ondrop="annCatDrop(event,${i})"
+        ondragend="annCatDragEnd(event)">
+        <span class="cat-drag-handle">⠿</span>
+        <input class="cat-row-input" type="text" id="ann-cat-input-${i}" value="${cat}">
+        <button class="cat-del-btn" onclick="removeAnnCat(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  function annCatDragStart(e, idx) {
+    catDragSrcIdx = idx;
+    e.currentTarget.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  }
+  function annCatDragOver(e, idx) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('#ann-cat-list .cat-row').forEach(r => r.classList.remove('drag-over'));
+    if (idx !== catDragSrcIdx) e.currentTarget.classList.add('drag-over');
+  }
+  function annCatDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+  }
+  function annCatDrop(e, idx) {
+    e.preventDefault();
+    document.querySelectorAll('#ann-cat-list .cat-row').forEach(r => r.classList.remove('drag-over', 'dragging'));
+    if (catDragSrcIdx === null || catDragSrcIdx === idx) return;
+    const moved = annCatsEditing.splice(catDragSrcIdx, 1)[0];
+    annCatsEditing.splice(idx, 0, moved);
+    catDragSrcIdx = null;
+    renderCatManager();
+  }
+  function annCatDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+    document.querySelectorAll('#ann-cat-list .cat-row').forEach(r => r.classList.remove('drag-over'));
+    catDragSrcIdx = null;
+  }
+
+  function removeAnnCat(i) {
+    const catName = annCatsEditing[i];
+    const used = manageAnnouncements.filter(a => a.category === catName).length;
+    if (used > 0) {
+      alert(`「${catName}」目前有 ${used} 則公告使用，無法刪除。\n請先將這些公告改為其他分類。`);
+      return;
+    }
+    annCatsEditing.splice(i, 1);
+    renderCatManager();
+  }
+
+  function addAnnCat() {
+    const input = document.getElementById('new-cat-input');
+    const val = input.value.trim();
+    if (!val) return;
+    if (annCatsEditing.includes(val)) { alert(`「${val}」分類已存在`); return; }
+    annCatsEditing.push(val);
+    input.value = '';
+    renderCatManager();
+  }
+
+  function saveAnnCats() {
+    // 讀取所有輸入框（inline rename），同步更新 annCatsEditing
+    document.querySelectorAll('#ann-cat-list .cat-row').forEach((row, i) => {
+      const input = row.querySelector('input');
+      const newName = input ? input.value.trim() : '';
+      if (newName && annCatsEditing[i] !== undefined && newName !== annCatsEditing[i]) {
+        const oldName = annCatsEditing[i];
+        // 同步更新所有資料陣列中使用此分類的記錄
+        manageAnnouncements.forEach(a => { if (a.category === oldName) a.category = newName; });
+        adminAnnouncements.forEach(a => { if (a.category === oldName) a.category = newName; });
+        feAnnouncements.forEach(a => { if (a.category === oldName) a.category = newName; });
+        annCatsEditing[i] = newName;
+      }
+    });
+    annCats = [...annCatsEditing];
+    closeCatModal();
+    populateCatSelects();
+    populateCatTabs();
+    renderManageTable();
+    renderAdmin();
+    renderFE();
+    renderAnnModal();
+  }
 
   // 初始化：預設顯示公告通知頁，並自動彈出未讀公告
+  populateCatSelects();
+  populateCatTabs();
   switchAdminPage('notify');
   showAdminUnreadQueue();
 </script>

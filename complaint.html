@@ -402,6 +402,84 @@
       animation: slideUp 0.3s ease;
     }
     @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    /* Category modal */
+    .cat-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      overflow-y: auto;
+      padding: 24px 16px;
+    }
+    .cat-modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+    .cat-modal {
+      background: white;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      overflow: hidden;
+      margin: auto 0;
+    }
+    .cat-modal .modal-header { padding: 16px 20px; }
+    .cat-modal .modal-body  { padding: 16px 20px; }
+    .cat-list { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .cat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: grab;
+      user-select: none;
+      border: 1.5px solid transparent;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .cat-item.drag-over { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .cat-item.dragging  { opacity: 0.4; }
+    .cat-drag-handle { color: var(--text-light); font-size: 14px; cursor: grab; }
+    .cat-name { flex: 1; font-size: 14px; }
+    .cat-name-input {
+      flex: 1;
+      padding: 4px 8px;
+      border: 1.5px solid var(--primary);
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+    .cat-del-btn {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 15px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      line-height: 1;
+      font-family: inherit;
+    }
+    .cat-del-btn:hover { background: #fde8e8; }
+    .cat-add-row { display: flex; gap: 8px; }
+    .cat-add-row input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+    .cat-add-row input:focus { border-color: var(--primary); }
+    .cat-modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
     /* Sidebar layout */
     .member-layout { display: flex; gap: 20px; align-items: flex-start; }
     .sidebar {
@@ -447,6 +525,7 @@
 <header class="site-header">
   <h1>🍱 客訴管理系統</h1>
   <div style="display:flex;align-items:center;gap:12px">
+    <button onclick="openCatModal()" style="padding:5px 12px;border:1px solid rgba(255,255,255,0.4);border-radius:6px;background:transparent;color:rgba(255,255,255,0.8);font-size:12px;cursor:pointer;font-family:inherit" title="管理客訴類型">⚙ 管理類型</button>
     <button onclick="resetData()" style="padding:5px 12px;border:1px solid rgba(255,255,255,0.4);border-radius:6px;background:transparent;color:rgba(255,255,255,0.8);font-size:12px;cursor:pointer;font-family:inherit" title="清除所有資料並還原預設">🗑 重設資料</button>
     <div class="role-switch">
       <button class="role-btn active" id="btnMember" onclick="switchRole('member')">會員前台</button>
@@ -504,12 +583,7 @@
               <h3>客訴內容</h3>
               <div class="form-group" style="margin-bottom:16px">
                 <label>客訴類型 <span class="req">*</span></label>
-                <div class="pill-group">
-                  <label class="pill-item"><input type="radio" name="cType" value="quality" required><span>🍽 餐點品質／異物</span></label>
-                  <label class="pill-item"><input type="radio" name="cType" value="delivery"><span>🚚 遲送或未送達</span></label>
-                  <label class="pill-item"><input type="radio" name="cType" value="quantity"><span>📦 數量或品項錯誤</span></label>
-                  <label class="pill-item"><input type="radio" name="cType" value="other"><span>❓ 其他</span></label>
-                </div>
+                <div class="pill-group" id="typePills"></div>
               </div>
               <div class="form-group" style="margin-bottom:16px">
                 <label>問題說明 <span class="req">*</span></label>
@@ -555,10 +629,6 @@
         </select>
         <select id="fType" onchange="applyFilter()">
           <option value="">所有類型</option>
-          <option value="quality">餐點品質／異物</option>
-          <option value="delivery">遲送或未送達</option>
-          <option value="quantity">數量或品項錯誤</option>
-          <option value="other">其他</option>
         </select>
         <select id="fStat" onchange="applyFilter()">
           <option value="">所有狀態</option>
@@ -592,6 +662,27 @@
   </div>
 </div>
 
+<!-- 類型管理 Modal -->
+<div class="cat-modal-overlay" id="catModalOverlay" onclick="onCatOverlayClick(event)">
+  <div class="cat-modal">
+    <div class="modal-header">
+      <h2>⚙ 管理客訴類型</h2>
+      <button class="modal-close" onclick="closeCatModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <ul class="cat-list" id="catList"></ul>
+      <div class="cat-add-row">
+        <input type="text" id="catNewInput" placeholder="輸入新類型名稱" onkeydown="if(event.key==='Enter')addCatType()">
+        <button class="btn btn-primary btn-sm" onclick="addCatType()">＋ 新增</button>
+      </div>
+    </div>
+    <div class="cat-modal-footer">
+      <button class="btn btn-secondary" onclick="closeCatModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveCatTypes()">儲存</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -603,12 +694,6 @@ const STATUSES = [
   { key: 'compensating',  label: '補償處理', icon: '💰', cls: 's-compensating' },
   { key: 'closed',        label: '結案',    icon: '✅', cls: 's-closed' },
 ];
-const TYPES = {
-  quality:  { label: '餐點品質／異物', icon: '🍽' },
-  delivery: { label: '遲送或未送達',   icon: '🚚' },
-  quantity: { label: '數量或品項錯誤', icon: '📦' },
-  other:    { label: '其他',           icon: '❓' },
-};
 const MEMBERS = {
   M001: { name: '張小明', phone: '0912-345-678' },
   M002: { name: '李美華', phone: '0923-456-789' },
@@ -618,6 +703,58 @@ const ME = 'M001';
 let complaints = [];
 let uploadedPhotos = [];
 let currentRole = 'member';
+
+// ─── Complaint Types (dynamic) ────────────────────────────────
+let complaintTypes = ['餐點品質／異物', '遲送或未送達', '數量或品項錯誤', '其他'];
+
+function saveTypes() { localStorage.setItem('cmp_types_v1', JSON.stringify(complaintTypes)); }
+function loadTypes() {
+  const raw = localStorage.getItem('cmp_types_v1');
+  if (raw) { try { complaintTypes = JSON.parse(raw); } catch(e) {} }
+}
+
+// 將類型名稱轉為 key（用於資料欄位，相容既有資料）
+function typeKey(name) {
+  // 若剛好符合舊 key 就直接用，否則用 base64-like 安全字串
+  const legacyMap = { '餐點品質／異物': 'quality', '遲送或未送達': 'delivery', '數量或品項錯誤': 'quantity', '其他': 'other' };
+  if (legacyMap[name]) return legacyMap[name];
+  return 'type_' + btoa(unescape(encodeURIComponent(name))).replace(/[^a-zA-Z0-9]/g, '').slice(0, 20);
+}
+
+// 從 type key 反查 label
+function typeLabel(key) {
+  // 嘗試舊 key 對應
+  const legacyLabels = { quality: '餐點品質／異物', delivery: '遲送或未送達', quantity: '數量或品項錯誤', other: '其他' };
+  if (legacyLabels[key]) {
+    // 如果使用者已修改過此類型名稱，優先用 complaintTypes 中現有的對應
+    const found = complaintTypes.find(n => typeKey(n) === key);
+    return found !== undefined ? found : legacyLabels[key];
+  }
+  const found = complaintTypes.find(n => typeKey(n) === key);
+  return found !== undefined ? found : key;
+}
+
+// 動態填入所有「類型」相關 UI
+function populateTypeSelects() {
+  // 1. 表單 pill-group
+  const pills = document.getElementById('typePills');
+  if (pills) {
+    pills.innerHTML = complaintTypes.map((t, i) => {
+      const k = typeKey(t);
+      return `<label class="pill-item"><input type="radio" name="cType" value="${k}"${i===0?' required':''}><span>${t}</span></label>`;
+    }).join('');
+  }
+  // 2. 管理後台篩選 select
+  const fType = document.getElementById('fType');
+  if (fType) {
+    const cur = fType.value;
+    fType.innerHTML = '<option value="">所有類型</option>' +
+      complaintTypes.map(t => {
+        const k = typeKey(t);
+        return `<option value="${k}"${k===cur?' selected':''}>${t}</option>`;
+      }).join('');
+  }
+}
 
 // ─── Storage ──────────────────────────────────────────────────
 function save() { localStorage.setItem('cmp_v1', JSON.stringify(complaints)); }
@@ -835,7 +972,7 @@ function renderMyList() {
 }
 function cardHtml(c, isAdmin) {
   const st = STATUSES.find(s => s.key === c.status);
-  const tp = TYPES[c.type];
+  const tpLabel = typeLabel(c.type);
   const mem = MEMBERS[c.memberId];
   return `<div class="c-card" onclick="openModal('${c.id}',${isAdmin})">
     <div class="c-card-head">
@@ -844,7 +981,7 @@ function cardHtml(c, isAdmin) {
     </div>
     <div class="c-card-body">
       <div>
-        <div class="c-card-title">${tp.icon} ${tp.label}</div>
+        <div class="c-card-title">${tpLabel}</div>
         <div class="c-card-meta">${c.location} · 訂單 ${c.orderId}${isAdmin ? ' · ' + (mem ? mem.name : c.memberId) : ''}</div>
         <div class="c-card-meta" style="margin-top:4px">${c.description.slice(0,60)}${c.description.length>60?'…':''}</div>
       </div>
@@ -866,13 +1003,13 @@ function renderAdminList(list) {
     </tr></thead>
     <tbody>${list.map(c => {
       const st = STATUSES.find(s => s.key === c.status);
-      const tp = TYPES[c.type];
+      const tpLabel = typeLabel(c.type);
       const mem = MEMBERS[c.memberId];
       return `<tr onclick="openModal('${c.id}',true)">
         <td><strong style="color:var(--primary)">${c.id}</strong></td>
         <td>${c.location}</td>
         <td>${mem ? mem.name : c.memberId}</td>
-        <td>${tp.icon} ${tp.label}</td>
+        <td>${tpLabel}</td>
         <td><span class="badge ${st.cls}">${st.icon} ${st.label}</span></td>
         <td>${fmtShort(c.createdAt)}</td>
         <td style="text-align:center">${c.compensation ? '✅' : '—'}</td>
@@ -903,7 +1040,7 @@ function clearFilter() {
 function openModal(id, isAdmin) {
   const c = complaints.find(x => x.id === id); if (!c) return;
   const st   = STATUSES.find(s => s.key === c.status);
-  const tp   = TYPES[c.type];
+  const tpLabel = typeLabel(c.type);
   const mem  = MEMBERS[c.memberId] || { name: c.memberId, phone: '—' };
   const sidx = STATUSES.findIndex(s => s.key === c.status);
 
@@ -937,7 +1074,7 @@ function openModal(id, isAdmin) {
   // Complaint content
   h += `<div class="det-section"><h3>客訴內容</h3>
     <div class="det-grid" style="margin-bottom:12px">
-      <div class="det-item"><label>客訴類型</label><div class="val">${tp.icon} ${tp.label}</div></div>
+      <div class="det-item"><label>客訴類型</label><div class="val">${tpLabel}</div></div>
       <div class="det-item"><label>目前狀態</label><div class="val"><span class="badge ${st.cls}">${st.icon} ${st.label}</span></div></div>
     </div>
     <div class="det-item" style="margin-bottom:${c.photos&&c.photos.length?'12px':'0'}">
@@ -1053,6 +1190,138 @@ function toggleComp() {
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 function onOverlayClick(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
 
+// ─── Category Modal ───────────────────────────────────────────
+let catWorkingList = []; // 編輯中的暫存清單
+let dragSrcIdx = null;
+
+function openCatModal() {
+  catWorkingList = [...complaintTypes];
+  renderCatList();
+  document.getElementById('catNewInput').value = '';
+  document.getElementById('catModalOverlay').classList.add('open');
+}
+function closeCatModal() {
+  document.getElementById('catModalOverlay').classList.remove('open');
+}
+function onCatOverlayClick(e) {
+  if (e.target === document.getElementById('catModalOverlay')) closeCatModal();
+}
+
+function renderCatList() {
+  const ul = document.getElementById('catList');
+  ul.innerHTML = catWorkingList.map((t, i) => `
+    <li class="cat-item" draggable="true" data-idx="${i}"
+        ondragstart="onCatDragStart(event,${i})"
+        ondragover="onCatDragOver(event,${i})"
+        ondragleave="onCatDragLeave(event)"
+        ondrop="onCatDrop(event,${i})"
+        ondragend="onCatDragEnd(event)">
+      <span class="cat-drag-handle">☰</span>
+      <span class="cat-name" ondblclick="startCatRename(${i})">${esc(t)}</span>
+      <button class="cat-del-btn" onclick="deleteCatType(${i})" title="刪除">✕</button>
+    </li>`).join('');
+}
+
+function startCatRename(idx) {
+  const ul = document.getElementById('catList');
+  const li = ul.querySelector(`[data-idx="${idx}"]`);
+  if (!li) return;
+  const nameSpan = li.querySelector('.cat-name');
+  const oldVal = catWorkingList[idx];
+  nameSpan.outerHTML = `<input class="cat-name-input" data-idx="${idx}" value="${esc(oldVal)}"
+    onblur="finishCatRename(${idx},this.value)"
+    onkeydown="if(event.key==='Enter'){this.blur();}if(event.key==='Escape'){finishCatRenameCancel(${idx});}">`;
+  const inp = li.querySelector('.cat-name-input');
+  inp.focus();
+  inp.select();
+}
+function finishCatRename(idx, newVal) {
+  newVal = newVal.trim();
+  if (newVal && newVal !== catWorkingList[idx]) {
+    catWorkingList[idx] = newVal;
+  }
+  renderCatList();
+}
+function finishCatRenameCancel(idx) {
+  renderCatList();
+}
+
+function addCatType() {
+  const inp = document.getElementById('catNewInput');
+  const val = inp.value.trim();
+  if (!val) { showToast('請輸入類型名稱'); return; }
+  if (catWorkingList.includes(val)) { showToast('已存在相同類型'); return; }
+  catWorkingList.push(val);
+  inp.value = '';
+  renderCatList();
+}
+
+function deleteCatType(idx) {
+  const name = catWorkingList[idx];
+  const key  = typeKey(name);
+  const inUse = complaints.some(c => c.type === key);
+  if (inUse) {
+    alert(`「${name}」目前有客訴資料使用中，無法刪除。`);
+    return;
+  }
+  catWorkingList.splice(idx, 1);
+  renderCatList();
+}
+
+function saveCatTypes() {
+  // 找出哪些類型被改名，同步更新 complaints 資料
+  const oldTypes = complaintTypes;
+  const newTypes = catWorkingList;
+  // 建立 old key → new key 的對照（依位置配對，新增或刪除的直接忽略）
+  const minLen = Math.min(oldTypes.length, newTypes.length);
+  for (let i = 0; i < minLen; i++) {
+    const oldKey = typeKey(oldTypes[i]);
+    const newKey = typeKey(newTypes[i]);
+    if (oldKey !== newKey) {
+      complaints.forEach(c => { if (c.type === oldKey) c.type = newKey; });
+    }
+  }
+  complaintTypes = [...newTypes];
+  saveTypes();
+  save();
+  populateTypeSelects();
+  closeCatModal();
+  // 重新渲染
+  if (currentRole === 'admin') renderAdminList();
+  else renderMyList();
+  showToast('✅ 類型設定已儲存');
+}
+
+// ─── Drag & Drop for cat list ─────────────────────────────────
+function onCatDragStart(e, idx) {
+  dragSrcIdx = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onCatDragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('drag-over'));
+  if (idx !== dragSrcIdx) e.currentTarget.classList.add('drag-over');
+}
+function onCatDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function onCatDrop(e, idx) {
+  e.preventDefault();
+  if (dragSrcIdx === null || dragSrcIdx === idx) return;
+  const moved = catWorkingList.splice(dragSrcIdx, 1)[0];
+  catWorkingList.splice(idx, 0, moved);
+  dragSrcIdx = null;
+  renderCatList();
+}
+function onCatDragEnd(e) {
+  dragSrcIdx = null;
+  document.querySelectorAll('.cat-item').forEach(el => {
+    el.classList.remove('dragging', 'drag-over');
+  });
+}
+
 // ─── Admin actions ────────────────────────────────────────────
 function updateStatus(id) {
   const c = complaints.find(x => x.id === id); if (!c) return;
@@ -1159,15 +1428,21 @@ function showToast(msg) {
 function resetData() {
   if (!confirm('確定要清除所有資料並還原為預設範例？')) return;
   localStorage.removeItem('cmp_v1');
+  localStorage.removeItem('cmp_types_v1');
   complaints = defaultData();
+  complaintTypes = ['餐點品質／異物', '遲送或未送達', '數量或品項錯誤', '其他'];
   save();
+  saveTypes();
+  populateTypeSelects();
   renderMyList();
   renderAdminList();
   showToast('✅ 資料已重設');
 }
 
 // ─── Init ─────────────────────────────────────────────────────
+loadTypes();
 load();
+populateTypeSelects();
 renderOrders();
 </script>
 </body>
