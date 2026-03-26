@@ -892,7 +892,7 @@ function filterCat(el, cat) {
 function openAdd() {
   editingId = null;
   document.getElementById('edit-title').textContent = '新增品項';
-  ['f-name','f-display','f-en','f-desc','f-note','f-cost','f-new-store','f-new-end','f-new-cost'].forEach(id => document.getElementById(id).value = '');
+  ['f-name','f-display','f-en','f-desc','f-note','f-cost','f-new-store','f-new-cost'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-store').value = '';
   document.getElementById('f-end').value = '';
   // 自動建議排序：目前最大 sort + 1
