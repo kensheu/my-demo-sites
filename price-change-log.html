@@ -485,9 +485,9 @@ let curTLF  = 'all';
 
 const RNAMES = { A:'XX 早餐店', B:'OO 雞飯專門店' };
 
-// 只列終端售價欄（成本價、店內價是固定欄，獨立渲染）
+// 只列終端價欄（成本價、店內價是固定欄，獨立渲染）
 const PRICE_COLS = {
-  A: ['終端售價'],
+  A: ['終端價'],
   B: ['聯發科終端價','聯寶終端價'],
 };
 
@@ -683,7 +683,7 @@ const BADGE = { new:'b-new 新增', chg:'b-chg 異動', out:'b-out 已下架', o
 // 只在換餐廳時呼叫，固定欄寬避免換月位移
 function renderSnapHead() {
   const pCols = PRICE_COLS[curRest];
-  const termW = curRest === 'B' ? 86 : 90; // 終端售價欄寬
+  const termW = curRest === 'B' ? 86 : 90; // 終端價欄寬
   document.getElementById('snap-thead-row').innerHTML =
     `<th style="width:68px">料號</th>` +
     `<th>餐點名稱</th>` +
