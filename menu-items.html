@@ -480,6 +480,7 @@ select {
         <div class="form-row">
           <label class="fl">介紹</label>
           <textarea id="f-desc" placeholder="例：辣度、素食、食材說明…（選填）"></textarea>
+          <div class="fhint">會顯示於訂餐前台</div>
         </div>
         <div class="form-row">
           <label class="fl">內部備註（僅浩華人員可見）</label>
@@ -506,16 +507,16 @@ select {
         </div>
 
         <div class="pending-box">
-          <div class="fsec-title">預約調整成本價（選填）</div>
-          <div class="fhint" style="margin-bottom:12px">設定新店內價後，系統於生效日自動更新成本價，不需人工操作。</div>
+          <div class="fsec-title">預約調整售價（選填）</div>
+          <div class="fhint" style="margin-bottom:12px">設定新價格與生效日，系統於生效日當天自動切換，不需人工操作。</div>
           <div class="form-2 form-row">
             <div>
-              <label class="fl">新店內價</label>
-              <input type="number" id="f-new-store" min="0" placeholder="留空表示不預約" oninput="calcNewCost()">
+              <label class="fl">新終端售價</label>
+              <input type="number" id="f-new-end" min="0" placeholder="留空表示不異動">
             </div>
             <div>
-              <label class="fl">新成本價（自動計算）</label>
-              <input type="text" id="f-new-cost" readonly placeholder="—">
+              <label class="fl">新成本價</label>
+              <input type="number" id="f-new-cost" min="0" placeholder="留空表示不異動">
             </div>
           </div>
           <div class="form-row">
@@ -721,19 +722,19 @@ document.addEventListener('click', e => {
 
 const allItems = {
   'OO雞飯': [
-    { id:'B001', name:'雙拼便當',         display:'雙拼便當',   cat:'便當', sort:1, en:'Combo Bento',      desc:'雞腿＋排骨雙主菜', note:'',                         storePrice:120, endPrice:120, costPrice:96,  status:'on',  pending:{ storePrice:130, costPrice:104, effDate:'2026-04-01' }, mobo:true,  moboSync:'2026/3/1',  imgStatus:'ok' },
+    { id:'B001', name:'雙拼便當',         display:'雙拼便當',   cat:'便當', sort:1, en:'Combo Bento',      desc:'雞腿＋排骨雙主菜', note:'',                         storePrice:120, endPrice:120, costPrice:96,  status:'on',  pending:{ endPrice:130, costPrice:104, effDate:'2026-04-01' }, mobo:true,  moboSync:'2026/3/1',  imgStatus:'ok' },
     { id:'B002', name:'雞腿便當',         display:'雞腿便當',   cat:'便當', sort:2, en:'',                 desc:'香煎雞腿，附湯',   note:'',                         storePrice:110, endPrice:110, costPrice:88,  status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'pending' },
     { id:'B003', name:'排骨便當',         display:'排骨便當',   cat:'便當', sort:3, en:'',                 desc:'',                note:'熱銷商品，最多 50 份/日',   storePrice:100, endPrice:100, costPrice:80,  status:'on',  pending:null, mobo:true,  moboSync:'2026/2/15', imgStatus:'ok' },
     { id:'B005', name:'咖哩豬排飯（特餐）', display:'咖哩豬排飯', cat:'便當', sort:4, en:'Curry Pork Cutlet', desc:'',              note:'春節特餐，3/31 前供應',     storePrice:130, endPrice:130, costPrice:104, status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'ok' },
     { id:'D001', name:'冬瓜茶',           display:'冬瓜茶',     cat:'飲料', sort:1, en:'',                 desc:'',                note:'',                         storePrice:25,  endPrice:25,  costPrice:20,  status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'ok' },
-    { id:'D002', name:'紅茶（冷）',        display:'紅茶',      cat:'飲料', sort:2, en:'',                 desc:'',                note:'',                         storePrice:20,  endPrice:20,  costPrice:16,  status:'on',  pending:{ storePrice:25, costPrice:20, effDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'D002', name:'紅茶（冷）',        display:'紅茶',      cat:'飲料', sort:2, en:'',                 desc:'',                note:'',                         storePrice:20,  endPrice:20,  costPrice:16,  status:'on',  pending:{ endPrice:25, costPrice:20, effDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
     { id:'B004', name:'麻婆豆腐飯',        display:'麻婆豆腐飯', cat:'便當', sort:null, en:'',             desc:'',                note:'',                         storePrice:90,  endPrice:90,  costPrice:72,  status:'off', pending:null, mobo:false, moboSync:null,        imgStatus:'ok',     archivedAt:'2026/2/1' },
     { id:'D003', name:'青草茶',           display:'青草茶',     cat:'飲料', sort:null, en:'',             desc:'',                note:'',                         storePrice:20,  endPrice:20,  costPrice:16,  status:'off', pending:null, mobo:false, moboSync:null,        imgStatus:'ok',     archivedAt:'2026/1/15' },
   ],
   'XX早餐': [
     { id:'A001', name:'奶油厚片',         display:'奶油厚片',   cat:'吐司', sort:1, en:'Butter Toast',     desc:'',                note:'',                         storePrice:40,  endPrice:40,  costPrice:18,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
     { id:'A002', name:'原味蛋餅',         display:'原味蛋餅',   cat:'蛋餅', sort:1, en:'',                 desc:'',                note:'',                         storePrice:35,  endPrice:35,  costPrice:15,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
-    { id:'A003', name:'總匯蛋餅',         display:'總匯蛋餅',   cat:'蛋餅', sort:2, en:'',                 desc:'',                note:'',                         storePrice:55,  endPrice:55,  costPrice:22,  status:'on',  pending:{ storePrice:58, costPrice:46, effDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'A003', name:'總匯蛋餅',         display:'總匯蛋餅',   cat:'蛋餅', sort:2, en:'',                 desc:'',                note:'',                         storePrice:55,  endPrice:55,  costPrice:22,  status:'on',  pending:{ endPrice:58, costPrice:46, effDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
     { id:'A005', name:'起司雙層蛋餅',     display:'起司厚蛋餅', cat:'蛋餅', sort:3, en:'Cheese Egg Wrap',  desc:'',                note:'',                         storePrice:50,  endPrice:50,  costPrice:22,  status:'on',  pending:null, mobo:true,  moboSync:'2026/1/10', imgStatus:'ok' },
     { id:'A013', name:'冰美式（中）',     display:'冰美式',     cat:'飲料', sort:1, en:'Iced Americano M', desc:'',                note:'',                         storePrice:35,  endPrice:35,  costPrice:10,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'pending' },
     { id:'A012', name:'紅茶（中）',       display:'紅茶',       cat:'飲料', sort:2, en:'',                 desc:'',                note:'',                         storePrice:25,  endPrice:25,  costPrice:8,   status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
@@ -778,8 +779,20 @@ function moboBadge(item) {
   </div>`;
 }
 
+/* ── auto-apply pending prices ── */
+function applyPendingPrices() {
+  const today = new Date().toISOString().slice(0, 10);
+  items.forEach(item => {
+    if (!item.pending || item.pending.effDate > today) return;
+    if (item.pending.endPrice)  item.endPrice  = item.pending.endPrice;
+    if (item.pending.costPrice) item.costPrice = item.pending.costPrice;
+    item.pending = null;
+  });
+}
+
 /* ── render ── */
 function renderAll() {
+  applyPendingPrices();
   renderStats();
   renderCatPills();
   renderActive();
@@ -820,8 +833,8 @@ function renderActive() {
     return;
   }
   tbody.innerHTML = data.map(item => {
-    const pendStore = item.pending ? `<div class="price-pending">↑ $${item.pending.storePrice} (${item.pending.effDate.slice(5)} 生效)</div>` : '';
-    const pendCost  = item.pending ? `<div class="price-pending">↑ $${item.pending.costPrice} (${item.pending.effDate.slice(5)} 生效)</div>` : '';
+    const pendEnd  = item.pending?.endPrice  ? `<div class="price-pending">↑ $${item.pending.endPrice} (${item.pending.effDate.slice(5)} 生效)</div>` : '';
+    const pendCost = item.pending?.costPrice ? `<div class="price-pending">↑ $${item.pending.costPrice} (${item.pending.effDate.slice(5)} 生效)</div>` : '';
     const machineDiff = item.display && item.display !== item.name;
     return `<tr>
       <td><div class="item-id">${item.id}</div></td>
@@ -830,8 +843,8 @@ function renderActive() {
         ${machineDiff ? `<div class="item-name-machine"><span class="machine-label">機台</span>${item.display}</div>` : ''}
       </td>
       <td>${item.cat}</td>
-      <td><div class="price-main">$${item.storePrice}</div>${pendStore}</td>
-      <td><div class="price-main">$${item.endPrice}</div></td>
+      <td><div class="price-main">$${item.storePrice}</div></td>
+      <td><div class="price-main">$${item.endPrice}</div>${pendEnd}</td>
       <td><div class="price-auto">$${item.costPrice}</div>${pendCost}</td>
       <td>${imgBadge(item.imgStatus)}</td>
       <td>${moboBadge(item)}</td>
@@ -892,7 +905,7 @@ function filterCat(el, cat) {
 function openAdd() {
   editingId = null;
   document.getElementById('edit-title').textContent = '新增品項';
-  ['f-name','f-display','f-en','f-desc','f-note','f-cost','f-new-store','f-new-cost'].forEach(id => document.getElementById(id).value = '');
+  ['f-name','f-display','f-en','f-desc','f-note','f-cost','f-new-end','f-new-cost'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-store').value = '';
   document.getElementById('f-end').value = '';
   // 自動建議排序：目前最大 sort + 1
@@ -922,11 +935,11 @@ function openEdit(id) {
   document.getElementById('f-end').value = item.endPrice;
   document.getElementById('f-cost').value = `$${item.costPrice}`;
   if (item.pending) {
-    document.getElementById('f-new-store').value = item.pending.storePrice;
-    document.getElementById('f-new-cost').value = `$${item.pending.costPrice}`;
+    document.getElementById('f-new-end').value  = item.pending.endPrice  || '';
+    document.getElementById('f-new-cost').value = item.pending.costPrice || '';
     document.getElementById('f-eff-date').value = item.pending.effDate;
   } else {
-    document.getElementById('f-new-store').value = '';
+    document.getElementById('f-new-end').value  = '';
     document.getElementById('f-new-cost').value = '';
     document.getElementById('f-eff-date').value = '2026-04-01';
   }
@@ -945,8 +958,10 @@ function saveItem() {
   if (isNaN(end)  ||end   < 0) { alert('請填寫正確的終端售價'); return; }
   if (!sortRaw || isNaN(sort) || sort < 1) { alert('請填寫排序序號（正整數）'); return; }
 
-  const ns = parseFloat(document.getElementById('f-new-store').value);
-  const hasPending = !isNaN(ns) && ns > 0;
+  const ne = parseFloat(document.getElementById('f-new-end').value);
+  const nc = parseFloat(document.getElementById('f-new-cost').value);
+  const effDate = document.getElementById('f-eff-date').value;
+  const hasPending = (!isNaN(ne) && ne > 0) || (!isNaN(nc) && nc > 0);
 
   const data = {
     name,
@@ -961,9 +976,9 @@ function saveItem() {
     costPrice:  Math.round(store * COMMISSION),
     status: 'on',
     pending: hasPending ? {
-      storePrice: ns,
-      costPrice:  Math.round(ns * COMMISSION),
-      effDate: document.getElementById('f-eff-date').value,
+      endPrice:  (!isNaN(ne) && ne > 0) ? ne : null,
+      costPrice: (!isNaN(nc) && nc > 0) ? nc : null,
+      effDate,
     } : null,
   };
 
@@ -986,10 +1001,7 @@ function calcCost() {
   const v = parseFloat(document.getElementById('f-store').value);
   document.getElementById('f-cost').value = isNaN(v) ? '' : `$${Math.round(v * COMMISSION)}`;
 }
-function calcNewCost() {
-  const v = parseFloat(document.getElementById('f-new-store').value);
-  document.getElementById('f-new-cost').value = isNaN(v) ? '' : `$${Math.round(v * COMMISSION)}`;
-}
+
 function updateCharCount() {
   const len = [...document.getElementById('f-display').value].length;
   const el  = document.getElementById('char-count');
