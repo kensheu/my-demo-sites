@@ -328,6 +328,48 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 .btn-cancel { background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); }
 
 .empty { padding: 48px 16px; text-align: center; color: var(--text-3); font-size: 13px; }
+
+/* ─── Rest picker ─── */
+.top-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+.rest-picker-wrap { position:relative; display:inline-block; }
+.rest-trigger {
+  display:flex; align-items:center; gap:8px; padding:8px 12px;
+  border:1px solid var(--border); border-radius:8px; background:var(--bg);
+  cursor:pointer; user-select:none; min-width:200px;
+  transition:border-color .12s, box-shadow .12s;
+}
+.rest-trigger:hover { border-color:#a8a29e; }
+.rest-trigger.open  { border-color:var(--blue); box-shadow:0 0 0 2px #dbeafe; }
+.rt-icon  { font-size:16px; }
+.rt-label { flex:1; font-size:13px; font-weight:500; color:var(--text); }
+.rt-arrow { font-size:10px; color:var(--text-3); transition:transform .15s; }
+.rest-trigger.open .rt-arrow { transform:rotate(180deg); }
+.rest-dropdown {
+  position:absolute; top:calc(100% + 6px); left:0;
+  background:var(--bg); border:1px solid var(--border); border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); min-width:240px; z-index:50;
+  opacity:0; pointer-events:none; transform:translateY(-4px);
+  transition:opacity .12s, transform .12s;
+}
+.rest-dropdown.open { opacity:1; pointer-events:auto; transform:translateY(0); }
+.rest-search-wrap { padding:10px 10px 8px; border-bottom:1px solid var(--border-2); }
+.rest-search-wrap input {
+  width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:6px;
+  font-size:13px; color:var(--text); background:var(--bg-2); outline:none; font-family:inherit;
+}
+.rest-search-wrap input:focus { border-color:var(--blue); box-shadow:0 0 0 2px #dbeafe; }
+.rest-list { padding:6px; max-height:220px; overflow-y:auto; }
+.rest-item {
+  padding:8px 10px; border-radius:6px; font-size:13px; cursor:pointer;
+  color:var(--text-2); transition:background .1s; display:flex; align-items:center; gap:8px;
+}
+.rest-item:hover { background:var(--bg-2); color:var(--text); }
+.rest-item.selected { background:var(--blue-bg); color:var(--blue-text); font-weight:500; }
+.rest-item .rc { font-size:11px; color:var(--text-3); font-family:monospace; }
+.rest-item.selected .rc { color:var(--blue-text); opacity:.7; }
+.rest-all { font-style:italic; }
+.back-link { font-size:13px; color:var(--text-3); text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap; }
+.back-link:hover { color:var(--text); }
 </style>
 </head>
 <body>
@@ -335,11 +377,25 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 <div class="page">
 
   <div class="page-header">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px">
-      <div class="page-title">店家異動審核</div>
-      <a href="purchasing-home.html" style="font-size:13px;color:var(--text-3);text-decoration:none;display:flex;align-items:center;gap:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-3)'">← 回首頁</a>
-    </div>
+    <div class="page-title">店家異動審核</div>
     <div class="page-sub">採購部 ・ 店家申請之異動須採購核准後才正式寫入系統</div>
+  </div>
+
+  <div class="top-bar">
+    <div class="rest-picker-wrap" id="rest-picker">
+      <div class="rest-trigger" id="rest-trigger" onclick="togglePicker()">
+        <span class="rt-icon">🏪</span>
+        <span class="rt-label" id="rt-label">所有餐廳</span>
+        <span class="rt-arrow">▼</span>
+      </div>
+      <div class="rest-dropdown" id="rest-dropdown">
+        <div class="rest-search-wrap">
+          <input type="text" id="rest-search" placeholder="搜尋餐廳名稱…" oninput="filterPicker()" autocomplete="off">
+        </div>
+        <div class="rest-list" id="rest-list"></div>
+      </div>
+    </div>
+    <a href="purchasing-home.html" class="back-link">← 回首頁</a>
   </div>
 
   <div class="tabs">
@@ -356,11 +412,6 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
   <div class="view active" id="v-pending">
 
     <div class="toolbar">
-      <select id="rest-filter" onchange="filterCards()">
-        <option value="">所有餐廳</option>
-        <option value="XX 早餐店">XX 早餐店</option>
-        <option value="OO 雞飯專門店">OO 雞飯專門店</option>
-      </select>
       <div class="pill on" onclick="filterType(this,'')">全部</div>
       <div class="pill" onclick="filterType(this,'price')">調價</div>
       <div class="pill" onclick="filterType(this,'name')">改名</div>
@@ -615,10 +666,52 @@ function switchTab(t) {
   document.getElementById('v-done').classList.toggle('active', t === 'done');
 }
 
-function filterCards() {
-  curRestFilter = document.getElementById('rest-filter').value;
+/* ── Restaurant picker ── */
+const restList = [
+  { id:'',                name:'所有餐廳',      code:'' },
+  { id:'XX 早餐店',       name:'XX 早餐店',     code:'S0002' },
+  { id:'OO 雞飯專門店',   name:'OO 雞飯專門店', code:'S0001' },
+  { id:'阿成便當',        name:'阿成便當',      code:'S0003' },
+  { id:'好味食堂',        name:'好味食堂',      code:'S0004' },
+  { id:'家鄉麵食館',      name:'家鄉麵食館',    code:'S0005' },
+];
+
+function renderPickerList(q = '') {
+  const filtered = q ? restList.filter(r => r.name.includes(q)) : restList;
+  document.getElementById('rest-list').innerHTML = filtered.length
+    ? filtered.map(r => `
+        <div class="rest-item${r.id === curRestFilter ? ' selected' : ''}" onclick="selectRest('${r.id}')">
+          <span style="flex:1" class="${r.id===''?'rest-all':''}">${r.name}</span>
+          ${r.code ? `<span class="rc">${r.code}</span>` : ''}
+        </div>`).join('')
+    : '<div style="padding:16px 10px;text-align:center;font-size:12px;color:var(--text-3)">找不到符合的餐廳</div>';
+}
+function togglePicker() {
+  const isOpen = document.getElementById('rest-dropdown').classList.contains('open');
+  if (isOpen) { closePicker(); return; }
+  document.getElementById('rest-trigger').classList.add('open');
+  document.getElementById('rest-dropdown').classList.add('open');
+  renderPickerList();
+  setTimeout(() => document.getElementById('rest-search').focus(), 50);
+}
+function closePicker() {
+  document.getElementById('rest-trigger').classList.remove('open');
+  document.getElementById('rest-dropdown').classList.remove('open');
+  document.getElementById('rest-search').value = '';
+}
+function filterPicker() {
+  renderPickerList(document.getElementById('rest-search').value.trim());
+}
+function selectRest(id) {
+  curRestFilter = id;
+  const r = restList.find(x => x.id === id);
+  document.getElementById('rt-label').textContent = r ? r.name : '所有餐廳';
+  closePicker();
   renderPending();
 }
+document.addEventListener('click', e => {
+  if (!document.getElementById('rest-picker').contains(e.target)) closePicker();
+});
 
 function filterType(el, type) {
   document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
