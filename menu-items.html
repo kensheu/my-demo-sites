@@ -325,6 +325,33 @@ select {
 .rest-item .rest-code { font-size: 11px; color: var(--text-3); font-family: monospace; }
 .rest-item.selected .rest-code { color: var(--blue-text); opacity: .7; }
 .rest-empty { padding: 16px 10px; text-align: center; font-size: 12px; color: var(--text-3); }
+
+/* ─── Cat manager ─── */
+.cat-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 6px;
+  background: var(--card); cursor: default; user-select: none;
+  transition: background .1s, border-color .1s;
+}
+.cat-row.drag-over { border-color: var(--blue); background: var(--blue-bg); }
+.cat-row.dragging  { opacity: .4; }
+.cat-drag-handle { color: var(--text-3); font-size: 14px; cursor: grab; padding: 0 2px; }
+.cat-row-input {
+  flex: 1; border: none !important; outline: none !important;
+  background: transparent !important; font-size: 13px; color: var(--text);
+  padding: 0 !important; box-shadow: none !important;
+}
+.cat-row-input:focus { border-bottom: 1px solid var(--blue) !important; }
+.cat-del-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-3); font-size: 15px; padding: 0 2px; line-height: 1;
+}
+.cat-del-btn:hover { color: var(--red); }
+
+/* ─── Mobo cell ─── */
+.mobo-cell { display: flex; flex-direction: column; gap: 3px; }
+.mobo-sync-time { font-size: 10px; color: var(--text-3); }
 </style>
 </head>
 <body>
@@ -378,6 +405,7 @@ select {
       <div class="spacer"></div>
       <button class="btn" onclick="exportExcel()">📤 Excel 匯出</button>
       <button class="btn" onclick="openImport()">📥 Excel 匯入</button>
+      <button class="btn" onclick="openCatManager()">⚙ 管理分類</button>
       <button class="btn btn-primary" onclick="openAdd()">＋ 新增品項</button>
     </div>
     <div class="tbl-wrap">
@@ -438,12 +466,7 @@ select {
         <div class="form-2 form-row">
           <div>
             <label class="fl">分類 <span style="color:var(--red)">*</span></label>
-            <select id="f-cat">
-              <option value="便當">便當</option>
-              <option value="飲料">飲料</option>
-              <option value="點心">點心</option>
-              <option value="套餐">套餐</option>
-            </select>
+            <select id="f-cat"></select>
           </div>
           <div>
             <label class="fl">排序 <span style="color:var(--red)">*</span></label>
@@ -567,10 +590,7 @@ select {
       </p>
       <div>
         <label class="fl">移回分類</label>
-        <select id="restore-cat">
-          <option>便當</option><option>飲料</option>
-          <option>點心</option><option>套餐</option>
-        </select>
+        <select id="restore-cat"></select>
       </div>
     </div>
     <div class="modal-footer">
@@ -608,6 +628,28 @@ select {
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('import-modal')">取消</button>
       <button class="btn" style="color:var(--blue);border-color:var(--blue-border)">下載範本</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 分類管理 Modal ══ -->
+<div class="overlay" id="cat-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">管理分類</div>
+      <button class="modal-close" onclick="closeModal('cat-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text-3);margin-bottom:14px">拖移 <span style="font-size:14px">⠿</span> 調整順序；點擊名稱可改名；按 ✕ 刪除（需先移走品項）。</p>
+      <div id="cat-list"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" id="new-cat-input" placeholder="輸入新分類名稱…" style="flex:1" onkeydown="if(event.key==='Enter')addCat()">
+        <button class="btn btn-primary" onclick="addCat()">新增</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('cat-modal')">取消</button>
+      <button class="btn btn-primary" onclick="saveCats()">儲存並關閉</button>
     </div>
   </div>
 </div>
@@ -702,11 +744,19 @@ const allItems = {
   '家鄉麵食': [],
 };
 
+const allCats = {
+  'OO雞飯':  ['便當', '飲料', '點心', '套餐'],
+  'XX早餐':  ['吐司', '蛋餅', '飲料', '輕食'],
+  '阿成便當': ['便當', '飲料', '點心'],
+  '好味食堂': ['便當', '飲料', '點心', '湯品'],
+  '家鄉麵食': ['麵食', '飲料', '點心'],
+};
+
 let items = JSON.parse(JSON.stringify(allItems['OO雞飯']));
 
 let curCatFilter = '';
 let editingId = null, deletingId = null, archivingId = null, restoringId = null;
-let nextNum = 10;
+let catDragSrcIdx = null;
 
 /* ── helpers ── */
 const activeItems   = () => items.filter(i => i.status === 'on');
@@ -718,8 +768,14 @@ function imgBadge(s) {
   return `<span class="badge badge-gray">待上傳</span>`;
 }
 function moboBadge(item) {
-  if (!item.mobo) return `<span class="badge badge-gray">未連結</span>`;
-  return `<span class="badge badge-purple" title="最後同步：${item.moboSync}">已連結</span>`;
+  if (!item.mobo) {
+    return `<div class="mobo-cell"><button class="act-btn" onclick="uploadMobo('${item.id}')">上傳摩寶</button></div>`;
+  }
+  return `<div class="mobo-cell">
+    <span class="badge badge-purple">已連結</span>
+    <span class="mobo-sync-time">${item.moboSync}</span>
+    <button class="act-btn" style="font-size:11px" onclick="syncMobo('${item.id}')">更新摩寶</button>
+  </div>`;
 }
 
 /* ── render ── */
@@ -729,6 +785,7 @@ function renderAll() {
   renderActive();
   renderArchive();
   updateCounts();
+  populateCatSelects();
 }
 
 function renderStats() {
@@ -744,7 +801,7 @@ function renderStats() {
 }
 
 function renderCatPills() {
-  const cats = [...new Set(activeItems().map(i => i.cat))];
+  const cats = allCats[curRest.id] || [];
   const all = [{ v: '', l: '全部' }, ...cats.map(c => ({ v: c, l: c }))];
   document.getElementById('cat-pills').innerHTML = all.map(p =>
     `<div class="pill${curCatFilter === p.v ? ' on' : ''}" onclick="filterCat(this,'${p.v}')">${p.l}</div>`
@@ -838,8 +895,12 @@ function openAdd() {
   ['f-name','f-display','f-en','f-desc','f-note','f-cost','f-new-store','f-new-end','f-new-cost'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-store').value = '';
   document.getElementById('f-end').value = '';
-  document.getElementById('f-sort').value = '';
-  document.getElementById('f-cat').value = '便當';
+  // 自動建議排序：目前最大 sort + 1
+  const maxSort = Math.max(0, ...activeItems().map(i => i.sort || 0));
+  document.getElementById('f-sort').value = maxSort + 1;
+  // 預設選第一個分類
+  const curCats = allCats[curRest.id] || [];
+  document.getElementById('f-cat').value = curCats[0] || '';
   document.getElementById('f-eff-date').value = '2026-04-01';
   updateCharCount();
   openModal('edit-modal');
@@ -877,9 +938,12 @@ function saveItem() {
   const name = document.getElementById('f-name').value.trim();
   const store = parseFloat(document.getElementById('f-store').value);
   const end   = parseFloat(document.getElementById('f-end').value);
-  if (!name)              { alert('請填寫餐點完整名稱'); return; }
+  const sortRaw = document.getElementById('f-sort').value.trim();
+  const sort = parseInt(sortRaw);
+  if (!name)                   { alert('請填寫餐點完整名稱'); return; }
   if (isNaN(store)||store < 0) { alert('請填寫正確的店內價'); return; }
   if (isNaN(end)  ||end   < 0) { alert('請填寫正確的終端售價'); return; }
+  if (!sortRaw || isNaN(sort) || sort < 1) { alert('請填寫排序序號（正整數）'); return; }
 
   const ns = parseFloat(document.getElementById('f-new-store').value);
   const hasPending = !isNaN(ns) && ns > 0;
@@ -888,7 +952,7 @@ function saveItem() {
     name,
     display: document.getElementById('f-display').value.trim() || [...name].slice(0,9).join(''),
     cat:  document.getElementById('f-cat').value,
-    sort: parseInt(document.getElementById('f-sort').value) || 99,
+    sort,
     en:   document.getElementById('f-en').value.trim(),
     desc: document.getElementById('f-desc').value.trim(),
     note: document.getElementById('f-note').value.trim(),
@@ -907,7 +971,10 @@ function saveItem() {
     const idx = items.findIndex(i => i.id === editingId);
     if (idx !== -1) items[idx] = { ...items[idx], ...data };
   } else {
-    data.id = 'N' + String(nextNum++).padStart(3, '0');
+    // 從所有品項中取最大數字部分 +1，確保不重複
+    const allNums = items.map(i => parseInt(i.id.replace(/\D/g,'')) || 0);
+    const maxNum = Math.max(0, ...allNums);
+    data.id = 'N' + String(maxNum + 1).padStart(3, '0');
     data.mobo = false; data.moboSync = null; data.imgStatus = 'pending';
     items.push(data);
   }
@@ -962,13 +1029,142 @@ function openRestore(id) {
   restoringId = id;
   const item = items.find(i => i.id === id);
   document.getElementById('restore-name').textContent = item ? item.name : '';
-  document.getElementById('restore-cat').value = item?.cat || '便當';
+  const curCats = allCats[curRest.id] || [];
+  document.getElementById('restore-cat').value = item?.cat || curCats[0] || '';
   openModal('restore-modal');
 }
 function confirmRestore() {
   const item = items.find(i => i.id === restoringId);
   if (item) { item.status = 'on'; item.cat = document.getElementById('restore-cat').value; item.sort = 99; item.archivedAt = null; }
   closeModal('restore-modal');
+  renderAll();
+}
+
+/* ── mobo ── */
+function uploadMobo(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  if (!confirm(`確定要將「${item.name}」上傳至摩寶系統？`)) return;
+  const now = new Date();
+  item.mobo = true;
+  item.moboSync = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+  renderAll();
+}
+
+function syncMobo(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  if (!confirm(`確定要重新同步「${item.name}」至摩寶系統？\n摩寶系統中的售價與圖片資訊將被覆寫。`)) return;
+  const now = new Date();
+  item.moboSync = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+  renderAll();
+}
+
+/* ── cat selects ── */
+function populateCatSelects() {
+  const cur = allCats[curRest.id] || [];
+  ['f-cat', 'restore-cat'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = cur.map(c => `<option value="${c}">${c}</option>`).join('');
+    if (cur.includes(prev)) sel.value = prev;
+  });
+}
+
+/* ── cat manager ── */
+function openCatManager() {
+  renderCatManager();
+  openModal('cat-modal');
+}
+
+function renderCatManager() {
+  const cur = allCats[curRest.id] || [];
+  const el = document.getElementById('cat-list');
+  if (!cur.length) {
+    el.innerHTML = `<div style="font-size:13px;color:var(--text-3);padding:12px 0">尚無分類，請於下方新增。</div>`;
+    return;
+  }
+  el.innerHTML = cur.map((cat, i) => `
+    <div class="cat-row" draggable="true" data-idx="${i}"
+      ondragstart="catDragStart(event,${i})"
+      ondragover="catDragOver(event,${i})"
+      ondragleave="catDragLeave(event)"
+      ondrop="catDrop(event,${i})"
+      ondragend="catDragEnd(event)">
+      <span class="cat-drag-handle">⠿</span>
+      <input class="cat-row-input" type="text" id="cat-input-${i}" value="${cat}">
+      <button class="cat-del-btn" onclick="removeCat(${i})">✕</button>
+    </div>`).join('');
+}
+
+function catDragStart(e, idx) {
+  catDragSrcIdx = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function catDragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.cat-row').forEach(r => r.classList.remove('drag-over'));
+  if (idx !== catDragSrcIdx) e.currentTarget.classList.add('drag-over');
+}
+function catDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function catDrop(e, idx) {
+  e.preventDefault();
+  document.querySelectorAll('.cat-row').forEach(r => r.classList.remove('drag-over', 'dragging'));
+  if (catDragSrcIdx === null || catDragSrcIdx === idx) return;
+  const cur = allCats[curRest.id];
+  const moved = cur.splice(catDragSrcIdx, 1)[0];
+  cur.splice(idx, 0, moved);
+  catDragSrcIdx = null;
+  renderCatManager();
+}
+function catDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.cat-row').forEach(r => r.classList.remove('drag-over'));
+  catDragSrcIdx = null;
+}
+
+function removeCat(i) {
+  const cur = allCats[curRest.id];
+  const catName = cur[i];
+  const usedCount = items.filter(it => it.cat === catName && it.status === 'on').length;
+  if (usedCount > 0) {
+    alert(`「${catName}」目前有 ${usedCount} 個上架品項，無法刪除。\n請先將品項改為其他分類。`);
+    return;
+  }
+  cur.splice(i, 1);
+  renderCatManager();
+}
+
+function addCat() {
+  const input = document.getElementById('new-cat-input');
+  const val = input.value.trim();
+  if (!val) return;
+  const cur = allCats[curRest.id] || (allCats[curRest.id] = []);
+  if (cur.includes(val)) { alert(`「${val}」分類已存在`); return; }
+  cur.push(val);
+  input.value = '';
+  renderCatManager();
+}
+
+function saveCats() {
+  const cur = allCats[curRest.id] || [];
+  // 讀取所有輸入框，更新 allCats 並同步品項的 cat 欄位
+  document.querySelectorAll('#cat-list .cat-row').forEach((row, i) => {
+    const input = row.querySelector('input');
+    const newName = input ? input.value.trim() : '';
+    if (newName && cur[i] !== undefined && newName !== cur[i]) {
+      const oldName = cur[i];
+      items.forEach(item => { if (item.cat === oldName) item.cat = newName; });
+      cur[i] = newName;
+    }
+  });
+  closeModal('cat-modal');
+  populateCatSelects();
   renderAll();
 }
 
