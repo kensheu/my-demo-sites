@@ -9,9 +9,9 @@ https://kensheu.github.io/my-demo-sites/
 ## 頁面清單
 
 - [首頁公告 demo](https://kensheu.github.io/my-demo-sites/announcement.html)
+- [採購部首頁 demo](https://kensheu.github.io/my-demo-sites/purchasing-home.html)（包含三個子頁面：[店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)、[餐點調價歷史紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)、[餐點管理](https://kensheu.github.io/my-demo-sites/menu-items.html)）
 - [客訴管理 demo](https://kensheu.github.io/my-demo-sites/complaint.html)
 - [問題單與 ECR 請求 demo](https://kensheu.github.io/my-demo-sites/issue-and-ecr.html)
-- [採購部首頁 demo](https://kensheu.github.io/my-demo-sites/purchasing-home.html)（包含兩個子頁面：[店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)、[餐點調價歷史紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)）
 
 ---
 
@@ -134,9 +134,8 @@ https://kensheu.github.io/my-demo-sites/
 
 ### 餐點調價歷史紀錄
 
-- 共用操作：
-    - 店家切換
-    - 月份切換（上 / 下一月）
+- 餐廳切換（下拉選單）
+- 月份切換（上 / 下一月）
 - 價格快照頁：
     - 顯示當月全部品項完整價格清單
     - 欄位：料號、餐點名稱、成本價、店內價、終端售價、異動標記
@@ -147,3 +146,17 @@ https://kensheu.github.io/my-demo-sites/
     - 每筆紀錄包含：料號、餐點名稱、異動描述、日期、時間、操作人員、來源（人工操作 / 系統自動）
     - 依異動類型篩選（成本 / 售價異動、品名異動、上下架 / 新增）
     - 搜尋品名或料號
+
+---
+
+### 餐點管理
+
+- 可搜尋餐廳選擇器（左上）
+- 販售中 / 下架存檔區兩個 Tab
+- 品項列表：料號、餐點名稱、機台顯示名稱、分類、店內價、終端售價、成本價、圖片狀態、摩寶連結狀態
+- 預約調整成本價：設定新店內價＋生效日，系統自動計算新成本價
+- 新增 / 編輯品項：完整名稱、機台顯示名稱（9 字上限）、分類、排序、英文名稱、介紹、內部備註
+- 刪除品項（權限確認提示）
+- 下架移至存檔區 / 重新上架
+- Excel 匯入 / 匯出（示意）
+- 分類 pills 篩選、搜尋品名或料號

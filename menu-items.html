@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餐點管理</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #a8a29e;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --purple:      #7c3aed;
+  --purple-bg:   #f5f3ff;
+  --purple-bdr:  #ddd6fe;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* ─── Header ─── */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  margin-bottom: 20px;
+}
+.page-title { font-size: 19px; font-weight: 600; }
+.page-sub   { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+
+/* ─── Stats bar ─── */
+.stats-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.stat-chip {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px;
+  font-size: 12px; color: var(--text-2);
+  display: flex; align-items: center; gap: 6px;
+}
+.stat-chip strong { color: var(--text); font-size: 15px; font-variant-numeric: tabular-nums; }
+.stat-chip.warn strong { color: var(--orange); }
+
+/* ─── Tabs ─── */
+.tabs { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 16px; }
+.tab {
+  padding: 9px 18px; font-size: 13px; cursor: pointer;
+  color: var(--text-3); border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px; white-space: nowrap;
+  transition: color .12s; user-select: none;
+}
+.tab:hover { color: var(--text-2); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 500; }
+.tab-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; border-radius: 100px;
+  font-size: 10px; font-weight: 600; padding: 0 5px; margin-left: 5px;
+  background: var(--bg); color: var(--text-3); border: 1px solid var(--border);
+}
+.tab.active .tab-count { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.search-box {
+  display: flex; align-items: center;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--card); padding: 0 10px; gap: 6px;
+  flex: 1; min-width: 160px; max-width: 260px;
+}
+.search-box input {
+  border: none; outline: none;
+  font-size: 13px; color: var(--text); background: transparent;
+  width: 100%; padding: 6px 0;
+}
+.search-box input::placeholder { color: var(--text-3); }
+.si { font-size: 12px; color: var(--text-3); }
+
+.pill {
+  padding: 5px 13px; border-radius: 100px;
+  border: 1px solid var(--border); font-size: 12px;
+  cursor: pointer; background: var(--card); color: var(--text-2);
+  transition: all .12s; user-select: none; white-space: nowrap;
+}
+.pill:hover { border-color: #a8a29e; color: var(--text); }
+.pill.on { background: var(--text); color: #fff; border-color: var(--text); }
+
+.spacer { flex: 1; }
+
+.btn {
+  padding: 7px 14px; border-radius: 6px;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card); color: var(--text-2);
+  transition: all .12s; white-space: nowrap;
+}
+.btn:hover { border-color: #a8a29e; color: var(--text); }
+.btn-primary { background: var(--text); color: #fff; border-color: var(--text); }
+.btn-primary:hover { opacity: .88; color: #fff; border-color: var(--text); }
+.btn-danger { color: var(--red); border-color: var(--red-bdr); }
+.btn-danger:hover { background: var(--red-bg); }
+
+/* ─── Table ─── */
+.tbl-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 780px; }
+thead th {
+  padding: 10px 14px; text-align: left;
+  font-size: 11px; font-weight: 500; letter-spacing: .04em;
+  color: var(--text-3); background: var(--bg-2);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border-2); transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-2); }
+td { padding: 11px 14px; vertical-align: middle; }
+
+.item-id { font-size: 11px; color: var(--text-3); font-family: monospace; }
+.item-name-main { font-weight: 500; }
+.item-name-machine { font-size: 11px; color: var(--text-3); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.machine-label {
+  font-size: 10px; color: var(--text-3); border: 1px solid var(--border);
+  border-radius: 3px; padding: 0 4px; line-height: 1.6;
+}
+
+.price-main { font-weight: 500; font-variant-numeric: tabular-nums; }
+.price-pending {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; background: var(--orange-bg); color: var(--orange);
+  border: 1px solid var(--orange-bdr); border-radius: 4px; padding: 1px 5px; margin-top: 3px;
+}
+.price-auto { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 500;
+}
+.badge-green  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.badge-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.badge-gray   { background: #f3f4f6; color: var(--text-3); border: 1px solid var(--border); }
+.badge-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-bdr); }
+
+.action-btns { display: flex; gap: 6px; }
+.act-btn {
+  padding: 4px 10px; border-radius: 5px; font-size: 12px;
+  cursor: pointer; border: 1px solid var(--border);
+  background: transparent; color: var(--text-2); transition: all .1s;
+}
+.act-btn:hover { background: var(--bg); color: var(--text); }
+.act-btn.danger { color: var(--red); border-color: var(--red-bdr); }
+.act-btn.danger:hover { background: var(--red-bg); }
+
+.empty { padding: 48px 16px; text-align: center; color: var(--text-3); font-size: 13px; }
+
+/* ─── Archive cards ─── */
+.arc-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.arc-id { font-size: 11px; color: var(--text-3); font-family: monospace; }
+.arc-name { font-weight: 500; flex: 1; min-width: 120px; }
+.arc-meta { font-size: 11px; color: var(--text-3); }
+
+/* ─── Modal ─── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; opacity: 0; pointer-events: none;
+  transition: opacity .15s; padding: 16px;
+}
+.overlay.open { opacity: 1; pointer-events: auto; }
+.modal {
+  background: var(--card); border-radius: 12px;
+  width: 540px; max-width: 100%; max-height: calc(100vh - 32px); overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  transform: translateY(8px); transition: transform .15s;
+}
+.overlay.open .modal { transform: translateY(0); }
+.modal-sm { width: 400px; }
+
+.modal-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: var(--card); z-index: 1;
+}
+.modal-title { font-size: 15px; font-weight: 600; }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 6px; border: none;
+  background: transparent; cursor: pointer; font-size: 16px; color: var(--text-3);
+  display: flex; align-items: center; justify-content: center; transition: background .1s;
+}
+.modal-close:hover { background: var(--bg); color: var(--text); }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  padding: 14px 24px; border-top: 1px solid var(--border-2);
+  display: flex; justify-content: flex-end; gap: 8px;
+  position: sticky; bottom: 0; background: var(--card);
+}
+
+/* ─── Form ─── */
+.form-section { margin-bottom: 22px; }
+.fsec-title {
+  font-size: 11px; font-weight: 600; letter-spacing: .06em;
+  color: var(--text-3); text-transform: uppercase;
+  margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border-2);
+}
+.form-row { margin-bottom: 14px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+label.fl { display: block; font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 5px; }
+.fhint { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+input[type="text"], input[type="number"], input[type="date"], textarea, select {
+  width: 100%; padding: 7px 10px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 13px; color: var(--text);
+  background: var(--card); font-family: inherit; outline: none;
+  transition: border-color .12s, box-shadow .12s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
+input[readonly] { background: var(--bg-2); color: var(--text-3); cursor: default; }
+input[readonly]:focus { border-color: var(--border); box-shadow: none; }
+textarea { resize: vertical; min-height: 60px; }
+
+.char-counter { text-align: right; font-size: 11px; color: var(--text-3); margin-top: 3px; }
+.char-counter.warn { color: var(--orange); }
+.char-counter.over { color: var(--red); }
+
+.pending-box {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px; margin-top: 12px;
+}
+.pending-box .fsec-title { border-bottom: none; padding-bottom: 0; margin-bottom: 12px; }
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center; padding-right: 28px;
+}
+
+.warn-box {
+  border-radius: 7px; padding: 10px 12px; font-size: 12px; margin-top: 10px;
+}
+.warn-box.red   { background: var(--red-bg); border: 1px solid var(--red-bdr); color: var(--red); }
+.warn-box.orange{ background: var(--orange-bg); border: 1px solid var(--orange-bdr); color: var(--orange); }
+
+/* ─── Restaurant picker ─── */
+.rest-picker { position: relative; display: inline-block; margin-bottom: 20px; }
+.rest-trigger {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--card);
+  cursor: pointer; user-select: none;
+  transition: border-color .12s, box-shadow .12s;
+  min-width: 200px;
+}
+.rest-trigger:hover { border-color: #a8a29e; }
+.rest-trigger.open  { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
+.rest-icon { font-size: 16px; }
+.rest-label { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+.rest-arrow { font-size: 10px; color: var(--text-3); transition: transform .15s; }
+.rest-trigger.open .rest-arrow { transform: rotate(180deg); }
+
+.rest-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  min-width: 240px; z-index: 50;
+  opacity: 0; pointer-events: none;
+  transform: translateY(-4px); transition: opacity .12s, transform .12s;
+}
+.rest-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+.rest-search-wrap {
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--border-2);
+}
+.rest-search-wrap input {
+  width: 100%; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; color: var(--text); background: var(--bg-2);
+  outline: none; font-family: inherit;
+}
+.rest-search-wrap input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
+
+.rest-list { padding: 6px; max-height: 220px; overflow-y: auto; }
+.rest-item {
+  padding: 8px 10px; border-radius: 6px;
+  font-size: 13px; cursor: pointer; color: var(--text-2);
+  transition: background .1s;
+  display: flex; align-items: center; gap: 8px;
+}
+.rest-item:hover { background: var(--bg-2); color: var(--text); }
+.rest-item.selected { background: var(--blue-bg); color: var(--blue-text); font-weight: 500; }
+.rest-item .rest-code { font-size: 11px; color: var(--text-3); font-family: monospace; }
+.rest-item.selected .rest-code { color: var(--blue-text); opacity: .7; }
+.rest-empty { padding: 16px 10px; text-align: center; font-size: 12px; color: var(--text-3); }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">餐點管理</div>
+      <div class="page-sub">採購部 ・ 品項建置、價格設定與異動管理</div>
+    </div>
+    <a href="purchasing-home.html" style="font-size:13px;color:var(--text-3);text-decoration:none;display:flex;align-items:center;gap:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-3)'">← 回首頁</a>
+  </div>
+
+  <!-- 餐廳選擇器 -->
+  <div class="rest-picker" id="rest-picker">
+    <div class="rest-trigger" id="rest-trigger" onclick="toggleRestPicker()">
+      <span class="rest-icon">🏪</span>
+      <span class="rest-label" id="rest-label">OO 雞飯專門店</span>
+      <span class="rest-arrow">▼</span>
+    </div>
+    <div class="rest-dropdown" id="rest-dropdown">
+      <div class="rest-search-wrap">
+        <input type="text" id="rest-search" placeholder="搜尋餐廳名稱…" oninput="filterRests()" autocomplete="off">
+      </div>
+      <div class="rest-list" id="rest-list"></div>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('on')">
+      販售中 <span class="tab-count" id="cnt-on">0</span>
+    </div>
+    <div class="tab" onclick="switchTab('off')">
+      下架／存檔區 <span class="tab-count" id="cnt-off">0</span>
+    </div>
+  </div>
+
+  <!-- ══ 販售中 ══ -->
+  <div class="view active" id="v-on">
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="si">🔍</span>
+        <input type="text" id="search-on" placeholder="搜尋品名或料號…" oninput="renderActive()">
+      </div>
+      <div id="cat-pills" style="display:contents"></div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="exportExcel()">📤 Excel 匯出</button>
+      <button class="btn" onclick="openImport()">📥 Excel 匯入</button>
+      <button class="btn btn-primary" onclick="openAdd()">＋ 新增品項</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>料號</th>
+            <th>餐點名稱</th>
+            <th>分類</th>
+            <th>店內價</th>
+            <th>終端售價</th>
+            <th>成本價</th>
+            <th>圖片</th>
+            <th>摩寶</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ 下架/存檔區 ══ -->
+  <div class="view" id="v-off">
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="si">🔍</span>
+        <input type="text" id="search-off" placeholder="搜尋品名或料號…" oninput="renderArchive()">
+      </div>
+      <div class="spacer"></div>
+    </div>
+    <div id="archive-list"></div>
+  </div>
+
+</div>
+
+<!-- ══ 新增／編輯 Modal ══ -->
+<div class="overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="edit-title">新增品項</div>
+      <button class="modal-close" onclick="closeModal('edit-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-section">
+        <div class="fsec-title">基本資料</div>
+        <div class="form-row">
+          <label class="fl">餐點完整名稱 <span style="color:var(--red)">*</span></label>
+          <input type="text" id="f-name" placeholder="例：起司雙層厚蛋餅（無字數限制）">
+        </div>
+        <div class="form-row">
+          <label class="fl">機台顯示名稱（最多 9 字）</label>
+          <input type="text" id="f-display" maxlength="9" placeholder="例：起司厚蛋餅" oninput="updateCharCount()">
+          <div class="char-counter" id="char-count">0 / 9</div>
+          <div class="fhint">顯示於熱食機；留空則自動截取完整名稱前 9 字</div>
+        </div>
+        <div class="form-2 form-row">
+          <div>
+            <label class="fl">分類 <span style="color:var(--red)">*</span></label>
+            <select id="f-cat">
+              <option value="便當">便當</option>
+              <option value="飲料">飲料</option>
+              <option value="點心">點心</option>
+              <option value="套餐">套餐</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl">排序 <span style="color:var(--red)">*</span></label>
+            <input type="number" id="f-sort" min="1" placeholder="1">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="fl">英文名稱</label>
+          <input type="text" id="f-en" placeholder="例：Cheese Double Egg Pancake（選填）">
+        </div>
+        <div class="form-row">
+          <label class="fl">介紹</label>
+          <textarea id="f-desc" placeholder="例：辣度、素食、食材說明…（選填）"></textarea>
+        </div>
+        <div class="form-row">
+          <label class="fl">內部備註（僅浩華人員可見）</label>
+          <textarea id="f-note" placeholder="例：春節特餐、最多 30 份/日、地區限定…（選填）"></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="fsec-title">現行售價</div>
+        <div class="form-2 form-row">
+          <div>
+            <label class="fl">店內價 <span style="color:var(--red)">*</span></label>
+            <input type="number" id="f-store" min="0" placeholder="0" oninput="calcCost()">
+          </div>
+          <div>
+            <label class="fl">終端售價 <span style="color:var(--red)">*</span></label>
+            <input type="number" id="f-end" min="0" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="fl">成本價（自動計算）</label>
+          <input type="text" id="f-cost" readonly placeholder="依店內價自動計算">
+          <div class="fhint">成本 ＝ 店內價 × 80%（抽成比例設定於客戶供應商資料）</div>
+        </div>
+
+        <div class="pending-box">
+          <div class="fsec-title">預約調整成本價（選填）</div>
+          <div class="fhint" style="margin-bottom:12px">設定新店內價後，系統於生效日自動更新成本價，不需人工操作。</div>
+          <div class="form-2 form-row">
+            <div>
+              <label class="fl">新店內價</label>
+              <input type="number" id="f-new-store" min="0" placeholder="留空表示不預約" oninput="calcNewCost()">
+            </div>
+            <div>
+              <label class="fl">新成本價（自動計算）</label>
+              <input type="text" id="f-new-cost" readonly placeholder="—">
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="fl">預計生效日</label>
+            <input type="date" id="f-eff-date" value="2026-04-01">
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('edit-modal')">取消</button>
+      <button class="btn btn-primary" onclick="saveItem()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 刪除 Modal ══ -->
+<div class="overlay" id="delete-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--red)">刪除品項</div>
+      <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:12px">
+        確定要刪除 <strong id="delete-name"></strong> 嗎？
+      </p>
+      <div class="warn-box red">
+        ⚠ 刪除後品項料號不會再使用。若有歷史訂單關聯，資料仍會保留於報表中，但品項將從管理清單移除。此操作無法還原。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('delete-modal')">取消</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 下架 Modal ══ -->
+<div class="overlay" id="archive-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">下架品項</div>
+      <button class="modal-close" onclick="closeModal('archive-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:12px">
+        確定要將 <strong id="archive-name"></strong> 移至下架／存檔區嗎？
+      </p>
+      <div class="warn-box orange">
+        下架後品項將不再出現於菜單排程選單。若需重新供應，可從存檔區移回。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('archive-modal')">取消</button>
+      <button class="btn" style="background:var(--orange);color:#fff;border-color:var(--orange)" onclick="confirmArchive()">確認下架</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 重新上架 Modal ══ -->
+<div class="overlay" id="restore-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">重新上架</div>
+      <button class="modal-close" onclick="closeModal('restore-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px">
+        確定要將 <strong id="restore-name"></strong> 移回販售中嗎？
+      </p>
+      <div>
+        <label class="fl">移回分類</label>
+        <select id="restore-cat">
+          <option>便當</option><option>飲料</option>
+          <option>點心</option><option>套餐</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('restore-modal')">取消</button>
+      <button class="btn" style="background:var(--green);color:#fff;border-color:var(--green)" onclick="confirmRestore()">確認上架</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Excel 匯入 Modal ══ -->
+<div class="overlay" id="import-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">Excel 批次匯入</div>
+      <button class="modal-close" onclick="closeModal('import-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:14px">
+        上傳符合格式的 .xlsx 檔案，系統自動編列料號並匯入品項。
+      </p>
+      <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--text-2);margin-bottom:14px;line-height:1.8">
+        <div style="font-weight:600;margin-bottom:4px;color:var(--text)">欄位格式（* 為必填）</div>
+        <div>• 餐點完整名稱 *</div>
+        <div>• 機台顯示名稱（max 9 字）</div>
+        <div>• 英文名稱</div>
+        <div>• 分類 *　・　店內價 *</div>
+        <div>• 介紹　・　內部備註</div>
+      </div>
+      <div onclick="alert('【示意】實際系統將在此開啟檔案選取對話框，上傳 .xlsx 後自動批次建立品項')"
+        style="border:2px dashed var(--border);border-radius:8px;padding:30px;text-align:center;color:var(--text-3);font-size:13px;cursor:pointer;transition:background .1s"
+        onmouseover="this.style.background='var(--bg-2)'" onmouseout="this.style.background=''">
+        點擊上傳 或 拖曳 .xlsx 至此
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('import-modal')">取消</button>
+      <button class="btn" style="color:var(--blue);border-color:var(--blue-border)">下載範本</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMMISSION = 0.8;
+
+/* ── Restaurant picker ── */
+const restaurants = [
+  { id: 'OO雞飯',  name: 'OO 雞飯專門店', code: 'S0001' },
+  { id: 'XX早餐',  name: 'XX 早餐店',      code: 'S0002' },
+  { id: '阿成便當', name: '阿成便當',       code: 'S0003' },
+  { id: '好味食堂', name: '好味食堂',       code: 'S0004' },
+  { id: '家鄉麵食', name: '家鄉麵食館',     code: 'S0005' },
+];
+let curRest = restaurants[0];
+
+function renderRestList(filter = '') {
+  const q = filter.trim().toLowerCase();
+  const filtered = q ? restaurants.filter(r => r.name.toLowerCase().includes(q)) : restaurants;
+  const el = document.getElementById('rest-list');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="rest-empty">找不到符合的餐廳</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(r => `
+    <div class="rest-item${r.id === curRest.id ? ' selected' : ''}" onclick="selectRest('${r.id}')">
+      <span style="flex:1">${r.name}</span>
+      <span class="rest-code">${r.code}</span>
+    </div>`).join('');
+}
+
+function toggleRestPicker() {
+  const trigger  = document.getElementById('rest-trigger');
+  const dropdown = document.getElementById('rest-dropdown');
+  const isOpen   = dropdown.classList.contains('open');
+  if (isOpen) {
+    closeRestPicker();
+  } else {
+    trigger.classList.add('open');
+    dropdown.classList.add('open');
+    renderRestList();
+    setTimeout(() => document.getElementById('rest-search').focus(), 50);
+  }
+}
+
+function closeRestPicker() {
+  document.getElementById('rest-trigger').classList.remove('open');
+  document.getElementById('rest-dropdown').classList.remove('open');
+  document.getElementById('rest-search').value = '';
+}
+
+function selectRest(id) {
+  curRest = restaurants.find(r => r.id === id) || restaurants[0];
+  document.getElementById('rest-label').textContent = curRest.name;
+  items = JSON.parse(JSON.stringify(allItems[curRest.id] || []));
+  curCatFilter = '';
+  closeRestPicker();
+  renderAll();
+}
+
+function filterRests() {
+  renderRestList(document.getElementById('rest-search').value);
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('rest-picker').contains(e.target)) closeRestPicker();
+});
+
+const allItems = {
+  'OO雞飯': [
+    { id:'B001', name:'雙拼便當',         display:'雙拼便當',   cat:'便當', sort:1, en:'Combo Bento',      desc:'雞腿＋排骨雙主菜', note:'',                         storePrice:120, endPrice:120, costPrice:96,  status:'on',  pending:{ storePrice:130, costPrice:104, effDate:'2026-04-01' }, mobo:true,  moboSync:'2026/3/1',  imgStatus:'ok' },
+    { id:'B002', name:'雞腿便當',         display:'雞腿便當',   cat:'便當', sort:2, en:'',                 desc:'香煎雞腿，附湯',   note:'',                         storePrice:110, endPrice:110, costPrice:88,  status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'pending' },
+    { id:'B003', name:'排骨便當',         display:'排骨便當',   cat:'便當', sort:3, en:'',                 desc:'',                note:'熱銷商品，最多 50 份/日',   storePrice:100, endPrice:100, costPrice:80,  status:'on',  pending:null, mobo:true,  moboSync:'2026/2/15', imgStatus:'ok' },
+    { id:'B005', name:'咖哩豬排飯（特餐）', display:'咖哩豬排飯', cat:'便當', sort:4, en:'Curry Pork Cutlet', desc:'',              note:'春節特餐，3/31 前供應',     storePrice:130, endPrice:130, costPrice:104, status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'ok' },
+    { id:'D001', name:'冬瓜茶',           display:'冬瓜茶',     cat:'飲料', sort:1, en:'',                 desc:'',                note:'',                         storePrice:25,  endPrice:25,  costPrice:20,  status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'ok' },
+    { id:'D002', name:'紅茶（冷）',        display:'紅茶',      cat:'飲料', sort:2, en:'',                 desc:'',                note:'',                         storePrice:20,  endPrice:20,  costPrice:16,  status:'on',  pending:{ storePrice:25, costPrice:20, effDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'B004', name:'麻婆豆腐飯',        display:'麻婆豆腐飯', cat:'便當', sort:null, en:'',             desc:'',                note:'',                         storePrice:90,  endPrice:90,  costPrice:72,  status:'off', pending:null, mobo:false, moboSync:null,        imgStatus:'ok',     archivedAt:'2026/2/1' },
+    { id:'D003', name:'青草茶',           display:'青草茶',     cat:'飲料', sort:null, en:'',             desc:'',                note:'',                         storePrice:20,  endPrice:20,  costPrice:16,  status:'off', pending:null, mobo:false, moboSync:null,        imgStatus:'ok',     archivedAt:'2026/1/15' },
+  ],
+  'XX早餐': [
+    { id:'A001', name:'奶油厚片',         display:'奶油厚片',   cat:'吐司', sort:1, en:'Butter Toast',     desc:'',                note:'',                         storePrice:40,  endPrice:40,  costPrice:18,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'A002', name:'原味蛋餅',         display:'原味蛋餅',   cat:'蛋餅', sort:1, en:'',                 desc:'',                note:'',                         storePrice:35,  endPrice:35,  costPrice:15,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'A003', name:'總匯蛋餅',         display:'總匯蛋餅',   cat:'蛋餅', sort:2, en:'',                 desc:'',                note:'',                         storePrice:55,  endPrice:55,  costPrice:22,  status:'on',  pending:{ storePrice:58, costPrice:46, effDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'A005', name:'起司雙層蛋餅',     display:'起司厚蛋餅', cat:'蛋餅', sort:3, en:'Cheese Egg Wrap',  desc:'',                note:'',                         storePrice:50,  endPrice:50,  costPrice:22,  status:'on',  pending:null, mobo:true,  moboSync:'2026/1/10', imgStatus:'ok' },
+    { id:'A013', name:'冰美式（中）',     display:'冰美式',     cat:'飲料', sort:1, en:'Iced Americano M', desc:'',                note:'',                         storePrice:35,  endPrice:35,  costPrice:10,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'pending' },
+    { id:'A012', name:'紅茶（中）',       display:'紅茶',       cat:'飲料', sort:2, en:'',                 desc:'',                note:'',                         storePrice:25,  endPrice:25,  costPrice:8,   status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'A004', name:'火腿蛋餅',         display:'火腿蛋餅',   cat:'蛋餅', sort:null, en:'',             desc:'',                note:'',                         storePrice:50,  endPrice:50,  costPrice:25,  status:'off', pending:null, mobo:false, moboSync:null, imgStatus:'ok', archivedAt:'2026/3/1' },
+  ],
+  '阿成便當': [],
+  '好味食堂': [],
+  '家鄉麵食': [],
+};
+
+let items = JSON.parse(JSON.stringify(allItems['OO雞飯']));
+
+let curCatFilter = '';
+let editingId = null, deletingId = null, archivingId = null, restoringId = null;
+let nextNum = 10;
+
+/* ── helpers ── */
+const activeItems   = () => items.filter(i => i.status === 'on');
+const archivedItems = () => items.filter(i => i.status === 'off');
+
+function imgBadge(s) {
+  if (s === 'ok')      return `<span class="badge badge-green">已上線</span>`;
+  if (s === 'pending') return `<span class="badge badge-orange">待審核</span>`;
+  return `<span class="badge badge-gray">待上傳</span>`;
+}
+function moboBadge(item) {
+  if (!item.mobo) return `<span class="badge badge-gray">未連結</span>`;
+  return `<span class="badge badge-purple" title="最後同步：${item.moboSync}">已連結</span>`;
+}
+
+/* ── render ── */
+function renderAll() {
+  renderStats();
+  renderCatPills();
+  renderActive();
+  renderArchive();
+  updateCounts();
+}
+
+function renderStats() {
+  const a = activeItems();
+  const pending  = a.filter(i => !!i.pending).length;
+  const imgBad   = a.filter(i => i.imgStatus !== 'ok').length;
+  const moboLink = a.filter(i => i.mobo).length;
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-chip"><strong>${a.length}</strong> 上架品項</div>
+    <div class="stat-chip${pending  > 0 ? ' warn' : ''}"><strong>${pending}</strong> 預約生效待確認</div>
+    <div class="stat-chip${imgBad   > 0 ? ' warn' : ''}"><strong>${imgBad}</strong> 圖片待處理</div>
+    <div class="stat-chip"><strong>${moboLink}</strong> 已連結摩寶</div>`;
+}
+
+function renderCatPills() {
+  const cats = [...new Set(activeItems().map(i => i.cat))];
+  const all = [{ v: '', l: '全部' }, ...cats.map(c => ({ v: c, l: c }))];
+  document.getElementById('cat-pills').innerHTML = all.map(p =>
+    `<div class="pill${curCatFilter === p.v ? ' on' : ''}" onclick="filterCat(this,'${p.v}')">${p.l}</div>`
+  ).join('');
+}
+
+function renderActive() {
+  const q = (document.getElementById('search-on').value || '').trim().toLowerCase();
+  const data = activeItems().filter(i =>
+    (!curCatFilter || i.cat === curCatFilter) &&
+    (!q || i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q))
+  );
+  const tbody = document.getElementById('tbl-body');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty">沒有符合條件的品項</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(item => {
+    const pendStore = item.pending ? `<div class="price-pending">↑ $${item.pending.storePrice} (${item.pending.effDate.slice(5)} 生效)</div>` : '';
+    const pendCost  = item.pending ? `<div class="price-pending">↑ $${item.pending.costPrice} (${item.pending.effDate.slice(5)} 生效)</div>` : '';
+    const machineDiff = item.display && item.display !== item.name;
+    return `<tr>
+      <td><div class="item-id">${item.id}</div></td>
+      <td>
+        <div class="item-name-main">${item.name}</div>
+        ${machineDiff ? `<div class="item-name-machine"><span class="machine-label">機台</span>${item.display}</div>` : ''}
+      </td>
+      <td>${item.cat}</td>
+      <td><div class="price-main">$${item.storePrice}</div>${pendStore}</td>
+      <td><div class="price-main">$${item.endPrice}</div></td>
+      <td><div class="price-auto">$${item.costPrice}</div>${pendCost}</td>
+      <td>${imgBadge(item.imgStatus)}</td>
+      <td>${moboBadge(item)}</td>
+      <td><div class="action-btns">
+        <button class="act-btn" onclick="openEdit('${item.id}')">編輯</button>
+        <button class="act-btn" onclick="openArchive('${item.id}')">下架</button>
+        <button class="act-btn danger" onclick="openDelete('${item.id}')">刪除</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderArchive() {
+  const q = (document.getElementById('search-off').value || '').trim().toLowerCase();
+  const data = archivedItems().filter(i =>
+    !q || i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q)
+  );
+  const el = document.getElementById('archive-list');
+  if (!data.length) {
+    el.innerHTML = `<div class="empty">下架／存檔區目前沒有品項</div>`;
+    return;
+  }
+  el.innerHTML = data.map(item => `
+    <div class="arc-card">
+      <div>
+        <div class="arc-id">${item.id}</div>
+        <div class="arc-name">${item.name}</div>
+      </div>
+      <div class="arc-meta">${item.cat}・下架日 ${item.archivedAt || '—'}・$${item.storePrice}</div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="act-btn" onclick="openRestore('${item.id}')">重新上架</button>
+        <button class="act-btn danger" onclick="openDelete('${item.id}')">刪除</button>
+      </div>
+    </div>`).join('');
+}
+
+function updateCounts() {
+  document.getElementById('cnt-on').textContent  = activeItems().length;
+  document.getElementById('cnt-off').textContent = archivedItems().length;
+}
+
+/* ── tab / filter ── */
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el, i) =>
+    el.classList.toggle('active', (i===0&&t==='on')||(i===1&&t==='off'))
+  );
+  document.getElementById('v-on').classList.toggle('active', t==='on');
+  document.getElementById('v-off').classList.toggle('active', t==='off');
+}
+
+function filterCat(el, cat) {
+  curCatFilter = cat;
+  renderCatPills();
+  renderActive();
+}
+
+/* ── add / edit ── */
+function openAdd() {
+  editingId = null;
+  document.getElementById('edit-title').textContent = '新增品項';
+  ['f-name','f-display','f-en','f-desc','f-note','f-cost','f-new-store','f-new-end','f-new-cost'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-store').value = '';
+  document.getElementById('f-end').value = '';
+  document.getElementById('f-sort').value = '';
+  document.getElementById('f-cat').value = '便當';
+  document.getElementById('f-eff-date').value = '2026-04-01';
+  updateCharCount();
+  openModal('edit-modal');
+}
+
+function openEdit(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  editingId = id;
+  document.getElementById('edit-title').textContent = '編輯品項';
+  document.getElementById('f-name').value = item.name;
+  document.getElementById('f-display').value = item.display;
+  document.getElementById('f-cat').value = item.cat;
+  document.getElementById('f-sort').value = item.sort || '';
+  document.getElementById('f-en').value = item.en || '';
+  document.getElementById('f-desc').value = item.desc || '';
+  document.getElementById('f-note').value = item.note || '';
+  document.getElementById('f-store').value = item.storePrice;
+  document.getElementById('f-end').value = item.endPrice;
+  document.getElementById('f-cost').value = `$${item.costPrice}`;
+  if (item.pending) {
+    document.getElementById('f-new-store').value = item.pending.storePrice;
+    document.getElementById('f-new-cost').value = `$${item.pending.costPrice}`;
+    document.getElementById('f-eff-date').value = item.pending.effDate;
+  } else {
+    document.getElementById('f-new-store').value = '';
+    document.getElementById('f-new-cost').value = '';
+    document.getElementById('f-eff-date').value = '2026-04-01';
+  }
+  updateCharCount();
+  openModal('edit-modal');
+}
+
+function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  const store = parseFloat(document.getElementById('f-store').value);
+  const end   = parseFloat(document.getElementById('f-end').value);
+  if (!name)              { alert('請填寫餐點完整名稱'); return; }
+  if (isNaN(store)||store < 0) { alert('請填寫正確的店內價'); return; }
+  if (isNaN(end)  ||end   < 0) { alert('請填寫正確的終端售價'); return; }
+
+  const ns = parseFloat(document.getElementById('f-new-store').value);
+  const hasPending = !isNaN(ns) && ns > 0;
+
+  const data = {
+    name,
+    display: document.getElementById('f-display').value.trim() || [...name].slice(0,9).join(''),
+    cat:  document.getElementById('f-cat').value,
+    sort: parseInt(document.getElementById('f-sort').value) || 99,
+    en:   document.getElementById('f-en').value.trim(),
+    desc: document.getElementById('f-desc').value.trim(),
+    note: document.getElementById('f-note').value.trim(),
+    storePrice: store,
+    endPrice:   end,
+    costPrice:  Math.round(store * COMMISSION),
+    status: 'on',
+    pending: hasPending ? {
+      storePrice: ns,
+      costPrice:  Math.round(ns * COMMISSION),
+      effDate: document.getElementById('f-eff-date').value,
+    } : null,
+  };
+
+  if (editingId) {
+    const idx = items.findIndex(i => i.id === editingId);
+    if (idx !== -1) items[idx] = { ...items[idx], ...data };
+  } else {
+    data.id = 'N' + String(nextNum++).padStart(3, '0');
+    data.mobo = false; data.moboSync = null; data.imgStatus = 'pending';
+    items.push(data);
+  }
+  closeModal('edit-modal');
+  renderAll();
+}
+
+function calcCost() {
+  const v = parseFloat(document.getElementById('f-store').value);
+  document.getElementById('f-cost').value = isNaN(v) ? '' : `$${Math.round(v * COMMISSION)}`;
+}
+function calcNewCost() {
+  const v = parseFloat(document.getElementById('f-new-store').value);
+  document.getElementById('f-new-cost').value = isNaN(v) ? '' : `$${Math.round(v * COMMISSION)}`;
+}
+function updateCharCount() {
+  const len = [...document.getElementById('f-display').value].length;
+  const el  = document.getElementById('char-count');
+  el.textContent = `${len} / 9`;
+  el.className = 'char-counter' + (len >= 9 ? ' over' : len >= 7 ? ' warn' : '');
+}
+
+/* ── delete ── */
+function openDelete(id) {
+  deletingId = id;
+  const item = items.find(i => i.id === id);
+  document.getElementById('delete-name').textContent = item ? `${item.name}（${item.id}）` : '';
+  openModal('delete-modal');
+}
+function confirmDelete() {
+  items = items.filter(i => i.id !== deletingId);
+  closeModal('delete-modal');
+  renderAll();
+}
+
+/* ── archive ── */
+function openArchive(id) {
+  archivingId = id;
+  const item = items.find(i => i.id === id);
+  document.getElementById('archive-name').textContent = item ? item.name : '';
+  openModal('archive-modal');
+}
+function confirmArchive() {
+  const item = items.find(i => i.id === archivingId);
+  if (item) { item.status = 'off'; item.sort = null; item.archivedAt = '2026/3/26'; }
+  closeModal('archive-modal');
+  renderAll();
+}
+
+/* ── restore ── */
+function openRestore(id) {
+  restoringId = id;
+  const item = items.find(i => i.id === id);
+  document.getElementById('restore-name').textContent = item ? item.name : '';
+  document.getElementById('restore-cat').value = item?.cat || '便當';
+  openModal('restore-modal');
+}
+function confirmRestore() {
+  const item = items.find(i => i.id === restoringId);
+  if (item) { item.status = 'on'; item.cat = document.getElementById('restore-cat').value; item.sort = 99; item.archivedAt = null; }
+  closeModal('restore-modal');
+  renderAll();
+}
+
+/* ── import ── */
+function openImport() { openModal('import-modal'); }
+
+/* ── export ── */
+function exportExcel() {
+  alert('【示意】實際系統將在此下載目前餐廳的餐點清單 .xlsx 檔案');
+}
+
+/* ── modal helpers ── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o =>
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
+);
+
+renderAll();
+</script>
+</body>
+</html>
