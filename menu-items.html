@@ -466,7 +466,7 @@ select {
         <div class="form-2 form-row">
           <div>
             <label class="fl">分類 <span style="color:var(--red)">*</span></label>
-            <select id="f-cat"></select>
+            <select id="f-cat" onchange="suggestSort(this.value)"></select>
           </div>
           <div>
             <label class="fl">排序 <span style="color:var(--red)">*</span></label>
@@ -914,6 +914,12 @@ function filterCat(el, cat) {
 }
 
 /* ── add / edit ── */
+function suggestSort(cat) {
+  const inCat = activeItems().filter(i => i.cat === cat);
+  const max = Math.max(0, ...inCat.map(i => i.sort || 0));
+  document.getElementById('f-sort').value = max + 1;
+}
+
 function openAdd() {
   editingId = null;
   document.getElementById('edit-title').textContent = '新增品項';
@@ -922,12 +928,11 @@ function openAdd() {
   document.getElementById('f-cost-date').value = '2026-04-01';
   document.getElementById('f-store').value = '';
   document.getElementById('f-end').value = '';
-  // 自動建議排序：目前最大 sort + 1
-  const maxSort = Math.max(0, ...activeItems().map(i => i.sort || 0));
-  document.getElementById('f-sort').value = maxSort + 1;
-  // 預設選第一個分類
+  // 預設選目前篩選中的分類，否則選第一個
   const curCats = allCats[curRest.id] || [];
-  document.getElementById('f-cat').value = curCats[0] || '';
+  const defaultCat = curCatFilter || curCats[0] || '';
+  document.getElementById('f-cat').value = defaultCat;
+  suggestSort(defaultCat);
   document.getElementById('f-eff-date').value = '2026-04-01';
   updateCharCount();
   openModal('edit-modal');
