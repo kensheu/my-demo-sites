@@ -148,6 +148,7 @@ td { padding: 11px 14px; vertical-align: middle; }
 .item-id { font-size: 11px; color: var(--text-3); font-family: monospace; }
 .item-name-main { font-weight: 500; }
 .item-name-machine { font-size: 11px; color: var(--text-3); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.item-name-en { font-size: 11px; color: var(--text-3); margin-top: 1px; font-style: italic; }
 .machine-label {
   font-size: 10px; color: var(--text-3); border: 1px solid var(--border);
   border-radius: 3px; padding: 0 4px; line-height: 1.6;
@@ -205,21 +206,32 @@ td { padding: 11px 14px; vertical-align: middle; }
 .card-img {
   width: 100%; aspect-ratio: 4/3; background: var(--bg-2);
   display: flex; align-items: center; justify-content: center; overflow: hidden;
+  position: relative;
 }
 .card-img img { width: 100%; height: 100%; object-fit: cover; }
 .card-img-placeholder { font-size: 36px; color: var(--border); }
 .card-body { padding: 10px 12px 8px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
 .card-id { font-size: 10px; color: var(--text-3); font-family: monospace; }
 .card-name { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.card-en { font-size: 11px; color: var(--text-3); line-height: 1.2; margin-top: 1px; font-style: italic; }
 .card-machine { font-size: 11px; color: var(--text-3); }
+.card-img-upload-btn {
+  position: absolute; bottom: 6px; right: 6px;
+  background: rgba(0,0,0,.55); color: #fff; border: none;
+  border-radius: 5px; font-size: 11px; padding: 3px 8px;
+  cursor: pointer; opacity: 0; transition: opacity .15s; z-index: 2;
+}
+.item-card:hover .card-img-upload-btn { opacity: 1; }
 .card-prices { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
 .card-price-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); }
 .card-price-row span:last-child { font-weight: 500; font-variant-numeric: tabular-nums; }
 .card-actions {
-  padding: 8px 10px; display: flex; gap: 5px;
+  padding: 8px 10px; display: flex; flex-direction: column; gap: 5px;
   border-top: 1px solid var(--border-2);
 }
-.card-actions .act-btn { flex: 1; text-align: center; font-size: 11px; padding: 4px 4px; }
+.card-actions-row { display: flex; gap: 5px; }
+.card-actions-row .act-btn { flex: 1; text-align: center; font-size: 11px; padding: 4px 4px; }
+.card-actions .act-btn.mobo-btn { width: 100%; font-size: 11px; padding: 4px 4px; }
 
 /* ─── Archive cards ─── */
 .arc-card {
@@ -478,7 +490,7 @@ select {
       <div class="rest-list" id="rest-list"></div>
     </div>
   </div>
-  <div class="commission-chip" id="commission-chip">抽成：—</div>
+  <div class="commission-chip" id="commission-chip" title="來自客戶／供應商管理的合約設定">抽成：—</div>
   </div>
   <a href="purchasing-home.html" style="font-size:13px;color:var(--text-3);text-decoration:none;display:flex;align-items:center;gap:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-3)'">← 回首頁</a>
   </div>
@@ -518,6 +530,7 @@ select {
     </div>
     <div id="tbl-wrap" class="tbl-wrap"></div>
     <input type="file" id="bulk-img-input" accept="image/*" multiple style="display:none" onchange="handleBulkUpload(this)">
+    <input type="file" id="card-img-input" accept="image/*" style="display:none" onchange="onCardImgChange(this)">
   </div>
 
   <!-- ══ 下架/存檔區 ══ -->
@@ -1021,10 +1034,12 @@ function renderActive() {
           ${item.imgPreview
             ? `<img src="${item.imgPreview}" alt="${item.name}">`
             : `<span class="card-img-placeholder">🍽</span>`}
+          <button class="card-img-upload-btn" onclick="event.stopPropagation();uploadCardImg('${item.id}')">${item.imgPreview ? '更新圖片' : '上傳圖片'}</button>
         </div>
         <div class="card-body">
           <div class="card-id">${item.id} · ${item.cat}</div>
           <div class="card-name">${item.name}</div>
+          ${item.en ? `<div class="card-en">${item.en}</div>` : ''}
           ${machineDiff ? `<div class="card-machine">機台顯示：${item.display}</div>` : ''}
           <div class="card-prices">
             <div class="card-price-row"><span>店內價</span><span>$${item.storePrice}</span></div>
@@ -1034,9 +1049,16 @@ function renderActive() {
           </div>
         </div>
         <div class="card-actions">
-          <button class="act-btn" onclick="openEdit('${item.id}')">編輯</button>
-          <button class="act-btn" onclick="openArchive('${item.id}')">下架</button>
-          <button class="act-btn danger" onclick="openDelete('${item.id}')">刪除</button>
+          <div class="card-actions-row">
+            <button class="act-btn" onclick="openEdit('${item.id}')">編輯</button>
+            <button class="act-btn" onclick="openArchive('${item.id}')">下架</button>
+            <button class="act-btn danger" onclick="openDelete('${item.id}')">刪除</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            ${item.mobo ? `<span class="badge badge-purple" style="flex-shrink:0">已連結</span>
+            <span class="mobo-sync-time" style="flex:1">${item.moboSync}</span>` : '<span style="flex:1"></span>'}
+            <button class="act-btn" style="font-size:10px;padding:3px 7px;flex-shrink:0" onclick="${item.mobo ? `syncMobo('${item.id}')` : `uploadMobo('${item.id}')`}">${item.mobo ? '更新摩寶' : '上傳摩寶'}</button>
+          </div>
         </div>
       </div>`;
     }).join('')}</div>`;
@@ -1060,6 +1082,7 @@ function renderActive() {
       <td><div class="item-id">${item.id}</div></td>
       <td>
         <div class="item-name-main">${item.name}</div>
+        ${item.en ? `<div class="item-name-en">${item.en}</div>` : ''}
         ${machineDiff ? `<div class="item-name-machine"><span class="machine-label">機台顯示</span>${item.display}</div>` : ''}
       </td>
       <td>${item.cat}</td>
@@ -1259,6 +1282,25 @@ function previewImg(input) {
   if (!input.files?.[0]) return;
   const reader = new FileReader();
   reader.onload = e => setThumbImg(e.target.result);
+  reader.readAsDataURL(input.files[0]);
+}
+
+/* ── card image upload ── */
+let cardImgTargetId = null;
+function uploadCardImg(id) {
+  cardImgTargetId = id;
+  const input = document.getElementById('card-img-input');
+  input.value = '';
+  input.click();
+}
+function onCardImgChange(input) {
+  if (!input.files?.[0] || !cardImgTargetId) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const item = items.find(i => i.id === cardImgTargetId);
+    if (item) { item.imgPreview = e.target.result; renderActive(); }
+    cardImgTargetId = null;
+  };
   reader.readAsDataURL(input.files[0]);
 }
 
