@@ -530,12 +530,9 @@ const snapData = {
     2: [
       {id:'A001', n:'奶油厚片',       c:18, s:40, p:[40],  st:'ok'},
       {id:'A002', n:'原味蛋餅',       c:15, s:35, p:[35],  st:'ok'},
-      {id:'A003', n:'總匯蛋餅',       c:22, s:55, p:[55],  st:'chg',
-       note:'品名改名 + 售價調漲（原：蛋餅，原售價 45）'},
-      {id:'A004', n:'火腿蛋餅',       c:60, s:50, p:[50],  st:'chg',
-       note:'成本調漲（原成本 50 → 60）'},
-      {id:'A005', n:'起司雙層蛋餅',   c:22, s:50, p:[50],  st:'chg',
-       note:'品名異動（原：起司蛋餅）・3/15 下架後 3/18 改名重新上架，同料號 A005'},
+      {id:'A003', n:'總匯蛋餅',       c:22, s:55, p:[55],  st:'chg'},
+      {id:'A004', n:'火腿蛋餅',       c:60, s:50, p:[50],  st:'chg'},
+      {id:'A005', n:'起司雙層蛋餅',   c:22, s:50, p:[50],  st:'chg'},
       {id:'A006', n:'鮪魚蛋餅',       c:24, s:55, p:[55],  st:'ok'},
       {id:'A007', n:'燻雞蛋餅',       c:26, s:60, p:[60],  st:'ok'},
       {id:'A008', n:'培根蛋餅',       c:25, s:55, p:[55],  st:'ok'},
@@ -548,10 +545,8 @@ const snapData = {
     3: [
       {id:'A001', n:'奶油厚片',       c:18, s:40, p:[40],  st:'ok'},
       {id:'A002', n:'原味蛋餅',       c:15, s:35, p:[35],  st:'ok'},
-      {id:'A003', n:'總匯蛋餅',       c:38, s:55, p:[55],  st:'chg',
-       note:'系統依成本變更日自動套用（原 30 → 38）'},
-      {id:'A004', n:'火腿蛋餅',       c:32, s:50, p:[50],  st:'chg',
-       note:'系統依成本變更日自動套用（原 25 → 32）'},
+      {id:'A003', n:'總匯蛋餅',       c:38, s:55, p:[55],  st:'chg'},
+      {id:'A004', n:'火腿蛋餅',       c:32, s:50, p:[50],  st:'chg'},
       {id:'A005', n:'起司雙層蛋餅',   c:22, s:50, p:[50],  st:'ok'},
       {id:'A006', n:'鮪魚蛋餅',       c:24, s:55, p:[55],  st:'ok'},
       {id:'A007', n:'燻雞蛋餅',       c:26, s:60, p:[60],  st:'ok'},
@@ -595,19 +590,16 @@ const snapData = {
       {id:'B001', n:'蔥油雞飯',           c:96,  s:120, p:[120,125], st:'ok'},
       {id:'B002', n:'椒麻涼拌雞飯',       c:96,  s:120, p:[120,125], st:'ok'},
       {id:'B004', n:'塔香三杯雞飯',       c:96,  s:120, p:[120,125], st:'ok'},
-      {id:'B006', n:'紅油雞飯',           c:96,  s:120, p:[120,125], st:'chg',
-       note:'改名（原：四川紅油雞飯）'},
+      {id:'B006', n:'紅油雞飯',           c:96,  s:120, p:[120,125], st:'chg'},
       {id:'B008', n:'左宗棠雞飯',         c:96,  s:120, p:[120,125], st:'ok'},
-      {id:'B009', n:'紹興醉雞飯',         c:120, s:150, p:[150,155], st:'chg',
-       note:'調漲（原成本 96、店內 120、終端 120/125）'},
-      {id:'B011', n:'蔥爆牛柳飯',         c:96,  s:120, p:[120,125], st:'chg',
-       note:'改名（原：蔥爆炒牛肉飯）'},
+      {id:'B009', n:'紹興醉雞飯',         c:120, s:150, p:[150,155], st:'chg'},
+      {id:'B011', n:'蔥爆牛柳飯',         c:96,  s:120, p:[120,125], st:'chg'},
       {id:'B012', n:'古早味炸排骨飯',     c:96,  s:120, p:[120,125], st:'new'},
       {id:'B013', n:'無敵香酥大雞腿飯',   c:96,  s:120, p:[120,125], st:'new'},
-      {id:'B003', n:'酸辣涼拌雞飯',       c:96,  s:120, p:[120,125], st:'out', note:'已下架'},
-      {id:'B005', n:'花雕酒香雞飯',       c:96,  s:120, p:[120,125], st:'out', note:'已下架'},
-      {id:'B007', n:'泰式打拋豬飯',       c:96,  s:120, p:[120,125], st:'out', note:'已下架'},
-      {id:'B010', n:'蒜泥灼白肉飯',       c:96,  s:120, p:[120,125], st:'out', note:'已下架'},
+      {id:'B003', n:'酸辣涼拌雞飯',       c:96,  s:120, p:[120,125], st:'out'},
+      {id:'B005', n:'花雕酒香雞飯',       c:96,  s:120, p:[120,125], st:'out'},
+      {id:'B007', n:'泰式打拋豬飯',       c:96,  s:120, p:[120,125], st:'out'},
+      {id:'B010', n:'蒜泥灼白肉飯',       c:96,  s:120, p:[120,125], st:'out'},
     ],
     3: [
       {id:'B001', n:'蔥油雞飯',         c:96,  s:120, p:[120,125], st:'ok'},
@@ -676,6 +668,28 @@ const tlData = {
 };
 
 /* ═══════════════════════════════════════════════
+   自動產生月份快照異動備註
+═══════════════════════════════════════════════ */
+function autoNote(r, prevRows) {
+  if (r.st === 'ok')  return '';
+  if (r.st === 'new') return '本月新增品項';
+  if (r.st === 'out') return '已下架';
+  // st === 'chg'
+  const prev = prevRows && prevRows.find(p => p.id === r.id);
+  if (!prev) return '（查無上月紀錄）';
+  const parts = [];
+  if (r.n !== prev.n)
+    parts.push(`品名異動（原：${prev.n}）`);
+  if (r.c !== prev.c)
+    parts.push(`成本${r.c > prev.c ? '調漲' : '調降'}（原 ${prev.c} → ${r.c}）`);
+  if (r.s !== prev.s)
+    parts.push(`售價${r.s > prev.s ? '調漲' : '調降'}（原 ${prev.s} → ${r.s}）`);
+  if (JSON.stringify(r.p) !== JSON.stringify(prev.p))
+    parts.push(`終端價異動（原 ${prev.p.join('/')} → ${r.p.join('/')}）`);
+  return parts.join('・') || '（內容異動）';
+}
+
+/* ═══════════════════════════════════════════════
    Render：月份快照
 ═══════════════════════════════════════════════ */
 const BADGE = { new:'b-new 新增', chg:'b-chg 異動', out:'b-out 已下架', ok:'b-ok 無異動' };
@@ -718,7 +732,9 @@ function renderSnap() {
     const [bc, bl] = BADGE[r.st].split(' ');
     const rowCls   = r.st !== 'ok' ? ` class="row-${r.st}"` : '';
     const nameCls  = r.st === 'out' ? ' class="name-out"' : '';
-    const noteHtml = r.note ? `<div class="row-note">${r.note}</div>` : '';
+    const prevRows = curM > MIN_M ? snapData[curRest][curM - 1] : null;
+    const note = autoNote(r, prevRows);
+    const noteHtml = note ? `<div class="row-note">${note}</div>` : '';
     const pCells   = r.p.map(v => `<td class="num r">${v}</td>`).join('');
     return `<tr${rowCls}>
       <td class="id-cell">${r.id}</td>
