@@ -413,7 +413,7 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 
     <div class="toolbar">
       <div class="pill on" onclick="filterType(this,'')">全部</div>
-      <div class="pill" onclick="filterType(this,'price')">成本調整</div>
+      <div class="pill" onclick="filterType(this,'price')">店內價調整</div>
       <div class="pill" onclick="filterType(this,'name')">改名</div>
       <div class="pill" onclick="filterType(this,'new')">新增品項</div>
       <div class="pill" onclick="filterType(this,'out')">下架</div>
@@ -470,13 +470,13 @@ let pendingData = [
     rest: 'OO 雞飯專門店',
     date: '2026/3/24',
     type: 'price',
-    typeLabel: '成本調整',
+    typeLabel: '店內價調整',
     itemId: 'B009',
     itemName: '紹興醉雞飯',
     evidence: '菜單照片_OO雞飯_2026-03-24.jpg',
     evidenceSize: '1.2 MB',
     changes: [
-      { field: '成本價', before: '96', after: '120' },
+      { field: '店內價', before: '120', after: '150' },
     ],
     effDate: '2026-04-01',
   },
@@ -507,7 +507,7 @@ let pendingData = [
     evidenceSize: '0.8 MB',
     changes: [
       { field: '餐點名稱', before: '—', after: '冰美式（中）' },
-      { field: '成本價', before: '—', after: '28' },
+      { field: '店內價', before: '—', after: '35' },
     ],
     effDate: '2026-03-27',
   },
@@ -531,8 +531,8 @@ const doneData = [
     rest: 'XX 早餐店',
     date: '2026/3/10',
     type: 'price',
-    typeLabel: '成本調整',
-    itemName: '原味蛋餅 售價調整',
+    typeLabel: '店內價調整',
+    itemName: '原味蛋餅 店內價調整',
     status: 'rejected',
     by: '採購人員1',
     rejectReason: '菜單照片不清晰，請重新拍攝紙本菜單上傳。',
@@ -600,6 +600,7 @@ function renderPending() {
           </div>
           ${changesHtml}
         </div>
+        ${(d.type === 'price' || d.type === 'new') ? `<div style="margin-top:8px;padding:8px 10px;background:#f5f5f4;border-radius:6px;font-size:11px;color:#a8a29e">⚙ 核准後系統將依合約抽成%自動計算成本價，並依各據點設定自動更新終端價，無需人工操作。</div>` : ''}
         <div class="evidence" onclick="previewEvidence('${d.evidence}')">
           <span class="ev-icon">📄</span>
           <span class="ev-name">${d.evidence}</span>
@@ -737,7 +738,7 @@ function confirmReject() {
     const d = pendingData[idx];
     doneData.unshift({
       id: d.id, rest: d.rest, date: d.date, type: d.type, typeLabel: d.typeLabel,
-      itemName: d.itemName + ' ' + d.type === 'price' ? '售價調整' : '',
+      itemName: d.itemName + ' ' + d.type === 'price' ? '店內價調整' : '',
       status: 'rejected',
       by: '採購人員1',
       rejectReason: reason,

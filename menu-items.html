@@ -156,9 +156,10 @@ td { padding: 11px 14px; vertical-align: middle; }
 .price-main { font-weight: 500; font-variant-numeric: tabular-nums; }
 .price-pending {
   display: inline-flex; align-items: center; gap: 3px;
-  font-size: 10px; background: var(--orange-bg); color: var(--orange);
-  border: 1px solid var(--orange-bdr); border-radius: 4px; padding: 1px 5px; margin-top: 3px;
+  font-size: 10px; border-radius: 4px; padding: 1px 5px; margin-top: 3px;
 }
+.price-pending.up   { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bdr); }
+.price-pending.down { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bdr); }
 .price-auto { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
 
 .badge {
@@ -352,6 +353,36 @@ select {
 /* ─── Mobo cell ─── */
 .mobo-cell { display: flex; flex-direction: column; gap: 3px; }
 .mobo-sync-time { font-size: 10px; color: var(--text-3); }
+
+/* ─── Commission chip ─── */
+.commission-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 6px;
+  background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-bdr);
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+
+/* ─── Price system auto-update label ─── */
+.price-sys-upd {
+  display: block; font-size: 10px; color: var(--text-3); margin-top: 3px;
+}
+
+/* ─── Image upload in modal ─── */
+.img-upload-row { display: flex; align-items: flex-start; gap: 12px; }
+.img-thumb-box {
+  width: 80px; height: 80px; border-radius: 8px; flex-shrink: 0;
+  border: 1.5px dashed var(--border); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-2); font-size: 28px; cursor: pointer;
+  transition: border-color .12s;
+}
+.img-thumb-box:hover { border-color: var(--blue); }
+.img-thumb-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-upload-ctrl { flex: 1; }
+.img-upload-ctrl .img-status-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.img-upload-ctrl .img-hint { font-size: 11px; color: var(--text-3); margin-bottom: 8px; line-height: 1.5; }
+.img-upload-ctrl .img-btns { display: flex; gap: 6px; }
+
 </style>
 </head>
 <body>
@@ -365,9 +396,10 @@ select {
     </div>
   </div>
 
-  <!-- 餐廳選擇器 + 回首頁 -->
+  <!-- 餐廳選擇器 + 抽成 chip + 回首頁 -->
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px">
-  <div class="rest-picker" id="rest-picker">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+  <div class="rest-picker" id="rest-picker" style="margin-bottom:0">
     <div class="rest-trigger" id="rest-trigger" onclick="toggleRestPicker()">
       <span class="rest-icon">🏪</span>
       <span class="rest-label" id="rest-label">OO 雞飯專門店</span>
@@ -379,6 +411,8 @@ select {
       </div>
       <div class="rest-list" id="rest-list"></div>
     </div>
+  </div>
+  <div class="commission-chip" id="commission-chip">抽成：—</div>
   </div>
   <a href="purchasing-home.html" style="font-size:13px;color:var(--text-3);text-decoration:none;display:flex;align-items:center;gap:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-3)'">← 回首頁</a>
   </div>
@@ -489,44 +523,54 @@ select {
       </div>
 
       <div class="form-section">
+        <div class="fsec-title">圖片管理</div>
+        <div class="img-upload-row">
+          <div class="img-thumb-box" id="img-thumb" onclick="document.getElementById('img-file-input').click()">
+            <span id="img-placeholder-icon">🖼</span>
+          </div>
+          <div class="img-upload-ctrl">
+            <div class="img-status-row">
+              <span style="font-size:12px;font-weight:500;color:var(--text-2)">目前狀態：</span>
+              <span id="img-status-badge">—</span>
+            </div>
+            <div class="img-hint">美編負責審核與正式上線。上傳後狀態將變為「待審核」。</div>
+            <div class="img-btns">
+              <button type="button" class="act-btn" onclick="document.getElementById('img-file-input').click()">上傳圖片</button>
+              <button type="button" class="act-btn danger" id="img-del-btn" onclick="clearImg()" style="display:none">移除圖片</button>
+            </div>
+          </div>
+        </div>
+        <input type="file" id="img-file-input" accept="image/*" onchange="previewImg(this)" style="display:none">
+      </div>
+
+      <div class="form-section">
         <div class="fsec-title">現行售價</div>
-        <div class="form-2 form-row">
-          <div>
-            <label class="fl">店內價 <span style="color:var(--red)">*</span></label>
-            <input type="number" id="f-store" min="0" placeholder="0" oninput="calcCost()">
-          </div>
-          <div>
-            <label class="fl">終端價 <span style="color:var(--red)">*</span></label>
-            <input type="number" id="f-end" min="0" placeholder="0">
-          </div>
+        <div class="form-row">
+          <label class="fl">店內價 <span style="color:var(--red)">*</span></label>
+          <input type="number" id="f-store" min="0" placeholder="0" oninput="calcPrices()">
+        </div>
+        <div class="form-row">
+          <label class="fl">終端價</label>
+          <input type="number" id="f-end" min="0" placeholder="0">
+          <div class="fhint">預設與店內價相同，可手動覆寫</div>
         </div>
         <div class="form-row">
           <label class="fl">成本價（自動計算）</label>
           <input type="text" id="f-cost" readonly placeholder="依店內價自動計算">
-          <div class="fhint">成本 ＝ 店內價 × 80%（抽成比例設定於客戶供應商資料）</div>
+          <div class="fhint" id="f-cost-hint">成本 ＝ 店內價 × (1 − 抽成%)</div>
         </div>
 
         <div class="pending-box">
-          <div class="fsec-title">預約調整售價（選填）</div>
-          <div class="fhint" style="margin-bottom:12px">設定新價格與各自生效日，系統於生效日當天自動切換，不需人工操作。</div>
+          <div class="fsec-title">預約調整（選填）</div>
+          <div class="fhint" style="margin-bottom:12px">設定新店內價後，系統自動計算成本價。</div>
           <div class="form-2 form-row">
             <div>
-              <label class="fl">新終端價</label>
-              <input type="number" id="f-new-end" min="0" placeholder="留空表示不異動">
+              <label class="fl">新店內價</label>
+              <input type="number" id="f-new-store" min="0" placeholder="留空表示不異動">
             </div>
             <div>
-              <label class="fl">終端價生效日</label>
-              <input type="date" id="f-end-date" value="2026-04-01">
-            </div>
-          </div>
-          <div class="form-2 form-row">
-            <div>
-              <label class="fl">新成本價</label>
-              <input type="number" id="f-new-cost" min="0" placeholder="留空表示不異動">
-            </div>
-            <div>
-              <label class="fl">成本價生效日</label>
-              <input type="date" id="f-cost-date" value="2026-04-01">
+              <label class="fl">生效日</label>
+              <input type="date" id="f-store-date" value="2026-04-01">
             </div>
           </div>
         </div>
@@ -662,17 +706,17 @@ select {
 </div>
 
 <script>
-const COMMISSION = 0.8;
-
 /* ── Restaurant picker ── */
 const restaurants = [
-  { id: 'OO雞飯',  name: 'OO 雞飯專門店', code: 'S0001' },
-  { id: 'XX早餐',  name: 'XX 早餐店',      code: 'S0002' },
-  { id: '阿成便當', name: '阿成便當',       code: 'S0003' },
-  { id: '好味食堂', name: '好味食堂',       code: 'S0004' },
-  { id: '家鄉麵食', name: '家鄉麵食館',     code: 'S0005' },
+  { id: 'OO雞飯',  name: 'OO 雞飯專門店', code: 'S0001', commission: 20 },
+  { id: 'XX早餐',  name: 'XX 早餐店',      code: 'S0002', commission: 30 },
+  { id: '阿成便當', name: '阿成便當',       code: 'S0003', commission: 25 },
+  { id: '好味食堂', name: '好味食堂',       code: 'S0004', commission: 22 },
+  { id: '家鄉麵食', name: '家鄉麵食館',     code: 'S0005', commission: 18 },
 ];
 let curRest = restaurants[0];
+
+function getCommission() { return (100 - curRest.commission) / 100; }
 
 function renderRestList(filter = '') {
   const q = filter.trim().toLowerCase();
@@ -718,6 +762,11 @@ function selectRest(id) {
   renderAll();
 }
 
+function renderCommChip() {
+  const el = document.getElementById('commission-chip');
+  el.textContent = `抽成：${curRest.commission}%`;
+}
+
 function filterRests() {
   renderRestList(document.getElementById('rest-search').value);
 }
@@ -728,19 +777,19 @@ document.addEventListener('click', e => {
 
 const allItems = {
   'OO雞飯': [
-    { id:'B001', name:'雙拼便當',         display:'雙拼便當',   cat:'便當', sort:1, en:'Combo Bento',      desc:'雞腿＋排骨雙主菜', note:'',                         storePrice:120, endPrice:120, costPrice:96,  status:'on',  pending:{ endPrice:130, endDate:'2026-04-01', costPrice:104, costDate:'2026-05-01' }, mobo:true,  moboSync:'2026/3/1',  imgStatus:'ok' },
+    { id:'B001', name:'雙拼便當',         display:'雙拼便當',   cat:'便當', sort:1, en:'Combo Bento',      desc:'雞腿＋排骨雙主菜', note:'',                         storePrice:120, endPrice:120, costPrice:96,  status:'on',  pending:{ storePrice:130, storeDate:'2026-04-01' }, mobo:true,  moboSync:'2026/3/1',  imgStatus:'ok' },
     { id:'B002', name:'雞腿便當',         display:'雞腿便當',   cat:'便當', sort:2, en:'',                 desc:'香煎雞腿，附湯',   note:'',                         storePrice:110, endPrice:110, costPrice:88,  status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'pending' },
     { id:'B003', name:'排骨便當',         display:'排骨便當',   cat:'便當', sort:3, en:'',                 desc:'',                note:'熱銷商品，最多 50 份/日',   storePrice:100, endPrice:100, costPrice:80,  status:'on',  pending:null, mobo:true,  moboSync:'2026/2/15', imgStatus:'ok' },
-    { id:'B005', name:'咖哩豬排飯（特餐）', display:'咖哩豬排飯', cat:'便當', sort:4, en:'Curry Pork Cutlet', desc:'',              note:'春節特餐，3/31 前供應',     storePrice:130, endPrice:130, costPrice:104, status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'ok' },
+    { id:'B005', name:'咖哩豬排飯（特餐）', display:'咖哩豬排飯', cat:'便當', sort:4, en:'Curry Pork Cutlet', desc:'',              note:'春節特餐，3/31 前供應',     storePrice:130, endPrice:130, costPrice:104, status:'on',  pending:{ storePrice:110, storeDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
     { id:'D001', name:'冬瓜茶',           display:'冬瓜茶',     cat:'飲料', sort:1, en:'',                 desc:'',                note:'',                         storePrice:25,  endPrice:25,  costPrice:20,  status:'on',  pending:null, mobo:false, moboSync:null,        imgStatus:'ok' },
-    { id:'D002', name:'紅茶（冷）',        display:'紅茶',      cat:'飲料', sort:2, en:'',                 desc:'',                note:'',                         storePrice:20,  endPrice:20,  costPrice:16,  status:'on',  pending:{ endPrice:25, endDate:'2026-04-01', costPrice:null, costDate:null }, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'D002', name:'紅茶（冷）',        display:'紅茶',      cat:'飲料', sort:2, en:'',                 desc:'',                note:'',                         storePrice:20,  endPrice:20,  costPrice:16,  status:'on',  pending:{ storePrice:25, storeDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
     { id:'B004', name:'麻婆豆腐飯',        display:'麻婆豆腐飯', cat:'便當', sort:null, en:'',             desc:'',                note:'',                         storePrice:90,  endPrice:90,  costPrice:72,  status:'off', pending:null, mobo:false, moboSync:null,        imgStatus:'ok',     archivedAt:'2026/2/1' },
     { id:'D003', name:'青草茶',           display:'青草茶',     cat:'飲料', sort:null, en:'',             desc:'',                note:'',                         storePrice:20,  endPrice:20,  costPrice:16,  status:'off', pending:null, mobo:false, moboSync:null,        imgStatus:'ok',     archivedAt:'2026/1/15' },
   ],
   'XX早餐': [
     { id:'A001', name:'奶油厚片',         display:'奶油厚片',   cat:'吐司', sort:1, en:'Butter Toast',     desc:'',                note:'',                         storePrice:40,  endPrice:40,  costPrice:18,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
     { id:'A002', name:'原味蛋餅',         display:'原味蛋餅',   cat:'蛋餅', sort:1, en:'',                 desc:'',                note:'',                         storePrice:35,  endPrice:35,  costPrice:15,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
-    { id:'A003', name:'總匯蛋餅',         display:'總匯蛋餅',   cat:'蛋餅', sort:2, en:'',                 desc:'',                note:'',                         storePrice:55,  endPrice:55,  costPrice:22,  status:'on',  pending:{ endPrice:58, endDate:'2026-04-01', costPrice:46, costDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
+    { id:'A003', name:'總匯蛋餅',         display:'總匯蛋餅',   cat:'蛋餅', sort:2, en:'',                 desc:'',                note:'',                         storePrice:55,  endPrice:55,  costPrice:22,  status:'on',  pending:{ storePrice:58, storeDate:'2026-04-01' }, mobo:false, moboSync:null, imgStatus:'ok' },
     { id:'A005', name:'起司雙層蛋餅',     display:'起司厚蛋餅', cat:'蛋餅', sort:3, en:'Cheese Egg Wrap',  desc:'',                note:'',                         storePrice:50,  endPrice:50,  costPrice:22,  status:'on',  pending:null, mobo:true,  moboSync:'2026/1/10', imgStatus:'ok' },
     { id:'A013', name:'冰美式（中）',     display:'冰美式',     cat:'飲料', sort:1, en:'Iced Americano M', desc:'',                note:'',                         storePrice:35,  endPrice:35,  costPrice:10,  status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'pending' },
     { id:'A012', name:'紅茶（中）',       display:'紅茶',       cat:'飲料', sort:2, en:'',                 desc:'',                note:'',                         storePrice:25,  endPrice:25,  costPrice:8,   status:'on',  pending:null, mobo:false, moboSync:null, imgStatus:'ok' },
@@ -790,21 +839,21 @@ function applyPendingPrices() {
   const today = new Date().toISOString().slice(0, 10);
   items.forEach(item => {
     if (!item.pending) return;
-    if (item.pending.endPrice  && item.pending.endDate  <= today) item.endPrice  = item.pending.endPrice;
-    if (item.pending.costPrice && item.pending.costDate <= today) item.costPrice = item.pending.costPrice;
-    const stillPending = (item.pending.endPrice  && item.pending.endDate  > today)
-                      || (item.pending.costPrice && item.pending.costDate > today);
-    if (!stillPending) item.pending = null;
-    else {
-      if (item.pending.endPrice  && item.pending.endDate  <= today) { item.pending.endPrice  = null; item.pending.endDate  = null; }
-      if (item.pending.costPrice && item.pending.costDate <= today) { item.pending.costPrice = null; item.pending.costDate = null; }
+    const pend = item.pending;
+    if (pend.storePrice && pend.storeDate && pend.storeDate <= today) {
+      const ns = pend.storePrice;
+      item.storePrice = ns;
+      item.costPrice  = Math.round(ns * getCommission());
+      pend.storePrice = null; pend.storeDate = null;
     }
+    if (!pend.storePrice) item.pending = null;
   });
 }
 
 /* ── render ── */
 function renderAll() {
   applyPendingPrices();
+  renderCommChip();
   renderStats();
   renderCatPills();
   renderActive();
@@ -845,19 +894,23 @@ function renderActive() {
     return;
   }
   tbody.innerHTML = data.map(item => {
-    const pendEnd  = item.pending?.endPrice  ? `<div class="price-pending">↑ $${item.pending.endPrice} (${item.pending.endDate.slice(5)} 生效)</div>`   : '';
-    const pendCost = item.pending?.costPrice ? `<div class="price-pending">↑ $${item.pending.costPrice} (${item.pending.costDate.slice(5)} 生效)</div>` : '';
+    const pend = item.pending;
+    const pendStore   = pend?.storePrice ? (() => {
+      const isUp = pend.storePrice > item.storePrice;
+      return `<div class="price-pending ${isUp ? 'up' : 'down'}">${isUp ? '↑' : '↓'} $${pend.storePrice} (${pend.storeDate.slice(5)} 生效)</div>`;
+    })() : '';
+    const pendCostUpd = pend?.storePrice ? `<span class="price-sys-upd">↕ ${pend.storeDate.slice(5)} 自動更新為 $${Math.round(pend.storePrice * getCommission())}</span>` : '';
     const machineDiff = item.display && item.display !== item.name;
     return `<tr>
       <td><div class="item-id">${item.id}</div></td>
       <td>
         <div class="item-name-main">${item.name}</div>
-        ${machineDiff ? `<div class="item-name-machine"><span class="machine-label">機台</span>${item.display}</div>` : ''}
+        ${machineDiff ? `<div class="item-name-machine"><span class="machine-label">機台顯示</span>${item.display}</div>` : ''}
       </td>
       <td>${item.cat}</td>
-      <td><div class="price-main">$${item.storePrice}</div></td>
-      <td><div class="price-main">$${item.endPrice}</div>${pendEnd}</td>
-      <td><div class="price-auto">$${item.costPrice}</div>${pendCost}</td>
+      <td><div class="price-main">$${item.storePrice}</div>${pendStore}</td>
+      <td><div class="price-main">$${item.endPrice ?? item.storePrice}</div></td>
+      <td><div class="price-auto">$${item.costPrice}</div>${pendCostUpd}</td>
       <td>${imgBadge(item.imgStatus)}</td>
       <td>${moboBadge(item)}</td>
       <td><div class="action-btns">
@@ -923,17 +976,16 @@ function suggestSort(cat) {
 function openAdd() {
   editingId = null;
   document.getElementById('edit-title').textContent = '新增品項';
-  ['f-name','f-display','f-en','f-desc','f-note','f-cost','f-new-end','f-new-cost'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('f-end-date').value  = '2026-04-01';
-  document.getElementById('f-cost-date').value = '2026-04-01';
+  ['f-name','f-display','f-en','f-desc','f-note','f-end','f-cost','f-new-store'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-store-date').value = '2026-04-01';
   document.getElementById('f-store').value = '';
-  document.getElementById('f-end').value = '';
-  // 預設選目前篩選中的分類，否則選第一個
   const curCats = allCats[curRest.id] || [];
   const defaultCat = curCatFilter || curCats[0] || '';
   document.getElementById('f-cat').value = defaultCat;
   suggestSort(defaultCat);
   updateCharCount();
+  resetImgUpload();
+  document.getElementById('f-cost-hint').textContent = `成本 ＝ 店內價 × ${100 - curRest.commission}%（抽成 ${curRest.commission}%）`;
   openModal('edit-modal');
 }
 
@@ -950,19 +1002,13 @@ function openEdit(id) {
   document.getElementById('f-desc').value = item.desc || '';
   document.getElementById('f-note').value = item.note || '';
   document.getElementById('f-store').value = item.storePrice;
-  document.getElementById('f-end').value = item.endPrice;
+  document.getElementById('f-end').value   = item.endPrice ?? item.storePrice;
   document.getElementById('f-cost').value = `$${item.costPrice}`;
-  if (item.pending) {
-    document.getElementById('f-new-end').value   = item.pending.endPrice   || '';
-    document.getElementById('f-end-date').value  = item.pending.endDate    || '2026-04-01';
-    document.getElementById('f-new-cost').value  = item.pending.costPrice  || '';
-    document.getElementById('f-cost-date').value = item.pending.costDate   || '2026-04-01';
-  } else {
-    document.getElementById('f-new-end').value   = '';
-    document.getElementById('f-end-date').value  = '2026-04-01';
-    document.getElementById('f-new-cost').value  = '';
-    document.getElementById('f-cost-date').value = '2026-04-01';
-  }
+  document.getElementById('f-cost-hint').textContent = `成本 ＝ 店內價 × ${100 - curRest.commission}%（抽成 ${curRest.commission}%）`;
+  document.getElementById('f-new-store').value  = item.pending?.storePrice || '';
+  document.getElementById('f-store-date').value = item.pending?.storeDate  || '2026-04-01';
+  // 圖片
+  loadImgUpload(item);
   updateCharCount();
   openModal('edit-modal');
 }
@@ -970,19 +1016,18 @@ function openEdit(id) {
 function saveItem() {
   const name = document.getElementById('f-name').value.trim();
   const store = parseFloat(document.getElementById('f-store').value);
-  const end   = parseFloat(document.getElementById('f-end').value);
   const sortRaw = document.getElementById('f-sort').value.trim();
   const sort = parseInt(sortRaw);
   if (!name)                   { alert('請填寫餐點完整名稱'); return; }
   if (isNaN(store)||store < 0) { alert('請填寫正確的店內價'); return; }
-  if (isNaN(end)  ||end   < 0) { alert('請填寫正確的終端價'); return; }
   if (!sortRaw || isNaN(sort) || sort < 1) { alert('請填寫排序序號（正整數）'); return; }
 
-  const ne = parseFloat(document.getElementById('f-new-end').value);
-  const nc = parseFloat(document.getElementById('f-new-cost').value);
-  const endDate  = document.getElementById('f-end-date').value;
-  const costDate = document.getElementById('f-cost-date').value;
-  const hasPending = (!isNaN(ne) && ne > 0) || (!isNaN(nc) && nc > 0);
+  const ns = parseFloat(document.getElementById('f-new-store').value);
+  const storeDate = document.getElementById('f-store-date').value;
+  const hasPending = !isNaN(ns) && ns > 0;
+
+  // 圖片
+  const imgDataUrl = document.getElementById('img-thumb').querySelector('img')?.src || null;
 
   const data = {
     name,
@@ -993,35 +1038,79 @@ function saveItem() {
     desc: document.getElementById('f-desc').value.trim(),
     note: document.getElementById('f-note').value.trim(),
     storePrice: store,
-    endPrice:   end,
-    costPrice:  Math.round(store * COMMISSION),
+    endPrice:   parseFloat(document.getElementById('f-end').value) || store,
+    costPrice:  Math.round(store * getCommission()),
     status: 'on',
     pending: hasPending ? {
-      endPrice:  (!isNaN(ne) && ne > 0) ? ne    : null,
-      endDate:   (!isNaN(ne) && ne > 0) ? endDate  : null,
-      costPrice: (!isNaN(nc) && nc > 0) ? nc    : null,
-      costDate:  (!isNaN(nc) && nc > 0) ? costDate : null,
+      storePrice: ns,
+      storeDate:  storeDate,
     } : null,
+    imgPreview: imgDataUrl,
   };
 
   if (editingId) {
     const idx = items.findIndex(i => i.id === editingId);
-    if (idx !== -1) items[idx] = { ...items[idx], ...data };
+    if (idx !== -1) {
+      const old = items[idx];
+      // 圖片狀態：若有新上傳則 pending；若已清除則 none；否則保留原狀態
+      if (imgDataUrl && imgDataUrl !== old.imgPreview) data.imgStatus = 'pending';
+      else if (!imgDataUrl) data.imgStatus = 'none';
+      else data.imgStatus = old.imgStatus;
+      items[idx] = { ...old, ...data };
+    }
   } else {
-    // 從所有品項中取最大數字部分 +1，確保不重複
     const allNums = items.map(i => parseInt(i.id.replace(/\D/g,'')) || 0);
     const maxNum = Math.max(0, ...allNums);
     data.id = 'N' + String(maxNum + 1).padStart(3, '0');
-    data.mobo = false; data.moboSync = null; data.imgStatus = 'pending';
+    data.mobo = false; data.moboSync = null;
+    data.imgStatus = imgDataUrl ? 'pending' : 'none';
     items.push(data);
   }
   closeModal('edit-modal');
   renderAll();
 }
 
-function calcCost() {
+function calcPrices() {
   const v = parseFloat(document.getElementById('f-store').value);
-  document.getElementById('f-cost').value = isNaN(v) ? '' : `$${Math.round(v * COMMISSION)}`;
+  document.getElementById('f-cost').value = isNaN(v) ? '' : `$${Math.round(v * getCommission())}`;
+  if (!isNaN(v)) document.getElementById('f-end').value = v;
+}
+
+/* ── image upload ── */
+function resetImgUpload() {
+  const thumb = document.getElementById('img-thumb');
+  thumb.innerHTML = `<span id="img-placeholder-icon">🖼</span>`;
+  document.getElementById('img-status-badge').innerHTML = `<span class="badge badge-gray">待上傳</span>`;
+  document.getElementById('img-del-btn').style.display = 'none';
+  document.getElementById('img-file-input').value = '';
+}
+
+function loadImgUpload(item) {
+  const thumb = document.getElementById('img-thumb');
+  if (item.imgPreview) {
+    thumb.innerHTML = `<img src="${item.imgPreview}" alt="圖片預覽">`;
+    document.getElementById('img-del-btn').style.display = '';
+  } else {
+    thumb.innerHTML = `<span id="img-placeholder-icon">🖼</span>`;
+    document.getElementById('img-del-btn').style.display = 'none';
+  }
+  document.getElementById('img-status-badge').innerHTML = imgBadge(item.imgStatus);
+}
+
+function previewImg(input) {
+  if (!input.files?.[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const thumb = document.getElementById('img-thumb');
+    thumb.innerHTML = `<img src="${e.target.result}" alt="圖片預覽">`;
+    document.getElementById('img-status-badge').innerHTML = `<span class="badge badge-orange">待審核</span>`;
+    document.getElementById('img-del-btn').style.display = '';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function clearImg() {
+  resetImgUpload();
 }
 
 function updateCharCount() {

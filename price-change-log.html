@@ -687,7 +687,7 @@ function renderSnapHead() {
   document.getElementById('snap-thead-row').innerHTML =
     `<th style="width:68px">料號</th>` +
     `<th>餐點名稱</th>` +
-    `<th class="r" style="width:62px">成本價</th>` +
+    `<th class="r" style="width:62px;cursor:help" title="成本價 ＝ 店內價 × (1 − 抽成%)">成本價 ℹ</th>` +
     `<th class="r" style="width:62px">店內價</th>` +
     pCols.map(c => `<th class="r" style="width:${termW}px">${c}</th>`).join('') +
     `<th style="width:76px">異動標記</th>`;
