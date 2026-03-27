@@ -1049,7 +1049,7 @@ function renderActive() {
           <div class="card-name">${item.name}</div>
           <div class="card-en"><span class="card-field-label">英文名稱：</span>${item.en || '—'}</div>
           <div class="card-machine"><span class="card-field-label">機台顯示：</span>${item.display || '—'}</div>
-          ${item.desc ? `<div class="card-desc">${item.desc}</div>` : ''}
+          <div class="card-desc"><span class="card-field-label">介紹：</span>${item.desc || '—'}</div>
           <div class="card-prices">
             <div class="card-price-row"><span>店內價</span><span>$${item.storePrice}${pendStore ? ` ${pendStore}` : ''}</span></div>
             <div class="card-price-row"><span>終端價</span><span>$${item.endPrice ?? item.storePrice}</span></div>
