@@ -37,13 +37,13 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
                "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
   background: var(--bg);
   min-height: 100vh;
 }
 
-.page { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+.page { max-width: 1400px; margin: 0 auto; padding: 28px 20px 60px; }
 
 /* ─── Header ─── */
 .page-header {
@@ -51,24 +51,24 @@ body {
   flex-wrap: wrap; gap: 12px;
   margin-bottom: 20px;
 }
-.page-title { font-size: 19px; font-weight: 600; }
-.page-sub   { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+.page-title { font-size: 22px; font-weight: 600; }
+.page-sub   { font-size: 14px; color: var(--text-3); margin-top: 3px; }
 
 /* ─── Stats bar ─── */
 .stats-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .stat-chip {
   background: var(--card); border: 1px solid var(--border);
   border-radius: 8px; padding: 8px 14px;
-  font-size: 12px; color: var(--text-2);
+  font-size: 14px; color: var(--text-2);
   display: flex; align-items: center; gap: 6px;
 }
-.stat-chip strong { color: var(--text); font-size: 15px; font-variant-numeric: tabular-nums; }
+.stat-chip strong { color: var(--text); font-size: 17px; font-variant-numeric: tabular-nums; }
 .stat-chip.warn strong { color: var(--orange); }
 
 /* ─── Tabs ─── */
 .tabs { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 16px; }
 .tab {
-  padding: 9px 18px; font-size: 13px; cursor: pointer;
+  padding: 9px 18px; font-size: 15px; cursor: pointer;
   color: var(--text-3); border-bottom: 2px solid transparent;
   margin-bottom: -1.5px; white-space: nowrap;
   transition: color .12s; user-select: none;
@@ -78,7 +78,7 @@ body {
 .tab-count {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 18px; height: 18px; border-radius: 100px;
-  font-size: 10px; font-weight: 600; padding: 0 5px; margin-left: 5px;
+  font-size: 12px; font-weight: 600; padding: 0 5px; margin-left: 5px;
   background: var(--bg); color: var(--text-3); border: 1px solid var(--border);
 }
 .tab.active .tab-count { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
@@ -99,15 +99,15 @@ body {
 }
 .search-box input {
   border: none; outline: none;
-  font-size: 13px; color: var(--text); background: transparent;
+  font-size: 15px; color: var(--text); background: transparent;
   width: 100%; padding: 6px 0;
 }
 .search-box input::placeholder { color: var(--text-3); }
-.si { font-size: 12px; color: var(--text-3); }
+.si { font-size: 14px; color: var(--text-3); }
 
 .pill {
   padding: 5px 13px; border-radius: 100px;
-  border: 1px solid var(--border); font-size: 12px;
+  border: 1px solid var(--border); font-size: 14px;
   cursor: pointer; background: var(--card); color: var(--text-2);
   transition: all .12s; user-select: none; white-space: nowrap;
 }
@@ -118,7 +118,7 @@ body {
 
 .btn {
   padding: 7px 14px; border-radius: 6px;
-  font-size: 13px; font-weight: 500; cursor: pointer;
+  font-size: 15px; font-weight: 500; cursor: pointer;
   border: 1px solid var(--border); background: var(--card); color: var(--text-2);
   transition: all .12s; white-space: nowrap;
 }
@@ -133,10 +133,10 @@ body {
   background: var(--card); border: 1px solid var(--border);
   border-radius: 10px; overflow: hidden; overflow-x: auto;
 }
-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 780px; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 860px; table-layout: fixed; }
 thead th {
   padding: 10px 14px; text-align: left;
-  font-size: 11px; font-weight: 500; letter-spacing: .04em;
+  font-size: 13px; font-weight: 500; letter-spacing: .04em;
   color: var(--text-3); background: var(--bg-2);
   border-bottom: 1px solid var(--border); white-space: nowrap;
 }
@@ -145,27 +145,27 @@ tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: var(--bg-2); }
 td { padding: 11px 14px; vertical-align: middle; }
 
-.item-id { font-size: 11px; color: var(--text-3); font-family: monospace; }
+.item-id { font-size: 13px; color: var(--text-3); font-family: monospace; }
 .item-name-main { font-weight: 500; }
-.item-name-machine { font-size: 11px; color: var(--text-3); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
-.item-name-en { font-size: 11px; color: var(--text-3); margin-top: 1px; font-style: italic; }
+.item-name-machine { font-size: 13px; color: var(--text-3); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.item-name-en { font-size: 13px; color: var(--text-3); margin-top: 1px; font-style: italic; }
 .machine-label {
-  font-size: 10px; color: var(--text-3); border: 1px solid var(--border);
+  font-size: 12px; color: var(--text-3); border: 1px solid var(--border);
   border-radius: 3px; padding: 0 4px; line-height: 1.6;
 }
 
 .price-main { font-weight: 500; font-variant-numeric: tabular-nums; }
 .price-pending {
   display: inline-flex; align-items: center; gap: 3px;
-  font-size: 10px; border-radius: 4px; padding: 1px 5px; margin-top: 3px;
+  font-size: 12px; border-radius: 4px; padding: 1px 5px; margin-top: 3px;
 }
 .price-pending.up   { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bdr); }
 .price-pending.down { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bdr); }
-.price-auto { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.price-auto { font-size: 14px; color: var(--text-3); font-variant-numeric: tabular-nums; }
 
 .badge {
   display: inline-flex; align-items: center;
-  padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 100px; font-size: 13px; font-weight: 500;
 }
 .badge-green  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 .badge-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
@@ -174,7 +174,7 @@ td { padding: 11px 14px; vertical-align: middle; }
 
 .action-btns { display: flex; gap: 6px; }
 .act-btn {
-  padding: 4px 10px; border-radius: 5px; font-size: 12px;
+  padding: 4px 10px; border-radius: 5px; font-size: 14px;
   cursor: pointer; border: 1px solid var(--border);
   background: transparent; color: var(--text-2); transition: all .1s;
 }
@@ -194,7 +194,7 @@ td { padding: 11px 14px; vertical-align: middle; }
 .view-toggle-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px; padding: 16px;
 }
 .item-card {
@@ -211,10 +211,15 @@ td { padding: 11px 14px; vertical-align: middle; }
 .card-img img { width: 100%; height: 100%; object-fit: cover; }
 .card-img-placeholder { font-size: 36px; color: var(--border); }
 .card-body { padding: 10px 12px 8px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.card-id { font-size: 10px; color: var(--text-3); font-family: monospace; }
-.card-name { font-size: 13px; font-weight: 600; line-height: 1.3; }
-.card-en { font-size: 11px; color: var(--text-3); line-height: 1.2; margin-top: 1px; font-style: italic; }
-.card-machine { font-size: 11px; color: var(--text-3); }
+.card-id { font-size: 12px; color: var(--text-3); font-family: monospace; }
+.card-name { font-size: 16px; font-weight: 600; line-height: 1.3; }
+.card-en { font-size: 13px; color: var(--text-3); line-height: 1.2; margin-top: 1px; font-style: italic; }
+.card-machine { font-size: 13px; color: var(--text-3); }
+.card-desc { font-size: 13px; color: var(--text-2); margin-top: 2px; line-height: 1.4; }
+.card-note-row { font-size: 13px; color: var(--text-3); padding: 6px 0 0; line-height: 1.4; word-break: break-all; }
+.card-note-label { font-weight: 600; color: var(--text-2); margin-right: 4px; }
+.card-field-label { font-weight: 600; color: var(--text-2); }
+.item-note-cell { font-size: 13px; color: var(--text-3); white-space: pre-wrap; word-break: break-all; }
 .card-img-upload-btn {
   position: absolute; bottom: 6px; right: 6px;
   background: rgba(0,0,0,.55); color: #fff; border: none;
@@ -223,15 +228,15 @@ td { padding: 11px 14px; vertical-align: middle; }
 }
 .item-card:hover .card-img-upload-btn { opacity: 1; }
 .card-prices { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
-.card-price-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); }
+.card-price-row { display: flex; justify-content: flex-start; gap: 8px; font-size: 14px; color: var(--text-2); }
 .card-price-row span:last-child { font-weight: 500; font-variant-numeric: tabular-nums; }
 .card-actions {
   padding: 8px 10px; display: flex; flex-direction: column; gap: 5px;
   border-top: 1px solid var(--border-2);
 }
 .card-actions-row { display: flex; gap: 5px; }
-.card-actions-row .act-btn { flex: 1; text-align: center; font-size: 11px; padding: 4px 4px; }
-.card-actions .act-btn.mobo-btn { width: 100%; font-size: 11px; padding: 4px 4px; }
+.card-actions-row .act-btn { flex: 1; text-align: center; font-size: 13px; padding: 4px 4px; }
+.card-actions .act-btn.mobo-btn { width: 100%; font-size: 13px; padding: 4px 4px; }
 
 /* ─── Archive cards ─── */
 .arc-card {
@@ -265,7 +270,7 @@ td { padding: 11px 14px; vertical-align: middle; }
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; background: var(--card); z-index: 1;
 }
-.modal-title { font-size: 15px; font-weight: 600; }
+.modal-title { font-size: 17px; font-weight: 600; }
 .modal-close {
   width: 28px; height: 28px; border-radius: 6px; border: none;
   background: transparent; cursor: pointer; font-size: 16px; color: var(--text-3);
@@ -282,19 +287,19 @@ td { padding: 11px 14px; vertical-align: middle; }
 /* ─── Form ─── */
 .form-section { margin-bottom: 22px; }
 .fsec-title {
-  font-size: 11px; font-weight: 600; letter-spacing: .06em;
+  font-size: 13px; font-weight: 600; letter-spacing: .06em;
   color: var(--text-3); text-transform: uppercase;
   margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border-2);
 }
 .form-row { margin-bottom: 14px; }
 .form-row:last-child { margin-bottom: 0; }
 .form-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-label.fl { display: block; font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 5px; }
-.fhint { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+label.fl { display: block; font-size: 14px; font-weight: 500; color: var(--text-2); margin-bottom: 5px; }
+.fhint { font-size: 13px; color: var(--text-3); margin-top: 4px; }
 
 input[type="text"], input[type="number"], input[type="date"], textarea, select {
   width: 100%; padding: 7px 10px; border: 1px solid var(--border);
-  border-radius: 6px; font-size: 13px; color: var(--text);
+  border-radius: 6px; font-size: 15px; color: var(--text);
   background: var(--card); font-family: inherit; outline: none;
   transition: border-color .12s, box-shadow .12s;
 }
@@ -303,7 +308,7 @@ input[readonly] { background: var(--bg-2); color: var(--text-3); cursor: default
 input[readonly]:focus { border-color: var(--border); box-shadow: none; }
 textarea { resize: vertical; min-height: 60px; }
 
-.char-counter { text-align: right; font-size: 11px; color: var(--text-3); margin-top: 3px; }
+.char-counter { text-align: right; font-size: 13px; color: var(--text-3); margin-top: 3px; }
 .char-counter.warn { color: var(--orange); }
 .char-counter.over { color: var(--red); }
 
@@ -402,7 +407,7 @@ select {
 
 /* ─── Mobo cell ─── */
 .mobo-cell { display: flex; flex-direction: column; gap: 3px; }
-.mobo-sync-time { font-size: 10px; color: var(--text-3); }
+.mobo-sync-time { font-size: 12px; color: var(--text-3); }
 
 /* ─── Commission chip ─── */
 .commission-chip {
@@ -414,7 +419,7 @@ select {
 
 /* ─── Price system auto-update label ─── */
 .price-sys-upd {
-  display: block; font-size: 10px; color: var(--text-3); margin-top: 3px;
+  display: block; font-size: 12px; color: var(--text-3); margin-top: 3px; white-space: nowrap;
 }
 
 /* ─── Image upload in modal ─── */
@@ -523,7 +528,7 @@ select {
         <button class="view-toggle-btn active" id="btn-view-list" onclick="setView('list')">☰ 清單</button>
         <button class="view-toggle-btn" id="btn-view-grid" onclick="setView('grid')">⊞ 圖片</button>
       </div>
-      <button class="btn" onclick="bulkUploadImages()" title="批量上傳圖片&#10;檔名需以料號開頭，例如 B001_xxx.jpg&#10;系統依料號自動對應品項">🖼 批量上傳圖片 ⓘ</button>
+      <button class="btn" onclick="bulkUploadImages()" title="批量上傳圖片&#10;檔名需以品項名稱開頭，例如 雙拼便當_1.jpg&#10;系統依品項名稱自動對應">🖼 批量上傳圖片 ⓘ</button>
       <button class="btn" onclick="bulkDownloadImages()" title="下載目前篩選結果中有圖片的品項&#10;打包為 ZIP 壓縮檔">📥 批量下載圖片 ⓘ</button>
       <button class="btn" onclick="openImport()">📥 Excel 匯入</button>
       <button class="btn" onclick="exportExcel()">📤 Excel 匯出</button>
@@ -751,14 +756,14 @@ select {
     </div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:14px">
-        一次上傳多張圖片，系統依檔名中的料號自動對應品項。
+        一次上傳多張圖片，系統依檔名中的品項名稱自動對應。
       </p>
       <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--text-2);margin-bottom:14px;line-height:1.9">
         <div style="font-weight:600;margin-bottom:4px;color:var(--text)">檔名規則</div>
-        <div>• 檔名需以 <strong>料號</strong> 開頭，後接底線與任意描述</div>
-        <div style="color:var(--text-3);padding-left:14px">例：B001_雙拼便當.jpg　A003_總匯蛋餅.png</div>
+        <div>• 檔名需以 <strong>品項名稱</strong> 開頭，後接底線與任意描述</div>
+        <div style="color:var(--text-3);padding-left:14px">例：雙拼便當_1.jpg　總匯蛋餅.png</div>
         <div>• 支援格式：JPG、PNG、WEBP</div>
-        <div>• 無法對應料號的檔案將於結果中列出</div>
+        <div>• 無法對應名稱的檔案將於結果中列出</div>
       </div>
       <div onclick="document.getElementById('bulk-img-input').click()"
         style="border:2px dashed var(--border);border-radius:8px;padding:30px;text-align:center;color:var(--text-3);font-size:13px;cursor:pointer;transition:background .1s"
@@ -930,8 +935,8 @@ function handleBulkUpload(input) {
   let matched = 0, unmatched = [];
   let done = 0;
   files.forEach(file => {
-    const id = file.name.split('_')[0].toUpperCase();
-    const item = items.find(i => i.id === id);
+    const rawName = file.name.replace(/\.[^.]+$/, '').split('_')[0].trim();
+    const item = items.find(i => i.name === rawName || i.display === rawName);
     const reader = new FileReader();
     reader.onload = e => {
       if (item) { item.imgPreview = e.target.result; matched++; }
@@ -940,7 +945,7 @@ function handleBulkUpload(input) {
         closeModal('bulk-img-modal');
         renderActive();
         let msg = `成功更新 ${matched} 張圖片。`;
-        if (unmatched.length) msg += `\n\n無法對應的檔案：\n${unmatched.join('\n')}\n（請確認檔名以料號開頭，例如 B001_xxx.jpg）`;
+        if (unmatched.length) msg += `\n\n無法對應的檔案：\n${unmatched.join('\n')}\n（請確認檔名以品項名稱開頭，例如 雙拼便當_1.jpg）`;
         alert(msg);
       }
     };
@@ -1018,16 +1023,19 @@ function renderActive() {
     const pend = item.pending;
     if (!pend?.storePrice) return { store: '', cost: '' };
     const isUp = pend.storePrice > item.storePrice;
+    const cls = `price-pending ${isUp ? 'up' : 'down'}`;
+    const arrow = isUp ? '↑' : '↓';
     return {
-      store: `<div class="price-pending ${isUp ? 'up' : 'down'}">${isUp ? '↑' : '↓'} $${pend.storePrice} (${pend.storeDate.slice(5)} 生效)</div>`,
-      cost:  `<span class="price-sys-upd">↕ ${pend.storeDate.slice(5)} 自動更新為 $${Math.round(pend.storePrice * getCommission())}</span>`,
+      store:     `<span class="${cls}">${arrow} $${pend.storePrice}<br>(${pend.storeDate.slice(5)} 生效)</span>`,
+      storeCard: `<span class="${cls}">${arrow} $${pend.storePrice} (${pend.storeDate.slice(5)} 生效)</span>`,
+      cost:      `<span class="price-sys-upd">↕ ${pend.storeDate.slice(5)} 自動更新為 $${Math.round(pend.storePrice * getCommission())}</span>`,
     };
   };
 
   if (viewMode === 'grid') {
     if (!data.length) { wrap.innerHTML = `<div class="empty">沒有符合條件的品項</div>`; return; }
     wrap.innerHTML = `<div class="card-grid">${data.map(item => {
-      const { store: pendStore } = pendTag(item);
+      const { storeCard: pendStore } = pendTag(item);
       const machineDiff = item.display && item.display !== item.name;
       return `<div class="item-card">
         <div class="card-img" ${item.imgPreview ? `onclick="openLightbox('${item.imgPreview}')" style="cursor:zoom-in"` : ''}>
@@ -1039,14 +1047,15 @@ function renderActive() {
         <div class="card-body">
           <div class="card-id">${item.id} · ${item.cat}</div>
           <div class="card-name">${item.name}</div>
-          ${item.en ? `<div class="card-en">${item.en}</div>` : ''}
-          ${machineDiff ? `<div class="card-machine">機台顯示：${item.display}</div>` : ''}
+          <div class="card-en"><span class="card-field-label">英文名稱：</span>${item.en || '—'}</div>
+          <div class="card-machine"><span class="card-field-label">機台顯示：</span>${item.display || '—'}</div>
+          ${item.desc ? `<div class="card-desc">${item.desc}</div>` : ''}
           <div class="card-prices">
-            <div class="card-price-row"><span>店內價</span><span>$${item.storePrice}</span></div>
-            ${pendStore ? `<div style="margin:-2px 0 2px">${pendStore}</div>` : ''}
+            <div class="card-price-row"><span>店內價</span><span>$${item.storePrice}${pendStore ? ` ${pendStore}` : ''}</span></div>
             <div class="card-price-row"><span>終端價</span><span>$${item.endPrice ?? item.storePrice}</span></div>
             <div class="card-price-row"><span>成本價</span><span>$${item.costPrice}</span></div>
           </div>
+          <div class="card-note-row"><span class="card-note-label">備註：</span>${item.note || '—'}</div>
         </div>
         <div class="card-actions">
           <div class="card-actions-row">
@@ -1057,7 +1066,7 @@ function renderActive() {
           <div style="display:flex;align-items:center;gap:6px">
             ${item.mobo ? `<span class="badge badge-purple" style="flex-shrink:0">已連結</span>
             <span class="mobo-sync-time" style="flex:1">${item.moboSync}</span>` : '<span style="flex:1"></span>'}
-            <button class="act-btn" style="font-size:10px;padding:3px 7px;flex-shrink:0" onclick="${item.mobo ? `syncMobo('${item.id}')` : `uploadMobo('${item.id}')`}">${item.mobo ? '更新摩寶' : '上傳摩寶'}</button>
+            <button class="act-btn" style="flex-shrink:0" onclick="${item.mobo ? `syncMobo('${item.id}')` : `uploadMobo('${item.id}')`}">${item.mobo ? '更新摩寶' : '上傳摩寶'}</button>
           </div>
         </div>
       </div>`;
@@ -1067,12 +1076,18 @@ function renderActive() {
 
   // 清單模式
   const thead = `<thead><tr>
-    <th>料號</th><th>餐點名稱</th><th>分類</th>
-    <th>店內價</th><th>終端價</th><th>成本價</th>
-    <th>摩寶</th><th>操作</th>
+    <th style="width:62px">料號</th>
+    <th style="width:110px">餐點名稱</th>
+    <th style="width:64px">分類</th>
+    <th style="width:72px">店內價</th>
+    <th style="width:72px">終端價</th>
+    <th style="width:100px">成本價</th>
+    <th style="width:130px">內部備註</th>
+    <th style="width:125px">摩寶</th>
+    <th style="width:110px">操作</th>
   </tr></thead>`;
   if (!data.length) {
-    wrap.innerHTML = `<table>${thead}<tbody><tr><td colspan="8" class="empty">沒有符合條件的品項</td></tr></tbody></table>`;
+    wrap.innerHTML = `<table>${thead}<tbody><tr><td colspan="9" class="empty">沒有符合條件的品項</td></tr></tbody></table>`;
     return;
   }
   const rows = data.map(item => {
@@ -1086,9 +1101,10 @@ function renderActive() {
         ${machineDiff ? `<div class="item-name-machine"><span class="machine-label">機台顯示</span>${item.display}</div>` : ''}
       </td>
       <td>${item.cat}</td>
-      <td><div class="price-main">$${item.storePrice}</div>${pendStore}</td>
+      <td><div class="price-main">$${item.storePrice}</div>${pendStore ? `<div style="margin-top:3px">${pendStore}</div>` : ''}</td>
       <td><div class="price-main">$${item.endPrice ?? item.storePrice}</div></td>
       <td><div class="price-auto">$${item.costPrice}</div>${pendCostUpd}</td>
+      <td><div class="item-note-cell">${item.note || '—'}</div></td>
       <td>${moboBadge(item)}</td>
       <td><div class="action-btns">
         <button class="act-btn" onclick="openEdit('${item.id}')">編輯</button>
