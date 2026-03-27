@@ -412,10 +412,36 @@ select {
   border: 1.5px dashed var(--border); overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg-2); font-size: 28px; cursor: pointer;
-  transition: border-color .12s;
+  transition: border-color .12s; position: relative;
 }
 .img-thumb-box:hover { border-color: var(--blue); }
 .img-thumb-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-thumb-zoom {
+  position: absolute; inset: 0; background: rgba(0,0,0,.35);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .15s; font-size: 18px; color: #fff;
+}
+.img-thumb-box:hover .img-thumb-zoom { opacity: 1; }
+
+/* ─── Lightbox ─── */
+.lightbox {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,.82); display: flex;
+  align-items: center; justify-content: center;
+  cursor: zoom-out; animation: lbIn .15s ease;
+}
+@keyframes lbIn { from { opacity:0 } to { opacity:1 } }
+.lightbox img {
+  max-width: min(90vw, 900px); max-height: 85vh;
+  border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,.5);
+  object-fit: contain; pointer-events: none;
+}
+.lightbox-close {
+  position: absolute; top: 18px; right: 22px;
+  color: #fff; font-size: 28px; line-height: 1;
+  cursor: pointer; opacity: .7; transition: opacity .1s;
+}
+.lightbox-close:hover { opacity: 1; }
 .img-upload-ctrl { flex: 1; }
 .img-upload-ctrl .img-status-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
 .img-upload-ctrl .img-hint { font-size: 11px; color: var(--text-3); margin-bottom: 8px; line-height: 1.5; }
@@ -557,7 +583,7 @@ select {
       <div class="form-section">
         <div class="fsec-title">圖片管理</div>
         <div class="img-upload-row">
-          <div class="img-thumb-box" id="img-thumb" onclick="document.getElementById('img-file-input').click()">
+          <div class="img-thumb-box" id="img-thumb" onclick="imgThumbClick()">
             <span id="img-placeholder-icon">🖼</span>
           </div>
           <div class="img-upload-ctrl">
@@ -991,7 +1017,7 @@ function renderActive() {
       const { store: pendStore } = pendTag(item);
       const machineDiff = item.display && item.display !== item.name;
       return `<div class="item-card">
-        <div class="card-img">
+        <div class="card-img" ${item.imgPreview ? `onclick="openLightbox('${item.imgPreview}')" style="cursor:zoom-in"` : ''}>
           ${item.imgPreview
             ? `<img src="${item.imgPreview}" alt="${item.name}">`
             : `<span class="card-img-placeholder">🍽</span>`}
@@ -1204,29 +1230,36 @@ function resetImgUpload() {
   document.getElementById('img-file-input').value = '';
 }
 
+function clearImg() {
+  resetImgUpload();
+}
+
+function setThumbImg(src) {
+  const thumb = document.getElementById('img-thumb');
+  thumb.innerHTML = `<img src="${src}" alt="圖片預覽"><div class="img-thumb-zoom">🔍</div>`;
+  document.getElementById('img-del-btn').style.display = '';
+}
+
 function loadImgUpload(item) {
   const thumb = document.getElementById('img-thumb');
   if (item.imgPreview) {
-    thumb.innerHTML = `<img src="${item.imgPreview}" alt="圖片預覽">`;
-    document.getElementById('img-del-btn').style.display = '';
+    setThumbImg(item.imgPreview);
   } else {
     thumb.innerHTML = `<span id="img-placeholder-icon">🖼</span>`;
     document.getElementById('img-del-btn').style.display = 'none';
   }
 }
 
+function imgThumbClick() {
+  const img = document.getElementById('img-thumb').querySelector('img');
+  if (img) { openLightbox(img.src); } else { document.getElementById('img-file-input').click(); }
+}
+
 function previewImg(input) {
   if (!input.files?.[0]) return;
   const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById('img-thumb').innerHTML = `<img src="${e.target.result}" alt="圖片預覽">`;
-    document.getElementById('img-del-btn').style.display = '';
-  };
+  reader.onload = e => setThumbImg(e.target.result);
   reader.readAsDataURL(input.files[0]);
-}
-
-function clearImg() {
-  resetImgUpload();
 }
 
 function updateCharCount() {
@@ -1423,6 +1456,19 @@ document.querySelectorAll('.overlay').forEach(o =>
 );
 
 renderAll();
+
+/* ── Lightbox ── */
+function openLightbox(src) {
+  if (!src) return;
+  const lb = document.createElement('div');
+  lb.className = 'lightbox';
+  lb.innerHTML = `<span class="lightbox-close" onclick="this.parentElement.remove()">✕</span><img src="${src}">`;
+  lb.addEventListener('click', e => { if (e.target === lb) lb.remove(); });
+  document.body.appendChild(lb);
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { lb.remove(); document.removeEventListener('keydown', esc); }
+  });
+}
 </script>
 </body>
 </html>
