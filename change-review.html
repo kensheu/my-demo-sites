@@ -34,7 +34,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
                "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
   background: #f3f2ef;
   min-height: 100vh;
@@ -43,8 +43,8 @@ body {
 .page { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
 
 .page-header { margin-bottom: 22px; }
-.page-title  { font-size: 19px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.page-sub    { font-size: 12px; color: var(--text-3); }
+.page-title  { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.page-sub    { font-size: 14px; color: var(--text-3); }
 
 /* ─── Tabs ─── */
 .tabs {
@@ -54,7 +54,7 @@ body {
 }
 .tab {
   padding: 9px 18px;
-  font-size: 13px;
+  font-size: 15px;
   cursor: pointer;
   color: var(--text-3);
   border-bottom: 2px solid transparent;
@@ -69,7 +69,7 @@ body {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 18px; height: 18px;
   border-radius: 100px;
-  font-size: 10px; font-weight: 600;
+  font-size: 11px; font-weight: 600;
   padding: 0 5px;
   margin-left: 5px;
   background: var(--orange-bg);
@@ -92,7 +92,7 @@ select {
   border-radius: 6px;
   background: var(--bg);
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   outline: none;
   appearance: none;
@@ -106,7 +106,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   padding: 5px 13px;
   border-radius: 100px;
   border: 1px solid var(--border);
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   background: var(--bg); color: var(--text-2);
   transition: all .12s;
@@ -133,11 +133,11 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   flex-wrap: wrap; gap: 8px;
   background: var(--bg-2);
 }
-.rev-rest { font-size: 13px; font-weight: 600; }
-.rev-meta { font-size: 11px; color: var(--text-3); }
+.rev-rest { font-size: 15px; font-weight: 600; }
+.rev-meta { font-size: 13px; color: var(--text-3); }
 .rev-type-badge {
   padding: 3px 10px; border-radius: 100px;
-  font-size: 11px; font-weight: 500;
+  font-size: 12px; font-weight: 500;
 }
 .rt-price  { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
 .rt-name   { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
@@ -147,7 +147,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 .rev-body { padding: 14px 16px; }
 
 .item-name {
-  font-size: 14px; font-weight: 500;
+  font-size: 15px; font-weight: 500;
   margin-bottom: 12px;
   display: flex; align-items: center; gap: 8px;
 }
@@ -155,7 +155,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   padding: 1px 7px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  font-size: 10px; color: var(--text-3);
+  font-size: 11px; color: var(--text-3);
   background: var(--bg-2);
   font-variant-numeric: tabular-nums;
 }
@@ -167,7 +167,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  font-size: 12px;
+  font-size: 13px;
   margin-bottom: 14px;
 }
 .cmp-header {
@@ -175,7 +175,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 }
 .cmp-header > div {
   padding: 7px 12px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: .04em;
   color: var(--text-3);
@@ -192,7 +192,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 }
 .cmp-row:last-child > div { border-bottom: none; }
 .cmp-field {
-  font-size: 11px; color: var(--text-3); font-weight: 500;
+  font-size: 12px; color: var(--text-3); font-weight: 500;
   white-space: nowrap;
   background: var(--bg-2);
   border-right: 1px solid var(--border-2);
@@ -211,7 +211,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   padding: 9px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  font-size: 12px; color: var(--text-2);
+  font-size: 13px; color: var(--text-2);
   margin-bottom: 14px;
   cursor: pointer;
   transition: background .1s;
@@ -219,8 +219,8 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 .evidence:hover { background: var(--bg-2); }
 .evidence .ev-icon { font-size: 18px; }
 .evidence .ev-name { flex: 1; }
-.evidence .ev-size { font-size: 11px; color: var(--text-3); }
-.evidence .ev-link { font-size: 11px; color: var(--blue); }
+.evidence .ev-size { font-size: 12px; color: var(--text-3); }
+.evidence .ev-link { font-size: 12px; color: var(--blue); }
 
 /* Action bar */
 .rev-actions {
@@ -232,14 +232,14 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 
 .eff-date {
   display: flex; align-items: center; gap: 6px;
-  font-size: 12px; color: var(--text-2);
+  font-size: 13px; color: var(--text-2);
 }
 .eff-date label { white-space: nowrap; }
 input[type="date"] {
   padding: 5px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text);
   background: var(--bg);
   outline: none;
@@ -249,7 +249,7 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 .btn {
   padding: 7px 16px;
   border-radius: 6px;
-  font-size: 13px; font-weight: 500;
+  font-size: 15px; font-weight: 500;
   cursor: pointer;
   border: none;
   transition: opacity .15s;
@@ -275,19 +275,19 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
   flex-wrap: wrap; gap: 6px;
 }
 .done-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.done-rest { font-size: 13px; font-weight: 500; }
-.done-item { font-size: 13px; color: var(--text-2); }
-.done-meta { font-size: 11px; color: var(--text-3); }
+.done-rest { font-size: 15px; font-weight: 500; }
+.done-item { font-size: 14px; color: var(--text-2); }
+.done-meta { font-size: 13px; color: var(--text-3); }
 .done-status {
   padding: 3px 10px; border-radius: 100px;
-  font-size: 11px; font-weight: 500;
+  font-size: 12px; font-weight: 500;
 }
 .ds-approved { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 .ds-rejected { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bdr); }
 
 .done-detail {
   padding: 8px 16px 12px;
-  font-size: 12px; color: var(--text-3);
+  font-size: 13px; color: var(--text-3);
   border-top: 1px solid var(--border-2);
 }
 .done-detail span { color: var(--text-2); }
@@ -313,21 +313,21 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
   transition: transform .15s;
 }
 .overlay.open .modal { transform: translateY(0); }
-.modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-.modal p  { font-size: 12px; color: var(--text-2); margin-bottom: 16px; line-height: 1.6; }
+.modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.modal p  { font-size: 13px; color: var(--text-2); margin-bottom: 16px; line-height: 1.6; }
 .modal textarea {
   width: 100%; height: 80px;
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 7px;
-  font-size: 13px; font-family: inherit; resize: vertical;
+  font-size: 14px; font-family: inherit; resize: vertical;
   outline: none; color: var(--text);
 }
 .modal textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 .btn-cancel { background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); }
 
-.empty { padding: 48px 16px; text-align: center; color: var(--text-3); font-size: 13px; }
+.empty { padding: 48px 16px; text-align: center; color: var(--text-3); font-size: 15px; }
 
 /* ─── Rest picker ─── */
 .top-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
@@ -341,7 +341,7 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 .rest-trigger:hover { border-color:#a8a29e; }
 .rest-trigger.open  { border-color:var(--blue); box-shadow:0 0 0 2px #dbeafe; }
 .rt-icon  { font-size:16px; }
-.rt-label { flex:1; font-size:13px; font-weight:500; color:var(--text); }
+.rt-label { flex:1; font-size:15px; font-weight:500; color:var(--text); }
 .rt-arrow { font-size:10px; color:var(--text-3); transition:transform .15s; }
 .rest-trigger.open .rt-arrow { transform:rotate(180deg); }
 .rest-dropdown {
