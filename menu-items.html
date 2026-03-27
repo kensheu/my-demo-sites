@@ -464,6 +464,74 @@ select {
 .img-upload-ctrl .img-hint { font-size: 11px; color: var(--text-3); margin-bottom: 8px; line-height: 1.5; }
 .img-upload-ctrl .img-btns { display: flex; gap: 6px; }
 
+/* ─── RWD ─── */
+@media (max-width: 768px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  /* 容器 */
+  .page { padding: 16px 12px 48px; }
+
+  /* Header */
+  .page-header { margin-bottom: 14px; }
+  .page-title { font-size: 18px; }
+
+  /* 餐廳選擇器列 */
+  .rest-picker { margin-bottom: 0; }
+  .rest-trigger { min-width: unset; width: 100%; }
+
+  /* Stats bar */
+  .stats-bar { gap: 6px; }
+  .stat-chip { padding: 6px 10px; font-size: 13px; }
+  .stat-chip strong { font-size: 15px; }
+
+  /* Tabs */
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab { padding: 8px 12px; font-size: 14px; }
+
+  /* Toolbar */
+  .toolbar { gap: 6px; }
+  .search-box { max-width: 100%; }
+  .btn { padding: 6px 10px; font-size: 14px; }
+
+  /* Table — 水平滑動，隱藏次要欄位 */
+  .tbl-wrap { border-radius: 8px; }
+  table { min-width: 520px; font-size: 14px; }
+  thead th, td { padding: 8px 10px; }
+  /* 隱藏終端價、摩寶欄 */
+  thead th:nth-child(5), td:nth-child(5),
+  thead th:nth-child(8), td:nth-child(8) { display: none; }
+
+  /* 卡片 grid — 單欄 */
+  .card-grid { grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+
+  /* 下架卡片 */
+  .arc-card { gap: 10px; }
+  .arc-card > div:last-child { margin-left: 0; width: 100%; }
+  .arc-card > div:last-child .act-btn { flex: 1; }
+
+  /* Modal 全螢幕 */
+  .overlay { padding: 0; align-items: flex-end; }
+  .modal {
+    width: 100%; border-radius: 16px 16px 0 0;
+    max-height: 92dvh; min-height: unset;
+  }
+  .modal-sm { width: 100%; }
+  .modal-body { padding: 16px; }
+  .modal-header { padding: 16px 16px 12px; }
+  .modal-footer { padding: 12px 16px; }
+
+  /* Form */
+  .form-2 { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column; }
+  .form-actions .btn { width: 100%; }
+}
+
+@media (max-width: 400px) {
+  .stat-chip { font-size: 12px; padding: 5px 8px; }
+  .tab { font-size: 13px; padding: 7px 10px; }
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
