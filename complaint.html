@@ -6,9 +6,9 @@
   <title>客訴管理系統</title>
   <style>
     :root {
-      --primary: #e05a2b;
-      --primary-light: #fef0eb;
-      --primary-dark: #c44d22;
+      --primary: #2563eb;
+      --primary-light: #dbeafe;
+      --primary-dark: #1d4ed8;
       --success: #27ae60;
       --warning: #f39c12;
       --info: #2980b9;
@@ -312,7 +312,7 @@
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.45);
-      z-index: 100;
+      z-index: 2000;
       overflow-y: auto;
       padding: 24px 16px;
     }
@@ -396,7 +396,7 @@
       padding: 12px 20px;
       border-radius: 8px;
       font-size: 14px;
-      z-index: 999;
+      z-index: 2002;
       display: none;
       box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       animation: slideUp 0.3s ease;
@@ -408,7 +408,7 @@
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.45);
-      z-index: 200;
+      z-index: 2001;
       overflow-y: auto;
       padding: 24px 16px;
     }
@@ -565,32 +565,16 @@
       #toast { left: 12px; right: 12px; bottom: 16px; }
     }
   </style>
+  <link rel="stylesheet" href="shared-nav.css">
 </head>
 <body>
-
-<header class="site-header">
-  <h1>🍱 客訴管理系統</h1>
-  <div style="display:flex;align-items:center;gap:12px">
-    <button onclick="openCatModal()" style="padding:5px 12px;border:1px solid rgba(255,255,255,0.4);border-radius:6px;background:transparent;color:rgba(255,255,255,0.8);font-size:12px;cursor:pointer;font-family:inherit" title="管理客訴類型">⚙ 管理類型</button>
-    <button onclick="resetData()" style="padding:5px 12px;border:1px solid rgba(255,255,255,0.4);border-radius:6px;background:transparent;color:rgba(255,255,255,0.8);font-size:12px;cursor:pointer;font-family:inherit" title="清除所有資料並還原預設">🗑 重設資料</button>
-    <div class="role-switch">
-      <button class="role-btn active" id="btnMember" onclick="switchRole('member')">會員前台</button>
-      <button class="role-btn" id="btnAdmin" onclick="switchRole('admin')">管理後台</button>
-    </div>
-  </div>
-</header>
+<script src="shared-nav.js"></script>
 
 <div class="main-container">
 
   <!-- 會員前台 -->
   <div id="memberView">
     <div class="member-layout">
-      <!-- 側邊欄 -->
-      <div class="sidebar">
-        <button class="sidebar-item active" id="sideM0" onclick="showMTab('orders')">📦 我的訂單</button>
-        <button class="sidebar-item" id="sideM2" onclick="showMTab('mylist')">📋 我的客訴</button>
-      </div>
-
       <!-- 內容區 -->
       <div class="content-area">
         <!-- 我的訂單 -->
@@ -687,6 +671,7 @@
         <input type="date" id="fFrom" onchange="applyFilter()">
         <input type="date" id="fTo" onchange="applyFilter()">
         <button class="btn btn-secondary" onclick="clearFilter()">清除篩選</button>
+        <button class="btn btn-secondary" onclick="openCatModal()">⚙ 管理類型</button>
       </div>
       <div id="adminListBody"></div>
     </div>
@@ -884,8 +869,10 @@ function defaultData() {
 // ─── Role / Tab ────────────────────────────────────────────────
 function switchRole(role) {
   currentRole = role;
-  document.getElementById('btnMember').classList.toggle('active', role === 'member');
-  document.getElementById('btnAdmin').classList.toggle('active', role === 'admin');
+  var btnM = document.getElementById('btnMember');
+  var btnA = document.getElementById('btnAdmin');
+  if (btnM) btnM.classList.toggle('active', role === 'member');
+  if (btnA) btnA.classList.toggle('active', role === 'admin');
   document.getElementById('memberView').style.display = role === 'member' ? '' : 'none';
   document.getElementById('adminView').style.display  = role === 'admin'  ? '' : 'none';
   if (role === 'admin') renderAdminList();
@@ -895,8 +882,6 @@ function showMTab(tab) {
   document.getElementById('panelOrders').style.display = tab === 'orders' ? '' : 'none';
   document.getElementById('panelSubmit').style.display = tab === 'submit' ? '' : 'none';
   document.getElementById('panelMyList').style.display = tab === 'mylist' ? '' : 'none';
-  document.getElementById('sideM0').classList.toggle('active', tab === 'orders');
-  document.getElementById('sideM2').classList.toggle('active', tab === 'mylist');
   if (tab === 'mylist') renderMyList();
   if (tab === 'orders') renderOrders();
 }
@@ -1490,6 +1475,15 @@ loadTypes();
 load();
 populateTypeSelects();
 renderOrders();
+
+// URL 參數初始化（供全域導覽使用）
+(function () {
+  var _p = new URLSearchParams(location.search);
+  var _mode = _p.get('mode');
+  var _tab  = _p.get('tab');
+  if (_mode) switchRole(_mode);
+  if (_tab)  showMTab(_tab);
+})();
 </script>
 </body>
 </html>

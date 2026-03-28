@@ -297,7 +297,7 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
   position: fixed; inset: 0;
   background: rgba(0,0,0,.35);
   display: flex; align-items: center; justify-content: center;
-  z-index: 100;
+  z-index: 2000;
   opacity: 0; pointer-events: none;
   transition: opacity .15s;
 }
@@ -370,9 +370,39 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 .rest-all { font-style:italic; }
 .back-link { font-size:13px; color:var(--text-3); text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap; }
 .back-link:hover { color:var(--text); }
+
+/* ─── RWD ─── */
+@media (max-width: 768px) {
+  .page { padding: 16px 14px 40px; }
+  .top-bar { flex-direction: column; align-items: flex-start; }
+  .tabs { overflow-x: auto; flex-wrap: nowrap; border-bottom-width: 1px; }
+  .tab { flex-shrink: 0; padding: 8px 14px; font-size: 14px; }
+  .toolbar { gap: 6px; }
+  .rev-actions { gap: 8px; }
+  .rev-actions .spacer { display: none; }
+  .rev-actions .eff-date { width: 100%; }
+  .compare { overflow-x: auto; }
+}
+
+@media (max-width: 540px) {
+  .page-title { font-size: 18px; }
+  .compare { display: block; }
+  .cmp-header { display: flex; }
+  .cmp-header > div { flex: 1; font-size: 11px; }
+  .cmp-row { display: flex; border-bottom: 1px solid var(--border-2); }
+  .cmp-row:last-child { border-bottom: none; }
+  .cmp-row > div { flex: 1; padding: 8px 10px; border-bottom: none; }
+  .cmp-field { flex: 0 0 80px; font-size: 11px; }
+  .rev-actions { flex-direction: column; align-items: stretch; }
+  .btn-approve, .btn-reject { width: 100%; text-align: center; }
+  .rest-trigger { min-width: unset; width: 100%; }
+  .done-head { flex-direction: column; align-items: flex-start; }
+}
 </style>
+  <link rel="stylesheet" href="shared-nav.css">
 </head>
 <body>
+<script src="shared-nav.js"></script>
 
 <div class="page">
 

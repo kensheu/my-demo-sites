@@ -4,105 +4,224 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demo Sites</title>
+  <link rel="stylesheet" href="shared-nav.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+                   "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      background: #eef0f5;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding-top: 48px;
     }
-    .container {
-      background: #fff;
-      border-radius: 12px;
-      padding: 40px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+
+    .portal-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
     }
-    h1 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #111;
-    }
-    p {
-      font-size: 14px;
-      color: #888;
-      margin-bottom: 32px;
-    }
-    .demo-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .demo-link {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 16px 20px;
-      border: 1px solid #e8e8e8;
-      border-radius: 10px;
-      text-decoration: none;
-      color: #111;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .demo-link:hover {
-      border-color: #4f8ef7;
-      box-shadow: 0 2px 8px rgba(79,142,247,0.12);
-    }
-    .icon {
-      font-size: 24px;
-      width: 40px;
+
+    .portal-hero {
       text-align: center;
+      margin-bottom: 36px;
     }
-    .demo-link .info .title {
-      font-weight: 600;
+    .portal-hero h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1e2532;
+      margin-bottom: 8px;
+    }
+    .portal-hero p {
       font-size: 15px;
+      color: #6b7280;
     }
-    .demo-link .info .desc {
-      font-size: 13px;
-      color: #999;
+
+    /* ─── Three columns ─── */
+    .system-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .system-grid { grid-template-columns: 1fr; }
+    }
+
+    .system-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+
+    .system-card-header {
+      padding: 20px 24px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #edf0f7;
+    }
+    .system-card-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .icon-internal { background: #dbeafe; }
+    .icon-store    { background: #dcfce7; }
+    .icon-frontend { background: #fef3c7; }
+
+    .system-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e2532;
+    }
+    .system-card-desc {
+      font-size: 12px;
+      color: #9ba3b8;
       margin-top: 2px;
     }
+
+    .system-card-pages {
+      padding: 8px 0 12px;
+    }
+    .page-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 24px;
+      text-decoration: none;
+      color: #374151;
+      font-size: 14px;
+      transition: background 0.12s, color 0.12s;
+      border-left: 3px solid transparent;
+    }
+    .page-link:hover {
+      background: #f0f4ff;
+      color: #2a4de0;
+      border-left-color: #6c8bff;
+    }
+    .page-link .pl-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #d1d5db;
+      flex-shrink: 0;
+    }
+    .page-link:hover .pl-dot { background: #6c8bff; }
+
+    .system-card-enter {
+      display: block;
+      margin: 4px 24px 16px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .enter-internal { background: #eff6ff; color: #1d4ed8; }
+    .enter-internal:hover { background: #dbeafe; }
+    .enter-store    { background: #f0fdf4; color: #16a34a; }
+    .enter-store:hover { background: #dcfce7; }
+    .enter-frontend { background: #fffbeb; color: #d97706; }
+    .enter-frontend:hover { background: #fef3c7; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Demo Sites</h1>
-    <p>請選擇要測試的功能頁面</p>
-    <div class="demo-list">
-      <a class="demo-link" href="announcement.html">
-        <div class="icon">📢</div>
-        <div class="info">
-          <div class="title">首頁公告demo</div>
-          <div class="desc">Announcement</div>
-        </div>
-      </a>
-      <a class="demo-link" href="purchasing-home.html">
-        <div class="icon">🛒</div>
-        <div class="info">
-          <div class="title">採購部首頁 demo</div>
-          <div class="desc">Purchasing Home</div>
-        </div>
-      </a>
-      <a class="demo-link" href="complaint.html">
-        <div class="icon">📋</div>
-        <div class="info">
-          <div class="title">客訴管理demo</div>
-          <div class="desc">Complaint</div>
-        </div>
-      </a>
-      <a class="demo-link" href="issue-and-ecr.html">
-        <div class="icon">🔧</div>
-        <div class="info">
-          <div class="title">問題單與ECR請求demo</div>
-          <div class="desc">Issue & ECR</div>
-        </div>
-      </a>
-    </div>
+<script src="shared-nav.js"></script>
+
+<div class="portal-wrap">
+  <div class="portal-hero">
+    <h1>Demo Sites Portal</h1>
+    <p>請選擇系統入口，或直接點擊子頁面進入</p>
   </div>
+
+  <div class="system-grid">
+
+    <!-- 內部後台 -->
+    <div class="system-card">
+      <div class="system-card-header">
+        <div class="system-card-icon icon-internal">🏢</div>
+        <div>
+          <div class="system-card-title">內部後台</div>
+          <div class="system-card-desc">Internal Backend</div>
+        </div>
+      </div>
+      <div class="system-card-pages">
+        <a class="page-link" href="announcement.html?view=admin&page=notify">
+          <span class="pl-dot"></span>首頁&amp;公告
+        </a>
+        <a class="page-link" href="announcement.html?view=admin&page=manage">
+          <span class="pl-dot"></span>公告管理
+        </a>
+        <a class="page-link" href="purchasing-home.html">
+          <span class="pl-dot"></span>採購首頁
+        </a>
+        <a class="page-link" href="menu-items.html">
+          <span class="pl-dot"></span>餐點管理
+        </a>
+        <a class="page-link" href="price-change-log.html">
+          <span class="pl-dot"></span>餐點異動紀錄
+        </a>
+        <a class="page-link" href="change-review.html">
+          <span class="pl-dot"></span>店家異動審核
+        </a>
+        <a class="page-link" href="complaint.html?mode=admin">
+          <span class="pl-dot"></span>客訴管理
+        </a>
+        <a class="page-link" href="issue-and-ecr.html?tab=issue">
+          <span class="pl-dot"></span>問題單
+        </a>
+        <a class="page-link" href="issue-and-ecr.html?tab=ecr">
+          <span class="pl-dot"></span>ECR
+        </a>
+      </div>
+      <a class="system-card-enter enter-internal" href="purchasing-home.html">進入內部後台 →</a>
+    </div>
+
+    <!-- 店家後台 -->
+    <div class="system-card">
+      <div class="system-card-header">
+        <div class="system-card-icon icon-store">🏪</div>
+        <div>
+          <div class="system-card-title">店家後台</div>
+          <div class="system-card-desc">Store Backend</div>
+        </div>
+      </div>
+      <div class="system-card-pages">
+        <a class="page-link" href="announcement.html?view=admin&page=notify&sys=store">
+          <span class="pl-dot"></span>公告通知
+        </a>
+      </div>
+      <a class="system-card-enter enter-store" href="announcement.html?view=admin&page=notify&sys=store">進入店家後台 →</a>
+    </div>
+
+    <!-- 訂餐前台 -->
+    <div class="system-card">
+      <div class="system-card-header">
+        <div class="system-card-icon icon-frontend">🛒</div>
+        <div>
+          <div class="system-card-title">訂餐前台</div>
+          <div class="system-card-desc">Order Frontend</div>
+        </div>
+      </div>
+      <div class="system-card-pages">
+        <a class="page-link" href="announcement.html?view=frontend">
+          <span class="pl-dot"></span>公告通知
+        </a>
+        <a class="page-link" href="complaint.html?mode=member&tab=orders">
+          <span class="pl-dot"></span>我的訂單
+        </a>
+        <a class="page-link" href="complaint.html?mode=member&tab=mylist">
+          <span class="pl-dot"></span>我的客訴
+        </a>
+      </div>
+      <a class="system-card-enter enter-frontend" href="announcement.html?view=frontend">進入訂餐前台 →</a>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
