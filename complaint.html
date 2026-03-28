@@ -953,16 +953,23 @@ function resetCForm() {
 
 // ─── Orders data ──────────────────────────────────────────────
 const ORDERS = [
+  { id: 'ORD-20250325-011', location: '據點B', date: '2025-03-25', items: ['雞腿便當 x1', '湯 x1'], total: 140 },
+  { id: 'ORD-20250322-008', location: '據點C', date: '2025-03-22', items: ['排骨飯 x2', '飲料 x1'], total: 230 },
   { id: 'ORD-20250318-007', location: '據點C', date: '2025-03-18', items: ['雞腿便當 x2', '飲料 x1'], total: 210 },
   { id: 'ORD-20250315-019', location: '據點B', date: '2025-03-15', items: ['排骨飯 x1', '湯 x1'], total: 130 },
+  { id: 'ORD-20250312-033', location: '據點A', date: '2025-03-12', items: ['招牌便當 x1', '飲料 x2'], total: 190 },
   { id: 'ORD-20250309-024', location: '據點A', date: '2025-03-09', items: ['雞排飯 x1', '飲料 x2'], total: 220 },
+  { id: 'ORD-20250305-016', location: '據點C', date: '2025-03-05', items: ['雞腿便當 x3'], total: 330 },
   { id: 'ORD-20250301-042', location: '據點A', date: '2025-03-01', items: ['招牌便當 x3'], total: 360 },
+  { id: 'ORD-20250226-009', location: '據點B', date: '2025-02-26', items: ['排骨飯 x2', '湯 x2'], total: 280 },
+  { id: 'ORD-20250220-031', location: '據點A', date: '2025-02-20', items: ['雞排飯 x2', '飲料 x1'], total: 270 },
 ];
+let ordersShown = 5;
 
 function renderOrders() {
   const el = document.getElementById('ordersBody');
   const complained = id => complaints.some(c => c.orderId === id && c.memberId === ME);
-  el.innerHTML = `<div class="c-list">${ORDERS.map(o => {
+  const cards = ORDERS.slice(0, ordersShown).map(o => {
     const done = complained(o.id);
     return `<div class="c-card" style="cursor:default">
       <div class="c-card-head">
@@ -981,7 +988,16 @@ function renderOrders() {
         </div>
       </div>
     </div>`;
-  }).join('')}</div>`;
+  }).join('');
+  const loadMoreBtn = ordersShown < ORDERS.length
+    ? `<button class="btn btn-outline" style="width:100%;margin-top:4px" onclick="loadMoreOrders()">載入更多</button>`
+    : '';
+  el.innerHTML = `<div class="c-list">${cards}</div>${loadMoreBtn}`;
+}
+
+function loadMoreOrders() {
+  ordersShown = Math.min(ordersShown + 5, ORDERS.length);
+  renderOrders();
 }
 
 function startComplaint(orderId, location) {

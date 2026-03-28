@@ -323,18 +323,11 @@
         </div>
         <div class="form-group">
           <label>專案名稱 <span class="req">*</span></label>
-          <select id="f-project" onchange="syncModules('f-project','f-module')">
-            <option value="">請選擇...</option>
-            <option>訂餐前台</option>
-            <option>內部後台</option>
-            <option>店家後台</option>
-          </select>
+          <input type="text" id="f-project" placeholder="例：訂餐前台、內部後台、店家後台" />
         </div>
         <div class="form-group">
           <label>模組 <span class="req">*</span></label>
-          <select id="f-module">
-            <option value="">請先選擇專案...</option>
-          </select>
+          <input type="text" id="f-module" placeholder="例：餐點管理、訂單列表、會員管理" />
         </div>
         <div class="form-group full">
           <label>問題摘要 <span class="req">*</span> <span class="hint">（建議包含頁面名稱或功能規格名稱）</span></label>
@@ -631,18 +624,11 @@
       <div class="form-grid cols-3">
         <div class="form-group">
           <label>專案名稱 <span class="req">*</span></label>
-          <select id="e-project" class="ecr-focus" onchange="syncModules('e-project','e-module')">
-            <option value="">請選擇...</option>
-            <option>訂餐前台</option>
-            <option>內部後台</option>
-            <option>店家後台</option>
-          </select>
+          <input type="text" id="e-project" class="ecr-focus" placeholder="例：訂餐前台、內部後台、店家後台" />
         </div>
         <div class="form-group">
           <label>影響模組 <span class="req">*</span></label>
-          <select id="e-module" class="ecr-focus">
-            <option value="">請先選擇專案...</option>
-          </select>
+          <input type="text" id="e-module" class="ecr-focus" placeholder="例：餐點管理、訂單列表、會員管理" />
         </div>
         <div class="form-group">
           <label>申請日期 <span class="req">*</span></label>
@@ -988,21 +974,6 @@ function handleFiles(files, listId, color) {
   });
 }
 
-// ════ 專案模組連動 ════
-const projectModules = {
-  '訂餐前台': ['首頁', '我的訂單'],
-  '內部後台': ['首頁', '據點管理', '餐點管理', '訂單管理', '據點訂單明細', '會員管理', '折價券管理', '使用者管理', '上稿管理', '統計報表', '對帳維護', '檔案瀏覽'],
-  '店家後台': ['首頁', '訂單檢索', '使用者檢索', '餐廳管理', '對帳作業', '檔案上傳', 'QA'],
-};
-
-function syncModules(projectId, moduleId) {
-  const project = document.getElementById(projectId).value;
-  const moduleSel = document.getElementById(moduleId);
-  const modules = projectModules[project] || [];
-  moduleSel.innerHTML = modules.length
-    ? '<option value="">請選擇模組...</option>' + modules.map(m => `<option>${m}</option>`).join('')
-    : '<option value="">請先選擇專案...</option>';
-}
 
 // ════ ISSUE TRACKER ════
 let issues = JSON.parse(localStorage.getItem('issues') || '[]');
