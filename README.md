@@ -13,7 +13,7 @@ https://kensheu.github.io/my-demo-sites/
 | 系統 | 說明 | 頁面 |
 |------|------|------|
 | 內部後台 | 採購／管理人員使用 | 首頁&公告、公告管理、採購首頁、餐點管理、餐點異動紀錄、店家異動審核、客訴管理、問題單&ECR |
-| 店家後台 | 餐廳店家使用 | 公告通知 |
+| 店家後台 | 餐廳店家使用 | 公告通知、餐點管理 |
 | 訂餐前台 | 訂餐會員使用 | 公告通知、我的訂單、我的客訴 |
 
 手機版（< 768px）：頂部列收合為 hamburger 選單，左側邊欄隱藏。
@@ -23,7 +23,8 @@ https://kensheu.github.io/my-demo-sites/
 - [Portal 入口](https://kensheu.github.io/my-demo-sites/index.html)
 - [公告系統](https://kensheu.github.io/my-demo-sites/announcement.html)（內部後台 / 店家後台 / 訂餐前台 三合一）
 - [採購首頁](https://kensheu.github.io/my-demo-sites/purchasing-home.html)
-- [餐點管理](https://kensheu.github.io/my-demo-sites/menu-items.html)
+- [餐點管理（內部後台）](https://kensheu.github.io/my-demo-sites/menu-items.html)
+- [餐點管理（店家後台）](https://kensheu.github.io/my-demo-sites/store-menu.html)
 - [餐點異動紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)
 - [店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)
 - [客訴管理](https://kensheu.github.io/my-demo-sites/complaint.html)
@@ -70,6 +71,23 @@ https://kensheu.github.io/my-demo-sites/
 
 ---
 
+### 店家後台 — 餐點管理
+
+- 店家可查看自家品項清單（販售中 / 待審核 / 下架 三個 Tab）
+- 清單 / 圖片切換檢視（同內部後台餐點管理樣式）
+- 圖片可點擊放大（Lightbox）
+- 可申請變更以下欄位（送出後進入內部後台審核流程）：
+    - 餐點完整名稱
+    - 介紹
+    - 圖片上傳
+    - 店內價
+- 申請新增品項
+- 通知菜單更新：上傳實體菜單照片，通知採購部確認是否需建立異動申請
+- 退回通知：審核退回時於待審核 Tab 顯示紅框 + 退回原因，可點擊「編輯」重新申請
+- 隱藏欄位（店家後台不顯示）：機台顯示名稱、分類、排序、內部備註、終端價、成本價、預約調整
+
+---
+
 ### 店家異動審核
 
 - 可搜尋餐廳選擇器
@@ -78,7 +96,8 @@ https://kensheu.github.io/my-demo-sites/
 - 附件佐證（店家上傳之紙本菜單照片）
 - 核准：可設定系統生效日期後確認寫入
 - 退回：須填寫退回原因通知店家
-- 篩選：依餐廳、異動類型（店內價調整 / 改名 / 新增品項 / 下架）
+- 篩選：依餐廳、異動類型（完整名稱 / 介紹 / 圖片 / 店內價）
+- 菜單更新通知：店家上傳實體菜單照片時，顯示為獨立通知類型供採購部確認
 
 ---
 
