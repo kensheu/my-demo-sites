@@ -68,6 +68,11 @@
             label: '公告通知',
             url: 'announcement.html?view=admin&page=notify&sys=store',
             match: function (p) { return p.file === 'announcement.html' && p.sys === 'store'; }
+          },
+          {
+            label: '餐點管理',
+            url: 'store-menu.html?sys=store',
+            match: function (p) { return p.file === 'store-menu.html'; }
           }
         ]
       },
@@ -203,7 +208,7 @@
     var active = detectActive(pageInfo);
     var activeSystem = active.system;
     var activePage = active.page;
-    var hasSidebar = activeSystem.id === 'internal' || activeSystem.id === 'frontend';
+    var hasSidebar = activeSystem.id === 'internal' || activeSystem.id === 'frontend' || activeSystem.id === 'store';
 
     var html = buildTopbar(activeSystem);
     if (hasSidebar) {

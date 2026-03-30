@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餐點管理 — 店家後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #a8a29e;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --purple:      #7c3aed;
+  --purple-bg:   #f5f3ff;
+  --purple-bdr:  #ddd6fe;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* ─── Header ─── */
+.page-header { margin-bottom: 20px; }
+.page-title  { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.page-sub    { font-size: 14px; color: var(--text-3); }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.toolbar-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+.toolbar-right { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-2);
+  transition: all .12s;
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.btn:hover { border-color: #a8a29e; color: var(--text); }
+.btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { background: #1e40af; border-color: #1e40af; color: #fff; opacity: 1; }
+.btn-notify { background: var(--card); color: var(--text-2); }
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 20px;
+}
+.tab {
+  padding: 9px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px;
+  white-space: nowrap;
+  transition: color .12s;
+  user-select: none;
+  position: relative;
+}
+.tab:hover { color: var(--text-2); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 500; }
+.tab-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px;
+  border-radius: 100px;
+  font-size: 12px; font-weight: 600;
+  padding: 0 5px;
+  margin-left: 5px;
+  background: var(--orange-bg);
+  color: var(--orange);
+  border: 1px solid var(--orange-bdr);
+}
+.tab.active .tab-count { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+.tab-notif {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 8px; height: 8px;
+  border-radius: 100px;
+  background: var(--red);
+  margin-left: 5px;
+  vertical-align: middle;
+  margin-bottom: 1px;
+}
+
+/* ─── List View ─── */
+.view { display: none; }
+.view.active { display: block; }
+
+.list-table { width: 100%; border-collapse: collapse; }
+.list-table th, .list-table td {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 15px;
+  border-bottom: 1px solid var(--border-2);
+  vertical-align: top;
+}
+.list-table th {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-3);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.list-table tr:last-child td { border-bottom: none; }
+.list-table tbody tr:hover td { background: var(--bg-2); }
+
+.list-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.item-id-tag {
+  font-size: 12px; color: var(--text-3);
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 5px;
+  font-variant-numeric: tabular-nums;
+  display: inline-block; margin-left: 5px;
+}
+.item-name-main { font-weight: 500; display: inline; }
+.desc-cell { color: var(--text-2); font-size: 14px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.img-status { font-size: 13px; }
+.img-ok   { color: var(--green); }
+.img-miss { color: var(--orange); font-weight: 500; }
+.price-cell { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.action-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+.act-btn {
+  padding: 4px 9px;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text-2);
+  transition: all .1s;
+  white-space: nowrap;
+}
+.act-btn:hover { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+
+/* ─── Card View ─── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 640px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.menu-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: box-shadow .15s;
+}
+.menu-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+
+.card-img {
+  width: 100%; aspect-ratio: 4/3;
+  background: var(--bg-3);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.card-img img { width: 100%; height: 100%; object-fit: cover; }
+.card-img-placeholder {
+  font-size: 40px; color: var(--border);
+}
+
+.card-body { padding: 10px 12px 8px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.card-id-row { font-size: 13px; color: var(--text-3); }
+.card-name { font-size: 16px; font-weight: 600; line-height: 1.3; margin-bottom: 2px; }
+.card-field { font-size: 14px; color: var(--text-2); display: flex; gap: 6px; align-items: baseline; }
+.card-field-label { font-size: 13px; color: var(--text-3); white-space: nowrap; flex-shrink: 0; min-width: 48px; }
+.card-desc-row { align-items: flex-start; }
+.card-desc-row > :last-child { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.card-price { font-size: 14px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+.card-img-badge { font-size: 12px; padding: 1px 6px; border-radius: 4px; }
+.card-img-badge.ok   { background: var(--green-bg); color: var(--green); }
+.card-img-badge.miss { background: var(--orange-bg); color: var(--orange); }
+
+.card-actions {
+  padding: 8px 10px;
+  border-top: 1px solid var(--border-2);
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+.card-actions .act-btn { flex: 1; text-align: center; font-size: 14px; padding: 5px 4px; }
+
+/* ─── Pending / Off Tab Cards ─── */
+.req-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.req-card.rejected {
+  border-color: var(--red-bdr);
+  box-shadow: 0 0 0 2px var(--red-bg);
+}
+.req-head {
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 6px;
+}
+.req-head.rejected-head { background: var(--red-bg); }
+.req-type-badge {
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 13px; font-weight: 500;
+}
+.rt-fname  { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+.rt-desc   { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.rt-image  { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
+.rt-price  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.rt-new    { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); }
+.rt-notify { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); }
+
+.req-status {
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 13px; font-weight: 500;
+}
+.rs-pending  { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.rs-rejected { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bdr); }
+
+.req-body { padding: 12px 14px; }
+.req-item { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+.req-date { font-size: 13px; color: var(--text-3); }
+
+.req-compare {
+  font-size: 14px; color: var(--text-2);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+.req-before { color: var(--red); text-decoration: line-through; }
+.req-after  { color: var(--green); font-weight: 500; }
+
+.req-reject-reason {
+  background: var(--red-bg);
+  border: 1px solid var(--red-bdr);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px; color: var(--red);
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.req-actions {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-2);
+  background: var(--bg-2);
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.req-actions .spacer { flex: 1; }
+.btn-withdraw {
+  background: var(--bg); color: var(--text-2);
+  border: 1px solid var(--border);
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 14px; cursor: pointer;
+  transition: all .1s;
+}
+.btn-withdraw:hover { border-color: var(--red-bdr); color: var(--red); background: var(--red-bg); }
+.btn-ack {
+  background: var(--blue); color: #fff;
+  border: none;
+  padding: 6px 14px; border-radius: 6px;
+  font-size: 14px; cursor: pointer;
+  transition: opacity .1s;
+}
+.btn-ack:hover { opacity: .85; }
+
+/* ─── Off Tab (下架) ─── */
+.off-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.off-thumb {
+  width: 48px; height: 48px;
+  border-radius: 6px;
+  background: var(--bg-3);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--text-3);
+  overflow: hidden;
+}
+.off-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.off-info { flex: 1; }
+.off-name { font-size: 14px; font-weight: 500; }
+.off-meta { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+.off-price { font-size: 14px; color: var(--text-2); font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+/* ─── Modal ─── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000;
+  opacity: 0; pointer-events: none;
+  transition: opacity .15s;
+}
+.overlay.open { opacity: 1; pointer-events: auto; }
+.modal {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 24px;
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  transform: translateY(8px);
+  transition: transform .15s;
+}
+.overlay.open .modal { transform: translateY(0); }
+.modal-title { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.btn-cancel { background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); }
+
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 14px; font-weight: 500; color: var(--text-2);
+  margin-bottom: 5px;
+}
+.form-label .req-mark { color: var(--red); margin-left: 2px; }
+.form-label .optional { font-weight: 400; color: var(--text-3); margin-left: 4px; }
+
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 14px; font-family: inherit;
+  color: var(--text);
+  background: var(--card);
+  outline: none;
+  transition: border-color .1s, box-shadow .1s;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px #dbeafe;
+}
+.form-input[readonly], .form-textarea[readonly] {
+  background: var(--bg-2);
+  color: var(--text-3);
+  cursor: default;
+}
+.form-input[readonly]:focus, .form-textarea[readonly]:focus {
+  border-color: var(--border);
+  box-shadow: none;
+}
+.form-textarea { resize: vertical; height: 80px; }
+
+.upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .12s;
+  position: relative;
+  overflow: hidden;
+}
+.upload-area:hover { border-color: var(--blue); background: var(--blue-bg); }
+.upload-area input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer;
+}
+.upload-icon { font-size: 24px; margin-bottom: 6px; }
+.upload-text { font-size: 14px; color: var(--text-2); }
+.upload-hint { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+.upload-warn { font-size: 12px; color: var(--red); margin-top: 4px; font-weight: 500; }
+
+.reject-banner {
+  display: none;
+  background: var(--red-bg);
+  border: 1px solid var(--red-bdr);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 14px; color: var(--red);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.upload-preview {
+  width: 80px; height: 80px;
+  border-radius: 6px; object-fit: cover;
+  border: 1px solid var(--border);
+  margin: 0 auto 8px;
+  display: block;
+}
+.upload-filename { font-size: 13px; color: var(--blue-text); margin-top: 4px; }
+
+.current-img-preview {
+  width: 80px; height: 80px;
+  border-radius: 6px; object-fit: cover;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.no-img-placeholder {
+  width: 80px; height: 80px;
+  border-radius: 6px;
+  background: var(--bg-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: var(--text-3);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+/* ─── Lightbox ─── */
+.lightbox {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 3000;
+  opacity: 0; pointer-events: none;
+  transition: opacity .18s;
+  cursor: zoom-out;
+}
+.lightbox.open { opacity: 1; pointer-events: auto; }
+.lightbox img {
+  max-width: min(90vw, 700px);
+  max-height: 85vh;
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.5);
+  object-fit: contain;
+  transform: scale(.95);
+  transition: transform .18s;
+}
+.lightbox.open img { transform: scale(1); }
+.lightbox-close {
+  position: absolute; top: 16px; right: 20px;
+  font-size: 28px; color: #fff; cursor: pointer;
+  line-height: 1; opacity: .7; transition: opacity .1s;
+  background: none; border: none;
+}
+.lightbox-close:hover { opacity: 1; }
+
+/* ─── Toast ─── */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #1c1b1a; color: #fff;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 3000;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── Empty ─── */
+.empty { padding: 48px 16px; text-align: center; color: var(--text-3); font-size: 15px; }
+
+/* ─── RWD ─── */
+@media (max-width: 768px) {
+  .page { padding: 16px 12px 40px; }
+  .toolbar-sep { display: none; }
+  .card-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+}
+@media (max-width: 540px) {
+  .page-title { font-size: 18px; }
+  .list-table td:nth-child(3), .list-table th:nth-child(3) { display: none; }
+  .action-btns { flex-direction: column; }
+}
+</style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">XX 早餐店 — 餐點管理</div>
+    <div class="page-sub">店家後台 ・ 查看品項、提出異動申請、通知菜單更新</div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn active" id="btn-list" onclick="switchView('list')">☰ 清單</button>
+    <button class="btn" id="btn-card" onclick="switchView('card')">⊞ 圖片</button>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-right">
+      <button class="btn btn-primary" onclick="openModal('new-item-modal')">＋ 申請新增品項</button>
+      <button class="btn btn-notify" onclick="openModal('notify-modal')">📷 通知菜單更新</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('on')">
+      販售中
+      <span class="tab-count" id="on-count">6</span>
+    </div>
+    <div class="tab" onclick="switchTab('pending')">
+      待審核
+      <span class="tab-count" id="pending-count">2</span>
+      <span class="tab-notif" id="reject-dot" style="display:none"></span>
+    </div>
+    <div class="tab" onclick="switchTab('off')">
+      下架
+      <span class="tab-count" id="off-count" style="background:var(--bg-3);color:var(--text-3);border-color:var(--border)">1</span>
+    </div>
+  </div>
+
+  <!-- ══ 販售中 ══ -->
+  <div class="view active" id="v-on">
+    <!-- 清單視圖 -->
+    <div id="list-view">
+      <div class="list-wrap">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>品項名稱</th>
+              <th>店內價</th>
+              <th>介紹</th>
+              <th>圖片</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="list-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- 圖片視圖 -->
+    <div id="card-view" style="display:none">
+      <div class="card-grid" id="card-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ 待審核 ══ -->
+  <div class="view" id="v-pending">
+    <div id="pending-container"></div>
+  </div>
+
+  <!-- ══ 下架 ══ -->
+  <div class="view" id="v-off">
+    <div id="off-container"></div>
+  </div>
+
+</div>
+
+<!-- ══ Modal A：申請修改名稱 ══ -->
+<div class="overlay" id="fname-modal">
+  <div class="modal">
+    <div class="modal-title">申請修改「餐點名稱」</div>
+    <div class="reject-banner" id="fname-reject-banner"></div>
+    <div class="form-group">
+      <label class="form-label">品項</label>
+      <input class="form-input" id="fname-item" readonly>
+    </div>
+    <div class="form-group">
+      <label class="form-label">目前名稱</label>
+      <input class="form-input" id="fname-current" readonly>
+    </div>
+    <div class="form-group">
+      <label class="form-label">申請修改為<span class="req-mark">*</span></label>
+      <input class="form-input" id="fname-new" placeholder="請輸入新名稱">
+    </div>
+    <div class="form-group">
+      <label class="form-label">備註說明<span class="optional">（選填）</span></label>
+      <textarea class="form-textarea" id="fname-note" placeholder="例：春季菜單更新品名"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal('fname-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitFname()">送出申請</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal B：申請修改介紹 ══ -->
+<div class="overlay" id="desc-modal">
+  <div class="modal">
+    <div class="modal-title">申請修改「介紹」</div>
+    <div class="reject-banner" id="desc-reject-banner"></div>
+    <div class="form-group">
+      <label class="form-label">品項</label>
+      <input class="form-input" id="desc-item" readonly>
+    </div>
+    <div class="form-group">
+      <label class="form-label">目前介紹</label>
+      <textarea class="form-textarea" id="desc-current" readonly></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">申請修改為<span class="req-mark">*</span></label>
+      <textarea class="form-textarea" id="desc-new" placeholder="請輸入新介紹內容"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">備註說明<span class="optional">（選填）</span></label>
+      <textarea class="form-textarea" id="desc-note" placeholder="例：更新品項說明"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal('desc-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitDesc()">送出申請</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal C：申請換圖片 ══ -->
+<div class="overlay" id="image-modal">
+  <div class="modal">
+    <div class="modal-title">申請更換「圖片」</div>
+    <div class="reject-banner" id="image-reject-banner"></div>
+    <div class="form-group">
+      <label class="form-label">品項</label>
+      <input class="form-input" id="image-item" readonly>
+    </div>
+    <div class="form-group">
+      <label class="form-label">目前圖片</label>
+      <div id="image-current-wrap"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">上傳新圖片<span class="req-mark">*</span></label>
+      <div class="upload-area" id="image-upload-area">
+        <input type="file" accept="image/*" id="image-file" onchange="previewFile('image-file','image-preview','image-upload-area')">
+        <div id="image-preview-wrap">
+          <div class="upload-icon">🖼</div>
+          <div class="upload-text">點擊或拖曳上傳圖片</div>
+          <div class="upload-hint">支援 JPG、PNG，建議 600×600 以上</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">備註說明<span class="optional">（選填）</span></label>
+      <textarea class="form-textarea" id="image-note" placeholder="例：更新最新商品照片"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal('image-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitImage()">送出申請</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal D：申請調整店內價 ══ -->
+<div class="overlay" id="price-modal">
+  <div class="modal">
+    <div class="modal-title">申請調整「店內價」</div>
+    <div class="reject-banner" id="price-reject-banner"></div>
+    <div class="form-group">
+      <label class="form-label">品項</label>
+      <input class="form-input" id="price-item" readonly>
+    </div>
+    <div class="form-group">
+      <label class="form-label">目前店內價</label>
+      <input class="form-input" id="price-current" readonly>
+    </div>
+    <div class="form-group">
+      <label class="form-label">申請新店內價<span class="req-mark">*</span></label>
+      <input class="form-input" type="number" id="price-new" placeholder="請輸入新價格（元）" min="1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">菜單佐證照片<span class="req-mark">*</span></label>
+      <div class="upload-area" id="price-upload-area">
+        <input type="file" accept="image/*" id="price-file" onchange="previewFile('price-file','price-preview','price-upload-area')">
+        <div id="price-preview-wrap">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">上傳實體菜單照片</div>
+          <div class="upload-warn">⚠ 請拍攝紙本實體菜單，不接受電子截圖</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal('price-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitPrice()">送出申請</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal E：申請新增品項 ══ -->
+<div class="overlay" id="new-item-modal">
+  <div class="modal">
+    <div class="modal-title">申請新增品項</div>
+    <p style="font-size:13px;color:var(--text-3);margin-bottom:16px;line-height:1.6">送出後由採購人員審核，核准後品項才會正式建立。</p>
+    <div class="form-group">
+      <label class="form-label">餐點完整名稱<span class="req-mark">*</span></label>
+      <input class="form-input" id="new-name" placeholder="請輸入品項名稱">
+    </div>
+    <div class="form-group">
+      <label class="form-label">分類<span class="req-mark">*</span></label>
+      <select class="form-select" id="new-cat">
+        <option value="">請選擇分類</option>
+        <option>吐司</option>
+        <option>蛋餅</option>
+        <option>飲料</option>
+        <option>輕食</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">店內價<span class="req-mark">*</span></label>
+      <input class="form-input" type="number" id="new-price" placeholder="請輸入價格（元）" min="1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">介紹<span class="optional">（選填）</span></label>
+      <textarea class="form-textarea" id="new-desc" placeholder="品項說明、食材、特色…"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">菜單佐證照片<span class="req-mark">*</span></label>
+      <div class="upload-area" id="new-menu-area">
+        <input type="file" accept="image/*" id="new-menu-file" onchange="previewFile('new-menu-file','new-menu-preview','new-menu-area')">
+        <div id="new-menu-preview-wrap">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">上傳實體菜單照片</div>
+          <div class="upload-warn">⚠ 請拍攝紙本實體菜單，不接受電子截圖</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">品項圖片<span class="optional">（選填）</span></label>
+      <div class="upload-area" id="new-img-area">
+        <input type="file" accept="image/*" id="new-img-file" onchange="previewFile('new-img-file','new-img-preview','new-img-area')">
+        <div id="new-img-preview-wrap">
+          <div class="upload-icon">🖼</div>
+          <div class="upload-text">上傳品項照片</div>
+          <div class="upload-hint">若有品項照片可一併提供</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal('new-item-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitNewItem()">送出申請</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal F：通知菜單更新 ══ -->
+<div class="overlay" id="notify-modal">
+  <div class="modal">
+    <div class="modal-title">通知菜單更新</div>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6">
+      若您的實體菜單有任何更新，請上傳菜單翻拍照片通知浩華採購人員處理。<br>
+      如需新增品項，建議使用「申請新增品項」功能逐筆建立。
+    </p>
+    <div class="form-group">
+      <label class="form-label">菜單翻拍照片<span class="req-mark">*</span></label>
+      <div class="upload-area" id="notify-upload-area">
+        <input type="file" accept="image/*" id="notify-file" onchange="previewFile('notify-file','notify-preview','notify-upload-area')">
+        <div id="notify-preview-wrap">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">上傳菜單照片</div>
+          <div class="upload-warn">⚠ 請拍攝實體紙本菜單，不接受電子截圖或 PDF</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">補充說明<span class="optional">（選填）</span></label>
+      <textarea class="form-textarea" id="notify-note" placeholder="例：新增夏季品項、部分價格調整…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal('notify-modal')">取消</button>
+      <button class="btn btn-primary" onclick="submitNotify()">送出通知</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Lightbox ══ -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- ══ Toast ══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   Mock 資料
+═══════════════════════════════════════════════ */
+const menuItems = [
+  { id:'A001', name:'奶油厚片',     en:'Butter Toast',     desc:'',                       storePrice:40,  status:'on',  hasImg:true  },
+  { id:'A002', name:'原味蛋餅',     en:'',                 desc:'',                       storePrice:35,  status:'on',  hasImg:false },
+  { id:'A003', name:'總匯蛋餅',     en:'',                 desc:'',                       storePrice:55,  status:'on',  hasImg:false },
+  { id:'A005', name:'起司雙層蛋餅', en:'Cheese Egg Wrap',  desc:'雙層起司，口感濃郁香滑。', storePrice:50,  status:'on',  hasImg:true  },
+  { id:'A013', name:'冰美式（中）', en:'Iced Americano M', desc:'',                       storePrice:35,  status:'on',  hasImg:false },
+  { id:'A012', name:'紅茶（中）',   en:'',                 desc:'',                       storePrice:25,  status:'on',  hasImg:false },
+  { id:'A004', name:'火腿蛋餅',     en:'',                 desc:'',                       storePrice:50,  status:'off', hasImg:false, archivedAt:'2026/3/1' },
+];
+
+let myRequests = [
+  {
+    id: 'my-001',
+    type: 'price',
+    typeLabel: '店內價',
+    itemId: 'A003',
+    itemName: '總匯蛋餅',
+    date: '2026/3/28',
+    status: 'pending',
+    changes: [{ field: '店內價', before: '55', after: '60' }],
+  },
+  {
+    id: 'my-002',
+    type: 'fname',
+    typeLabel: '完整名稱',
+    itemId: 'A013',
+    itemName: '冰美式（中）',
+    date: '2026/3/29',
+    status: 'pending',
+    changes: [{ field: '完整名稱', before: '冰美式（中）', after: '冰美式咖啡（中）' }],
+  },
+  {
+    id: 'my-003',
+    type: 'desc',
+    typeLabel: '介紹',
+    itemId: 'A002',
+    itemName: '原味蛋餅',
+    date: '2026/3/25',
+    status: 'rejected',
+    rejectReason: '介紹內容過短，請提供更詳細的說明。',
+    rejectBy: '採購人員1',
+    changes: [{ field: '介紹', before: '（無）', after: '清爽原味' }],
+  },
+];
+
+let currentItemId = null; // 目前操作的品項 ID
+let currentView = 'list';
+let currentTab  = 'on';
+
+/* ═══════════════════════════════════════════════
+   Render
+═══════════════════════════════════════════════ */
+function getItem(id) { return menuItems.find(i => i.id === id); }
+
+function renderOnTab() {
+  const onItems = menuItems.filter(i => i.status === 'on');
+  document.getElementById('on-count').textContent = onItems.length;
+  renderList(onItems);
+  renderCards(onItems);
+}
+
+function renderList(items) {
+  document.getElementById('list-tbody').innerHTML = items.map(item => `
+    <tr>
+      <td>
+        <span class="item-name-main">${item.name}</span>
+        <span class="item-id-tag">${item.id}</span>
+        ${item.en ? `<br><span style="font-size:11px;color:var(--text-3)">${item.en}</span>` : ''}
+      </td>
+      <td class="price-cell">$${item.storePrice}</td>
+      <td class="desc-cell">${item.desc || '<span style="color:var(--text-3)">（無）</span>'}</td>
+      <td class="img-status">${item.hasImg ? '<span class="img-ok">✓ 有圖片</span>' : '<span class="img-miss">⚠ 尚缺圖片</span>'}</td>
+      <td>
+        <div class="action-btns">
+          <button class="act-btn" onclick="openFname('${item.id}')">修改名稱</button>
+          <button class="act-btn" onclick="openDesc('${item.id}')">修改介紹</button>
+          <button class="act-btn" onclick="openImage('${item.id}')">換圖片</button>
+          <button class="act-btn" onclick="openPrice('${item.id}')">調整店內價</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderCards(items) {
+  document.getElementById('card-grid').innerHTML = items.map(item => `
+    <div class="menu-card">
+      <div class="card-img" ${item.hasImg ? 'style="cursor:zoom-in"' : ''}>
+        ${item.hasImg
+          ? `<img src="https://placehold.co/400x300/e5e5e4/a8a29e?text=${encodeURIComponent(item.name)}" alt="${item.name}" onclick="openLightbox(this.src)">`
+          : `<span class="card-img-placeholder">🍽</span>`}
+      </div>
+      <div class="card-body">
+        <div class="card-id-row">${item.id}</div>
+        <div class="card-name">${item.name}</div>
+        <div class="card-field"><span class="card-field-label">英文名稱</span>${item.en || '—'}</div>
+        <div class="card-field card-desc-row"><span class="card-field-label">介紹</span>${item.desc || '—'}</div>
+        <div class="card-field"><span class="card-field-label">店內價</span><span class="card-price">$${item.storePrice}</span></div>
+        <div class="card-field"><span class="card-field-label">圖片</span><span class="card-img-badge ${item.hasImg ? 'ok' : 'miss'}">${item.hasImg ? '有圖片' : '尚缺圖片'}</span></div>
+      </div>
+      <div class="card-actions">
+        <button class="act-btn" onclick="openFname('${item.id}')">修改名稱</button>
+        <button class="act-btn" onclick="openDesc('${item.id}')">修改介紹</button>
+        <button class="act-btn" onclick="openImage('${item.id}')">換圖片</button>
+        <button class="act-btn" onclick="openPrice('${item.id}')">調整店內價</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderPending() {
+  const hasRejected = myRequests.some(r => r.status === 'rejected');
+  document.getElementById('reject-dot').style.display = hasRejected ? 'inline-flex' : 'none';
+  document.getElementById('pending-count').textContent = myRequests.filter(r => r.status === 'pending').length;
+
+  if (!myRequests.length) {
+    document.getElementById('pending-container').innerHTML = '<div class="empty">目前沒有待審核的申請</div>';
+    return;
+  }
+
+  const TYPE_BADGE = { fname:'rt-fname', desc:'rt-desc', image:'rt-image', price:'rt-price', new:'rt-new', notify:'rt-notify' };
+
+  document.getElementById('pending-container').innerHTML = myRequests.map(r => {
+    const isRejected = r.status === 'rejected';
+    const bc = TYPE_BADGE[r.type] || 'rt-price';
+    const statusHtml = isRejected
+      ? `<span class="req-status rs-rejected">已退回</span>`
+      : `<span class="req-status rs-pending">等待審核</span>`;
+
+    const changesHtml = r.changes.map(c => `
+      <div>欄位：${c.field}</div>
+      <div>修改前：<span class="req-before">${c.before}</span></div>
+      <div>修改後：<span class="req-after">${c.after}</span></div>`).join('');
+
+    const rejectHtml = isRejected ? `
+      <div class="req-reject-reason">
+        <strong>退回原因：</strong>${r.rejectReason}
+        ${r.rejectBy ? `<br><span style="font-size:11px;color:var(--red);opacity:.8">退回人：${r.rejectBy}</span>` : ''}
+      </div>` : '';
+
+    const actionsHtml = isRejected
+      ? `<div class="spacer"></div><button class="btn-ack" onclick="editRejected('${r.id}')">編輯</button>`
+      : `<div class="spacer"></div><button class="btn-withdraw" onclick="withdrawReq('${r.id}')">撤回申請</button>`;
+
+    return `
+    <div class="req-card${isRejected ? ' rejected' : ''}" id="req-${r.id}">
+      <div class="req-head${isRejected ? ' rejected-head' : ''}">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="req-type-badge ${bc}">${r.typeLabel}</span>
+          <span class="req-item">${r.itemName}</span>
+          <span class="req-date">${r.date}</span>
+        </div>
+        ${statusHtml}
+      </div>
+      <div class="req-body">
+        ${r.changes.length ? `<div class="req-compare">${changesHtml}</div>` : ''}
+        ${rejectHtml}
+      </div>
+      <div class="req-actions">
+        ${actionsHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderOff() {
+  const offItems = menuItems.filter(i => i.status === 'off');
+  document.getElementById('off-count').textContent = offItems.length;
+  if (!offItems.length) {
+    document.getElementById('off-container').innerHTML = '<div class="empty">目前沒有下架品項</div>';
+    return;
+  }
+  document.getElementById('off-container').innerHTML = offItems.map(item => `
+    <div class="off-card">
+      <div class="off-thumb">
+        ${item.hasImg
+          ? `<img src="https://placehold.co/96x96/e5e5e4/a8a29e?text=${encodeURIComponent(item.name)}" alt="${item.name}">`
+          : '🍽'}
+      </div>
+      <div class="off-info">
+        <div class="off-name">${item.name} <span class="item-id-tag">${item.id}</span></div>
+        ${item.archivedAt ? `<div class="off-meta">下架日期：${item.archivedAt}</div>` : ''}
+        <div class="off-price">原店內價：$${item.storePrice}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   切換視圖 / Tab
+═══════════════════════════════════════════════ */
+function switchView(v) {
+  currentView = v;
+  document.getElementById('btn-list').classList.toggle('active', v === 'list');
+  document.getElementById('btn-card').classList.toggle('active', v === 'card');
+  document.getElementById('list-view').style.display = v === 'list' ? '' : 'none';
+  document.getElementById('card-view').style.display = v === 'card' ? '' : 'none';
+}
+
+function switchTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', (i===0 && t==='on') || (i===1 && t==='pending') || (i===2 && t==='off'));
+  });
+  document.getElementById('v-on').classList.toggle('active', t === 'on');
+  document.getElementById('v-pending').classList.toggle('active', t === 'pending');
+  document.getElementById('v-off').classList.toggle('active', t === 'off');
+  if (t === 'pending') renderPending();
+}
+
+/* ═══════════════════════════════════════════════
+   Modal 開關
+═══════════════════════════════════════════════ */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  // 取消時也清除編輯退回模式
+  window._editingRejectedId = null;
+  // 隱藏所有 reject-banner
+  document.querySelectorAll('.reject-banner').forEach(el => { el.style.display = 'none'; el.innerHTML = ''; });
+}
+
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('overlay')) {
+    e.target.classList.remove('open');
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   各申請 Modal 開啟邏輯
+═══════════════════════════════════════════════ */
+function openFname(id) {
+  const item = getItem(id);
+  currentItemId = id;
+  document.getElementById('fname-item').value  = `${item.name}（${item.id}）`;
+  document.getElementById('fname-current').value = item.name;
+  document.getElementById('fname-new').value   = '';
+  document.getElementById('fname-note').value  = '';
+  openModal('fname-modal');
+}
+
+function openDesc(id) {
+  const item = getItem(id);
+  currentItemId = id;
+  document.getElementById('desc-item').value    = `${item.name}（${item.id}）`;
+  document.getElementById('desc-current').value = item.desc || '';
+  document.getElementById('desc-new').value     = '';
+  document.getElementById('desc-note').value    = '';
+  openModal('desc-modal');
+}
+
+function openImage(id) {
+  const item = getItem(id);
+  currentItemId = id;
+  document.getElementById('image-item').value = `${item.name}（${item.id}）`;
+  const wrap = document.getElementById('image-current-wrap');
+  wrap.innerHTML = item.hasImg
+    ? `<img class="current-img-preview" src="https://placehold.co/80x80/e5e5e4/a8a29e?text=${encodeURIComponent(item.name)}" alt="${item.name}">`
+    : `<div class="no-img-placeholder">🍽</div><div style="font-size:12px;color:var(--text-3);margin-bottom:4px">目前尚無圖片</div>`;
+  resetUpload('image-file', 'image-preview-wrap', 'image-upload-area');
+  document.getElementById('image-note').value = '';
+  openModal('image-modal');
+}
+
+function openPrice(id) {
+  const item = getItem(id);
+  currentItemId = id;
+  document.getElementById('price-item').value    = `${item.name}（${item.id}）`;
+  document.getElementById('price-current').value = `$${item.storePrice}`;
+  document.getElementById('price-new').value     = '';
+  resetUpload('price-file', 'price-preview-wrap', 'price-upload-area');
+  openModal('price-modal');
+}
+
+/* ═══════════════════════════════════════════════
+   圖片上傳預覽
+═══════════════════════════════════════════════ */
+function previewFile(fileInputId, previewId, areaId) {
+  const file = document.getElementById(fileInputId).files[0];
+  if (!file) return;
+  const wrapId = previewId + '-wrap';
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    wrap.innerHTML = `
+      <img class="upload-preview" src="${e.target.result}" alt="預覽">
+      <div class="upload-filename">${file.name}</div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetUpload(fileInputId, wrapId, areaId) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const orig = wrap.getAttribute('data-orig');
+  if (orig) { wrap.innerHTML = orig; return; }
+}
+
+/* ═══════════════════════════════════════════════
+   送出申請
+═══════════════════════════════════════════════ */
+function addRequest(req) {
+  if (window._editingRejectedId) {
+    myRequests = myRequests.filter(r => r.id !== window._editingRejectedId);
+    window._editingRejectedId = null;
+  }
+  myRequests.unshift(req);
+  document.getElementById('pending-count').textContent = myRequests.filter(r => r.status === 'pending').length;
+  const hasRejected = myRequests.some(r => r.status === 'rejected');
+  document.getElementById('reject-dot').style.display = hasRejected ? 'inline-flex' : 'none';
+  // 還原所有 Modal 送出按鈕文字
+  document.querySelectorAll('.overlay .btn-primary').forEach(el => {
+    if (el.textContent === '重新申請') el.textContent = '送出申請';
+  });
+  showToast('申請已送出，等待審核');
+}
+
+function submitFname() {
+  const newVal = document.getElementById('fname-new').value.trim();
+  if (!newVal) { alert('請填寫申請修改的名稱'); return; }
+  const item = getItem(currentItemId);
+  addRequest({
+    id: 'my-' + Date.now(),
+    type: 'fname', typeLabel: '完整名稱',
+    itemId: item.id, itemName: item.name,
+    date: '2026/3/30', status: 'pending',
+    changes: [{ field: '完整名稱', before: item.name, after: newVal }],
+  });
+  closeModal('fname-modal');
+}
+
+function submitDesc() {
+  const newVal = document.getElementById('desc-new').value.trim();
+  if (!newVal) { alert('請填寫申請修改的介紹'); return; }
+  const item = getItem(currentItemId);
+  addRequest({
+    id: 'my-' + Date.now(),
+    type: 'desc', typeLabel: '介紹',
+    itemId: item.id, itemName: item.name,
+    date: '2026/3/30', status: 'pending',
+    changes: [{ field: '介紹', before: item.desc || '（無）', after: newVal }],
+  });
+  closeModal('desc-modal');
+}
+
+function submitImage() {
+  const file = document.getElementById('image-file').files[0];
+  if (!file) { alert('請上傳新圖片'); return; }
+  const item = getItem(currentItemId);
+  addRequest({
+    id: 'my-' + Date.now(),
+    type: 'image', typeLabel: '圖片',
+    itemId: item.id, itemName: item.name,
+    date: '2026/3/30', status: 'pending',
+    changes: [{ field: '圖片', before: item.hasImg ? '現有圖片' : '（尚無圖片）', after: file.name }],
+  });
+  closeModal('image-modal');
+}
+
+function submitPrice() {
+  const newVal = document.getElementById('price-new').value.trim();
+  const file   = document.getElementById('price-file').files[0];
+  if (!newVal) { alert('請填寫申請新店內價'); return; }
+  if (!file)   { alert('請上傳菜單佐證照片'); return; }
+  const item = getItem(currentItemId);
+  addRequest({
+    id: 'my-' + Date.now(),
+    type: 'price', typeLabel: '店內價',
+    itemId: item.id, itemName: item.name,
+    date: '2026/3/30', status: 'pending',
+    changes: [{ field: '店內價', before: `$${item.storePrice}`, after: `$${newVal}` }],
+  });
+  closeModal('price-modal');
+}
+
+function submitNewItem() {
+  const name  = document.getElementById('new-name').value.trim();
+  const cat   = document.getElementById('new-cat').value;
+  const price = document.getElementById('new-price').value.trim();
+  const file  = document.getElementById('new-menu-file').files[0];
+  if (!name)  { alert('請填寫餐點完整名稱'); return; }
+  if (!cat)   { alert('請選擇分類'); return; }
+  if (!price) { alert('請填寫店內價'); return; }
+  if (!file)  { alert('請上傳菜單佐證照片'); return; }
+  myRequests.unshift({
+    id: 'my-' + Date.now(),
+    type: 'new', typeLabel: '新增品項',
+    itemId: '待建立', itemName: name,
+    date: '2026/3/30', status: 'pending',
+    changes: [
+      { field: '餐點名稱', before: '—', after: name },
+      { field: '分類',     before: '—', after: cat },
+      { field: '店內價',   before: '—', after: `$${price}` },
+    ],
+  });
+  document.getElementById('pending-count').textContent = myRequests.filter(r => r.status === 'pending').length;
+  closeModal('new-item-modal');
+  showToast('新增品項申請已送出，等待審核');
+}
+
+function submitNotify() {
+  const file = document.getElementById('notify-file').files[0];
+  if (!file) { alert('請上傳菜單翻拍照片'); return; }
+  closeModal('notify-modal');
+  showToast('通知已送出，浩華採購人員將盡快與您聯繫');
+}
+
+/* ═══════════════════════════════════════════════
+   申請操作
+═══════════════════════════════════════════════ */
+function withdrawReq(id) {
+  if (!confirm('確定要撤回此申請嗎？')) return;
+  myRequests = myRequests.filter(r => r.id !== id);
+  renderPending();
+  showToast('申請已撤回');
+}
+
+function editRejected(id) {
+  const req = myRequests.find(r => r.id === id);
+  if (!req) return;
+  window._editingRejectedId = id;
+  const change = req.changes[0] || {};
+  const bannerHtml = `<strong>退回原因：</strong>${req.rejectReason || ''}${req.rejectBy ? `<br><span style="font-size:11px;opacity:.8">退回人：${req.rejectBy}</span>` : ''}<br><span style="font-size:11px;opacity:.8">請修改後點「重新申請」送出。</span>`;
+
+  function showBanner(bannerId) {
+    const el = document.getElementById(bannerId);
+    if (!el) return;
+    el.innerHTML = bannerHtml;
+    el.style.display = 'block';
+  }
+
+  const typeModalMap = { fname: 'fname', desc: 'desc', image: 'image', price: 'price' };
+  const modalPrefix = typeModalMap[req.type];
+
+  switch (req.type) {
+    case 'fname':
+      openFname(req.itemId);
+      setTimeout(() => {
+        document.getElementById('fname-new').value = change.after || '';
+        showBanner('fname-reject-banner');
+        document.querySelector('#fname-modal .btn-primary').textContent = '重新申請';
+      }, 50);
+      break;
+    case 'desc':
+      openDesc(req.itemId);
+      setTimeout(() => {
+        document.getElementById('desc-new').value = change.after || '';
+        showBanner('desc-reject-banner');
+        document.querySelector('#desc-modal .btn-primary').textContent = '重新申請';
+      }, 50);
+      break;
+    case 'image':
+      openImage(req.itemId);
+      setTimeout(() => {
+        showBanner('image-reject-banner');
+        document.querySelector('#image-modal .btn-primary').textContent = '重新申請';
+      }, 50);
+      break;
+    case 'price':
+      openPrice(req.itemId);
+      setTimeout(() => {
+        const raw = (change.after || '').replace('$', '');
+        document.getElementById('price-new').value = raw;
+        showBanner('price-reject-banner');
+        document.querySelector('#price-modal .btn-primary').textContent = '重新申請';
+      }, 50);
+      break;
+    default:
+      openModal('new-item-modal');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Lightbox
+═══════════════════════════════════════════════ */
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+/* ═══════════════════════════════════════════════
+   Toast
+═══════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ═══════════════════════════════════════════════
+   Init
+═══════════════════════════════════════════════ */
+renderOnTab();
+renderOff();
+renderPending();
+</script>
+</body>
+</html>

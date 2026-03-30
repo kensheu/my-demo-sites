@@ -69,7 +69,7 @@ body {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 18px; height: 18px;
   border-radius: 100px;
-  font-size: 11px; font-weight: 600;
+  font-size: 12px; font-weight: 600;
   padding: 0 5px;
   margin-left: 5px;
   background: var(--orange-bg);
@@ -106,7 +106,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   padding: 5px 13px;
   border-radius: 100px;
   border: 1px solid var(--border);
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   background: var(--bg); color: var(--text-2);
   transition: all .12s;
@@ -134,15 +134,19 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   background: var(--bg-2);
 }
 .rev-rest { font-size: 15px; font-weight: 600; }
-.rev-meta { font-size: 13px; color: var(--text-3); }
+.rev-meta { font-size: 14px; color: var(--text-3); }
 .rev-type-badge {
   padding: 3px 10px; border-radius: 100px;
-  font-size: 12px; font-weight: 500;
+  font-size: 13px; font-weight: 500;
 }
 .rt-price  { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
 .rt-name   { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
 .rt-new    { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 .rt-out    { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bdr); }
+.rt-fname  { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+.rt-desc   { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+.rt-image  { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
+.rt-menu   { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); }
 
 .rev-body { padding: 14px 16px; }
 
@@ -155,7 +159,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   padding: 1px 7px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  font-size: 11px; color: var(--text-3);
+  font-size: 12px; color: var(--text-3);
   background: var(--bg-2);
   font-variant-numeric: tabular-nums;
 }
@@ -167,7 +171,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 14px;
 }
 .cmp-header {
@@ -192,7 +196,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 }
 .cmp-row:last-child > div { border-bottom: none; }
 .cmp-field {
-  font-size: 12px; color: var(--text-3); font-weight: 500;
+  font-size: 13px; color: var(--text-3); font-weight: 500;
   white-space: nowrap;
   background: var(--bg-2);
   border-right: 1px solid var(--border-2);
@@ -211,7 +215,7 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   padding: 9px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  font-size: 13px; color: var(--text-2);
+  font-size: 14px; color: var(--text-2);
   margin-bottom: 14px;
   cursor: pointer;
   transition: background .1s;
@@ -219,8 +223,8 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 .evidence:hover { background: var(--bg-2); }
 .evidence .ev-icon { font-size: 18px; }
 .evidence .ev-name { flex: 1; }
-.evidence .ev-size { font-size: 12px; color: var(--text-3); }
-.evidence .ev-link { font-size: 12px; color: var(--blue); }
+.evidence .ev-size { font-size: 13px; color: var(--text-3); }
+.evidence .ev-link { font-size: 13px; color: var(--blue); }
 
 /* Action bar */
 .rev-actions {
@@ -232,14 +236,14 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
 
 .eff-date {
   display: flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--text-2);
+  font-size: 14px; color: var(--text-2);
 }
 .eff-date label { white-space: nowrap; }
 input[type="date"] {
   padding: 5px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text);
   background: var(--bg);
   outline: none;
@@ -277,17 +281,17 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 .done-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .done-rest { font-size: 15px; font-weight: 500; }
 .done-item { font-size: 14px; color: var(--text-2); }
-.done-meta { font-size: 13px; color: var(--text-3); }
+.done-meta { font-size: 14px; color: var(--text-3); }
 .done-status {
   padding: 3px 10px; border-radius: 100px;
-  font-size: 12px; font-weight: 500;
+  font-size: 13px; font-weight: 500;
 }
 .ds-approved { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 .ds-rejected { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bdr); }
 
 .done-detail {
   padding: 8px 16px 12px;
-  font-size: 13px; color: var(--text-3);
+  font-size: 14px; color: var(--text-3);
   border-top: 1px solid var(--border-2);
 }
 .done-detail span { color: var(--text-2); }
@@ -314,7 +318,7 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 }
 .overlay.open .modal { transform: translateY(0); }
 .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
-.modal p  { font-size: 13px; color: var(--text-2); margin-bottom: 16px; line-height: 1.6; }
+.modal p  { font-size: 14px; color: var(--text-2); margin-bottom: 16px; line-height: 1.6; }
 .modal textarea {
   width: 100%; height: 80px;
   padding: 8px 10px;
@@ -368,7 +372,7 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 .rest-item .rc { font-size:11px; color:var(--text-3); font-family:monospace; }
 .rest-item.selected .rc { color:var(--blue-text); opacity:.7; }
 .rest-all { font-style:italic; }
-.back-link { font-size:13px; color:var(--text-3); text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap; }
+.back-link { font-size:14px; color:var(--text-3); text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap; }
 .back-link:hover { color:var(--text); }
 
 /* ─── RWD ─── */
@@ -443,10 +447,10 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
 
     <div class="toolbar">
       <div class="pill on" onclick="filterType(this,'')">全部</div>
-      <div class="pill" onclick="filterType(this,'price')">店內價調整</div>
-      <div class="pill" onclick="filterType(this,'name')">改名</div>
-      <div class="pill" onclick="filterType(this,'new')">新增品項</div>
-      <div class="pill" onclick="filterType(this,'out')">下架</div>
+      <div class="pill" onclick="filterType(this,'fname')">完整名稱</div>
+      <div class="pill" onclick="filterType(this,'desc')">介紹</div>
+      <div class="pill" onclick="filterType(this,'image')">圖片</div>
+      <div class="pill" onclick="filterType(this,'price')">店內價</div>
     </div>
 
     <div id="cards-container"></div>
@@ -482,7 +486,7 @@ input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbe
       <label>系統生效日期</label>
       <input type="date" id="approve-date" value="2026-04-01">
     </div>
-    <p style="font-size:11px;color:var(--text-3);margin-bottom:0">依店家 LINE 群組正式通知日期推算設定，確保報表生效日期準確。</p>
+    <p style="font-size:12px;color:var(--text-3);margin-bottom:0">依店家 LINE 群組正式通知日期推算設定，確保報表生效日期準確。</p>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeModal()">取消</button>
       <button class="btn btn-approve" onclick="confirmApprove()">確認核准</button>
@@ -541,6 +545,65 @@ let pendingData = [
     ],
     effDate: '2026-03-27',
   },
+  {
+    id: 'req-004',
+    rest: 'XX 早餐店',
+    date: '2026/3/26',
+    type: 'fname',
+    typeLabel: '完整名稱異動',
+    itemId: 'A005',
+    itemName: '起司蛋餅',
+    evidence: '菜單照片_XX早餐_2026-03-26.jpg',
+    evidenceSize: '0.7 MB',
+    changes: [
+      { field: '完整名稱', before: '起司蛋餅', after: '起司雙層蛋餅' },
+    ],
+    effDate: '2026-04-01',
+  },
+  {
+    id: 'req-005',
+    rest: 'OO 雞飯專門店',
+    date: '2026/3/26',
+    type: 'desc',
+    typeLabel: '介紹異動',
+    itemId: 'B003',
+    itemName: '蔥爆牛柳飯',
+    evidence: '申請說明_OO雞飯_2026-03-26.jpg',
+    evidenceSize: '0.5 MB',
+    changes: [
+      { field: '介紹', before: '（無）', after: '鮮嫩牛肉佐蔥爆醬汁，搭配白飯' },
+    ],
+    effDate: '2026-04-01',
+  },
+  {
+    id: 'req-006',
+    rest: 'XX 早餐店',
+    date: '2026/3/27',
+    type: 'image',
+    typeLabel: '圖片申請',
+    itemId: 'A002',
+    itemName: '原味蛋餅',
+    evidence: '新圖片_原味蛋餅_XX早餐_2026-03-27.jpg',
+    evidenceSize: '0.9 MB',
+    changes: [
+      { field: '圖片', before: '（尚無圖片）', after: '店家提供新圖片' },
+    ],
+    effDate: '2026-04-01',
+  },
+  {
+    id: 'req-007',
+    rest: 'OO 雞飯專門店',
+    date: '2026/3/28',
+    type: 'menu-notify',
+    typeLabel: '菜單更新通知',
+    itemId: null,
+    itemName: '（整份菜單）',
+    evidence: '菜單照片_OO雞飯_2026-03-28.jpg',
+    evidenceSize: '2.1 MB',
+    changes: [],
+    note: '春季菜單有調整，請浩華採購確認',
+    effDate: '2026-04-01',
+  },
 ];
 
 const doneData = [
@@ -578,7 +641,10 @@ let pendingApproveId = null;
 /* ═══════════════════════════════════════════════
    Render
 ═══════════════════════════════════════════════ */
-const TYPE_BADGE_CLS = { price:'rt-price', name:'rt-name', new:'rt-new', out:'rt-out' };
+const TYPE_BADGE_CLS = {
+  price:'rt-price', name:'rt-name', new:'rt-new', out:'rt-out',
+  fname:'rt-fname', desc:'rt-desc', image:'rt-image', 'menu-notify':'rt-menu'
+};
 
 function renderPending() {
   const data = pendingData.filter(d =>
@@ -599,7 +665,7 @@ function renderPending() {
     const changesHtml = d.changes.map(c => {
       const beforeCls = c.unchanged ? 'cmp-unchanged' : 'cmp-before';
       const afterCls  = c.unchanged ? 'cmp-unchanged' : 'cmp-after';
-      const noteHtml  = c.note ? ` <span style="font-size:10px;color:var(--text-3)">(${c.note})</span>` : '';
+      const noteHtml  = c.note ? ` <span style="font-size:12px;color:var(--text-3)">(${c.note})</span>` : '';
       return `
         <div class="cmp-row">
           <div class="cmp-field">${c.field}</div>
@@ -607,6 +673,24 @@ function renderPending() {
           <div class="${afterCls}">${c.after}${noteHtml}</div>
         </div>`;
     }).join('');
+
+    const isMenuNotify = d.type === 'menu-notify';
+    const isImage = d.type === 'image';
+    const bodyHtml = isMenuNotify
+      ? `<div style="padding:10px 0 4px;font-size:14px;color:var(--text-2);line-height:1.6">
+           店家通知菜單已更新，請查閱附件照片並確認是否需要建立品項異動申請。
+           ${d.note ? `<div style="margin-top:6px;padding:8px 10px;background:var(--bg-2);border-radius:6px;font-size:13px;color:var(--text-2)">備註：${d.note}</div>` : ''}
+         </div>`
+      : `<div class="compare">
+           <div class="cmp-header">
+             <div>欄位</div>
+             <div>異動前</div>
+             <div>異動後</div>
+           </div>
+           ${changesHtml}
+         </div>
+         ${(d.type === 'price' || d.type === 'new') ? `<div style="margin-top:8px;padding:8px 10px;background:#f5f5f4;border-radius:6px;font-size:12px;color:#a8a29e">⚙ 核准後系統將依合約抽成%自動計算成本價，並依各據點設定自動更新終端價，無需人工操作。</div>` : ''}
+         ${isImage ? `<div style="margin-top:8px;padding:8px 10px;background:var(--blue-bg);border-radius:6px;font-size:12px;color:var(--blue-text)">🖼 核准後請美編依圖片申請更新品項圖片。</div>` : ''}`;
 
     return `
     <div class="rev-card" id="card-${d.id}">
@@ -620,17 +704,9 @@ function renderPending() {
       <div class="rev-body">
         <div class="item-name">
           ${d.itemName}
-          <span class="item-id">${d.itemId}</span>
+          ${d.itemId ? `<span class="item-id">${d.itemId}</span>` : ''}
         </div>
-        <div class="compare">
-          <div class="cmp-header">
-            <div>欄位</div>
-            <div>異動前</div>
-            <div>異動後</div>
-          </div>
-          ${changesHtml}
-        </div>
-        ${(d.type === 'price' || d.type === 'new') ? `<div style="margin-top:8px;padding:8px 10px;background:#f5f5f4;border-radius:6px;font-size:11px;color:#a8a29e">⚙ 核准後系統將依合約抽成%自動計算成本價，並依各據點設定自動更新終端價，無需人工操作。</div>` : ''}
+        ${bodyHtml}
         <div class="evidence" onclick="previewEvidence('${d.evidence}')">
           <span class="ev-icon">📄</span>
           <span class="ev-name">${d.evidence}</span>
@@ -644,8 +720,8 @@ function renderPending() {
           <input type="date" id="eff-${d.id}" value="${d.effDate}">
         </div>
         <div class="spacer"></div>
-        <button class="btn btn-reject" onclick="openReject('${d.id}')">退回</button>
-        <button class="btn btn-approve" onclick="openApprove('${d.id}')">核准</button>
+        <button class="btn btn-reject" onclick="openReject('${d.id}')">${isMenuNotify ? '退回（需補充）' : '退回'}</button>
+        <button class="btn btn-approve" onclick="openApprove('${d.id}')">${isMenuNotify ? '標記已處理' : '核准'}</button>
       </div>
     </div>`;
   }).join('');
@@ -669,7 +745,7 @@ function renderDone() {
       <div class="done-head">
         <div class="done-info">
           <span class="done-rest">${d.rest}</span>
-          <span class="rev-type-badge ${bc}" style="font-size:10px">${d.typeLabel}</span>
+          <span class="rev-type-badge ${bc}" style="font-size:12px">${d.typeLabel}</span>
           <span class="done-item">${d.itemName}</span>
         </div>
         <span class="done-status ${sc}">${sl}</span>
