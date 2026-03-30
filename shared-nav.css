@@ -1,0 +1,225 @@
+/* =============================================
+   Global Navigation — shared-nav.css
+   所有選擇器加 .gn- 前綴，避免與各頁面 CSS 衝突
+   ============================================= */
+
+/* ---------- Top Bar ---------- */
+#gn-root * { box-sizing: border-box; }
+
+.gn-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  z-index: 1100;
+  background: #1e2532;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.gn-logo {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+.gn-logo:hover { color: #e0e6ff; }
+
+.gn-systems {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.gn-system-tab {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+.gn-system-tab:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+.gn-system-tab.gn-active {
+  color: #fff;
+  background: rgba(255,255,255,0.15);
+  position: relative;
+}
+.gn-system-tab.gn-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: #6c8bff;
+  border-radius: 2px;
+}
+
+.gn-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.gn-hamburger:hover { background: rgba(255,255,255,0.1); }
+
+/* ---------- Sidebar (桌面，僅內部後台) ---------- */
+.gn-sidebar {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  bottom: 0;
+  width: 200px;
+  z-index: 1050;
+  background: #f5f6fa;
+  border-right: 1px solid #dde1ec;
+  overflow-y: auto;
+  padding: 12px 0 24px;
+  scrollbar-width: thin;
+  scrollbar-color: #c8cdd8 transparent;
+}
+.gn-sidebar::-webkit-scrollbar { width: 4px; }
+.gn-sidebar::-webkit-scrollbar-thumb { background: #c8cdd8; border-radius: 4px; }
+
+.gn-sidebar-section {
+  padding: 6px 12px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ba3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 4px;
+}
+
+.gn-nav-item {
+  display: block;
+  padding: 10px 20px;
+  color: #4a5270;
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  border-left: 3px solid transparent;
+  line-height: 1.3;
+}
+.gn-nav-item:hover {
+  background: #e8ebf7;
+  color: #1e2532;
+}
+.gn-nav-item.gn-active {
+  background: #e4e9ff;
+  color: #2a4de0;
+  border-left-color: #4a6cf7;
+  font-weight: 600;
+}
+
+/* ---------- Mobile Drawer ---------- */
+.gn-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1099;
+  cursor: pointer;
+}
+.gn-overlay.gn-open { display: block; }
+
+.gn-drawer {
+  display: none;
+  position: fixed;
+  top: 48px;
+  left: 0;
+  bottom: 0;
+  width: 240px;
+  z-index: 1100;
+  background: #fff;
+  border-right: 1px solid #dde1ec;
+  overflow-y: auto;
+  padding: 0 0 24px;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.12);
+}
+.gn-drawer.gn-open {
+  transform: translateX(0);
+}
+
+.gn-drawer-systems {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+}
+.gn-drawer-sys-tab {
+  display: block;
+  padding: 11px 20px;
+  color: #4a5270;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.12s;
+}
+.gn-drawer-sys-tab:hover { background: #f0f2ff; color: #2a4de0; }
+.gn-drawer-sys-tab.gn-active {
+  color: #2a4de0;
+  background: #eef1ff;
+}
+
+.gn-drawer-pages {
+  padding: 8px 0;
+}
+.gn-drawer-page-label {
+  padding: 8px 20px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ba3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.gn-drawer-nav-item {
+  display: block;
+  padding: 10px 20px;
+  color: #4a5270;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.12s;
+  border-left: 3px solid transparent;
+}
+.gn-drawer-nav-item:hover { background: #f0f2ff; color: #1e2532; }
+.gn-drawer-nav-item.gn-active {
+  background: #e4e9ff;
+  color: #2a4de0;
+  border-left-color: #4a6cf7;
+  font-weight: 600;
+}
+
+/* ---------- RWD ---------- */
+@media (max-width: 768px) {
+  .gn-hamburger { display: flex; align-items: center; margin-right: 8px; }
+  .gn-systems { display: none; }
+  .gn-sidebar { display: none; }
+  .gn-drawer { display: block; }
+}

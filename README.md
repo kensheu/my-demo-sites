@@ -1,17 +1,33 @@
 # My Demo Sites
 
-展示用測試頁面，包含七個功能模組。
+展示用測試頁面，整合三個系統的統一導覽介面。
 
 ## 線上網址
 
 https://kensheu.github.io/my-demo-sites/
 
+## 系統架構
+
+全站透過 `shared-nav.js` / `shared-nav.css` 注入統一頂部列與左側邊欄，支援三個系統切換：
+
+| 系統 | 說明 | 頁面 |
+|------|------|------|
+| 內部後台 | 採購／管理人員使用 | 首頁&公告、公告管理、採購首頁、餐點管理、餐點異動紀錄、店家異動審核、客訴管理、問題單&ECR |
+| 店家後台 | 餐廳店家使用 | 公告通知 |
+| 訂餐前台 | 訂餐會員使用 | 公告通知、我的訂單、我的客訴 |
+
+手機版（< 768px）：頂部列收合為 hamburger 選單，左側邊欄隱藏。
+
 ## 頁面清單
 
-- [首頁公告 demo](https://kensheu.github.io/my-demo-sites/announcement.html)
-- [採購部首頁 demo](https://kensheu.github.io/my-demo-sites/purchasing-home.html)（包含三個子頁面：[店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)、[餐點調價歷史紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)、[餐點管理](https://kensheu.github.io/my-demo-sites/menu-items.html)）
-- [客訴管理 demo](https://kensheu.github.io/my-demo-sites/complaint.html)
-- [問題單與 ECR 請求 demo](https://kensheu.github.io/my-demo-sites/issue-and-ecr.html)
+- [Portal 入口](https://kensheu.github.io/my-demo-sites/index.html)
+- [公告系統](https://kensheu.github.io/my-demo-sites/announcement.html)（內部後台 / 店家後台 / 訂餐前台 三合一）
+- [採購首頁](https://kensheu.github.io/my-demo-sites/purchasing-home.html)
+- [餐點管理](https://kensheu.github.io/my-demo-sites/menu-items.html)
+- [餐點異動紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)
+- [店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)
+- [客訴管理](https://kensheu.github.io/my-demo-sites/complaint.html)
+- [問題單 & ECR](https://kensheu.github.io/my-demo-sites/issue-and-ecr.html)
 
 ---
 
@@ -25,16 +41,16 @@ https://kensheu.github.io/my-demo-sites/
 - 顯示位置：
     - 內部後台首頁
     - 訂餐前台首頁
-    - 餐廳後台首頁
+    - 店家後台首頁
 - 公告內容包含：
     - 文字、圖片、附件
     - 公告分類：更新通知、維護公告、活動訊息（可自訂管理）
 - 通知功能（三個位置皆支援）：
-    - 自動跳出未讀公告通知
+    - 可設定是否自動跳出未讀公告通知
     - 查看全部公告，可依全部 / 未讀 / 公告分類篩選
     - 標記已讀
 - 公告管理頁面（僅內部後台）：
-    - 新增公告，包含：標題、分類（下拉選擇）、顯示位置（複選）、內容、圖片、附件
+    - 新增公告，包含：標題、分類（下拉選擇）、顯示位置（複選：內部後台 / 店家後台 / 訂餐前台）、是否彈出通知、內容、圖片、附件
     - 可設定排程（發布時間、到期時間）
     - 公告狀態：發布中、草稿、排程待發、已到期
     - 搜尋標題、依分類 / 狀態 / 顯示位置篩選
@@ -129,8 +145,8 @@ https://kensheu.github.io/my-demo-sites/
 ### 客訴管理
 
 - 使用對象：
-    - 會員前台（提出客訴）
-    - 管理後台（處理客訴）
+    - 訂餐前台（提出客訴、查看我的客訴）
+    - 內部後台（處理客訴）
 - 會員前台功能：
     - 從我的訂單發起客訴，自動帶入訂單編號、據點、客戶資訊
     - 選擇客訴類型、描述問題、上傳照片

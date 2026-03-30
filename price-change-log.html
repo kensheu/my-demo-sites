@@ -371,9 +371,37 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
   display:flex; align-items:center; gap:4px; white-space:nowrap;
 }
 .back-link:hover { color:var(--text); }
+
+/* ─── RWD ─── */
+@media (max-width: 768px) {
+  .page { padding: 16px 14px 40px; }
+  .top-row, .top-bar { flex-direction: column; align-items: flex-start; }
+  .tabs { overflow-x: auto; flex-wrap: nowrap; }
+  .tab { flex-shrink: 0; }
+  .card { overflow: hidden; }
+  .card-head { flex-direction: column; align-items: flex-start; }
+  .month-nav { margin-top: 4px; }
+  .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tbl { min-width: 600px; table-layout: auto; }
+  .filter-bar { gap: 6px; }
+  .search-box { width: 100%; max-width: none; }
+  .dot-legend { gap: 10px; }
+  .legend-row { gap: 10px; }
+}
+
+@media (max-width: 480px) {
+  .page-title { font-size: 18px; }
+  .rest-trigger { min-width: unset; width: 100%; }
+  .tl-item { padding: 10px 12px; }
+  .tl-name { font-size: 14px; }
+  .summary-bar { gap: 10px; padding: 8px 12px; }
+  .tip { font-size: 12px; padding: 10px 12px; }
+}
 </style>
+  <link rel="stylesheet" href="shared-nav.css">
 </head>
 <body>
+<script src="shared-nav.js"></script>
 <div class="page">
 
   <div class="page-header">
@@ -419,10 +447,10 @@ select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
         </div>
       </div>
       <div class="summary-bar" id="snap-summary"></div>
-      <table class="tbl">
+      <div class="tbl-wrap"><table class="tbl">
         <thead><tr id="snap-thead-row"></tr></thead>
         <tbody id="snap-body"></tbody>
-      </table>
+      </table></div>
       <div class="legend-row">
         <div class="lg-item"><span class="badge b-new">新增</span>本月新加入的品項</div>
         <div class="lg-item"><span class="badge b-chg">異動</span>價格、品名或狀態有變更</div>

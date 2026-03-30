@@ -46,7 +46,7 @@
       height: 44px;
       font-size: 13px;
       position: sticky;
-      top: 0;
+      top: 48px;
       z-index: 1000;
       box-shadow: 0 1px 4px rgba(0,0,0,.3);
     }
@@ -69,13 +69,12 @@
 
     /* ───── 各視圖容器 ───── */
     .view { display: none; }
-    .view.active { display: flex; flex-direction: column; min-height: calc(100vh - 44px); }
+    .view.active { display: flex; flex-direction: column; min-height: calc(100vh - 48px); }
 
     /* ============================================================
        A. 內部後台
     ============================================================ */
     .admin-layout {
-      display: flex;
       flex: 1;
     }
     .admin-sidebar {
@@ -889,34 +888,72 @@
     @media (max-width: 900px) {
       .form-row { grid-template-columns: 1fr; }
       .admin-sidebar { display: none; }
+      .admin-main { padding: 20px; }
       .frontend-hero { padding: 24px 18px 20px; }
       .frontend-content { padding: 16px 18px; }
     }
+
+    /* ─── 平板 ─── */
+    @media (max-width: 768px) {
+      .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .page-header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+      .page-header-actions .btn { flex: 1 1 auto; text-align: center; }
+      .filter-row { flex-wrap: wrap; gap: 8px; }
+      .filter-row input, .filter-row select { min-width: unset; flex: 1 1 140px; }
+      .cat-filter-row { overflow-x: auto; padding-bottom: 4px; }
+      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table { min-width: 540px; }
+      .tabs { flex-wrap: nowrap; overflow-x: auto; }
+      .tab-btn { white-space: nowrap; flex-shrink: 0; }
+      .notif-dropdown { width: min(340px, 90vw); }
+    }
+
+    /* ─── 手機 ─── */
+    @media (max-width: 640px) {
+      .role-switcher { flex-wrap: wrap; height: auto; padding: 8px 16px; gap: 6px; }
+      .admin-main { padding: 14px; }
+      .card { padding: 14px; }
+      .card-title { font-size: 14px; }
+      .page-header { padding-bottom: 8px; }
+      .page-header h2 { font-size: 16px; }
+      .btn { font-size: 12px; padding: 6px 12px; }
+      .popup-card { width: min(520px, 95vw); padding: 20px 16px; }
+      .modal { max-width: 95vw; }
+      .frontend-hero h1 { font-size: 20px; }
+      .frontend-hero .subtitle { font-size: 13px; }
+      .cat-filter-row { gap: 6px; }
+      .announce-banner, .pickup-banner { padding: 14px 16px; }
+      .notif-row { padding: 10px 12px; }
+      .notif-row .n-desc { white-space: normal; }
+      .display-checkboxes { flex-direction: column; gap: 6px; }
+      .action-btns { flex-direction: column; gap: 4px; }
+      .action-btns .btn { width: 100%; text-align: center; }
+      .cat-row { flex-wrap: wrap; gap: 8px; }
+      .cat-tags { flex-wrap: wrap; }
+      /* 公告管理表格：隱藏次要欄位 */
+      #admin-page-manage table th:nth-child(2),
+      #admin-page-manage table td:nth-child(2),
+      #admin-page-manage table th:nth-child(3),
+      #admin-page-manage table td:nth-child(3),
+      #admin-page-manage table th:nth-child(4),
+      #admin-page-manage table td:nth-child(4),
+      #admin-page-manage table th:nth-child(5),
+      #admin-page-manage table td:nth-child(5) { display: none; }
+      #admin-page-manage table { min-width: unset; }
+      #admin-page-manage .filter-row input,
+      #admin-page-manage .filter-row select { flex: 1 1 100%; }
+    }
   </style>
+  <link rel="stylesheet" href="shared-nav.css">
 </head>
 <body>
-
-<!-- ───── 角色切換列 ───── -->
-<div class="role-switcher">
-  <span>切換視角：</span>
-  <button class="role-btn active" onclick="switchView('admin')">🛠 內部後台</button>
-  <button class="role-btn" onclick="switchView('frontend')">🛒 訂餐前台</button>
-</div>
+<script src="shared-nav.js"></script>
 
 <!-- ════════════════════════════════════
      A. 內部後台
 ════════════════════════════════════ -->
 <div class="view active" id="view-admin">
   <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="logo">⚙️ 內部管理後台</div>
-      <div class="sidebar-item" id="admin-nav-notify" onclick="switchAdminPage('notify')" style="flex-direction:column;align-items:flex-start;gap:3px">
-        <div style="display:flex;align-items:center;gap:8px;width:100%">🔔 公告通知 <span class="sidebar-badge" id="admin-sidebar-badge" style="background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">2</span></div>
-        <div style="font-size:10px;color:var(--gray-400);font-weight:400;padding-left:22px">內部後台與餐廳後台同款</div>
-      </div>
-      <div class="sidebar-item active" id="admin-nav-manage" onclick="switchAdminPage('manage')">📢 公告管理</div>
-    </aside>
-
     <main class="admin-main">
 
       <!-- ── 公告通知頁 ── -->
@@ -929,7 +966,6 @@
           </div>
           <div style="display:flex;gap:8px;align-items:center">
             <span style="font-size:12px;color:var(--gray-500)" id="admin-unread-count">2 則未讀</span>
-            <button class="btn btn-outline btn-sm" onclick="adminMarkAllRead()">全部標為已讀</button>
           </div>
         </div>
         <div class="tabs" id="admin-notify-tabs">
@@ -973,11 +1009,12 @@
           <select id="mf-loc" onchange="renderManageTable()">
             <option value="">顯示位置</option>
             <option value="admin">內部後台</option>
+            <option value="store">店家後台</option>
             <option value="fe">訂餐前台</option>
           </select>
         </div>
 
-        <table>
+        <div class="table-wrap"><table>
           <thead>
             <tr>
               <th>標題</th>
@@ -990,7 +1027,7 @@
             </tr>
           </thead>
           <tbody id="manage-tbody"></tbody>
-        </table>
+        </table></div>
       </div>
       </div><!-- /admin-page-manage -->
     </main>
@@ -1041,11 +1078,6 @@
   <div class="frontend-layout">
     <nav class="frontend-nav">
       <div class="nav-logo">🍱 BTW_企業訂餐平台</div>
-      <div class="nav-links">
-        <a href="#" class="active">首頁</a>
-        <a href="#">探索餐廳</a>
-        <a href="#">我的訂單</a>
-      </div>
       <div class="nav-right">
         <div class="bell-wrap">
           <div class="bell-btn" onclick="toggleNotifDropdown()">🔔<span class="badge" id="fe-badge">2</span></div>
@@ -1065,7 +1097,6 @@
         <div style="width:34px;height:34px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">王</div>
       </div>
     </nav>
-
     <div class="frontend-hero">
       <h1>午安，王小明！</h1>
       <p>今天想吃什麼？從 120+ 家餐廳中探索美食</p>
@@ -1171,9 +1202,20 @@
           <div style="margin-top:4px">
             <div class="display-checkboxes">
               <label class="checkbox-item"><input type="checkbox" id="loc-admin" checked /> 內部後台</label>
+              <label class="checkbox-item"><input type="checkbox" id="loc-store" /> 店家後台</label>
               <label class="checkbox-item"><input type="checkbox" id="loc-frontend" checked /> 訂餐前台</label>
             </div>
           </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">彈出通知</label>
+          <label class="schedule-toggle" style="margin-top:4px">
+            <label class="toggle-switch">
+              <input type="checkbox" id="popup-toggle" />
+              <span class="toggle-slider"></span>
+            </label>
+            發布後自動彈出通知
+          </label>
         </div>
       </div>
       <div class="form-group" style="margin-top:18px">
@@ -1349,7 +1391,7 @@
             <div style="font-size:11px;color:var(--gray-400);margin-top:2px">${a.desc}</div>
           </td>
           <td><span class="tag tag-${catClass(a.category)}">${a.category}</span></td>
-          <td><span style="font-size:12px;color:var(--gray-500)">${(a.locations||[]).map(l=>({'admin':'內部後台','fe':'訂餐前台'}[l]||l)).join('、')}</span></td>
+          <td><span style="font-size:12px;color:var(--gray-500)">${(a.locations||[]).map(l=>({'admin':'內部後台','store':'店家後台','fe':'訂餐前台'}[l]||l)).join('、')}</span></td>
           <td style="font-size:12px;color:${a.status==='expired'?'var(--gray-400)':'var(--gray-600)'}">${a.schedule}</td>
           <td>${readCell}</td>
           <td><span class="status-dot"><span class="dot ${s.dot}"></span>${s.label}</span></td>
@@ -1385,30 +1427,15 @@
   }
 
   // ─── 內部後台公告資料 ───
-  const adminAnnouncements = [
-    { id: 99, title: '📋 公告系統 Demo 測試說明', category: '更新通知', icon: '📋', time: '剛剛', read: false, text:
-`本次 Demo 包含以下功能，歡迎逐一測試：
-
-【內部後台】
-・公告通知：查看、標為已讀、依分類篩選、點開詳情
-・公告管理：新增、刪除公告（含確認視窗）
-・新增公告時可設定顯示位置、排程、到期時間
-
-【訂餐前台】
-・進入前台時，未讀公告會自動依序彈出
-・首頁最新公告區塊顯示未讀數與 NEW 標籤
-・右上角鈴鐺可開啟通知清單
-・「查看全部」可開啟完整公告列表並依分類篩選
-
-【建議測試流程】
-1. 在公告管理新增一則公告，勾選「訂餐前台」與「內部後台」，按發布
-2. 確認公告通知頁角標增加，點開查看內容
-3. 切換到訂餐前台，確認公告自動彈出
-4. 試試鈴鐺、查看全部與各篩選功能
-5. 回到公告管理刪除剛才新增的公告` },
+  let adminAnnouncements = [
     { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: '更新通知', icon: '🔄', time: '10 分鐘前', read: false, text: '本次更新包含訂單追蹤改版、評分調整及問題修復，請重新登入以套用新功能。' },
     { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: '維護公告', icon: '🔧', time: '2 小時前', read: false, text: '3月28日 01:00–04:00 進行系統例行維護，期間後台功能暫停使用。' },
     { id: 2, title: '春節假期系統暫停公告', category: '更新通知', icon: '📌', time: '2026/01/20', read: true, text: '1/27–2/4 春節假期系統暫停服務，緊急問題請聯繫值班人員。' },
+  ];
+
+  // ─── 店家後台公告資料 ───
+  const storeAnnouncements = [
+    { id: 200, title: '新版訂單確認流程上線', category: '更新通知', icon: '🔄', time: '剛剛', read: false, text: '新版訂單確認流程已於今日上線，請各店家確認操作流程並更新相關設定。如有疑問請聯繫系統管理員。' },
   ];
 
   let adminFilter = 'all';
@@ -1468,7 +1495,7 @@
 
   function updateAdminCount() {
     const count = adminAnnouncements.filter(a => !a.read).length;
-    document.getElementById('admin-unread-count').textContent = count > 0 ? `${count} 則未讀` : '全部已讀';
+    document.getElementById('admin-unread-count').textContent = count > 0 ? `${count} 則未讀` : '';
     const badge = document.getElementById('admin-sidebar-badge');
     if (badge) { badge.textContent = count; badge.style.display = count > 0 ? '' : 'none'; }
   }
@@ -1504,8 +1531,6 @@
   function switchAdminPage(page) {
     document.getElementById('admin-page-notify').style.display = page === 'notify' ? 'block' : 'none';
     document.getElementById('admin-page-manage').style.display = page === 'manage' ? 'block' : 'none';
-    document.getElementById('admin-nav-notify').classList.toggle('active', page === 'notify');
-    document.getElementById('admin-nav-manage').classList.toggle('active', page === 'manage');
     if (page === 'notify') renderAdmin();
     if (page === 'manage') renderManageTable();
   }
@@ -1522,9 +1547,6 @@
   function switchView(name) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + name).classList.add('active');
-    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-
     if (name === 'frontend') { renderFE(); showUnreadQueue(); }
   }
 
@@ -1850,7 +1872,9 @@
       document.getElementById('modal-input-category').value = a.category; // 現在直接是中文分類名
       document.getElementById('modal-input-content').value = a.desc || '';
       document.getElementById('loc-admin').checked = (a.locations || []).includes('admin');
+      document.getElementById('loc-store').checked = (a.locations || []).includes('store');
       document.getElementById('loc-frontend').checked = (a.locations || []).includes('fe');
+      document.getElementById('popup-toggle').checked = a.popup || false;
       // 排程
       const hasSchedule = a.schedule && a.schedule !== '立即發布';
       document.getElementById('schedule-toggle').checked = hasSchedule;
@@ -1862,7 +1886,9 @@
       document.getElementById('modal-input-category').value = annCats[0] || '';
       document.getElementById('modal-input-content').value = '';
       document.getElementById('loc-admin').checked = true;
+      document.getElementById('loc-store').checked = false;
       document.getElementById('loc-frontend').checked = true;
+      document.getElementById('popup-toggle').checked = false;
       document.getElementById('schedule-toggle').checked = false;
       toggleSchedule(document.getElementById('schedule-toggle'));
       document.getElementById('modal-input-schedule').value = '';
@@ -1896,7 +1922,9 @@
 
     const locs = [];
     if (document.getElementById('loc-admin').checked) locs.push('admin');
+    if (document.getElementById('loc-store').checked) locs.push('store');
     if (document.getElementById('loc-frontend').checked) locs.push('fe');
+    const popupOn = document.getElementById('popup-toggle').checked;
 
     const scheduleOn = document.getElementById('schedule-toggle').checked;
     const scheduleVal = document.getElementById('modal-input-schedule').value;
@@ -1921,6 +1949,7 @@
           desc: descStr,
           category: catValue,
           locations: locs,
+          popup: popupOn,
           schedule: scheduleStr,
           status: finalStatus,
         };
@@ -1934,6 +1963,7 @@
         desc: descStr,
         category: catValue,
         locations: locs,
+        popup: popupOn,
         schedule: scheduleStr,
         readRate: null,
         status: finalStatus,
@@ -1946,11 +1976,15 @@
         const newManageId = manageAnnouncements[0].id;
         if (document.getElementById('loc-frontend').checked) {
           const feId = feAnnouncements.length ? Math.max(...feAnnouncements.map(a => a.id)) + 1 : 0;
-          feAnnouncements.unshift({ id: feId, manageRef: newManageId, title, category: catValue, time: '剛剛', read: false, text: content, attach: false });
+          feAnnouncements.unshift({ id: feId, manageRef: newManageId, title, category: catValue, time: '剛剛', read: !popupOn, text: content, attach: false });
         }
         if (document.getElementById('loc-admin').checked) {
           const adId = adminAnnouncements.length ? Math.max(...adminAnnouncements.map(a => a.id)) + 1 : 0;
-          adminAnnouncements.unshift({ id: adId, manageRef: newManageId, title, category: catValue, icon: catIcon(catValue), time: '剛剛', read: false, text: content });
+          adminAnnouncements.unshift({ id: adId, manageRef: newManageId, title, category: catValue, icon: catIcon(catValue), time: '剛剛', read: !popupOn, text: content });
+        }
+        if (document.getElementById('loc-store').checked) {
+          const stId = storeAnnouncements.length ? Math.max(...storeAnnouncements.map(a => a.id)) + 1 : 0;
+          storeAnnouncements.unshift({ id: stId, manageRef: newManageId, title, category: catValue, icon: catIcon(catValue), time: '剛剛', read: !popupOn, text: content });
         }
       }
     } else {
@@ -2127,7 +2161,22 @@
   populateCatSelects();
   populateCatTabs();
   switchAdminPage('notify');
-  showAdminUnreadQueue();
+
+  // URL 參數初始化（供全域導覽使用）
+  (function () {
+    var _p = new URLSearchParams(location.search);
+    var _view = _p.get('view');
+    var _page = _p.get('page');
+    var _sys  = _p.get('sys');
+    if (_sys === 'store') {
+      adminAnnouncements = storeAnnouncements;
+      var subtitle = document.querySelector('#admin-page-notify .page-subtitle');
+      if (subtitle) subtitle.textContent = '系統發布給店家後台的公告';
+    }
+    if (_view) switchView(_view);
+    if (_page) switchAdminPage(_page);
+    if (_view !== 'frontend' && _page !== 'manage') showAdminUnreadQueue();
+  })();
 </script>
 </body>
 </html>

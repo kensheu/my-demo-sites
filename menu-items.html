@@ -252,7 +252,7 @@ td { padding: 11px 14px; vertical-align: middle; }
 .overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,.4);
   display: flex; align-items: center; justify-content: center;
-  z-index: 100; opacity: 0; pointer-events: none;
+  z-index: 2000; opacity: 0; pointer-events: none;
   transition: opacity .15s; padding: 16px;
 }
 .overlay.open { opacity: 1; pointer-events: auto; }
@@ -535,8 +535,10 @@ select {
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <link rel="stylesheet" href="shared-nav.css">
 </head>
 <body>
+<script src="shared-nav.js"></script>
 
 <div class="page">
 
