@@ -1064,12 +1064,12 @@ function renderAll() {
 function renderStats() {
   const a = activeItems();
   const pending  = a.filter(i => !!i.pending).length;
-  const hasImg   = a.filter(i => !!i.imgPreview).length;
+  const missingImg = a.filter(i => !i.imgPreview).length;
   const moboLink = a.filter(i => i.mobo).length;
   document.getElementById('stats-bar').innerHTML = `
     <div class="stat-chip"><strong>${a.length}</strong> 上架品項</div>
     <div class="stat-chip${pending > 0 ? ' warn' : ''}"><strong>${pending}</strong> 預約生效待確認</div>
-    <div class="stat-chip"><strong>${hasImg}</strong> 已有圖片</div>
+    <div class="stat-chip${missingImg > 0 ? ' warn' : ''}"><strong>${missingImg}</strong> 尚缺圖片</div>
     <div class="stat-chip"><strong>${moboLink}</strong> 已連結摩寶</div>`;
 }
 
