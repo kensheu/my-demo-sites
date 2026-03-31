@@ -798,9 +798,17 @@ body {
     </div>
     <div class="modal-body">
       <div id="copy-site-ctx" style="font-size:13px;color:var(--text-2);margin-bottom:14px;padding:10px 12px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:7px;line-height:1.6"></div>
-      <div class="form-group">
-        <div class="form-label">選擇目標據點（可複選）</div>
-        <div class="check-group" id="copy-site-checks"></div>
+      <div class="form-group" style="margin-bottom:0">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div class="form-label" style="margin-bottom:0">選擇目標據點</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="copy-site-sel-count" style="font-size:13px;color:var(--text-3)">已選 0 個</span>
+            <button class="btn btn-sm" onclick="copyClearAll()">清除</button>
+          </div>
+        </div>
+        <input type="text" class="form-input" placeholder="搜尋據點…" id="copy-site-search"
+          oninput="filterCopySites()" autocomplete="off" style="margin-bottom:8px">
+        <div id="copy-site-checks" style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px 0"></div>
       </div>
       <div style="margin-top:10px;font-size:13px;color:var(--text-3)">品項終端價將沿用來源據點的設定，複製後可在 detail panel 逐日調整。</div>
     </div>
@@ -1567,16 +1575,44 @@ function openCopySiteModal() {
     `<strong>來源據點：</strong>${site?.name || ''}&nbsp;&nbsp;<strong>月份：</strong>${curYear}年${MONTH_NAMES[curMonth]}<br>` +
     `<strong>本月排程：</strong>${srcDays} 天、共 ${srcEntries} 筆店家排程`;
 
-  document.getElementById('copy-site-checks').innerHTML = sites
-    .filter(s => s.id !== curSiteId)
-    .map(s => `<label class="check-item">
-      <input type="checkbox" data-site="${s.id}"> ${s.name}
-    </label>`).join('');
-
+  document.getElementById('copy-site-search').value = '';
+  renderCopySiteList('');
   openModal('copy-site-modal');
 }
 
 function updateCopyPriceSection() { /* 整月複製不需售價設定 */ }
+
+function renderCopySiteList(keyword) {
+  const kw = keyword.trim().toLowerCase();
+  const list = document.getElementById('copy-site-checks');
+  const filtered = sites.filter(s => s.id !== curSiteId && (!kw || s.name.toLowerCase().includes(kw)));
+  if (!filtered.length) {
+    list.innerHTML = `<div style="padding:12px 14px;color:var(--text-3);font-size:13px">無符合的據點</div>`;
+    return;
+  }
+  // 保留已勾選狀態
+  const checked = new Set([...document.querySelectorAll('#copy-site-checks input:checked')].map(i => i.dataset.site));
+  list.innerHTML = filtered.map(s => `
+    <label class="check-item" style="padding:8px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:0">
+      <input type="checkbox" data-site="${s.id}" onchange="updateCopySiteCount()" ${checked.has(s.id) ? 'checked' : ''}>
+      <span>${s.name}</span>
+    </label>`).join('');
+  updateCopySiteCount();
+}
+
+function filterCopySites() {
+  renderCopySiteList(document.getElementById('copy-site-search').value);
+}
+
+function updateCopySiteCount() {
+  const n = document.querySelectorAll('#copy-site-checks input:checked').length;
+  document.getElementById('copy-site-sel-count').textContent = `已選 ${n} 個`;
+}
+
+function copyClearAll() {
+  document.querySelectorAll('#copy-site-checks input[type=checkbox]').forEach(i => i.checked = false);
+  updateCopySiteCount();
+}
 
 function confirmCopyToSites() {
   const selSites = [...document.querySelectorAll('#copy-site-checks input:checked')].map(inp => inp.dataset.site);
