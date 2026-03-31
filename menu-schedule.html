@@ -81,6 +81,8 @@ body {
 .btn-primary:hover { background: #1e40af; border-color: #1e40af; color: #fff; }
 .btn-green  { background: var(--green); color: #fff; border-color: var(--green); }
 .btn-green:hover { background: #166534; border-color: #166534; color: #fff; }
+.btn-orange { background: var(--orange); color: #fff; border-color: var(--orange); }
+.btn-orange:hover { background: #9a3412; border-color: #9a3412; color: #fff; }
 .btn-sm { padding: 4px 10px; font-size: 14px; }
 .btn-icon { padding: 5px 9px; font-size: 16px; }
 
@@ -230,7 +232,7 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .rest-card-name { font-size: 15px; font-weight: 600; }
-.rest-card-meal { font-size: 12px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
+.rest-card-meal { font-size: 12px; padding: 2px 8px; border-radius: 100px; font-weight: 500; margin-right: auto; }
 
 .tag-breakfast  { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
 .tag-lunch      { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
@@ -243,6 +245,32 @@ body {
   font-size: 15px; padding: 0 2px; line-height: 1; flex-shrink: 0;
 }
 .rest-card-remove:hover { color: var(--red); }
+
+/* ─── Publish status ─── */
+.pub-status {
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+}
+.pub-badge {
+  font-size: 12px; font-weight: 500; padding: 2px 8px;
+  border-radius: 100px; white-space: nowrap;
+}
+.pub-badge.unpublished { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.pub-badge.published   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.pub-badge.dirty       { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.pub-btn {
+  font-size: 12px; padding: 3px 10px; border-radius: 6px; cursor: pointer;
+  border: 1px solid; white-space: nowrap; font-weight: 500;
+  background: none;
+}
+.pub-btn.do-publish   { border-color: var(--green); color: var(--green); }
+.pub-btn.do-publish:hover { background: var(--green-bg); }
+.pub-btn.do-republish { border-color: var(--orange); color: var(--orange); }
+.pub-btn.do-republish:hover { background: var(--orange-bg); }
+.detail-bulk-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 18px; border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
 
 .item-list { list-style: none; display: flex; flex-direction: column; }
 .item-row  { border-bottom: 1px solid var(--border-2); }
@@ -585,6 +613,7 @@ body {
       <div class="detail-head-title" id="detail-title"></div>
       <button class="detail-head-close" onclick="closeDetail()">✕</button>
     </div>
+    <div class="detail-bulk-bar" id="detail-bulk-bar"></div>
     <div class="detail-body" id="detail-body"></div>
   </div>
 
@@ -821,6 +850,23 @@ body {
 
 <div class="toast" id="toast"></div>
 
+<!-- Modal: 通用二次確認 -->
+<div class="overlay" id="generic-confirm-modal">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title" id="generic-confirm-title">確認操作</div>
+      <button class="modal-close" onclick="closeModal('generic-confirm-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="generic-confirm-body" style="font-size:15px;line-height:1.6;color:var(--text-2)"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('generic-confirm-modal')">取消</button>
+      <button class="btn btn-primary" id="generic-confirm-ok">確認</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════════
    CONSTANTS
@@ -853,10 +899,10 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I001', name: '雞腿便當', priceTiers: [{ price: 100, effectiveFrom: null }, { price: 110, effectiveFrom: '2026-05-01' }] },
-      { id: 'I002', name: '排骨便當', priceTiers: [{ price: 95, effectiveFrom: null }] },
-      { id: 'I003', name: '控肉飯',   priceTiers: [{ price: 85, effectiveFrom: null }] },
-      { id: 'I004', name: '滷肉飯',   priceTiers: [{ price: 75, effectiveFrom: null }, { price: 80, effectiveFrom: '2026-05-01' }] },
+      { id: 'I001', name: '雞腿便當', en: 'Chicken Leg Bento', priceTiers: [{ price: 100, effectiveFrom: null }, { price: 110, effectiveFrom: '2026-05-01' }] },
+      { id: 'I002', name: '排骨便當', en: 'Pork Rib Bento',    priceTiers: [{ price: 95, effectiveFrom: null }] },
+      { id: 'I003', name: '控肉飯',   en: 'Braised Pork Rice', priceTiers: [{ price: 85, effectiveFrom: null }] },
+      { id: 'I004', name: '滷肉飯',   en: 'Minced Pork Rice',  priceTiers: [{ price: 75, effectiveFrom: null }, { price: 80, effectiveFrom: '2026-05-01' }] },
     ]
   },
   {
@@ -864,11 +910,11 @@ const restaurants = [
     closedWeekdays: { breakfast:[0], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-05-01'],
     mealTypes: { breakfast: true, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I010', name: '奶油厚片',     priceTiers: [{ price: 40, effectiveFrom: null }] },
-      { id: 'I011', name: '原味蛋餅',     priceTiers: [{ price: 35, effectiveFrom: null }] },
-      { id: 'I012', name: '總匯蛋餅',     priceTiers: [{ price: 55, effectiveFrom: null }] },
-      { id: 'I013', name: '火腿蛋餅',     priceTiers: [{ price: 50, effectiveFrom: null }] },
-      { id: 'I014', name: '起司雙層蛋餅', priceTiers: [{ price: 60, effectiveFrom: null }] },
+      { id: 'I010', name: '奶油厚片',     en: 'Butter Toast',          priceTiers: [{ price: 40, effectiveFrom: null }] },
+      { id: 'I011', name: '原味蛋餅',     en: 'Plain Egg Crepe',        priceTiers: [{ price: 35, effectiveFrom: null }] },
+      { id: 'I012', name: '總匯蛋餅',     en: 'Club Egg Crepe',         priceTiers: [{ price: 55, effectiveFrom: null }] },
+      { id: 'I013', name: '火腿蛋餅',     en: 'Ham Egg Crepe',          priceTiers: [{ price: 50, effectiveFrom: null }] },
+      { id: 'I014', name: '起司雙層蛋餅', en: 'Double Cheese Egg Crepe',priceTiers: [{ price: 60, effectiveFrom: null }] },
     ]
   },
   {
@@ -876,9 +922,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[6,0], afternoon:[], dinner:[6,0], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
-      { id: 'I020', name: '三層肉便當', priceTiers: [{ price: 90, effectiveFrom: null }] },
-      { id: 'I021', name: '雞肉飯',     priceTiers: [{ price: 70, effectiveFrom: null }] },
-      { id: 'I022', name: '素食便當',   priceTiers: [{ price: 80, effectiveFrom: null }] },
+      { id: 'I020', name: '三層肉便當', en: 'Pork Belly Bento',     priceTiers: [{ price: 90, effectiveFrom: null }] },
+      { id: 'I021', name: '雞肉飯',     en: 'Chicken Rice',         priceTiers: [{ price: 70, effectiveFrom: null }] },
+      { id: 'I022', name: '素食便當',   en: 'Vegetarian Bento',     priceTiers: [{ price: 80, effectiveFrom: null }] },
     ]
   },
   {
@@ -886,9 +932,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
-      { id: 'I030', name: '紅燒牛腩飯', priceTiers: [{ price: 130, effectiveFrom: null }] },
-      { id: 'I031', name: '咖哩雞飯',   priceTiers: [{ price: 110, effectiveFrom: null }] },
-      { id: 'I032', name: '麻婆豆腐飯', priceTiers: [{ price: 100, effectiveFrom: null }] },
+      { id: 'I030', name: '紅燒牛腩飯', en: 'Braised Beef Brisket Rice', priceTiers: [{ price: 130, effectiveFrom: null }] },
+      { id: 'I031', name: '咖哩雞飯',   en: 'Curry Chicken Rice',        priceTiers: [{ price: 110, effectiveFrom: null }] },
+      { id: 'I032', name: '麻婆豆腐飯', en: 'Mapo Tofu Rice',            priceTiers: [{ price: 100, effectiveFrom: null }] },
     ]
   },
   {
@@ -896,14 +942,15 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-04-04'],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I040', name: '陽春麵', priceTiers: [{ price: 55, effectiveFrom: null }] },
-      { id: 'I041', name: '牛肉麵', priceTiers: [{ price: 120, effectiveFrom: null }] },
-      { id: 'I042', name: '刀削麵', priceTiers: [{ price: 85, effectiveFrom: null }] },
+      { id: 'I040', name: '陽春麵', en: 'Plain Noodle Soup',    priceTiers: [{ price: 55, effectiveFrom: null }] },
+      { id: 'I041', name: '牛肉麵', en: 'Beef Noodle Soup',     priceTiers: [{ price: 120, effectiveFrom: null }] },
+      { id: 'I042', name: '刀削麵', en: 'Knife-Cut Noodle Soup',priceTiers: [{ price: 85, effectiveFrom: null }] },
     ]
   },
 ];
 
-// scheduleData[siteId][dateStr] = [{ entryId, restaurantId, mealType, addedBy, items:[{itemId,name,price,isAuto}] }]
+// scheduleData[siteId][dateStr] = [{ entryId, restaurantId, mealType, addedBy, publishedAt, dirtyAfterPublish, items:[{itemId,name,price,isAuto}] }]
+// publishedAt: null=未發布, string=發布時間; dirtyAfterPublish: true=發布後有修改
 const scheduleData = {};
 sites.forEach(s => { scheduleData[s.id] = {}; });
 
@@ -1068,6 +1115,20 @@ function renderDetailBody(dateStr) {
   const filtered = filterEntries(entries);
   const body     = document.getElementById('detail-body');
 
+  // ── Bulk bar ──
+  const bulkBar = document.getElementById('detail-bulk-bar');
+  const anyUnpublished = filtered.some(e => !e.publishedAt);
+  const anyDirty       = filtered.some(e => e.publishedAt && e.dirtyAfterPublish);
+  let bulkHtml = `<span style="font-size:13px;color:var(--text-2);font-weight:500">批量操作：</span>`;
+  if (anyUnpublished)
+    bulkHtml += `<button class="btn btn-sm" style="border-color:var(--green);color:var(--green)" onclick="bulkPublish('${dateStr}','all')">▶ 全部發布</button>`;
+  if (anyDirty)
+    bulkHtml += `<button class="btn btn-sm" style="border-color:var(--orange);color:var(--orange)" onclick="bulkPublish('${dateStr}','dirty')">↺ 更新已修改</button>`;
+  if (!anyUnpublished && !anyDirty && filtered.length)
+    bulkHtml += `<span style="font-size:13px;color:var(--green)">✓ 全部已是最新發布</span>`;
+  bulkBar.style.display = filtered.length ? '' : 'none';
+  bulkBar.innerHTML = bulkHtml;
+
   let html = filtered.map(entry => {
     const rest   = restaurants.find(r => r.id === entry.restaurantId);
     if (!rest) return '';
@@ -1112,10 +1173,22 @@ function renderDetailBody(dateStr) {
         </div>
       </li>`;
     }).join('');
+    const pubBadge = !entry.publishedAt
+      ? `<span class="pub-badge unpublished">未發布</span>`
+      : entry.dirtyAfterPublish
+        ? `<span class="pub-badge dirty" title="發布後有修改，建議重新發布">已修改</span>`
+        : `<span class="pub-badge published" title="發布於 ${entry.publishedAt}">已發布</span>`;
+    const pubBtn = !entry.publishedAt
+      ? `<button class="pub-btn do-publish" onclick="publishEntry('${dateStr}','${entry.entryId}')">發布</button>`
+      : `<button class="pub-btn do-republish" onclick="publishEntry('${dateStr}','${entry.entryId}')">重新發布</button>`;
+    const revertBtn = entry.dirtyAfterPublish
+      ? `<button class="pub-btn" style="border-color:var(--text-3);color:var(--text-3)" onclick="revertEntry('${dateStr}','${entry.entryId}')">取消變更</button>`
+      : '';
     return `<div class="rest-card">
       <div class="rest-card-header">
         <span class="rest-card-name">${rest.name}</span>
         <span class="rest-card-meal ${mi.tagCls}">${mi.label}</span>
+        <div class="pub-status">${pubBadge}${revertBtn}${pubBtn}</div>
         <button class="rest-card-remove" onclick="removeEntry('${dateStr}','${entry.entryId}')">✕</button>
       </div>
       <ul class="item-list">${items}</ul>
@@ -1130,12 +1203,33 @@ function renderDetailBody(dateStr) {
   body.innerHTML = html;
 }
 
+function checkDirty(entry) {
+  if (!entry.publishedAt || !entry.publishedSnapshot) return;
+  const snap = entry.publishedSnapshot;
+  const cur  = entry.items;
+  if (snap.length !== cur.length) { entry.dirtyAfterPublish = true; return; }
+  const isDiff = snap.some((s, i) => {
+    const c = cur[i];
+    return !c || s.itemId !== c.itemId || s.price !== c.price ||
+           s.cabinet !== c.cabinet || s.onlineQty !== c.onlineQty ||
+           s.offlineQty !== c.offlineQty || s.storeQty !== c.storeQty;
+  });
+  entry.dirtyAfterPublish = isDiff;
+}
+
+function markDirty(dateStr, entryId) {
+  const entry = ((scheduleData[curSiteId] || {})[dateStr] || []).find(e => e.entryId === entryId);
+  if (entry && entry.publishedAt) checkDirty(entry);
+}
+
 function saveItemField(dateStr, entryId, itemId, field, value) {
   const entry = ((scheduleData[curSiteId] || {})[dateStr] || []).find(e => e.entryId === entryId);
   if (!entry) return;
   const item = entry.items.find(i => i.itemId === itemId);
   if (!item) return;
   item[field] = value;
+  markDirty(dateStr, entryId);
+  renderDetailBody(dateStr);
 }
 
 function saveItemPrice(dateStr, entryId, itemId, value) {
@@ -1145,7 +1239,78 @@ function saveItemPrice(dateStr, entryId, itemId, value) {
   if (!item) return;
   item.price  = value;
   item.isAuto = false;
+  markDirty(dateStr, entryId);
   renderDetailBody(dateStr);
+}
+
+/* ── Generic confirm ── */
+function showConfirm(title, bodyHtml, okLabel, okCls, onOk) {
+  document.getElementById('generic-confirm-title').textContent = title;
+  document.getElementById('generic-confirm-body').innerHTML = bodyHtml;
+  const okBtn = document.getElementById('generic-confirm-ok');
+  okBtn.textContent = okLabel;
+  okBtn.className = 'btn ' + (okCls || 'btn-primary');
+  okBtn.onclick = () => { closeModal('generic-confirm-modal'); onOk(); };
+  openModal('generic-confirm-modal');
+}
+
+/* ── Publish ── */
+function revertEntry(dateStr, entryId) {
+  const entry = ((scheduleData[curSiteId] || {})[dateStr] || []).find(e => e.entryId === entryId);
+  if (!entry || !entry.publishedSnapshot) return;
+  const rest = restaurants.find(r => r.id === entry.restaurantId);
+  showConfirm(
+    '確認取消變更？',
+    `將還原 <b>${rest?.name || ''}</b> 的排程至上次發布的狀態，目前所有修改將遺失。`,
+    '取消變更', 'btn',
+    () => {
+      entry.items = entry.publishedSnapshot.map(i => ({ ...i }));
+      entry.dirtyAfterPublish = false;
+      renderDetailBody(dateStr);
+      showToast('已還原至上次發布狀態');
+    }
+  );
+}
+
+function publishEntry(dateStr, entryId) {
+  const entry = ((scheduleData[curSiteId] || {})[dateStr] || []).find(e => e.entryId === entryId);
+  if (!entry) return;
+  const rest = restaurants.find(r => r.id === entry.restaurantId);
+  const wasPublished = !!entry.publishedAt;
+  const dateLabel = dateStr.slice(5).replace('-','/');
+  const title = wasPublished ? '確認重新發布？' : '確認發布？';
+  const body  = wasPublished
+    ? `將重新發布 <b>${rest?.name || ''}</b> 的排程（${dateLabel}），店家端將收到更新通知。`
+    : `將發布 <b>${rest?.name || ''}</b> 的排程（${dateLabel}）至店家端。`;
+  showConfirm(title, body, wasPublished ? '重新發布' : '發布', wasPublished ? 'btn-orange' : 'btn-green', () => {
+    const now = new Date();
+    const ts  = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    entry.publishedAt        = ts;
+    entry.dirtyAfterPublish  = false;
+    entry.publishedSnapshot  = entry.items.map(i => ({ ...i }));
+    showToast(`${wasPublished ? '已重新發布' : '已發布'}：${rest?.name || ''} ${dateLabel}`, 'success');
+    renderDetailBody(dateStr);
+  });
+}
+
+function bulkPublish(dateStr, mode) {
+  const entries = (scheduleData[curSiteId]?.[dateStr] || []);
+  const targets = mode === 'dirty'
+    ? entries.filter(e => e.publishedAt && e.dirtyAfterPublish)
+    : entries.filter(e => !e.publishedAt);
+  if (!targets.length) return;
+  const dateLabel = dateStr.slice(5).replace('-','/');
+  const title = mode === 'dirty' ? '確認更新已修改？' : '確認全部發布？';
+  const body  = mode === 'dirty'
+    ? `將重新發布 ${dateLabel} 共 <b>${targets.length} 間</b>已修改的店家排程至店家端。`
+    : `將發布 ${dateLabel} 共 <b>${targets.length} 間</b>尚未發布的店家排程至店家端。`;
+  showConfirm(title, body, mode === 'dirty' ? '更新已修改' : '全部發布', mode === 'dirty' ? 'btn-orange' : 'btn-green', () => {
+    const now = new Date();
+    const ts  = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    targets.forEach(e => { e.publishedAt = ts; e.dirtyAfterPublish = false; e.publishedSnapshot = e.items.map(i => ({ ...i })); });
+    showToast(`已${mode === 'dirty' ? '重新發布' : '發布'} ${targets.length} 間店家`, 'success');
+    renderDetailBody(dateStr);
+  });
 }
 
 /* ══════════════════════════════════════════════════
@@ -1537,6 +1702,7 @@ function confirmAddItem() {
       entry.items.push({ itemId: inp.value, name: inp.dataset.name, price: Number(inp.dataset.price), isAuto: inp.dataset.auto === 'true', cabinet: 'hot', onlineQty: 30, offlineQty: 0, storeQty: 0 });
     }
   });
+  markDirty(pickerItemDate, pickerItemEntryId);
   closeModal('item-picker-modal');
   rerenderCalendar();
   showToast(`已新增 ${checkedInputs.length} 個品項`, 'success');
@@ -1555,6 +1721,7 @@ function removeItem(dateStr, entryId, itemId) {
   const entry = getEntry(dateStr, entryId);
   if (!entry) return;
   entry.items = entry.items.filter(i => i.itemId !== itemId);
+  markDirty(dateStr, entryId);
   rerenderCalendar();
 }
 
@@ -1952,20 +2119,23 @@ function exportJSON() {
   const site     = sites.find(s => s.id === curSiteId);
   const siteData = scheduleData[curSiteId] || {};
   const days     = new Date(curYear, curMonth+1, 0).getDate();
-  const result   = [];
-  let rowId = 1;
+
+  // 依餐期分組
+  const byMeal = {}; // { mealId: { label, rows[] } }
 
   for (let d = 1; d <= days; d++) {
-    const dateStr  = getDateStr(curYear, curMonth, d);
-    const wd       = new Date(curYear, curMonth, d).getDay();
-    const wdLabel  = `星期${['日','一','二','三','四','五','六'][wd]}`;
-    const entries  = siteData[dateStr] || [];
+    const dateStr = getDateStr(curYear, curMonth, d);
+    const wd      = new Date(curYear, curMonth, d).getDay();
+    const wdLabel = `星期${['日','一','二','三','四','五','六'][wd]}`;
+    const entries = siteData[dateStr] || [];
     entries.forEach(entry => {
       const rest      = restaurants.find(r => r.id === entry.restaurantId);
-      const mealLabel = mealInfo(entry.mealType).label;
+      const mi        = mealInfo(entry.mealType);
+      if (!byMeal[entry.mealType]) byMeal[entry.mealType] = { label: mi.label, rows: [], rowId: 1 };
       entry.items.forEach(it => {
-        result.push({
-          id:       rowId++,
+        const itemDef = rest?.items.find(i => i.id === it.itemId);
+        byMeal[entry.mealType].rows.push({
+          id:       byMeal[entry.mealType].rowId++,
           分店:     `${rest?.name || ''}-${site.name}`,
           分類:     '餐點',
           售價:     String(it.price),
@@ -1973,7 +2143,8 @@ function exportJSON() {
           據點:     site.name,
           日期:     dateStr,
           星期:     wdLabel,
-          時段:     mealLabel,
+          時段:     mi.label,
+          英文名稱: itemDef?.en || '',
           餐廳名稱: rest?.name || '',
           餐廳地址: rest?.address || ' ',
           餐廳編號: rest?.id || '',
@@ -1984,14 +2155,23 @@ function exportJSON() {
     });
   }
 
-  const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = `菜單排程_${site.name}_${curYear}年${MONTH_NAMES[curMonth]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('JSON 已匯出', 'success');
+  const mealEntries = Object.values(byMeal).filter(m => m.rows.length > 0);
+  if (!mealEntries.length) { showToast('本月無排程資料', 'error'); return; }
+
+  // 逐餐期下載（延遲觸發避免瀏覽器攔截）
+  mealEntries.forEach((m, i) => {
+    setTimeout(() => {
+      const blob = new Blob([JSON.stringify(m.rows, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      a.download = `${site.name}_${curYear}年${MONTH_NAMES[curMonth]}${m.label}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }, i * 300);
+  });
+
+  showToast(`JSON 已匯出（共 ${mealEntries.length} 個餐期檔案）`, 'success');
 }
 
 /* ══════════════════════════════════════════════════
