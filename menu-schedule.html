@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>菜單排程管理 — 內部後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #a8a29e;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --purple:      #7c3aed;
+  --purple-bg:   #f5f3ff;
+  --purple-bdr:  #ddd6fe;
+  --teal:        #0f766e;
+  --teal-bg:     #f0fdfa;
+  --teal-bdr:    #99f6e4;
+  --pink:        #be185d;
+  --pink-bg:     #fdf2f8;
+  --pink-bdr:    #f9a8d4;
+  --gray-disabled: #d1d5db;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1400px; margin: 0 auto; padding: 12px 20px 80px; }
+
+/* ─── Header ─── */
+.page-header { margin-bottom: 10px; }
+.page-title  { font-size: 22px; font-weight: 600; }
+.page-sub    { font-size: 15px; color: var(--text-3); margin-top: 3px; }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 16px;
+}
+.toolbar-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+.toolbar-right { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  padding: 7px 14px; border-radius: 6px;
+  font-size: 15px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card); color: var(--text-2);
+  transition: all .12s; display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.btn:hover { border-color: #a8a29e; color: var(--text); }
+.btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { background: #1e40af; border-color: #1e40af; color: #fff; }
+.btn-green  { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-green:hover { background: #166534; border-color: #166534; color: #fff; }
+.btn-sm { padding: 4px 10px; font-size: 14px; }
+.btn-icon { padding: 5px 9px; font-size: 16px; }
+
+/* ─── Month nav ─── */
+.month-nav { display: flex; align-items: center; gap: 10px; }
+.month-label { font-size: 17px; font-weight: 600; min-width: 90px; text-align: center; }
+
+/* ─── Meal select in toolbar ─── */
+.meal-select-wrap { display: flex; align-items: center; gap: 8px; }
+.meal-select-wrap label { font-size: 15px; color: var(--text-2); white-space: nowrap; }
+.meal-select {
+  padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);
+  font-size: 15px; color: var(--text); background: var(--card); cursor: pointer;
+}
+.meal-select:focus { outline: none; border-color: var(--blue); }
+
+/* ─── Site tabs ─── */
+.site-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.site-tab {
+  padding: 6px 16px; border-radius: 100px;
+  border: 1.5px solid var(--border); background: var(--card);
+  font-size: 15px; font-weight: 500; cursor: pointer; color: var(--text-2);
+  transition: all .12s;
+}
+.site-tab:hover { border-color: var(--blue); color: var(--blue); }
+.site-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+/* ─── Weekly calendar ─── */
+.cal-wrap { overflow-x: auto; }
+
+.cal-week-header {
+  display: grid; grid-template-columns: 50px repeat(7, 1fr);
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-bottom: none; border-radius: 10px 10px 0 0;
+}
+.cal-week-header .wh-spacer { border-right: 1px solid var(--border-2); }
+.cal-wh-cell {
+  padding: 10px 8px; text-align: center;
+  font-size: 14px; font-weight: 500; color: var(--text-3);
+  letter-spacing: .04em; border-right: 1px solid var(--border-2);
+}
+.cal-wh-cell:last-child { border-right: none; }
+.cal-wh-cell.weekend { color: var(--red); }
+
+.cal-body {
+  border: 1px solid var(--border); border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+
+.cal-week-row {
+  display: grid; grid-template-columns: 50px repeat(7, 1fr);
+  border-bottom: 1px solid var(--border-2);
+  min-height: 120px;
+}
+.cal-week-row:last-child { border-bottom: none; }
+
+.cal-week-label {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-start; padding: 10px 4px;
+  border-right: 1px solid var(--border-2);
+  background: var(--bg-2);
+  font-size: 12px; color: var(--text-3); gap: 2px;
+}
+.cal-week-label .wk-num { font-weight: 600; font-size: 14px; color: var(--text-2); }
+
+.cal-cell {
+  padding: 8px 6px; border-right: 1px solid var(--border-2);
+  min-height: 120px; background: var(--card);
+  display: flex; flex-direction: column; gap: 4px;
+  position: relative; vertical-align: top;
+  transition: background .1s;
+}
+.cal-cell:last-child { border-right: none; }
+.cal-cell.weekend { background: #fafaf8; }
+.cal-cell.other-month { background: var(--bg-2); opacity: .5; pointer-events: none; }
+.cal-cell:hover:not(.other-month) { background: var(--blue-bg); }
+
+.cal-day-num {
+  font-size: 14px; font-weight: 600; color: var(--text-2);
+  line-height: 1; margin-bottom: 2px;
+}
+.cal-day-num.today {
+  background: var(--blue); color: #fff;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.cal-day-num.weekend { color: var(--red); }
+
+/* ─── Entry chip in calendar cell ─── */
+.entry-chip {
+  border-radius: 5px; padding: 5px 7px; font-size: 12px;
+  cursor: default; position: relative; line-height: 1.3;
+}
+.entry-chip-name { font-weight: 600; }
+.entry-chip-items { color: rgba(0,0,0,.55); font-size: 11px; margin-top: 1px; }
+.entry-chip-del {
+  position: absolute; top: 2px; right: 3px;
+  background: none; border: none; cursor: pointer;
+  font-size: 11px; opacity: 0; color: inherit; padding: 0; line-height: 1;
+}
+.entry-chip:hover .entry-chip-del { opacity: .7; }
+.entry-chip-del:hover { opacity: 1 !important; }
+
+/* meal colours */
+.chip-breakfast  { background: #fef9c3; color: #854d0e; }
+.chip-lunch      { background: var(--orange-bg); color: var(--orange); }
+.chip-afternoon  { background: var(--teal-bg);   color: var(--teal);   }
+.chip-dinner     { background: var(--purple-bg);  color: var(--purple); }
+.chip-latenight  { background: #1e293b; color: #cbd5e1; }
+
+.chip-add {
+  border: 1.5px dashed var(--border); background: transparent;
+  color: var(--text-3); cursor: pointer; font-size: 13px;
+  border-radius: 5px; padding: 4px 6px;
+  text-align: left; width: 100%; transition: all .1s;
+}
+.chip-add:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+
+/* ─── Detail panel (below calendar) ─── */
+.detail-panel {
+  margin-top: 16px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; display: none;
+}
+.detail-panel.open { display: block; }
+.detail-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.detail-head-title { font-size: 17px; font-weight: 600; }
+.detail-head-close {
+  background: none; border: none; font-size: 18px; color: var(--text-3);
+  cursor: pointer;
+}
+.detail-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+/* ─── Restaurant card in detail panel ─── */
+.rest-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+}
+.rest-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; gap: 6px; background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+}
+.rest-card-name { font-size: 15px; font-weight: 600; }
+.rest-card-meal { font-size: 12px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
+
+.tag-breakfast  { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
+.tag-lunch      { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.tag-afternoon  { background: var(--teal-bg);   color: var(--teal);   border: 1px solid var(--teal-bdr); }
+.tag-dinner     { background: var(--purple-bg);  color: var(--purple);  border: 1px solid var(--purple-bdr); }
+.tag-latenight  { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+
+.rest-card-remove {
+  background: none; border: none; color: var(--text-3); cursor: pointer;
+  font-size: 15px; padding: 0 2px; line-height: 1; flex-shrink: 0;
+}
+.rest-card-remove:hover { color: var(--red); }
+
+.item-list { list-style: none; display: flex; flex-direction: column; }
+.item-row  { border-bottom: 1px solid var(--border-2); }
+.item-row:last-child { border-bottom: none; }
+.item-row-top {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 14px; font-size: 14px; color: var(--text-2);
+}
+.item-name { flex: 1; }
+.item-price { font-size: 13px; color: var(--text-3); white-space: nowrap; }
+.item-price.auto-price { color: var(--green); }
+.item-del {
+  background: none; border: none; color: var(--text-3); cursor: pointer;
+  font-size: 13px; padding: 0; line-height: 1; flex-shrink: 0; opacity: 0;
+}
+.item-row:hover .item-del { opacity: 1; }
+.item-del:hover { color: var(--red); }
+.item-row-detail {
+  display: grid; grid-template-columns: auto 1fr 1fr 1fr;
+  gap: 0; border-top: 1px solid var(--border-2);
+  background: var(--bg-2);
+}
+.item-row-detail-cell {
+  padding: 8px 14px; border-right: 1px solid var(--border-2);
+  font-size: 13px;
+}
+.item-row-detail-cell:last-child { border-right: none; }
+.item-row-detail-cell label { display: block; color: var(--text-3); margin-bottom: 4px; font-size: 12px; }
+.item-row-detail-cell input[type=number] {
+  width: 100%; padding: 5px 8px; border: 1px solid var(--border);
+  border-radius: 5px; font-size: 13px; background: var(--card);
+}
+.item-row-detail-cell .cabinet-opts { display: flex; gap: 10px; }
+.item-row-detail-cell .cabinet-opts label {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; cursor: pointer; color: var(--text); margin-bottom: 0;
+}
+
+.add-item-btn {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 14px; color: var(--blue); cursor: pointer;
+  background: none; border: none; padding: 9px 14px;
+}
+.add-item-btn:hover { text-decoration: underline; }
+
+.detail-add-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 9px 16px; border-radius: 7px;
+  border: 1.5px dashed var(--border); background: transparent;
+  font-size: 15px; color: var(--text-3); cursor: pointer;
+  transition: all .12s; align-self: flex-start;
+}
+.detail-add-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+
+/* ─── Overlays & Modals ─── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; opacity: 0; pointer-events: none; transition: opacity .15s;
+  padding: 16px;
+}
+.overlay.open { opacity: 1; pointer-events: auto; }
+.modal {
+  background: var(--card); border-radius: 12px;
+  width: 520px; max-width: 100%; max-height: calc(100vh - 40px); overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  transform: translateY(8px); transition: transform .15s;
+}
+.overlay.open .modal { transform: translateY(0); }
+.modal-sm { width: 400px; }
+.modal-lg { width: 680px; }
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 22px 16px; border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 18px; font-weight: 600; }
+.modal-close {
+  background: none; border: none; font-size: 18px; color: var(--text-3);
+  cursor: pointer; padding: 2px; line-height: 1;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 20px 22px; }
+.modal-foot {
+  padding: 14px 22px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* ─── Form ─── */
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text-2); }
+.form-input, .form-select {
+  width: 100%; padding: 8px 12px; border-radius: 7px;
+  border: 1px solid var(--border); font-size: 15px; color: var(--text);
+  background: var(--card); transition: border-color .12s;
+}
+.form-input:focus, .form-select:focus { outline: none; border-color: var(--blue); }
+.form-inline { display: flex; gap: 8px; align-items: flex-end; }
+.form-inline .form-group { flex: 1; margin-bottom: 0; }
+
+/* ─── Item checklist ─── */
+.item-checklist {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  max-height: 260px; overflow-y: auto;
+}
+.item-check-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; cursor: pointer;
+  border-bottom: 1px solid var(--border-2);
+  transition: background .08s;
+  user-select: none;
+}
+.item-check-row:last-child { border-bottom: none; }
+.item-check-row:hover { background: var(--blue-bg); }
+.item-check-row.checked { background: var(--blue-bg); }
+.item-check-row input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; accent-color: var(--blue); }
+.item-check-row.already-added { opacity: .45; cursor: not-allowed; }
+.item-check-row.already-added:hover { background: none; }
+.item-check-name { flex: 1; font-size: 15px; }
+.item-check-price { font-size: 14px; color: var(--text-3); white-space: nowrap; }
+.item-extra {
+  display: none; padding: 10px 12px 12px 37px;
+  background: var(--bg-2); border-bottom: 1px solid var(--border-2);
+}
+.item-extra.show { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; align-items: end; }
+.item-extra-label { font-size: 13px; color: var(--text-2); margin-bottom: 4px; }
+.item-extra input[type=number] { width: 100%; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+.item-extra .cabinet-opts { display: flex; gap: 12px; padding: 6px 0; }
+.item-extra .cabinet-opts label { display: flex; align-items: center; gap: 5px; font-size: 14px; cursor: pointer; }
+.item-check-price.is-auto { color: var(--green); }
+.item-check-auto-badge {
+  font-size: 11px; padding: 1px 5px; border-radius: 3px;
+  background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr);
+  font-weight: 500;
+}
+.item-checklist-empty { padding: 14px; font-size: 14px; color: var(--text-3); text-align: center; }
+
+/* ─── Custom dropdown ─── */
+.custom-dropdown { position: relative; }
+.dropdown-trigger {
+  width: 100%; padding: 8px 12px; border-radius: 7px;
+  border: 1px solid var(--border); font-size: 15px; color: var(--text);
+  background: var(--card); cursor: pointer; text-align: left;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: border-color .12s;
+}
+.dropdown-trigger:focus { outline: none; border-color: var(--blue); }
+.dropdown-trigger.open { border-color: var(--blue); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.dropdown-arrow { color: var(--text-3); font-size: 12px; }
+.dropdown-list {
+  position: absolute; left: 0; right: 0; top: 100%;
+  background: var(--card); border: 1px solid var(--blue);
+  border-top: none; border-bottom-left-radius: 7px; border-bottom-right-radius: 7px;
+  max-height: 240px; overflow-y: auto; z-index: 50;
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+}
+.dropdown-search {
+  padding: 8px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--card);
+}
+.dropdown-search input {
+  width: 100%; padding: 6px 10px; border-radius: 5px;
+  border: 1px solid var(--border); font-size: 15px;
+}
+.dropdown-search input:focus { outline: none; border-color: var(--blue); }
+.dropdown-option {
+  padding: 10px 14px; font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  transition: background .08s;
+}
+.dropdown-option:hover:not(.disabled) { background: var(--bg-2); }
+.dropdown-option.disabled { color: var(--gray-disabled); cursor: not-allowed; }
+.dropdown-option .conflict-tip { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+.dropdown-option.disabled .conflict-tip { color: var(--red); }
+.dropdown-option .closed-tip { font-size: 12px; color: var(--orange); white-space: nowrap; }
+
+/* ─── Inline error ─── */
+.inline-error { font-size: 14px; color: var(--red); margin-top: 5px; display: none; align-items: center; gap: 4px; }
+.inline-error.show { display: flex; }
+
+/* ─── Weekday checkboxes ─── */
+.wd-checks { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.wd-check {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 13px; color: var(--text-2); cursor: pointer;
+}
+.wd-check input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; }
+.wd-check.checked { color: var(--red); }
+
+/* ─── Special dates ─── */
+.special-dates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.special-date-chip {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 9px; background: var(--orange-bg); border: 1px solid var(--orange-bdr);
+  border-radius: 100px; font-size: 13px; color: var(--orange);
+}
+.special-date-chip button { background: none; border: none; cursor: pointer; color: var(--orange); font-size: 13px; padding: 0; }
+
+/* ─── Publish modal ─── */
+.pub-section { margin-bottom: 18px; }
+.pub-section-label { font-size: 14px; font-weight: 500; color: var(--text-2); margin-bottom: 8px; }
+.check-group { display: flex; flex-direction: column; gap: 6px; }
+.check-item { display: flex; align-items: center; gap: 8px; font-size: 15px; cursor: pointer; }
+.check-item input { width: 15px; height: 15px; cursor: pointer; }
+.pub-summary {
+  background: var(--blue-bg); border: 1px solid var(--blue-border);
+  border-radius: 8px; padding: 12px 14px; font-size: 15px; color: var(--blue-text); line-height: 1.7;
+}
+
+/* ─── Toast ─── */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--text); color: #fff; padding: 12px 18px; border-radius: 8px;
+  font-size: 15px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  transform: translateY(80px); opacity: 0; transition: all .25s; z-index: 500;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.error   { background: var(--red); }
+
+/* ─── Export menu ─── */
+.export-opt {
+  padding: 10px 16px; font-size: 15px; cursor: pointer; color: var(--text-2);
+  transition: background .08s;
+}
+.export-opt:hover { background: var(--bg-2); color: var(--text); }
+
+/* ─── Tag auto ─── */
+.tag-auto {
+  font-size: 11px; padding: 1px 5px; border-radius: 3px;
+  background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr);
+  font-weight: 500; flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .cal-week-header, .cal-week-row { grid-template-columns: 36px repeat(7, minmax(80px,1fr)); }
+}
+@media (max-width: 640px) {
+  .toolbar { flex-direction: column; align-items: flex-start; }
+  .toolbar-right { margin-left: 0; }
+}
+</style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-title">菜單排程管理</div>
+    <div class="page-sub">安排各廠區月度供餐排程，系統自動套用防呆規則</div>
+  </div>
+
+  <!-- Machine Actions -->
+  <div style="display:flex;gap:10px;margin-bottom:12px;justify-content:flex-end">
+    <button class="btn" onclick="showToast('功能開發中', 'info')">傳送訂單資料至販賣機</button>
+    <button class="btn" onclick="showToast('功能開發中', 'info')">傳送巡捕資料至販賣機</button>
+    <button class="btn" onclick="showToast('功能開發中', 'info')">重整餐點圖片</button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="month-nav">
+      <button class="btn btn-icon" onclick="changeMonth(-1)">‹</button>
+      <div class="month-label" id="month-label"></div>
+      <button class="btn btn-icon" onclick="changeMonth(1)">›</button>
+    </div>
+
+    <button class="btn" onclick="goToday()">今日</button>
+
+    <div class="toolbar-sep"></div>
+
+    <div class="meal-select-wrap">
+      <label for="site-filter-sel">廠區：</label>
+      <select class="meal-select" id="site-filter-sel" onchange="onSiteFilterChange()"></select>
+    </div>
+
+    <div class="meal-select-wrap">
+      <label for="meal-filter-sel">餐期：</label>
+      <select class="meal-select" id="meal-filter-sel" onchange="onMealFilterChange()">
+        <option value="all">全部</option>
+        <option value="breakfast">早餐</option>
+        <option value="lunch" selected>午餐</option>
+        <option value="afternoon">下午茶</option>
+        <option value="dinner">晚餐</option>
+        <option value="latenight">消夜</option>
+      </select>
+    </div>
+
+    <div class="toolbar-right">
+      <button class="btn" onclick="openRestMgr()">🏪 餐廳管理</button>
+      <div style="position:relative" id="export-wrap">
+        <button class="btn" onclick="toggleExportMenu()">↓ 匯出 <span style="font-size:11px">▾</span></button>
+        <div id="export-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
+          <div class="export-opt" onclick="exportCSV()">CSV 格式</div>
+          <div class="export-opt" onclick="exportJSON()">JSON 格式</div>
+        </div>
+      </div>
+      <button class="btn-primary btn" onclick="openPublish()">▶ 發佈訂餐</button>
+    </div>
+  </div>
+
+  <!-- Calendar -->
+  <div class="cal-wrap">
+    <div class="cal-week-header" id="cal-header"></div>
+    <div class="cal-body" id="cal-body"></div>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-head">
+      <div class="detail-head-title" id="detail-title"></div>
+      <button class="detail-head-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+
+</div>
+
+<!-- Modal: 新增店家（含品項複選） -->
+<div class="overlay" id="rest-picker-modal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title">新增店家</div>
+      <button class="modal-close" onclick="closeModal('rest-picker-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <div class="form-label">餐期</div>
+        <select class="form-select" id="picker-meal-sel" onchange="onPickerMealChange()">
+          <option value="breakfast">早餐</option>
+          <option value="lunch" selected>午餐</option>
+          <option value="afternoon">下午茶</option>
+          <option value="dinner">晚餐</option>
+          <option value="latenight">消夜</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">選擇餐廳</div>
+        <div class="custom-dropdown" id="rest-dropdown">
+          <button class="dropdown-trigger" id="rest-trigger" onclick="toggleRestDrop()">
+            <span id="rest-trigger-text">請選擇餐廳…</span>
+            <span class="dropdown-arrow">▾</span>
+          </button>
+          <div class="dropdown-list" id="rest-drop-list" style="display:none">
+            <div class="dropdown-search">
+              <input type="text" placeholder="搜尋餐廳…" id="rest-search" oninput="filterRestDrop()" autocomplete="off">
+            </div>
+            <div id="rest-options"></div>
+          </div>
+        </div>
+      </div>
+      <div class="inline-error" id="rest-picker-err" style="margin-top:8px">⚠ 請先選擇餐廳</div>
+
+      <!-- 品項複選區 -->
+      <div id="item-checklist-section" style="margin-top:18px;display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="form-label" style="margin-bottom:0">選擇品項 <span id="item-check-count" style="font-size:13px;color:var(--text-3);font-weight:400"></span></div>
+          <button class="btn btn-sm" onclick="toggleAllItems()" id="toggle-all-btn">全選</button>
+        </div>
+        <div class="item-checklist" id="item-checklist"></div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('rest-picker-modal')">取消</button>
+      <button class="btn btn-primary" onclick="confirmAddRest()">確認新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 追加品項（既有店家） -->
+<div class="overlay" id="item-picker-modal">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title">新增品項</div>
+      <button class="modal-close" onclick="closeModal('item-picker-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="item-picker-ctx" style="font-size:13px;color:var(--text-3);margin-bottom:14px"></div>
+      <div class="form-group">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="form-label" style="margin-bottom:0">選擇品項 <span id="add-item-check-count" style="font-size:13px;color:var(--text-3);font-weight:400"></span></div>
+          <button class="btn btn-sm" onclick="toggleAllAddItems()" id="add-toggle-all-btn">全選</button>
+        </div>
+        <div class="item-checklist" id="add-item-checklist"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('item-picker-modal')">取消</button>
+      <button class="btn btn-primary" onclick="confirmAddItem()">確認新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 餐廳管理 -->
+<div class="overlay" id="rest-mgr-modal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title">餐廳管理 — 公休與供餐設定</div>
+      <button class="modal-close" onclick="closeModal('rest-mgr-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <div class="form-label">選擇餐廳</div>
+        <select class="form-select" id="mgr-rest-select" onchange="loadMgrRest()">
+          <option value="">請選擇…</option>
+        </select>
+      </div>
+      <div id="mgr-rest-form" style="display:none">
+        <div class="form-group">
+          <div class="form-label">固定公休日</div>
+          <div class="wd-checks" id="mgr-wd-checks"></div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:6px">勾選後，排程時該星期幾的此餐廳將顯示為不可選</div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">特定公休日期</div>
+          <div class="form-inline">
+            <div class="form-group">
+              <input type="date" class="form-input" id="mgr-special-date">
+            </div>
+            <button class="btn btn-sm" onclick="addSpecialDate()">＋ 新增</button>
+          </div>
+          <div class="special-dates" id="mgr-special-dates" style="margin-top:8px"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">供餐時段（可複選）</div>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:6px" id="mgr-meal-checks"></div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:5px">未勾選的餐期，排程時該餐廳將顯示為不可選</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="closeModal('rest-mgr-modal')">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 發佈訂餐 -->
+<div class="overlay" id="publish-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">發佈訂餐</div>
+      <button class="modal-close" onclick="closeModal('publish-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pub-section">
+        <div class="pub-section-label">月份</div>
+        <select class="form-select" id="pub-month-sel" onchange="updatePubSummary()"></select>
+      </div>
+      <div class="pub-section">
+        <div class="pub-section-label">廠區（可複選）</div>
+        <div class="check-group" id="pub-sites"></div>
+      </div>
+      <div class="pub-section">
+        <div class="pub-section-label">餐期（可複選）</div>
+        <div class="check-group" id="pub-meals"></div>
+      </div>
+      <div class="pub-summary" id="pub-summary"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('publish-modal')">取消</button>
+      <button class="btn btn-green" onclick="doPublish()">▶ 確認發佈</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   CONSTANTS
+══════════════════════════════════════════════════ */
+const MEAL_TYPES = [
+  { id: 'breakfast', label: '早餐',  chipCls: 'chip-breakfast',  tagCls: 'tag-breakfast'  },
+  { id: 'lunch',     label: '午餐',  chipCls: 'chip-lunch',      tagCls: 'tag-lunch'      },
+  { id: 'afternoon', label: '下午茶', chipCls: 'chip-afternoon',  tagCls: 'tag-afternoon'  },
+  { id: 'dinner',    label: '晚餐',  chipCls: 'chip-dinner',     tagCls: 'tag-dinner'     },
+  { id: 'latenight', label: '消夜',  chipCls: 'chip-latenight',  tagCls: 'tag-latenight'  },
+];
+function mealInfo(id) { return MEAL_TYPES.find(m => m.id === id) || MEAL_TYPES[1]; }
+
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const WD_NAMES    = ['日','一','二','三','四','五','六'];
+const CURRENT_USER = '王小明';
+
+/* ══════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════ */
+const sites = [
+  { id: 'hc-a', name: '新竹 A 廠', region: '新竹' },
+  { id: 'hc-b', name: '新竹 B 廠', region: '新竹' },
+  { id: 'tc-a', name: '台中 A 廠', region: '台中' },
+];
+
+const restaurants = [
+  {
+    id: 'S0001', name: 'OO 雞飯專門店',
+    closedWeekdays: [], closedDates: [],
+    mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
+    items: [
+      { id: 'I001', name: '雞腿便當', priceTiers: [{ price: 100, effectiveFrom: null }, { price: 110, effectiveFrom: '2026-05-01' }] },
+      { id: 'I002', name: '排骨便當', priceTiers: [{ price: 95, effectiveFrom: null }] },
+      { id: 'I003', name: '控肉飯',   priceTiers: [{ price: 85, effectiveFrom: null }] },
+      { id: 'I004', name: '滷肉飯',   priceTiers: [{ price: 75, effectiveFrom: null }, { price: 80, effectiveFrom: '2026-05-01' }] },
+    ]
+  },
+  {
+    id: 'S0002', name: 'XX 早餐店',
+    closedWeekdays: [0], closedDates: ['2026-05-01'],
+    mealTypes: { breakfast: true, lunch: true, afternoon: false, dinner: false, latenight: false },
+    items: [
+      { id: 'I010', name: '奶油厚片',     priceTiers: [{ price: 40, effectiveFrom: null }] },
+      { id: 'I011', name: '原味蛋餅',     priceTiers: [{ price: 35, effectiveFrom: null }] },
+      { id: 'I012', name: '總匯蛋餅',     priceTiers: [{ price: 55, effectiveFrom: null }] },
+      { id: 'I013', name: '火腿蛋餅',     priceTiers: [{ price: 50, effectiveFrom: null }] },
+      { id: 'I014', name: '起司雙層蛋餅', priceTiers: [{ price: 60, effectiveFrom: null }] },
+    ]
+  },
+  {
+    id: 'S0003', name: '阿成便當',
+    closedWeekdays: [6, 0], closedDates: [],
+    mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
+    items: [
+      { id: 'I020', name: '三層肉便當', priceTiers: [{ price: 90, effectiveFrom: null }] },
+      { id: 'I021', name: '雞肉飯',     priceTiers: [{ price: 70, effectiveFrom: null }] },
+      { id: 'I022', name: '素食便當',   priceTiers: [{ price: 80, effectiveFrom: null }] },
+    ]
+  },
+  {
+    id: 'S0004', name: '好味食堂',
+    closedWeekdays: [], closedDates: [],
+    mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
+    items: [
+      { id: 'I030', name: '紅燒牛腩飯', priceTiers: [{ price: 130, effectiveFrom: null }] },
+      { id: 'I031', name: '咖哩雞飯',   priceTiers: [{ price: 110, effectiveFrom: null }] },
+      { id: 'I032', name: '麻婆豆腐飯', priceTiers: [{ price: 100, effectiveFrom: null }] },
+    ]
+  },
+  {
+    id: 'S0005', name: '家鄉麵食館',
+    closedWeekdays: [0], closedDates: ['2026-04-04'],
+    mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
+    items: [
+      { id: 'I040', name: '陽春麵', priceTiers: [{ price: 55, effectiveFrom: null }] },
+      { id: 'I041', name: '牛肉麵', priceTiers: [{ price: 120, effectiveFrom: null }] },
+      { id: 'I042', name: '刀削麵', priceTiers: [{ price: 85, effectiveFrom: null }] },
+    ]
+  },
+];
+
+// scheduleData[siteId][dateStr] = [{ entryId, restaurantId, mealType, addedBy, items:[{itemId,name,price,isAuto}] }]
+const scheduleData = {};
+sites.forEach(s => { scheduleData[s.id] = {}; });
+
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let curSiteId   = sites[0].id;
+let curYear     = 2026;
+let curMonth    = 3; // 0-based
+let mealFilter  = 'lunch'; // 'all' or meal id
+
+let detailDate  = null; // currently open detail panel date
+
+// rest picker
+let pickerDate    = null;
+let pickerRestId  = null;
+
+// item picker
+let pickerItemDate    = null;
+let pickerItemEntryId = null;
+let pickerItemRestId  = null;
+let pickerItemId      = null;
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+function init() {
+  // site dropdown
+  document.getElementById('site-filter-sel').innerHTML = sites.map(s =>
+    `<option value="${s.id}"${s.id===curSiteId?' selected':''}>${s.name}</option>`
+  ).join('');
+
+  // mgr rest select
+  document.getElementById('mgr-rest-select').innerHTML = '<option value="">請選擇…</option>' +
+    restaurants.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+
+  // pub month
+  document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((m,i) =>
+    `<option value="${i}"${i===curMonth?' selected':''}>${curYear}年${m}</option>`
+  ).join('');
+
+  // pub sites
+  document.getElementById('pub-sites').innerHTML = sites.map(s =>
+    `<label class="check-item"><input type="checkbox" data-site="${s.id}" checked onchange="updatePubSummary()"> ${s.name}</label>`
+  ).join('');
+
+  // pub meals
+  document.getElementById('pub-meals').innerHTML = MEAL_TYPES.map(m =>
+    `<label class="check-item"><input type="checkbox" data-meal="${m.id}" ${m.id==='lunch'?'checked':''} onchange="updatePubSummary()"> ${m.label}</label>`
+  ).join('');
+
+  // meal filter sel sync
+  document.getElementById('meal-filter-sel').value = mealFilter;
+
+  renderMonthLabel();
+  renderCalendar();
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER CALENDAR
+══════════════════════════════════════════════════ */
+function renderMonthLabel() {
+  document.getElementById('month-label').textContent = `${curYear}年${MONTH_NAMES[curMonth]}`;
+}
+
+function getDateStr(y, m, d) {
+  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+function renderCalendar() {
+  const firstDay = new Date(curYear, curMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
+  const todayStr = getDateStr(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+
+  // header
+  document.getElementById('cal-header').innerHTML =
+    `<div class="wh-spacer"></div>` +
+    WD_NAMES.map((wd,i) => `<div class="cal-wh-cell${i===0||i===6?' weekend':''}">${wd}</div>`).join('');
+
+  // build weeks
+  let html = '';
+  // pad start: cells before the 1st
+  let cells = [];
+  for (let i = 0; i < firstDay; i++) cells.push({ day: null });
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d });
+  // pad end to complete last week
+  while (cells.length % 7 !== 0) cells.push({ day: null });
+
+  for (let w = 0; w < cells.length / 7; w++) {
+    const weekCells = cells.slice(w*7, w*7+7);
+    // week number label (use ISO or just ordinal)
+    const weekNum = w + 1;
+    html += `<div class="cal-week-row">
+      <div class="cal-week-label"><span class="wk-num">第${weekNum}週</span></div>`;
+    weekCells.forEach((cell, wi) => {
+      if (!cell.day) {
+        html += `<div class="cal-cell other-month${wi===0||wi===6?' weekend':''}"></div>`;
+        return;
+      }
+      const dateStr  = getDateStr(curYear, curMonth, cell.day);
+      const isWkend  = wi === 0 || wi === 6;
+      const isToday  = dateStr === todayStr;
+      const entries  = (scheduleData[curSiteId] || {})[dateStr] || [];
+      const filtered = filterEntries(entries);
+
+      const numCls = isToday ? 'today' : (isWkend ? 'weekend' : '');
+      html += `<div class="cal-cell${isWkend?' weekend':''}" onclick="openDetail('${dateStr}')">
+        <div class="cal-day-num ${numCls}">${cell.day}</div>
+        ${filtered.map(e => renderEntryChip(e, dateStr)).join('')}
+        <button class="chip-add" onclick="event.stopPropagation();openRestPicker('${dateStr}')">＋ 新增店家</button>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  document.getElementById('cal-body').innerHTML = html;
+}
+
+function filterEntries(entries) {
+  if (mealFilter === 'all') return entries;
+  return entries.filter(e => e.mealType === mealFilter);
+}
+
+function renderEntryChip(entry, dateStr) {
+  const rest = restaurants.find(r => r.id === entry.restaurantId);
+  if (!rest) return '';
+  const mi = mealInfo(entry.mealType);
+  const itemCount = entry.items.length;
+  return `<div class="entry-chip ${mi.chipCls}" onclick="event.stopPropagation();openDetail('${dateStr}')">
+    <button class="entry-chip-del" onclick="event.stopPropagation();removeEntry('${dateStr}','${entry.entryId}')" title="移除">✕</button>
+    <div class="entry-chip-name">${rest.name}</div>
+    <div class="entry-chip-items">${mi.label}　${itemCount} 品項</div>
+  </div>`;
+}
+
+function rerenderCalendar() {
+  renderCalendar();
+  if (detailDate) renderDetailBody(detailDate);
+}
+
+/* ══════════════════════════════════════════════════
+   DETAIL PANEL
+══════════════════════════════════════════════════ */
+function openDetail(dateStr) {
+  detailDate = dateStr;
+  const d   = new Date(dateStr);
+  const wd  = d.getDay();
+  document.getElementById('detail-title').textContent =
+    `${curYear}年${MONTH_NAMES[d.getMonth()]}${d.getDate()}日（週${WD_NAMES[wd]}）`;
+  document.getElementById('detail-panel').classList.add('open');
+  renderDetailBody(dateStr);
+  document.getElementById('detail-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeDetail() {
+  detailDate = null;
+  document.getElementById('detail-panel').classList.remove('open');
+}
+
+function renderDetailBody(dateStr) {
+  const entries  = (scheduleData[curSiteId] || {})[dateStr] || [];
+  const filtered = filterEntries(entries);
+  const body     = document.getElementById('detail-body');
+
+  let html = filtered.map(entry => {
+    const rest   = restaurants.find(r => r.id === entry.restaurantId);
+    if (!rest) return '';
+    const mi     = mealInfo(entry.mealType);
+    const items  = entry.items.map(it => {
+      const hotChecked  = (it.cabinet || 'hot') === 'hot';
+      const did = `${entry.entryId}-${it.itemId}`;
+      return `<li class="item-row" data-item-id="${it.itemId}">
+        <div class="item-row-top">
+          <span class="item-name">${it.name}</span>
+          <span class="item-price${it.isAuto?' auto-price':''}">$${it.price}${it.isAuto?' <span class="tag-auto">自動帶入</span>':''}</span>
+          <button class="item-del" onclick="removeItem('${dateStr}','${entry.entryId}','${it.itemId}')">✕</button>
+        </div>
+        <div class="item-row-detail">
+          <div class="item-row-detail-cell">
+            <label>櫃位</label>
+            <div class="cabinet-opts">
+              <label><input type="radio" name="det-cab-${did}" value="hot" ${hotChecked?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinet',this.value)"> 熱櫃</label>
+              <label><input type="radio" name="det-cab-${did}" value="cold" ${!hotChecked?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinet',this.value)"> 冷櫃</label>
+            </div>
+          </div>
+          <div class="item-row-detail-cell">
+            <label>線上可預約數</label>
+            <input type="number" min="0" placeholder="0" value="${it.onlineQty||0}"
+              onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','onlineQty',+this.value)">
+          </div>
+          <div class="item-row-detail-cell">
+            <label>線下可預約數</label>
+            <input type="number" min="0" placeholder="0" value="${it.offlineQty||0}"
+              onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','offlineQty',+this.value)">
+          </div>
+          <div class="item-row-detail-cell">
+            <label>店家預定數</label>
+            <input type="number" min="0" placeholder="0" value="${it.storeQty||0}"
+              onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','storeQty',+this.value)">
+          </div>
+        </div>
+      </li>`;
+    }).join('');
+    return `<div class="rest-card">
+      <div class="rest-card-header">
+        <span class="rest-card-name">${rest.name}</span>
+        <span class="rest-card-meal ${mi.tagCls}">${mi.label}</span>
+        <button class="rest-card-remove" onclick="removeEntry('${dateStr}','${entry.entryId}')">✕</button>
+      </div>
+      <ul class="item-list">${items}</ul>
+      <button class="add-item-btn" onclick="openItemPicker('${dateStr}','${entry.entryId}','${entry.restaurantId}')">＋ 新增品項</button>
+    </div>`;
+  }).join('');
+
+  html += `<button class="detail-add-btn" onclick="openRestPicker('${dateStr}')">
+    <span style="font-size:16px">＋</span> 新增店家
+  </button>`;
+
+  body.innerHTML = html;
+}
+
+function saveItemField(dateStr, entryId, itemId, field, value) {
+  const entry = ((scheduleData[curSiteId] || {})[dateStr] || []).find(e => e.entryId === entryId);
+  if (!entry) return;
+  const item = entry.items.find(i => i.itemId === itemId);
+  if (!item) return;
+  item[field] = value;
+}
+
+/* ══════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════ */
+function getPriceForDate(item, dateStr) {
+  const tiers = [...item.priceTiers].sort((a,b) => {
+    if (!a.effectiveFrom) return -1;
+    if (!b.effectiveFrom) return 1;
+    return a.effectiveFrom < b.effectiveFrom ? -1 : 1;
+  });
+  let result = tiers[0];
+  for (const tier of tiers) {
+    if (!tier.effectiveFrom) { result = tier; continue; }
+    if (tier.effectiveFrom <= dateStr) result = tier;
+  }
+  return result;
+}
+
+function isRestClosed(rest, dateStr) {
+  const wd = new Date(dateStr).getDay();
+  if (rest.closedWeekdays.includes(wd)) return { closed: true, reason: `週${WD_NAMES[wd]}固定公休` };
+  if (rest.closedDates.includes(dateStr)) return { closed: true, reason: '特定公休日' };
+  return { closed: false };
+}
+
+function getConflictSite(restId, dateStr) {
+  for (const site of sites) {
+    if (site.id === curSiteId) continue;
+    const conflict = ((scheduleData[site.id] || {})[dateStr] || []).find(e => e.restaurantId === restId);
+    if (conflict) return { site, entry: conflict };
+  }
+  return null;
+}
+
+function isDupRestInSite(restId, dateStr, mealType) {
+  return ((scheduleData[curSiteId] || {})[dateStr] || []).some(e => e.restaurantId === restId && e.mealType === mealType);
+}
+
+function genEntryId() { return 'e' + Date.now() + Math.floor(Math.random()*1000); }
+
+function getEntry(dateStr, entryId) {
+  return ((scheduleData[curSiteId] || {})[dateStr] || []).find(e => e.entryId === entryId) || null;
+}
+
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════ */
+function changeMonth(delta) {
+  curMonth += delta;
+  if (curMonth < 0)  { curMonth = 11; curYear--; }
+  if (curMonth > 11) { curMonth = 0;  curYear++; }
+  renderMonthLabel();
+  closeDetail();
+  renderCalendar();
+  document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((m,i) =>
+    `<option value="${i}"${i===curMonth?' selected':''}>${curYear}年${m}</option>`
+  ).join('');
+}
+
+function goToday() {
+  const now = new Date();
+  curYear  = now.getFullYear();
+  curMonth = now.getMonth();
+  renderMonthLabel();
+  closeDetail();
+  renderCalendar();
+  document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((m,i) =>
+    `<option value="${i}"${i===curMonth?' selected':''}>${curYear}年${m}</option>`
+  ).join('');
+}
+
+function onSiteFilterChange() {
+  curSiteId = document.getElementById('site-filter-sel').value;
+  closeDetail();
+  renderCalendar();
+}
+
+function onMealFilterChange() {
+  mealFilter = document.getElementById('meal-filter-sel').value;
+  rerenderCalendar();
+}
+
+/* ══════════════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('overlay')) e.target.classList.remove('open');
+  if (!e.target.closest('#rest-dropdown')) closeRestDrop();
+  if (!e.target.closest('#item-dropdown')) closeItemDrop();
+  if (!e.target.closest('#export-wrap')) document.getElementById('export-menu').style.display = 'none';
+});
+
+/* ── Rest Picker ── */
+function openRestPicker(dateStr) {
+  pickerDate   = dateStr;
+  pickerRestId = null;
+  document.getElementById('rest-trigger-text').textContent = '請選擇餐廳…';
+  document.getElementById('picker-meal-sel').value = (mealFilter !== 'all') ? mealFilter : 'lunch';
+  document.getElementById('rest-picker-err').classList.remove('show');
+  document.getElementById('item-checklist-section').style.display = 'none';
+  buildRestOptions(dateStr);
+  openModal('rest-picker-modal');
+}
+
+function buildRestOptions(dateStr) {
+  const mealType = document.getElementById('picker-meal-sel').value;
+  const opts = document.getElementById('rest-options');
+  opts.innerHTML = '';
+  restaurants.forEach(rest => {
+    const closedInfo = isRestClosed(rest, dateStr);
+    const conflict   = getConflictSite(rest.id, dateStr);
+    const dupInSite  = isDupRestInSite(rest.id, dateStr, mealType);
+    const noMeal     = !rest.mealTypes[mealType];
+    let disabled = false, tipHtml = '';
+    if (closedInfo.closed) {
+      disabled = true; tipHtml = `<span class="closed-tip">${closedInfo.reason}</span>`;
+    } else if (noMeal) {
+      disabled = true; tipHtml = `<span class="closed-tip">不供${mealInfo(mealType).label}</span>`;
+    } else if (dupInSite) {
+      disabled = true; tipHtml = `<span class="conflict-tip" style="color:var(--orange)">本廠已排此餐廳</span>`;
+    } else if (conflict) {
+      disabled = true; tipHtml = `<span class="conflict-tip" style="color:var(--red)">已由${conflict.entry.addedBy}排至${conflict.site.name}</span>`;
+    }
+    const el = document.createElement('div');
+    el.className = 'dropdown-option' + (disabled ? ' disabled' : '');
+    el.dataset.id = rest.id; el.dataset.name = rest.name;
+    el.innerHTML = `<span>${rest.name}</span>${tipHtml}`;
+    if (!disabled) el.onclick = () => selectRestOption(rest.id, rest.name);
+    else if (conflict) el.title = `該店家當日已由 ${conflict.entry.addedBy} 安排至 ${conflict.site.name}，請改選其他餐廳`;
+    opts.appendChild(el);
+  });
+}
+
+function onPickerMealChange() {
+  pickerRestId = null;
+  document.getElementById('rest-trigger-text').textContent = '請選擇餐廳…';
+  document.getElementById('item-checklist-section').style.display = 'none';
+  buildRestOptions(pickerDate);
+}
+
+function selectRestOption(id, name) {
+  pickerRestId = id;
+  document.getElementById('rest-trigger-text').textContent = name;
+  closeRestDrop();
+  document.getElementById('rest-picker-err').classList.remove('show');
+  buildNewRestItemChecklist();
+}
+
+function buildNewRestItemChecklist() {
+  if (!pickerRestId) return;
+  const rest = restaurants.find(r => r.id === pickerRestId);
+  if (!rest || !rest.items.length) {
+    document.getElementById('item-checklist-section').style.display = 'none';
+    return;
+  }
+  document.getElementById('item-checklist-section').style.display = 'block';
+  const list = document.getElementById('item-checklist');
+  list.innerHTML = rest.items.map(item => {
+    const tier   = getPriceForDate(item, pickerDate);
+    const isAuto = !!tier.effectiveFrom;
+    const eid    = 'iex-' + item.id;
+    return `<div>
+      <label class="item-check-row" onclick="toggleItemExtra('${eid}', this); updateNewRestItemCount()">
+        <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" data-auto="${isAuto}" onclick="event.stopPropagation(); document.getElementById('${eid}').classList.toggle('show', this.checked); updateNewRestItemCount()">
+        <span class="item-check-name">${item.name}</span>
+        <span class="item-check-price${isAuto?' is-auto':''}">$${tier.price}${isAuto?` <span class="item-check-auto-badge">自動帶入</span>`:''}</span>
+      </label>
+      <div class="item-extra" id="${eid}">
+        <div>
+          <div class="item-extra-label">櫃位</div>
+          <div class="cabinet-opts">
+            <label><input type="radio" name="cabinet-${item.id}" value="hot" checked> 熱櫃</label>
+            <label><input type="radio" name="cabinet-${item.id}" value="cold"> 冷櫃</label>
+          </div>
+        </div>
+        <div>
+          <div class="item-extra-label">線上可預約數</div>
+          <input type="number" id="online-${item.id}" min="0" placeholder="0">
+        </div>
+        <div>
+          <div class="item-extra-label">線下可預約數</div>
+          <input type="number" id="offline-${item.id}" min="0" placeholder="0">
+        </div>
+        <div>
+          <div class="item-extra-label">店家預定數</div>
+          <input type="number" id="store-${item.id}" min="0" placeholder="0">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateNewRestItemCount();
+}
+
+function updateNewRestItemCount() {
+  const inputs  = document.querySelectorAll('#item-checklist input[type=checkbox]');
+  const checked = [...inputs].filter(i => i.checked).length;
+  document.getElementById('item-check-count').textContent = checked ? `已選 ${checked} / ${inputs.length}` : `共 ${inputs.length} 項`;
+  document.getElementById('toggle-all-btn').textContent = (checked === inputs.length) ? '取消全選' : '全選';
+}
+
+function toggleItemExtra(eid, labelEl) {
+  /* label click 同時觸發 checkbox change，這裡只處理 label 本身的 checked 狀態同步 */
+  const cb = labelEl.querySelector('input[type=checkbox]');
+  if (!cb) return;
+  document.getElementById(eid).classList.toggle('show', cb.checked);
+}
+
+function toggleAllItems() {
+  const inputs = document.querySelectorAll('#item-checklist input[type=checkbox]');
+  const allChecked = [...inputs].every(i => i.checked);
+  inputs.forEach(i => {
+    i.checked = !allChecked;
+    const eid = 'iex-' + i.value;
+    const extra = document.getElementById(eid);
+    if (extra) extra.classList.toggle('show', !allChecked);
+  });
+  updateNewRestItemCount();
+}
+
+function toggleRestDrop() {
+  const list = document.getElementById('rest-drop-list');
+  const isOpen = list.style.display !== 'none';
+  if (isOpen) { closeRestDrop(); return; }
+  list.style.display = 'block';
+  document.getElementById('rest-trigger').classList.add('open');
+  document.getElementById('rest-search').value = '';
+  filterRestDrop();
+  document.getElementById('rest-search').focus();
+  buildRestOptions(pickerDate);
+}
+function closeRestDrop() {
+  document.getElementById('rest-drop-list').style.display = 'none';
+  document.getElementById('rest-trigger').classList.remove('open');
+}
+function filterRestDrop() {
+  const q = document.getElementById('rest-search').value.toLowerCase();
+  document.querySelectorAll('#rest-options .dropdown-option').forEach(el => {
+    el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function confirmAddRest() {
+  if (!pickerRestId) { document.getElementById('rest-picker-err').classList.add('show'); return; }
+  const mealType = document.getElementById('picker-meal-sel').value;
+  const entryId  = genEntryId();
+  // collect checked items
+  const checkedInputs = [...document.querySelectorAll('#item-checklist input[type=checkbox]:checked')];
+  const items = checkedInputs.map(inp => {
+    const id = inp.value;
+    const cabinet    = document.querySelector(`input[name="cabinet-${id}"]:checked`)?.value || 'hot';
+    const onlineQty  = Number(document.getElementById(`online-${id}`)?.value)  || 0;
+    const offlineQty = Number(document.getElementById(`offline-${id}`)?.value) || 0;
+    const storeQty   = Number(document.getElementById(`store-${id}`)?.value)   || 0;
+    return { itemId: id, name: inp.dataset.name, price: Number(inp.dataset.price), isAuto: inp.dataset.auto === 'true', cabinet, onlineQty, offlineQty, storeQty };
+  });
+  if (!scheduleData[curSiteId][pickerDate]) scheduleData[curSiteId][pickerDate] = [];
+  scheduleData[curSiteId][pickerDate].push({ entryId, restaurantId: pickerRestId, mealType, addedBy: CURRENT_USER, items });
+  closeModal('rest-picker-modal');
+  rerenderCalendar();
+  showToast('已新增店家', 'success');
+}
+
+/* ── Item Picker（追加品項至既有店家）── */
+function openItemPicker(dateStr, entryId, restId) {
+  pickerItemDate    = dateStr;
+  pickerItemEntryId = entryId;
+  pickerItemRestId  = restId;
+
+  const rest  = restaurants.find(r => r.id === restId);
+  const entry = getEntry(dateStr, entryId);
+  const existingIds = entry ? entry.items.map(i => i.itemId) : [];
+
+  document.getElementById('item-picker-ctx').textContent =
+    `${rest?.name||''} — ${dateStr.slice(5).replace('-','/')}`;
+
+  const list = document.getElementById('add-item-checklist');
+  const avail = (rest?.items || []).filter(item => !existingIds.includes(item.id));
+  if (!avail.length) {
+    list.innerHTML = '<div class="item-checklist-empty">所有品項已全部加入</div>';
+    document.getElementById('add-toggle-all-btn').style.display = 'none';
+  } else {
+    document.getElementById('add-toggle-all-btn').style.display = '';
+    list.innerHTML = avail.map(item => {
+      const tier   = getPriceForDate(item, dateStr);
+      const isAuto = !!tier.effectiveFrom;
+      return `<label class="item-check-row" onclick="updateAddItemCount()">
+        <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" data-auto="${isAuto}">
+        <span class="item-check-name">${item.name}</span>
+        <span class="item-check-price${isAuto?' is-auto':''}">$${tier.price}${isAuto?` <span class="item-check-auto-badge">自動帶入</span>`:''}</span>
+      </label>`;
+    }).join('');
+  }
+  updateAddItemCount();
+  openModal('item-picker-modal');
+}
+
+function updateAddItemCount() {
+  const checked = document.querySelectorAll('#add-item-checklist input:checked').length;
+  const total   = document.querySelectorAll('#add-item-checklist input').length;
+  document.getElementById('add-item-check-count').textContent = checked ? `已選 ${checked} / ${total}` : `共 ${total} 項`;
+  document.getElementById('add-toggle-all-btn').textContent = (checked === total && total > 0) ? '取消全選' : '全選';
+}
+
+function toggleAllAddItems() {
+  const inputs     = document.querySelectorAll('#add-item-checklist input');
+  const allChecked = [...inputs].every(i => i.checked);
+  inputs.forEach(i => i.checked = !allChecked);
+  updateAddItemCount();
+}
+
+function toggleItemDrop() {}
+function closeItemDrop()  {}
+function filterItemDrop() {}
+
+function confirmAddItem() {
+  const entry = getEntry(pickerItemDate, pickerItemEntryId);
+  if (!entry) return;
+  const checkedInputs = [...document.querySelectorAll('#add-item-checklist input:checked')];
+  if (!checkedInputs.length) { showToast('請至少選擇一個品項', 'error'); return; }
+  checkedInputs.forEach(inp => {
+    if (!entry.items.some(i => i.itemId === inp.value)) {
+      entry.items.push({ itemId: inp.value, name: inp.dataset.name, price: Number(inp.dataset.price), isAuto: inp.dataset.auto === 'true' });
+    }
+  });
+  closeModal('item-picker-modal');
+  rerenderCalendar();
+  showToast(`已新增 ${checkedInputs.length} 個品項`, 'success');
+}
+
+/* ── Remove ── */
+function removeEntry(dateStr, entryId) {
+  const d = scheduleData[curSiteId];
+  if (!d || !d[dateStr]) return;
+  d[dateStr] = d[dateStr].filter(e => e.entryId !== entryId);
+  rerenderCalendar();
+  showToast('已移除店家排程');
+}
+
+function removeItem(dateStr, entryId, itemId) {
+  const entry = getEntry(dateStr, entryId);
+  if (!entry) return;
+  entry.items = entry.items.filter(i => i.itemId !== itemId);
+  rerenderCalendar();
+}
+
+/* ══════════════════════════════════════════════════
+   RESTAURANT MANAGER
+══════════════════════════════════════════════════ */
+function openRestMgr() {
+  document.getElementById('mgr-rest-select').value = '';
+  document.getElementById('mgr-rest-form').style.display = 'none';
+  openModal('rest-mgr-modal');
+}
+
+function loadMgrRest() {
+  const restId = document.getElementById('mgr-rest-select').value;
+  const formEl = document.getElementById('mgr-rest-form');
+  if (!restId) { formEl.style.display = 'none'; return; }
+  formEl.style.display = 'block';
+  const rest = restaurants.find(r => r.id === restId);
+  if (!rest) return;
+
+  document.getElementById('mgr-wd-checks').innerHTML = WD_NAMES.map((wd,i) =>
+    `<label class="wd-check${rest.closedWeekdays.includes(i)?' checked':''}">
+       <input type="checkbox" data-wd="${i}" ${rest.closedWeekdays.includes(i)?'checked':''}
+              onchange="toggleWd('${restId}',${i},this.checked)"> 週${wd}
+     </label>`
+  ).join('');
+
+  renderSpecialDates(restId);
+
+  document.getElementById('mgr-meal-checks').innerHTML = MEAL_TYPES.map(m =>
+    `<label class="check-item">
+       <input type="checkbox" data-meal="${m.id}" ${rest.mealTypes[m.id]?'checked':''}
+              onchange="saveMgrMeal('${restId}','${m.id}',this.checked)"> ${m.label}
+     </label>`
+  ).join('');
+}
+
+function toggleWd(restId, wd, checked) {
+  const rest = restaurants.find(r => r.id === restId);
+  if (!rest) return;
+  if (checked) { if (!rest.closedWeekdays.includes(wd)) rest.closedWeekdays.push(wd); }
+  else rest.closedWeekdays = rest.closedWeekdays.filter(d => d !== wd);
+  loadMgrRest();
+}
+
+function addSpecialDate() {
+  const restId  = document.getElementById('mgr-rest-select').value;
+  const dateVal = document.getElementById('mgr-special-date').value;
+  if (!restId || !dateVal) return;
+  const rest = restaurants.find(r => r.id === restId);
+  if (!rest) return;
+  if (!rest.closedDates.includes(dateVal)) { rest.closedDates.push(dateVal); rest.closedDates.sort(); }
+  document.getElementById('mgr-special-date').value = '';
+  renderSpecialDates(restId);
+}
+
+function removeSpecialDate(restId, date) {
+  const rest = restaurants.find(r => r.id === restId);
+  if (!rest) return;
+  rest.closedDates = rest.closedDates.filter(d => d !== date);
+  renderSpecialDates(restId);
+}
+
+function renderSpecialDates(restId) {
+  const rest = restaurants.find(r => r.id === restId);
+  document.getElementById('mgr-special-dates').innerHTML =
+    (rest.closedDates || []).map(d =>
+      `<div class="special-date-chip">${d}<button onclick="removeSpecialDate('${restId}','${d}')">✕</button></div>`
+    ).join('') || '<span style="font-size:12px;color:var(--text-3)">尚無特定公休日</span>';
+}
+
+function saveMgrMeal(restId, mealId, checked) {
+  const rest = restaurants.find(r => r.id === restId);
+  if (rest) rest.mealTypes[mealId] = checked;
+}
+
+/* ══════════════════════════════════════════════════
+   PUBLISH
+══════════════════════════════════════════════════ */
+function openPublish() { updatePubSummary(); openModal('publish-modal'); }
+
+function updatePubSummary() {
+  const monthVal  = parseInt(document.getElementById('pub-month-sel').value);
+  const selSites  = [...document.querySelectorAll('#pub-sites input:checked')].map(el => el.dataset.site);
+  const selMeals  = [...document.querySelectorAll('#pub-meals input:checked')].map(el => el.dataset.meal);
+
+  let totalDays = 0; const totalStores = new Set(); let totalItems = 0;
+  selSites.forEach(siteId => {
+    Object.entries(scheduleData[siteId] || {}).forEach(([dateStr, entries]) => {
+      const d = new Date(dateStr);
+      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
+      const filtered = entries.filter(e => selMeals.includes(e.mealType));
+      if (filtered.length) {
+        totalDays++;
+        filtered.forEach(e => { totalStores.add(e.restaurantId); totalItems += e.items.length; });
+      }
+    });
+  });
+
+  const mealLabels = selMeals.map(id => mealInfo(id).label).join('、') || '（未選餐期）';
+  document.getElementById('pub-summary').innerHTML =
+    `發佈範圍：${curYear}年${MONTH_NAMES[monthVal]}｜${selSites.map(id=>sites.find(s=>s.id===id)?.name).join('、')||'（未選廠區）'}<br>
+     餐期：${mealLabels}<br>
+     共 <strong>${totalDays}</strong> 天有排程、<strong>${totalStores.size}</strong> 間店家、<strong>${totalItems}</strong> 個品項`;
+}
+
+function doPublish() {
+  const monthVal = parseInt(document.getElementById('pub-month-sel').value);
+  const selSites = [...document.querySelectorAll('#pub-sites input:checked')].map(el => el.dataset.site);
+  const selMeals = [...document.querySelectorAll('#pub-meals input:checked')].map(el => el.dataset.meal);
+  if (!selSites.length || !selMeals.length) { showToast('請選擇廠區與餐期', 'error'); return; }
+  let total = 0;
+  selSites.forEach(siteId => {
+    Object.entries(scheduleData[siteId] || {}).forEach(([dateStr, entries]) => {
+      const d = new Date(dateStr);
+      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
+      total += entries.filter(e => selMeals.includes(e.mealType)).length;
+    });
+  });
+  closeModal('publish-modal');
+  showToast(`已發佈 ${total} 筆排程至店家端（${curYear}年${MONTH_NAMES[monthVal]}）`, 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   CSV EXPORT
+══════════════════════════════════════════════════ */
+function toggleExportMenu() {
+  const m = document.getElementById('export-menu');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+
+function exportCSV() {
+  document.getElementById('export-menu').style.display = 'none';
+  const rows = [['日期', '星期', '廠區', '餐廳', '餐期', '品項', '售價']];
+  const site = sites.find(s => s.id === curSiteId);
+  const siteData = scheduleData[curSiteId] || {};
+  const days = new Date(curYear, curMonth+1, 0).getDate();
+
+  for (let d = 1; d <= days; d++) {
+    const dateStr = getDateStr(curYear, curMonth, d);
+    const wd      = new Date(curYear, curMonth, d).getDay();
+    const entries = siteData[dateStr] || [];
+    if (!entries.length) { rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, '', '', '', '']); continue; }
+    entries.forEach(entry => {
+      const rest      = restaurants.find(r => r.id === entry.restaurantId);
+      const mealLabel = mealInfo(entry.mealType).label;
+      if (!entry.items.length) {
+        rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, rest?.name||'', mealLabel, '', '']);
+      } else {
+        entry.items.forEach(it => {
+          rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, rest?.name||'', mealLabel, it.name, it.price]);
+        });
+      }
+    });
+  }
+
+  const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `菜單排程_${site.name}_${curYear}年${MONTH_NAMES[curMonth]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV 已匯出', 'success');
+}
+
+function exportJSON() {
+  document.getElementById('export-menu').style.display = 'none';
+  const site     = sites.find(s => s.id === curSiteId);
+  const siteData = scheduleData[curSiteId] || {};
+  const days     = new Date(curYear, curMonth+1, 0).getDate();
+  const result   = [];
+
+  for (let d = 1; d <= days; d++) {
+    const dateStr = getDateStr(curYear, curMonth, d);
+    const entries = siteData[dateStr] || [];
+    entries.forEach(entry => {
+      const rest = restaurants.find(r => r.id === entry.restaurantId);
+      result.push({
+        date:       dateStr,
+        weekday:    `週${WD_NAMES[new Date(curYear, curMonth, d).getDay()]}`,
+        site:       site.name,
+        restaurant: rest?.name || '',
+        mealType:   mealInfo(entry.mealType).label,
+        items:      entry.items.map(it => ({ name: it.name, price: it.price }))
+      });
+    });
+  }
+
+  const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `菜單排程_${site.name}_${curYear}年${MONTH_NAMES[curMonth]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSON 已匯出', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast' + (type ? ' '+type : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ══════════════════════════════════════════════════
+   START
+══════════════════════════════════════════════════ */
+init();
+</script>
+</body>
+</html>

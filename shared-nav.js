@@ -48,6 +48,11 @@
             match: function (p) { return p.file === 'change-review.html'; }
           },
           {
+            label: '菜單排程管理',
+            url: 'menu-schedule.html',
+            match: function (p) { return p.file === 'menu-schedule.html'; }
+          },
+          {
             label: '客訴管理',
             url: 'complaint.html?mode=admin',
             match: function (p) { return p.file === 'complaint.html' && p.mode === 'admin'; }

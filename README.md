@@ -12,7 +12,7 @@ https://kensheu.github.io/my-demo-sites/
 
 | 系統 | 說明 | 頁面 |
 |------|------|------|
-| 內部後台 | 採購／管理人員使用 | 首頁&公告、公告管理、採購首頁、餐點管理、餐點異動紀錄、店家異動審核、客訴管理、問題單&ECR |
+| 內部後台 | 採購／管理人員使用 | 首頁&公告、公告管理、採購首頁、餐點管理、餐點異動紀錄、店家異動審核、菜單排程管理、客訴管理、問題單&ECR |
 | 店家後台 | 餐廳店家使用 | 公告通知、餐點管理 |
 | 訂餐前台 | 訂餐會員使用 | 公告通知、我的訂單、我的客訴 |
 
@@ -27,6 +27,7 @@ https://kensheu.github.io/my-demo-sites/
 - [餐點管理（店家後台）](https://kensheu.github.io/my-demo-sites/store-menu.html)
 - [餐點異動紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)
 - [店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)
+- [菜單排程管理](https://kensheu.github.io/my-demo-sites/menu-schedule.html)
 - [客訴管理](https://kensheu.github.io/my-demo-sites/complaint.html)
 - [問題單 & ECR](https://kensheu.github.io/my-demo-sites/issue-and-ecr.html)
 
