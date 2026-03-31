@@ -300,9 +300,10 @@ body {
 /* ─── Overlays & Modals ─── */
 .overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,.4);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: flex-start; justify-content: center;
   z-index: 200; opacity: 0; pointer-events: none; transition: opacity .15s;
-  padding: 16px;
+  padding: 48px 16px 16px;
+  overflow-y: auto;
 }
 .overlay.open { opacity: 1; pointer-events: auto; }
 .modal {
@@ -509,17 +510,30 @@ body {
   <div class="toolbar">
     <div class="month-nav">
       <button class="btn btn-icon" onclick="changeMonth(-1)">‹</button>
-      <div class="month-label" id="month-label"></div>
+      <div class="month-label" id="month-label" onclick="openMonthPicker()" title="點擊跳至指定月份" style="cursor:pointer;user-select:none;padding:4px 8px;border-radius:6px;transition:background .12s" onmouseover="this.style.background='var(--bg-2)'" onmouseout="this.style.background=''"></div>
       <button class="btn btn-icon" onclick="changeMonth(1)">›</button>
     </div>
 
-    <button class="btn" onclick="goToday()">今日</button>
+    <button class="btn" onclick="goToday()">回到今日</button>
 
     <div class="toolbar-sep"></div>
 
-    <div class="meal-select-wrap">
-      <label for="site-filter-sel">廠區：</label>
-      <select class="meal-select" id="site-filter-sel" onchange="onSiteFilterChange()"></select>
+    <div class="meal-select-wrap" style="position:relative">
+      <label>廠區：</label>
+      <div style="position:relative">
+        <button class="meal-select" id="site-filter-btn" onclick="toggleSiteDrop()" style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;min-width:120px">
+          <span id="site-filter-label">請選擇</span>
+          <span style="font-size:11px;color:var(--text-3)">▾</span>
+        </button>
+        <div id="site-filter-drop" style="display:none;position:fixed;background:var(--card);border:1px solid var(--blue);border-radius:7px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:9999;min-width:160px;overflow:hidden">
+          <div style="padding:7px 8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card)">
+            <input type="text" id="site-filter-search" placeholder="搜尋廠區…" oninput="filterSiteDrop()"
+              style="width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:5px;font-size:14px;outline:none"
+              autocomplete="off">
+          </div>
+          <div id="site-filter-opts" style="max-height:200px;overflow-y:auto"></div>
+        </div>
+      </div>
     </div>
 
     <div class="meal-select-wrap">
@@ -562,6 +576,38 @@ body {
     <div class="detail-body" id="detail-body"></div>
   </div>
 
+</div>
+
+<!-- Modal: 月份選擇器 -->
+<div class="overlay" id="month-picker-modal">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title">跳至指定月份</div>
+      <button class="modal-close" onclick="closeModal('month-picker-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <div class="form-label">年份</div>
+          <input type="number" class="form-select" id="jump-year" min="2020" max="2099" style="margin-top:4px">
+        </div>
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <div class="form-label">月份</div>
+          <select class="form-select" id="jump-month" style="margin-top:4px">
+            <option value="0">1 月</option><option value="1">2 月</option><option value="2">3 月</option>
+            <option value="3">4 月</option><option value="4">5 月</option><option value="5">6 月</option>
+            <option value="6">7 月</option><option value="7">8 月</option><option value="8">9 月</option>
+            <option value="9">10 月</option><option value="10">11 月</option><option value="11">12 月</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px" id="month-quick-grid"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('month-picker-modal')">取消</button>
+      <button class="btn btn-primary" onclick="confirmJumpMonth()">跳至</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal: 新增店家（含品項複選） -->
@@ -712,6 +758,26 @@ body {
   </div>
 </div>
 
+<!-- Modal: 發佈二次確認 -->
+<div class="overlay" id="publish-confirm-modal">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title">確認發佈？</div>
+      <button class="modal-close" onclick="closeModal('publish-confirm-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="publish-confirm-summary" style="font-size:15px;line-height:1.8;color:var(--text-2)"></div>
+      <div style="margin-top:14px;padding:12px 14px;background:var(--orange-bg);border:1px solid var(--orange-bdr);border-radius:8px;font-size:14px;color:var(--orange)">
+        ⚠ 發佈後將通知店家，請確認資料無誤再送出。
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('publish-confirm-modal')">返回修改</button>
+      <button class="btn btn-green" onclick="executePublish()">▶ 確定發佈</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -824,10 +890,10 @@ let pickerItemId      = null;
    INIT
 ══════════════════════════════════════════════════ */
 function init() {
-  // site dropdown
-  document.getElementById('site-filter-sel').innerHTML = sites.map(s =>
-    `<option value="${s.id}"${s.id===curSiteId?' selected':''}>${s.name}</option>`
-  ).join('');
+  // site searchable dropdown
+  renderSiteDropOpts();
+  const firstSite = sites.find(s => s.id === curSiteId) || sites[0];
+  document.getElementById('site-filter-label').textContent = firstSite.name;
 
   // mgr rest select
   document.getElementById('mgr-rest-select').innerHTML = '<option value="">請選擇…</option>' +
@@ -1095,11 +1161,58 @@ function goToday() {
   ).join('');
 }
 
-function onSiteFilterChange() {
-  curSiteId = document.getElementById('site-filter-sel').value;
+function onSiteFilterChange(siteId) {
+  curSiteId = siteId;
   closeDetail();
   renderCalendar();
 }
+
+function renderSiteDropOpts() {
+  const q = (document.getElementById('site-filter-search')?.value || '').toLowerCase();
+  document.getElementById('site-filter-opts').innerHTML = sites
+    .filter(s => s.name.toLowerCase().includes(q))
+    .map(s => `<div onclick="selectSite('${s.id}','${s.name}')"
+      style="padding:9px 14px;font-size:15px;cursor:pointer;background:${s.id===curSiteId?'var(--blue-bg)':'transparent'};transition:background .08s"
+      onmouseover="if('${s.id}'!==curSiteId)this.style.background='var(--bg-2)'"
+      onmouseout="if('${s.id}'!==curSiteId)this.style.background='transparent'"
+    >${s.name}</div>`).join('') || '<div style="padding:10px 14px;font-size:14px;color:var(--text-3)">無結果</div>';
+}
+
+function filterSiteDrop() { renderSiteDropOpts(); }
+
+function toggleSiteDrop() {
+  const drop = document.getElementById('site-filter-drop');
+  const isOpen = drop.style.display !== 'none';
+  if (isOpen) { closeSiteDrop(); return; }
+  const btn = document.getElementById('site-filter-btn');
+  const rect = btn.getBoundingClientRect();
+  drop.style.display = 'block';
+  drop.style.left  = rect.left + 'px';
+  drop.style.width = rect.width + 'px';
+  drop.style.top   = rect.bottom + 4 + 'px';
+  document.getElementById('site-filter-search').value = '';
+  renderSiteDropOpts();
+  document.getElementById('site-filter-search').focus();
+}
+
+function closeSiteDrop() {
+  document.getElementById('site-filter-drop').style.display = 'none';
+}
+
+function selectSite(siteId, siteName) {
+  document.getElementById('site-filter-label').textContent = siteName;
+  closeSiteDrop();
+  onSiteFilterChange(siteId);
+}
+
+// 點擊外部關閉廠區下拉
+document.addEventListener('click', function(e) {
+  const btn  = document.getElementById('site-filter-btn');
+  const drop = document.getElementById('site-filter-drop');
+  if (btn && drop && !btn.contains(e.target) && !drop.contains(e.target)) {
+    closeSiteDrop();
+  }
+});
 
 function onMealFilterChange() {
   mealFilter = document.getElementById('meal-filter-sel').value;
@@ -1450,6 +1563,44 @@ function saveMgrMeal(restId, mealId, checked) {
 ══════════════════════════════════════════════════ */
 function openPublish() { updatePubSummary(); openModal('publish-modal'); }
 
+function openMonthPicker() {
+  document.getElementById('jump-year').value  = curYear;
+  document.getElementById('jump-month').value = curMonth;
+  // 快速捷徑：前後 6 個月
+  const grid = document.getElementById('month-quick-grid');
+  const now  = new Date();
+  const rows = [];
+  for (let i = -3; i <= 3; i++) {
+    let y = now.getFullYear(), m = now.getMonth() + i;
+    while (m < 0)  { m += 12; y--; }
+    while (m > 11) { m -= 12; y++; }
+    const isCur = (y === curYear && m === curMonth);
+    rows.push(`<button class="btn${isCur?' btn-primary':''}" style="font-size:13px;padding:6px 4px;text-align:center"
+      onclick="jumpToMonth(${y},${m});closeModal('month-picker-modal')">${y}/${String(m+1).padStart(2,'0')}</button>`);
+  }
+  grid.innerHTML = rows.join('');
+  openModal('month-picker-modal');
+}
+
+function confirmJumpMonth() {
+  const y = parseInt(document.getElementById('jump-year').value);
+  const m = parseInt(document.getElementById('jump-month').value);
+  if (isNaN(y) || isNaN(m)) return;
+  jumpToMonth(y, m);
+  closeModal('month-picker-modal');
+}
+
+function jumpToMonth(y, m) {
+  curYear  = y;
+  curMonth = m;
+  renderMonthLabel();
+  closeDetail();
+  renderCalendar();
+  document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((mn, i) =>
+    `<option value="${i}"${i === curMonth ? ' selected' : ''}>${curYear}年${mn}</option>`
+  ).join('');
+}
+
 function updatePubSummary() {
   const monthVal  = parseInt(document.getElementById('pub-month-sel').value);
   const selSites  = [...document.querySelectorAll('#pub-sites input:checked')].map(el => el.dataset.site);
@@ -1488,8 +1639,23 @@ function doPublish() {
       total += entries.filter(e => selMeals.includes(e.mealType)).length;
     });
   });
+  const siteNames = selSites.map(id => (sites.find(s => s.id === id) || {}).name || id).join('、');
+  const mealNames = selMeals.map(id => (MEAL_TYPES.find(m => m.id === id) || {}).label || id).join('、');
+  document.getElementById('publish-confirm-summary').innerHTML =
+    `<b>月份：</b>${curYear}年${MONTH_NAMES[monthVal]}<br>` +
+    `<b>廠區：</b>${siteNames}<br>` +
+    `<b>餐期：</b>${mealNames}<br>` +
+    `<b>排程筆數：</b>${total} 筆`;
+  // 暫存發佈參數供 executePublish 使用
+  window._pendingPublish = { monthVal, selSites, selMeals, total };
+  openModal('publish-confirm-modal');
+}
+
+function executePublish() {
+  const { total, monthVal } = window._pendingPublish || {};
+  closeModal('publish-confirm-modal');
   closeModal('publish-modal');
-  showToast(`已發佈 ${total} 筆排程至店家端（${curYear}年${MONTH_NAMES[monthVal]}）`, 'success');
+  showToast(`已發佈 ${total||0} 筆排程至店家端（${curYear}年${MONTH_NAMES[monthVal]}）`, 'success');
 }
 
 /* ══════════════════════════════════════════════════
