@@ -607,6 +607,44 @@ body {
   .toolbar { flex-direction: column; align-items: flex-start; }
   .toolbar-right { margin-left: 0; }
 }
+
+/* ─── Batch Price Adjust Modal ─── */
+.bpa-step          { display: none; }
+.bpa-step.active   { display: block; }
+.bpa-mode-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.bpa-mode-label {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 6px; border: 1.5px solid var(--border);
+  background: var(--card); color: var(--text-2); font-size: 14px;
+  cursor: pointer; transition: all .12s;
+}
+.bpa-mode-label input { accent-color: var(--blue); }
+.bpa-mode-label.active { border-color: var(--blue); background: var(--blue-bg); color: var(--blue-text); }
+.bpa-preview-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+.bpa-preview-table th {
+  text-align: left; padding: 7px 10px; background: var(--bg-2);
+  border-bottom: 1px solid var(--border); color: var(--text-2); font-weight: 500;
+}
+.bpa-preview-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-2); color: var(--text); }
+.bpa-preview-table tr:last-child td { border-bottom: none; }
+.bpa-price-old  { color: var(--text-3); text-decoration: line-through; }
+.bpa-price-new  { font-weight: 600; color: var(--text); }
+.bpa-price-warn { color: var(--red); font-weight: 600; }
+.bpa-warn-banner {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--red-bg); border: 1px solid var(--red-bdr);
+  border-radius: 7px; padding: 10px 14px; font-size: 14px; color: var(--red);
+  margin-bottom: 12px;
+}
+.bpa-info-banner {
+  background: var(--blue-bg); border: 1px solid var(--blue-border);
+  border-radius: 7px; padding: 10px 14px; font-size: 14px; color: var(--blue-text);
+  margin-bottom: 12px;
+}
+.bpa-preview-wrap {
+  max-height: 360px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 8px;
+}
 </style>
   <link rel="stylesheet" href="shared-nav.css">
 </head>
@@ -622,6 +660,7 @@ body {
 
   <!-- Machine Actions -->
   <div style="display:flex;gap:10px;margin-bottom:12px;justify-content:flex-end">
+    <button class="btn" onclick="openRestMgr()">🏪 餐廳管理</button>
     <button class="btn" onclick="showToast('功能開發中', 'info')">傳送訂單資料至販賣機</button>
     <button class="btn" onclick="showToast('功能開發中', 'info')">傳送巡捕資料至販賣機</button>
     <button class="btn" onclick="showToast('功能開發中', 'info')">重整餐點圖片</button>
@@ -671,7 +710,7 @@ body {
 
     <div class="toolbar-right">
       <button class="btn" onclick="openCopySiteModal()">⇉ 複製整月排程</button>
-      <button class="btn" onclick="openRestMgr()">🏪 餐廳管理</button>
+      <button class="btn" style="border-color:var(--purple);color:var(--purple)" onclick="openBpa()">批次調整價格</button>
       <div style="position:relative" id="export-wrap">
         <button class="btn" onclick="toggleExportMenu()">↓ 匯出 <span style="font-size:11px">▾</span></button>
         <div id="export-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
@@ -807,6 +846,13 @@ body {
     <div class="modal-body">
 
       <div class="form-group">
+        <div class="form-label">廠區</div>
+        <select class="form-select" id="mb-site-select" style="margin-top:4px">
+          <!-- 由 JS 動態產生 -->
+        </select>
+      </div>
+
+      <div class="form-group">
         <div class="form-label">人員名稱 <span style="font-size:13px;color:var(--text-3);font-weight:400">（如「楊秘書」）</span></div>
         <input type="text" class="form-input" id="mb-person-label" placeholder="楊秘書、陳主任…" autocomplete="off">
         <div class="inline-error" id="mb-person-err" style="margin-top:6px">⚠ 請填寫人員名稱</div>
@@ -814,7 +860,7 @@ body {
 
       <div class="form-group">
         <div class="form-label">餐期</div>
-        <select class="form-select" id="mb-meal-type" style="margin-top:4px">
+        <select class="form-select" id="mb-meal-type" style="margin-top:4px" onchange="onMbMealTypeChange()">
           <option value="breakfast">早餐</option>
           <option value="lunch" selected>午餐</option>
           <option value="afternoon">下午茶</option>
@@ -855,7 +901,7 @@ body {
       </div>
 
       <div class="form-group">
-        <div class="form-label">當天提醒店家時間 <span style="font-size:13px;color:var(--text-3);font-weight:400">（選填）</span></div>
+        <div class="form-label">提醒店家時間 <span style="font-size:13px;color:var(--text-3);font-weight:400">（早餐為前一天晚上提醒；可手動調整）</span></div>
         <input type="time" class="form-input" id="mb-remind-at" style="max-width:180px">
       </div>
 
@@ -1057,6 +1103,74 @@ body {
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('export-meeting-modal')">取消</button>
       <button class="btn btn-primary" onclick="doExportMeetingCSV()">匯出 CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 批次調整價格 -->
+<div class="overlay" id="bpa-modal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title" id="bpa-modal-title">批次調整價格</div>
+      <button class="modal-close" onclick="closeModal('bpa-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Step 1：設定 -->
+      <div class="bpa-step active" id="bpa-step1">
+        <div class="form-group">
+          <div class="form-label">調整範圍</div>
+          <div style="margin-top:6px;font-size:14px;color:var(--text-2)" id="bpa-scope-label">—</div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">調整方式</div>
+          <div class="bpa-mode-row">
+            <label class="bpa-mode-label active" id="bpa-mode-fixed-lbl">
+              <input type="radio" name="bpa-mode" value="fixed" checked onchange="bpaModeChange()"> 固定金額（元）
+            </label>
+            <label class="bpa-mode-label" id="bpa-mode-pct-lbl">
+              <input type="radio" name="bpa-mode" value="pct" onchange="bpaModeChange()"> 百分比（%）
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">調整數值 <span style="font-size:13px;color:var(--text-3);font-weight:400">（正值為加，負值為減；結果四捨五入至整數）</span></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="number" class="form-input" id="bpa-value" placeholder="例：+10 或 -5" step="1" style="max-width:180px" oninput="bpaClearError()">
+            <span id="bpa-unit" style="font-size:15px;color:var(--text-2)">元</span>
+          </div>
+          <div class="inline-error" id="bpa-value-err">⚠ 請輸入調整數值</div>
+        </div>
+        <div class="bpa-info-banner" id="bpa-scope-hint">選擇範圍後此處顯示受影響品項數量…</div>
+      </div>
+
+      <!-- Step 2：預覽確認 -->
+      <div class="bpa-step" id="bpa-step2">
+        <div class="bpa-warn-banner" id="bpa-zero-warn" style="display:none">⚠ 部分品項調整後價格 ≤ 0，請確認是否繼續。</div>
+        <div class="bpa-info-banner" id="bpa-preview-summary"></div>
+        <div class="bpa-preview-wrap">
+          <table class="bpa-preview-table">
+            <thead><tr><th>廠區</th><th>日期</th><th>店家</th><th>品項名稱</th><th>原價</th><th>新價格</th></tr></thead>
+            <tbody id="bpa-preview-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <div id="bpa-foot1" style="display:flex;gap:8px;justify-content:flex-end;width:100%">
+        <button class="btn" onclick="closeModal('bpa-modal')">取消</button>
+        <button class="btn btn-primary" onclick="bpaGoPreview()">預覽結果 →</button>
+      </div>
+      <div id="bpa-foot2" style="display:none;gap:8px;justify-content:flex-end;width:100%">
+        <button class="btn" onclick="bpaBack()">← 返回設定</button>
+        <button class="btn" onclick="closeModal('bpa-modal')">取消</button>
+        <button class="btn btn-primary" id="bpa-apply-btn" onclick="bpaApply()">套用調整</button>
+      </div>
+      <div id="bpa-foot3" style="display:none;gap:8px;justify-content:flex-end;width:100%">
+        <button class="btn btn-orange" id="bpa-revert-btn" onclick="bpaRevert()">↺ 還原本次調整</button>
+        <button class="btn btn-primary" onclick="closeModal('bpa-modal')">完成</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1357,6 +1471,9 @@ function renderDetailBody(dateStr) {
     bulkHtml += `<button class="btn btn-sm" style="border-color:var(--orange);color:var(--orange)" onclick="bulkPublish('${dateStr}','dirty')">↺ 更新已修改</button>`;
   if (!anyUnpublished && !anyDirty && filtered.length)
     bulkHtml += `<span style="font-size:15px;color:var(--green)">✓ 全部已是最新發布</span>`;
+  if (filtered.length) {
+    bulkHtml += `<button class="btn btn-sm" style="margin-left:auto;border-color:var(--purple);color:var(--purple)" onclick="openBpa('date')">批次調整價格</button>`;
+  }
   bulkBar.style.display = filtered.length ? '' : 'none';
   bulkBar.innerHTML = bulkHtml;
 
@@ -1489,6 +1606,221 @@ function saveItemPrice(dateStr, entryId, itemId, value) {
   item.isAuto = false;
   markDirty(dateStr, entryId);
   renderDetailBody(dateStr);
+}
+
+/* ══════════════════════════════════════════════════
+   BATCH PRICE ADJUST (BPA)
+══════════════════════════════════════════════════ */
+let bpaScope    = 'month-cur';
+let bpaMode     = 'fixed';
+let bpaSnapshot = null;
+let bpaApplied  = false;
+
+function openBpa(scope) {
+  bpaScope    = scope === 'date' && detailDate ? 'date' : 'month-cur';
+  bpaMode     = 'fixed';
+  bpaApplied  = false;
+  bpaSnapshot = null;
+
+  // 重置 UI 為 Step 1
+  document.getElementById('bpa-step1').classList.add('active');
+  document.getElementById('bpa-step2').classList.remove('active');
+  document.getElementById('bpa-foot1').style.display = 'flex';
+  document.getElementById('bpa-foot2').style.display = 'none';
+  document.getElementById('bpa-foot3').style.display = 'none';
+  document.getElementById('bpa-value').value = '';
+  document.getElementById('bpa-value-err').classList.remove('show');
+
+  // 同步 mode radio
+  document.querySelector(`input[name="bpa-mode"][value="fixed"]`).checked = true;
+  bpaModeChange();
+
+  // 更新範圍標註文字
+  const site = sites.find(s => s.id === curSiteId);
+  let scopeText;
+  if (bpaScope === 'date') {
+    const d = new Date(detailDate);
+    scopeText = `${site?.name || ''} — ${d.getMonth()+1}月${d.getDate()}日`;
+  } else {
+    const d1 = new Date(curYear, curMonth, 1);
+    const d2 = new Date(curYear, curMonth + 1, 0);
+    scopeText = `${site?.name || ''} — ${d1.getMonth()+1}月（${d1.getMonth()+1}/1 ～ ${d2.getMonth()+1}/${d2.getDate()}）`;
+  }
+  document.getElementById('bpa-scope-label').textContent = scopeText;
+
+  bpaUpdateScopeHint();
+
+  document.getElementById('bpa-modal-title').textContent = `批次調整價格`;
+  openModal('bpa-modal');
+}
+
+function bpaModeChange() {
+  bpaMode = document.querySelector('input[name="bpa-mode"]:checked').value;
+  document.getElementById('bpa-unit').textContent = bpaMode === 'pct' ? '%' : '元';
+  document.getElementById('bpa-mode-fixed-lbl').classList.toggle('active', bpaMode === 'fixed');
+  document.getElementById('bpa-mode-pct-lbl').classList.toggle('active', bpaMode === 'pct');
+}
+
+function bpaClearError() {
+  document.getElementById('bpa-value-err').classList.remove('show');
+}
+
+function bpaCollectItems() {
+  const result = [];
+  const targetSites = bpaScope === 'month-all' ? sites.map(s => s.id) : [curSiteId];
+  const monthPrefix = `${curYear}-${String(curMonth + 1).padStart(2, '0')}`;
+
+  targetSites.forEach(siteId => {
+    const siteData = scheduleData[siteId] || {};
+    const dates = bpaScope === 'date'
+      ? (detailDate ? [detailDate] : [])
+      : Object.keys(siteData).filter(d => d.startsWith(monthPrefix));
+
+    dates.forEach(dateStr => {
+      (siteData[dateStr] || []).forEach(entry => {
+        const rest = restaurants.find(r => r.id === entry.restaurantId);
+        entry.items.forEach(item => {
+          result.push({
+            siteId, dateStr,
+            entryId:  entry.entryId,
+            itemId:   item.itemId,
+            name:     item.name,
+            price:    item.price,
+            restName: rest?.name || '—',
+          });
+        });
+      });
+    });
+  });
+  return result;
+}
+
+function bpaUpdateScopeHint() {
+  const items = bpaCollectItems();
+  const hintEl = document.getElementById('bpa-scope-hint');
+  if (!items.length) {
+    hintEl.textContent = '目前範圍內無品項。';
+    return;
+  }
+  const sitesCount = [...new Set(items.map(i => i.siteId))].length;
+  const datesCount = [...new Set(items.map(i => i.dateStr))].length;
+  hintEl.textContent = `目前選擇範圍共影響 ${sitesCount} 個廠區、${datesCount} 天、${items.length} 個品項。`;
+}
+
+function bpaCalcNewPrice(oldPrice, value, mode) {
+  return mode === 'pct'
+    ? Math.round(oldPrice * (1 + value / 100))
+    : Math.round(oldPrice + value);
+}
+
+function bpaGoPreview() {
+  const rawVal = document.getElementById('bpa-value').value;
+  const value  = parseFloat(rawVal);
+  if (rawVal === '' || isNaN(value)) {
+    document.getElementById('bpa-value-err').classList.add('show');
+    return;
+  }
+
+  const items = bpaCollectItems();
+  if (!items.length) { showToast('目前範圍內無品項，無法調整', 'error'); return; }
+
+  const preview  = items.map(it => ({ ...it, newPrice: bpaCalcNewPrice(it.price, value, bpaMode) }));
+  const hasZero  = preview.some(p => p.newPrice <= 0);
+  const modeLabel = bpaMode === 'pct'
+    ? `百分比（${value > 0 ? '+' : ''}${value}%）`
+    : `固定金額（${value > 0 ? '+' : ''}${value} 元）`;
+
+  document.getElementById('bpa-zero-warn').style.display = hasZero ? 'flex' : 'none';
+  document.getElementById('bpa-preview-summary').innerHTML =
+    `即將對 <b>${preview.length}</b> 個品項進行 ${modeLabel} 調整。`;
+
+  document.getElementById('bpa-preview-body').innerHTML = preview.map(p => {
+    const isWarn = p.newPrice <= 0;
+    const newPriceHtml = isWarn
+      ? `<span class="bpa-price-warn">$${p.newPrice} ⚠</span>`
+      : `<span class="bpa-price-new">$${p.newPrice}</span>`;
+    const site = sites.find(s => s.id === p.siteId);
+    const d = new Date(p.dateStr);
+    return `<tr>
+      <td>${site?.name || p.siteId}</td>
+      <td>${d.getMonth()+1}/${d.getDate()}</td>
+      <td>${p.restName}</td>
+      <td>${p.name}</td>
+      <td class="bpa-price-old">$${p.price}</td>
+      <td>${newPriceHtml}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('bpa-step1').classList.remove('active');
+  document.getElementById('bpa-step2').classList.add('active');
+  document.getElementById('bpa-foot1').style.display = 'none';
+  document.getElementById('bpa-foot2').style.display = 'flex';
+}
+
+function bpaBack() {
+  document.getElementById('bpa-step2').classList.remove('active');
+  document.getElementById('bpa-step1').classList.add('active');
+  document.getElementById('bpa-foot2').style.display = 'none';
+  document.getElementById('bpa-foot1').style.display = 'flex';
+}
+
+function bpaApply() {
+  const value = parseFloat(document.getElementById('bpa-value').value);
+  if (isNaN(value)) return;
+
+  const items = bpaCollectItems();
+  if (!items.length) return;
+
+  bpaSnapshot = items.map(it => ({ siteId: it.siteId, dateStr: it.dateStr, entryId: it.entryId, itemId: it.itemId, price: it.price }));
+
+  items.forEach(it => {
+    const entry = ((scheduleData[it.siteId] || {})[it.dateStr] || []).find(e => e.entryId === it.entryId);
+    if (!entry) return;
+    const item = entry.items.find(i => i.itemId === it.itemId);
+    if (!item) return;
+    item.price  = bpaCalcNewPrice(item.price, value, bpaMode);
+    item.isAuto = false;
+    if (it.siteId === curSiteId && entry.publishedAt) checkDirty(entry);
+  });
+
+  rerenderCalendar();
+  if (detailDate) renderDetailBody(detailDate);
+
+  bpaApplied = true;
+  document.getElementById('bpa-foot2').style.display = 'none';
+  document.getElementById('bpa-foot3').style.display = 'flex';
+
+  const modeLabel = bpaMode === 'pct'
+    ? `${value > 0 ? '+' : ''}${value}%`
+    : `${value > 0 ? '+' : ''}${value} 元`;
+  showToast(`已批次調整 ${items.length} 個品項（${modeLabel}）`, 'success');
+}
+
+function bpaRevert() {
+  if (!bpaSnapshot?.length) return;
+  showConfirm(
+    '確認還原？',
+    `將還原本次批次調整的 <b>${bpaSnapshot.length}</b> 個品項至調整前的價格。`,
+    '確認還原', 'btn-orange',
+    () => {
+      bpaSnapshot.forEach(snap => {
+        const entry = ((scheduleData[snap.siteId] || {})[snap.dateStr] || []).find(e => e.entryId === snap.entryId);
+        if (!entry) return;
+        const item = entry.items.find(i => i.itemId === snap.itemId);
+        if (!item) return;
+        item.price = snap.price;
+        if (snap.siteId === curSiteId && entry.publishedAt) checkDirty(entry);
+      });
+      rerenderCalendar();
+      if (detailDate) renderDetailBody(detailDate);
+      bpaSnapshot = null;
+      bpaApplied  = false;
+      const btn = document.getElementById('bpa-revert-btn');
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      showToast('已還原本次批次調整', 'success');
+    }
+  );
 }
 
 /* ── Generic confirm ── */
@@ -1993,6 +2325,22 @@ function removeMb(dateStr, bentoId) {
 /* ══════════════════════════════════════════════════
    MEETING BENTO — MODAL
 ══════════════════════════════════════════════════ */
+const MB_DEFAULT_REMIND = {
+  breakfast: '22:05',
+  lunch:     '09:05',
+  dinner:    '13:05',
+  latenight: '18:05',
+};
+function getMbDefaultRemind(mealType) {
+  return MB_DEFAULT_REMIND[mealType] || '';
+}
+function onMbMealTypeChange() {
+  if (!mbPickerBentoId) {
+    document.getElementById('mb-remind-at').value =
+      getMbDefaultRemind(document.getElementById('mb-meal-type').value);
+  }
+}
+
 function openMbPicker(dateStr, bentoId) {
   mbPickerDate   = dateStr;
   mbPickerBentoId = bentoId || null;
@@ -2002,9 +2350,14 @@ function openMbPicker(dateStr, bentoId) {
   document.getElementById('mb-person-err').classList.remove('show');
   document.getElementById('mb-rest-err').classList.remove('show');
 
+  // 建立廠區選單
+  document.getElementById('mb-site-select').innerHTML =
+    sites.map(s => `<option value="${s.id}"${s.id === curSiteId ? ' selected' : ''}>${s.name}</option>`).join('');
+
   if (bentoId) {
     const mb = (meetingBentoData[curSiteId]?.[dateStr] || []).find(b => b.bentoId === bentoId);
     if (mb) {
+      document.getElementById('mb-site-select').value  = mb.siteId || curSiteId;
       document.getElementById('mb-person-label').value = mb.personLabel || '';
       document.getElementById('mb-meal-type').value    = mb.mealType    || 'lunch';
       document.getElementById('mb-note').value         = mb.note        || '';
@@ -2017,10 +2370,11 @@ function openMbPicker(dateStr, bentoId) {
       buildMbItemSection(mb.restaurantId, mb.items);
     }
   } else {
+    const defaultMealType = (mealFilter !== 'all') ? mealFilter : 'lunch';
     document.getElementById('mb-person-label').value = '';
-    document.getElementById('mb-meal-type').value    = (mealFilter !== 'all') ? mealFilter : 'lunch';
+    document.getElementById('mb-meal-type').value    = defaultMealType;
     document.getElementById('mb-note').value         = '';
-    document.getElementById('mb-remind-at').value    = '';
+    document.getElementById('mb-remind-at').value    = getMbDefaultRemind(defaultMealType);
     document.getElementById('mb-rest-trigger-text').textContent = '請選擇店家…';
     document.getElementById('mb-branch-section').style.display = 'none';
     document.getElementById('mb-item-section').style.display   = 'none';
@@ -2124,21 +2478,22 @@ function confirmSaveMb() {
     items.push({ itemId: cb.value, name: cb.dataset.name, qty, price, itemNote });
   });
 
-  if (!meetingBentoData[curSiteId][mbPickerDate]) meetingBentoData[curSiteId][mbPickerDate] = [];
-  const dateArr = meetingBentoData[curSiteId][mbPickerDate];
+  const targetSiteId = document.getElementById('mb-site-select').value || curSiteId;
+  if (!meetingBentoData[targetSiteId][mbPickerDate]) meetingBentoData[targetSiteId][mbPickerDate] = [];
+  const dateArr = meetingBentoData[targetSiteId][mbPickerDate];
 
   if (mbPickerBentoId) {
     // 編輯
     const idx = dateArr.findIndex(b => b.bentoId === mbPickerBentoId);
     if (idx >= 0) {
-      dateArr[idx] = { ...dateArr[idx], personLabel, mealType, restaurantId: mbPickerRestId,
-        branchId: branchId || null, note, remindAt, items };
+      dateArr[idx] = { ...dateArr[idx], siteId: targetSiteId, personLabel, mealType,
+        restaurantId: mbPickerRestId, branchId: branchId || null, note, remindAt, items };
     }
     showToast('已更新會議便當', 'success');
   } else {
     // 新增
-    dateArr.push({ bentoId: genEntryId(), mealType, restaurantId: mbPickerRestId,
-      branchId: branchId || null, personLabel, note, remindAt, items });
+    dateArr.push({ bentoId: genEntryId(), siteId: targetSiteId, mealType,
+      restaurantId: mbPickerRestId, branchId: branchId || null, personLabel, note, remindAt, items });
     showToast('已新增會議便當', 'success');
   }
 
