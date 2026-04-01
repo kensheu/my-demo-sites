@@ -977,7 +977,7 @@ function handleFiles(files, listId, color) {
 
 
 // ════ ISSUE TRACKER ════
-let issues = JSON.parse(localStorage.getItem('issues') || '[]');
+let issues = JSON.parse(sessionStorage.getItem('issues') || '[]');
 let currentIssueId = null;
 let currentSeverity = 'medium';
 
@@ -1056,7 +1056,7 @@ function submitForm() {
     issues.unshift(issue);
     showToast('問題單提交成功！', 'success');
   }
-  localStorage.setItem('issues', JSON.stringify(issues));
+  sessionStorage.setItem('issues', JSON.stringify(issues));
   resetForm();
   renderList();
 }
@@ -1133,7 +1133,7 @@ function changeStatus(val) {
   const issue = issues.find(i => i.id === currentIssueId);
   if (!issue) return;
   issue.status = val;
-  localStorage.setItem('issues', JSON.stringify(issues));
+  sessionStorage.setItem('issues', JSON.stringify(issues));
   renderList();
   showToast(`狀態已更新為：${issueStatusLabel[val]}`, 'success');
 }
@@ -1178,7 +1178,7 @@ function editIssue(id) {
 function deleteIssue(id) {
   if (!confirm('確定要刪除這筆問題單？')) return;
   issues = issues.filter(i => i.id !== id);
-  localStorage.setItem('issues', JSON.stringify(issues));
+  sessionStorage.setItem('issues', JSON.stringify(issues));
   renderList();
   showToast('問題單已刪除', 'success');
 }
@@ -1206,7 +1206,7 @@ function editIssueFromModal() {
 function deleteIssueFromModal() {
   if (!confirm('確定要刪除這筆問題單？')) return;
   issues = issues.filter(i => i.id !== currentIssueId);
-  localStorage.setItem('issues', JSON.stringify(issues));
+  sessionStorage.setItem('issues', JSON.stringify(issues));
   document.getElementById('modal-overlay').classList.remove('open');
   renderList();
   showToast('問題單已刪除', 'success');
@@ -1244,14 +1244,14 @@ function saveDevFill() {
   issue.unitTest  = document.getElementById('modal-unittest').value;
   issue.verify    = document.getElementById('modal-verify').value;
   issue.status    = 'resolved';
-  localStorage.setItem('issues', JSON.stringify(issues));
+  sessionStorage.setItem('issues', JSON.stringify(issues));
   renderList();
   showToast('IT/工程師 回填已儲存，問題已標記為解決！', 'success');
   openModal(currentIssueId);
 }
 
 // ════ ECR ════
-let ecrs = JSON.parse(localStorage.getItem('ecrs') || '[]');
+let ecrs = JSON.parse(sessionStorage.getItem('ecrs') || '[]');
 let currentEcrId = null;
 let currentPriority = 'normal';
 
@@ -1389,7 +1389,7 @@ function saveEcrTypes() {
     }
   });
   localStorage.setItem('ecrTypes', JSON.stringify(ecrTypes));
-  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  sessionStorage.setItem('ecrs', JSON.stringify(ecrs));
   document.getElementById('ecr-cat-modal').classList.remove('open');
   populateEcrTypeSelects();
   renderEcrList();
@@ -1470,7 +1470,7 @@ function submitEcr() {
     ecrs.unshift(ecr);
     showToast('ECR 提交成功！', 'success');
   }
-  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  sessionStorage.setItem('ecrs', JSON.stringify(ecrs));
   resetEcrForm();
   renderEcrList();
 }
@@ -1585,7 +1585,7 @@ function saveEcrReview() {
   ecr.approvedDate  = document.getElementById('modal-approved-date').value;
   if (result === 'approved') ecr.status = 'approved';
   else if (result === 'rejected') ecr.status = 'rejected';
-  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  sessionStorage.setItem('ecrs', JSON.stringify(ecrs));
   renderEcrList();
   showToast('審核結果已儲存！', 'success');
   openEcrModal(currentEcrId);
@@ -1595,7 +1595,7 @@ function changeEcrStatus(val) {
   const ecr = ecrs.find(e => e.id === currentEcrId);
   if (!ecr) return;
   ecr.status = val;
-  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  sessionStorage.setItem('ecrs', JSON.stringify(ecrs));
   renderEcrList();
   showToast(`ECR 狀態已更新為：${ecrStatusLabel[val]}`, 'success');
 }
@@ -1641,7 +1641,7 @@ function editEcr(id) {
 function deleteEcr(id) {
   if (!confirm('確定要刪除這筆 ECR？')) return;
   ecrs = ecrs.filter(e => e.id !== id);
-  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  sessionStorage.setItem('ecrs', JSON.stringify(ecrs));
   renderEcrList();
   showToast('ECR 已刪除', 'success');
 }
@@ -1669,7 +1669,7 @@ function editEcrFromModal() {
 function deleteEcrFromModal() {
   if (!confirm('確定要刪除這筆 ECR？')) return;
   ecrs = ecrs.filter(e => e.id !== currentEcrId);
-  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  sessionStorage.setItem('ecrs', JSON.stringify(ecrs));
   document.getElementById('ecr-modal-overlay').classList.remove('open');
   renderEcrList();
   showToast('ECR 已刪除', 'success');
@@ -1682,7 +1682,7 @@ if (issues.length === 0) {
     { id:2, project:'店家後台', module:'訂單檢索', summary:'[訂單檢索] 日期範圍選擇器在 Safari 無法開啟', severity:'critical', type:'error', page:'/store/orders', date:'2025-03-12', time:'10:15', action:'1. 使用 Safari 登入店家後台\n2. 進入訂單檢索\n3. 點擊日期範圍欄位', problem:'【實際】日期選擇器無反應，console 顯示 TypeError\n【預期】應正常開啟日曆元件', happenedBefore:'unknown', othersAffected:'yes', os:'macOS Sonoma', browser:'Safari 17', device:'MacBook Pro', okEnv:'Chrome / Edge 正常', files:[], repro:'Safari 環境必現', testdata:'', rootCause:'', fix:'', unitTest:'', verify:'', status:'progress', createdAt:'2025/03/12 10:20:00' },
     { id:3, project:'訂餐前台', module:'我的訂單', summary:'[我的訂單] 取消訂單後狀態未即時更新', severity:'medium', type:'data', page:'/orders/my', date:'2025-03-13', time:'16:00', action:'1. 登入前台\n2. 進入我的訂單\n3. 點擊取消某筆訂單', problem:'【實際】狀態仍顯示「處理中」，需重新整理才更新\n【預期】取消後應立即顯示「已取消」', happenedBefore:'no', othersAffected:'unknown', os:'iOS 17', browser:'Safari 17', device:'iPhone 15', okEnv:'', files:[], repro:'', testdata:'測試帳號：user01@test.com', rootCause:'', fix:'', unitTest:'', verify:'', status:'open', createdAt:'2025/03/13 16:05:00' },
   ];
-  localStorage.setItem('issues', JSON.stringify(issues));
+  sessionStorage.setItem('issues', JSON.stringify(issues));
 }
 
 if (ecrs.length === 0) {
@@ -1691,7 +1691,7 @@ if (ecrs.length === 0) {
     { id:102, project:'店家後台', module:'餐廳管理', date:'2025-03-14', requester:'SA-Carol', relatedIssue:'#002', version:'v3.1.0', title:'[餐廳管理] 營業時間設定支援分時段多組設定', type:'mod-req', priority:'normal', reason:'部分店家有午休或不同時段不同菜單需求，現行單一時段無法滿足', asis:'每間餐廳只能設定一組開始/結束時間', tobe:'改為可新增多組時段（最多5組），每組可獨立啟停', impactPages:'/restaurant/setting\n/restaurant/api/hours', impactLevel:'medium', deadline:'2025-04-30', dependency:'', ac:'✓ 可新增最多5組時段\n✓ 各時段可獨立啟用/停用\n✓ 前台依時段判斷是否開放訂餐', note:'', reviewResult:'discuss', reviewComment:'需確認前台訂餐邏輯如何對應', assignee:'', approvedDate:'', status:'reviewing', createdAt:'2025/03/14 14:00:00' },
     { id:103, project:'訂餐前台', module:'首頁', date:'2025-03-15', requester:'PM-Alice', relatedIssue:'', version:'', title:'[首頁] 新增「最近訂過」快速再訂區塊', type:'ui', priority:'low', reason:'用戶回饋希望能快速重複上次訂單，減少重新選餐時間', asis:'首頁無個人化推薦，需自行瀏覽餐廳', tobe:'登入後首頁顯示最近3筆訂單的餐廳，一鍵進入點餐', impactPages:'/home\n/api/user/recent-orders', impactLevel:'low', deadline:'', dependency:'', ac:'✓ 僅登入用戶顯示\n✓ 顯示最多3筆最近餐廳\n✓ 點擊直接進入該餐廳點餐頁', note:'', reviewResult:'', reviewComment:'', assignee:'', approvedDate:'', status:'pending', createdAt:'2025/03/15 10:30:00' },
   ];
-  localStorage.setItem('ecrs', JSON.stringify(ecrs));
+  sessionStorage.setItem('ecrs', JSON.stringify(ecrs));
 }
 
 // init

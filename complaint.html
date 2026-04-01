@@ -859,9 +859,9 @@ function populateTypeSelects() {
 }
 
 // ─── Storage ──────────────────────────────────────────────────
-function save() { localStorage.setItem('cmp_v1', JSON.stringify(complaints)); }
+function save() { sessionStorage.setItem('cmp_v1', JSON.stringify(complaints)); }
 function load() {
-  const raw = localStorage.getItem('cmp_v1');
+  const raw = sessionStorage.getItem('cmp_v1');
   if (raw) { complaints = JSON.parse(raw); }
   else { complaints = defaultData(); save(); }
 }
@@ -1679,7 +1679,7 @@ function showToast(msg) {
 
 function resetData() {
   if (!confirm('確定要清除所有資料並還原為預設範例？')) return;
-  localStorage.removeItem('cmp_v1');
+  sessionStorage.removeItem('cmp_v1');
   localStorage.removeItem('cmp_types_v1');
   complaints = defaultData();
   complaintTypes = ['餐點品質／異物', '遲送或未送達', '數量或品項錯誤', '其他'];
