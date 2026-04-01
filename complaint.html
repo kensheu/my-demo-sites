@@ -871,9 +871,10 @@ function daysAgo(n) {
 }
 
 function defaultData() {
+  function cmpId(n, seq) { return 'CMP-' + daysAgo(n).slice(0,10).replace(/-/g,'') + '-' + String(seq).padStart(3,'0'); }
   return [
     {
-      id: 'CMP-001', orderId: 'ORD-20250301-042', location: '據點A',
+      id: cmpId(8,1), orderId: 'ORD-20250301-042', location: '據點A',
       memberId: 'M001', type: 'quality',
       description: '餐點中發現疑似蟲子的異物，且餐點有明顯異味，完全無法食用。',
       photos: [], status: 'investigating',
@@ -885,7 +886,7 @@ function defaultData() {
       ]
     },
     {
-      id: 'CMP-002', orderId: 'ORD-20250305-017', location: '據點B',
+      id: cmpId(5,1), orderId: 'ORD-20250305-017', location: '據點B',
       memberId: 'M002', type: 'delivery',
       description: '訂單預計 12:30 送達，遲至 13:45 才收到，外送員態度不佳。',
       photos: [], status: 'compensating',
@@ -899,7 +900,7 @@ function defaultData() {
       ]
     },
     {
-      id: 'CMP-003', orderId: 'ORD-20250308-089', location: '據點C',
+      id: cmpId(3,1), orderId: 'ORD-20250308-089', location: '據點C',
       memberId: 'M003', type: 'quantity',
       description: '點了 3 份套餐只收到 2 份，少了一份雞腿便當（$120）。',
       photos: [], status: 'closed',
@@ -914,7 +915,7 @@ function defaultData() {
       ]
     },
     {
-      id: 'CMP-004', orderId: 'ORD-20250309-024', location: '據點A',
+      id: cmpId(1,1), orderId: 'ORD-20250309-024', location: '據點A',
       memberId: 'M001', type: 'other',
       description: '餐點包裝嚴重破損，湯品溢出，導致其他餐點受污染。',
       photos: [], status: 'accepted',
@@ -925,7 +926,7 @@ function defaultData() {
       ]
     },
     {
-      id: 'CMP-005', orderId: 'ORD-20250310-055', location: '據點B',
+      id: cmpId(0,1), orderId: 'ORD-20250310-055', location: '據點B',
       memberId: 'M002', type: 'quality',
       description: '食物中發現碎玻璃，已造成口腔輕微受傷，情況嚴重。',
       photos: [], status: 'submitted',
