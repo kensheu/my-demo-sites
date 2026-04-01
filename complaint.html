@@ -706,9 +706,9 @@
           <h3>訂單資訊</h3>
           <div class="form-grid">
             <div class="form-group">
-              <label>會員姓名 <span class="req">*</span></label>
+              <label>會員編號 <span class="req">*</span></label>
               <div style="position:relative">
-                <input type="text" id="crtMemberSearch" placeholder="搜尋會員…" autocomplete="off"
+                <input type="text" id="crtMemberSearch" placeholder="輸入會員編號…" autocomplete="off"
                   oninput="filterMemberOptions(this.value)" onfocus="showMemberDropdown()" onblur="hideMemberDropdown()"
                   style="width:100%">
                 <div id="crtMemberDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--primary);border-top:none;border-radius:0 0 var(--radius) var(--radius);z-index:10;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>
@@ -1342,11 +1342,11 @@ function onCreateOverlayClick(e) {
 // 會員搜尋下拉
 function filterMemberOptions(q) {
   const dd = document.getElementById('crtMemberDropdown');
-  const filtered = Object.entries(MEMBERS).filter(([, v]) => v.name.includes(q));
+  const filtered = Object.entries(MEMBERS).filter(([k]) => k.toLowerCase().includes(q.toLowerCase()));
   if (!filtered.length) { dd.style.display = 'none'; return; }
-  dd.innerHTML = filtered.map(([k, v]) =>
+  dd.innerHTML = filtered.map(([k]) =>
     `<div style="padding:9px 14px;cursor:pointer;font-size:14px" onmousedown="selectMember('${k}')"
-      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">${v.name}</div>`
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">${k}</div>`
   ).join('');
   dd.style.display = 'block';
 }
@@ -1358,7 +1358,7 @@ function hideMemberDropdown() {
 }
 function selectMember(id) {
   const m = MEMBERS[id];
-  document.getElementById('crtMemberSearch').value = m.name;
+  document.getElementById('crtMemberSearch').value = id;
   document.getElementById('crtMemberId').value = id;
   document.getElementById('crtMemberPhone').value = m.phone;
   document.getElementById('crtMemberDropdown').style.display = 'none';
@@ -1412,7 +1412,7 @@ function adminRemovePhoto(i) { adminUploadedPhotos.splice(i, 1); adminRenderThum
 function submitAdminCreate(e) {
   if (e) e.preventDefault();
   const memberName = document.getElementById('crtMemberSearch').value.trim();
-  if (!memberName) { showToast('請填寫會員姓名'); return; }
+  if (!memberName) { showToast('請填寫會員編號'); return; }
   const orderId = document.getElementById('crtOrderId').value.trim();
   if (!orderId) { showToast('請填寫訂單編號'); return; }
   const typeEl = document.querySelector('input[name="crtType"]:checked');
