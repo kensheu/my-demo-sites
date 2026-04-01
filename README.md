@@ -28,7 +28,7 @@ https://kensheu.github.io/my-demo-sites/
 - [餐點異動紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)
 - [店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)
 - [菜單排程管理](https://kensheu.github.io/my-demo-sites/menu-schedule.html)
-- [客訴管理](https://kensheu.github.io/my-demo-sites/complaint.html)
+- [客訴管理](https://kensheu.github.io/my-demo-sites/complaint.html?mode=admin)
 - [問題單 & ECR](https://kensheu.github.io/my-demo-sites/issue-and-ecr.html)
 
 ---
