@@ -155,6 +155,7 @@
         '<button class="gn-hamburger" id="gn-hamburger" onclick="gnNavToggle()" aria-label="開啟選單">&#9776;</button>' +
         '<a class="gn-logo" href="index.html">&#x1F371; Demo Sites</a>' +
         '<div class="gn-systems">' + tabs + '</div>' +
+        '<button class="gn-reset-btn" onclick="gnResetData()" title="重製所有資料">重製資料</button>' +
       '</nav>'
     );
   }
@@ -260,3 +261,8 @@
   }
 
 })();
+
+function gnResetData() {
+  sessionStorage.clear();
+  location.reload();
+}
