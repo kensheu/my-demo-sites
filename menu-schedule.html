@@ -836,7 +836,7 @@ body {
   </div>
 </div>
 
-<!-- Modal: 新增/編輯會議便當 -->
+<!-- Modal: 新增/編輯會議餐 -->
 <div class="overlay" id="meeting-bento-modal">
   <div class="modal modal-lg modal-full">
     <div class="modal-head">
@@ -845,7 +845,7 @@ body {
     </div>
     <div class="modal-body">
 
-      <div class="form-group">
+      <div class="form-group" id="mb-site-group">
         <div class="form-label">廠區</div>
         <select class="form-select" id="mb-site-select" style="margin-top:4px">
           <!-- 由 JS 動態產生 -->
@@ -1405,7 +1405,7 @@ function renderCalendar() {
         ${filtered.map(e => renderEntryChip(e, dateStr)).join('')}
         ${filterMbEntries(mbEntries).map(mb => renderMbChip(mb, dateStr)).join('')}
         <button class="chip-add" onclick="event.stopPropagation();openRestPicker('${dateStr}')">＋ 新增店家</button>
-        <button class="chip-add-meeting" onclick="event.stopPropagation();openMbPicker('${dateStr}')">🍱 新增會議便當</button>
+        <button class="chip-add-meeting" onclick="event.stopPropagation();openMbPicker('${dateStr}')">🍱 新增會議餐</button>
       </div>`;
     });
     html += `</div>`;
@@ -2346,7 +2346,8 @@ function openMbPicker(dateStr, bentoId) {
   mbPickerBentoId = bentoId || null;
   mbPickerRestId  = null;
 
-  document.getElementById('mb-modal-title').textContent = bentoId ? '編輯會議便當' : '新增會議便當';
+  document.getElementById('mb-modal-title').textContent = bentoId ? '編輯會議餐' : '新增會議餐';
+  document.getElementById('mb-site-group').style.display = 'none';
   document.getElementById('mb-person-err').classList.remove('show');
   document.getElementById('mb-rest-err').classList.remove('show');
 
@@ -2355,7 +2356,11 @@ function openMbPicker(dateStr, bentoId) {
     sites.map(s => `<option value="${s.id}"${s.id === curSiteId ? ' selected' : ''}>${s.name}</option>`).join('');
 
   if (bentoId) {
-    const mb = (meetingBentoData[curSiteId]?.[dateStr] || []).find(b => b.bentoId === bentoId);
+    let mb = null;
+    for (const sId of Object.keys(meetingBentoData)) {
+      mb = (meetingBentoData[sId]?.[dateStr] || []).find(b => b.bentoId === bentoId);
+      if (mb) break;
+    }
     if (mb) {
       document.getElementById('mb-site-select').value  = mb.siteId || curSiteId;
       document.getElementById('mb-person-label').value = mb.personLabel || '';
@@ -2478,23 +2483,28 @@ function confirmSaveMb() {
     items.push({ itemId: cb.value, name: cb.dataset.name, qty, price, itemNote });
   });
 
-  const targetSiteId = document.getElementById('mb-site-select').value || curSiteId;
-  if (!meetingBentoData[targetSiteId][mbPickerDate]) meetingBentoData[targetSiteId][mbPickerDate] = [];
-  const dateArr = meetingBentoData[targetSiteId][mbPickerDate];
-
   if (mbPickerBentoId) {
-    // 編輯
-    const idx = dateArr.findIndex(b => b.bentoId === mbPickerBentoId);
-    if (idx >= 0) {
-      dateArr[idx] = { ...dateArr[idx], siteId: targetSiteId, personLabel, mealType,
-        restaurantId: mbPickerRestId, branchId: branchId || null, note, remindAt, items };
+    // 編輯：從所有廠找到原資料並就地更新
+    let updated = false;
+    for (const sId of Object.keys(meetingBentoData)) {
+      const arr = meetingBentoData[sId]?.[mbPickerDate];
+      if (!arr) continue;
+      const idx = arr.findIndex(b => b.bentoId === mbPickerBentoId);
+      if (idx >= 0) {
+        arr[idx] = { ...arr[idx], personLabel, mealType,
+          restaurantId: mbPickerRestId, branchId: branchId || null, note, remindAt, items };
+        updated = true;
+        break;
+      }
     }
-    showToast('已更新會議便當', 'success');
+    if (!updated) showToast('找不到原始資料', 'error');
+    else showToast('已更新會議餐', 'success');
   } else {
-    // 新增
-    dateArr.push({ bentoId: genEntryId(), siteId: targetSiteId, mealType,
+    // 新增：存入當前廠
+    if (!meetingBentoData[curSiteId][mbPickerDate]) meetingBentoData[curSiteId][mbPickerDate] = [];
+    meetingBentoData[curSiteId][mbPickerDate].push({ bentoId: genEntryId(), siteId: curSiteId, mealType,
       restaurantId: mbPickerRestId, branchId: branchId || null, personLabel, note, remindAt, items });
-    showToast('已新增會議便當', 'success');
+    showToast('已新增會議餐', 'success');
   }
 
   closeModal('meeting-bento-modal');
