@@ -16,7 +16,7 @@
   --border-2:    #efefed;
   --text:        #1c1b1a;
   --text-2:      #57534e;
-  --text-3:      #a8a29e;
+  --text-3:      #78716c;
   --blue:        #1d4ed8;
   --blue-bg:     #eff6ff;
   --blue-border: #bfdbfe;
@@ -83,6 +83,8 @@ body {
 .btn-green:hover { background: #166534; border-color: #166534; color: #fff; }
 .btn-orange { background: var(--orange); color: #fff; border-color: var(--orange); }
 .btn-orange:hover { background: #9a3412; border-color: #9a3412; color: #fff; }
+.btn-danger { background: #ef4444; color: #fff; border-color: #ef4444; }
+.btn-danger:hover { background: #dc2626; border-color: #dc2626; color: #fff; }
 .btn-sm { padding: 4px 10px; font-size: 14px; }
 .btn-icon { padding: 5px 9px; font-size: 16px; }
 
@@ -231,8 +233,8 @@ body {
   padding: 10px 14px; gap: 6px; background: var(--bg-2);
   border-bottom: 1px solid var(--border);
 }
-.rest-card-name { font-size: 15px; font-weight: 600; }
-.rest-card-meal { font-size: 12px; padding: 2px 8px; border-radius: 100px; font-weight: 500; margin-right: auto; }
+.rest-card-name { font-size: 16px; font-weight: 600; }
+.rest-card-meal { font-size: 13px; padding: 2px 9px; border-radius: 100px; font-weight: 500; margin-right: auto; }
 
 .tag-breakfast  { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
 .tag-lunch      { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
@@ -251,14 +253,14 @@ body {
   display: flex; align-items: center; gap: 6px; flex-shrink: 0;
 }
 .pub-badge {
-  font-size: 12px; font-weight: 500; padding: 2px 8px;
+  font-size: 13px; font-weight: 500; padding: 3px 10px;
   border-radius: 100px; white-space: nowrap;
 }
 .pub-badge.unpublished { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
 .pub-badge.published   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 .pub-badge.dirty       { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
 .pub-btn {
-  font-size: 12px; padding: 3px 10px; border-radius: 6px; cursor: pointer;
+  font-size: 13px; padding: 4px 12px; border-radius: 6px; cursor: pointer;
   border: 1px solid; white-space: nowrap; font-weight: 500;
   background: none;
 }
@@ -277,14 +279,14 @@ body {
 .item-row:last-child { border-bottom: none; }
 .item-row-top {
   display: flex; align-items: center; gap: 6px;
-  padding: 9px 14px; font-size: 14px; color: var(--text-2);
+  padding: 10px 14px; font-size: 15px; color: var(--text-2);
 }
 .item-name { flex: 1; }
-.item-price { font-size: 13px; color: var(--text-3); white-space: nowrap; }
+.item-price { font-size: 14px; color: var(--text-3); white-space: nowrap; }
 .item-price.auto-price { color: var(--green); }
 .item-del {
   background: none; border: none; color: var(--text-3); cursor: pointer;
-  font-size: 13px; padding: 0; line-height: 1; flex-shrink: 0; opacity: 0;
+  font-size: 14px; padding: 0; line-height: 1; flex-shrink: 0; opacity: 0;
 }
 .item-row:hover .item-del { opacity: 1; }
 .item-del:hover { color: var(--red); }
@@ -294,25 +296,25 @@ body {
   background: var(--bg-2);
 }
 .item-row-detail-cell {
-  padding: 8px 14px; border-right: 1px solid var(--border-2);
-  font-size: 13px;
+  padding: 9px 14px; border-right: 1px solid var(--border-2);
+  font-size: 14px;
 }
 .item-row-detail-cell:last-child { border-right: none; }
-.item-row-detail-cell label { display: block; color: var(--text-3); margin-bottom: 4px; font-size: 12px; }
+.item-row-detail-cell label { display: block; color: var(--text-2); margin-bottom: 4px; font-size: 13px; }
 .item-row-detail-cell input[type=number] {
   width: 100%; padding: 5px 8px; border: 1px solid var(--border);
-  border-radius: 5px; font-size: 13px; background: var(--card);
+  border-radius: 5px; font-size: 14px; background: var(--card);
 }
 .item-row-detail-cell .cabinet-opts { display: flex; gap: 10px; }
 .item-row-detail-cell .cabinet-opts label {
   display: flex; align-items: center; gap: 4px;
-  font-size: 13px; cursor: pointer; color: var(--text); margin-bottom: 0;
+  font-size: 14px; cursor: pointer; color: var(--text); margin-bottom: 0;
 }
 
 .add-item-btn {
   display: flex; align-items: center; gap: 3px;
-  font-size: 14px; color: var(--blue); cursor: pointer;
-  background: none; border: none; padding: 9px 14px;
+  font-size: 15px; color: var(--blue); cursor: pointer;
+  background: none; border: none; padding: 10px 14px;
 }
 .add-item-btn:hover { text-decoration: underline; }
 
@@ -509,6 +511,95 @@ body {
   font-weight: 500; flex-shrink: 0;
 }
 
+/* ─── Branch badge ─── */
+.branch-badge {
+  font-size: 12px; color: #3b82f6; background: #eff6ff;
+  border: 1px solid #bfdbfe; border-radius: 100px;
+  padding: 1px 8px; margin-left: 6px; white-space: nowrap; flex-shrink: 0;
+}
+
+/* ─── Meeting bento chip (月曆格) ─── */
+.chip-meeting-bento {
+  background: #fff0f6; color: #c2185b;
+  border: 1px solid #f8bbd0; border-radius: 6px;
+  padding: 4px 6px; font-size: 12px; position: relative; cursor: pointer;
+  transition: background .1s;
+}
+.chip-meeting-bento:hover { background: #fce4ec; }
+.chip-meeting-bento .entry-chip-del {
+  position: absolute; top: 2px; right: 3px;
+  background: none; border: none; cursor: pointer;
+  font-size: 11px; color: #e91e63; line-height: 1; padding: 0 2px;
+}
+.chip-meeting-bento .entry-chip-del:hover { color: #880e4f; }
+.chip-meeting-bento .entry-chip-name { font-weight: 600; padding-right: 14px; line-height: 1.3; }
+.chip-meeting-bento .entry-chip-items { color: #e91e63; font-size: 11px; }
+.chip-mb-badge {
+  display: inline-block; font-size: 10px; background: #e91e63; color: #fff;
+  border-radius: 3px; padding: 0 4px; margin-right: 3px; font-weight: 500;
+}
+
+/* ─── Meeting bento add button (月曆格) ─── */
+.chip-add-meeting {
+  border: 1.5px dashed #f8bbd0; background: transparent; color: #c2185b;
+  cursor: pointer; font-size: 13px; border-radius: 5px; padding: 4px 6px;
+  text-align: left; width: 100%; transition: all .1s; margin-top: 2px;
+  display: block;
+}
+.chip-add-meeting:hover { border-color: #e91e63; background: #fff0f6; }
+
+/* ─── Meeting bento card (detail panel) ─── */
+.rest-card.meeting-bento-card { border-color: #f8bbd0; }
+.rest-card.meeting-bento-card .rest-card-header { background: #fff0f6; }
+.meeting-bento-person {
+  font-size: 12px; color: #c2185b; font-weight: 600;
+  padding: 1px 8px; background: #fff; border: 1px solid #f8bbd0;
+  border-radius: 100px; white-space: nowrap;
+}
+.meeting-bento-note {
+  font-size: 12px; color: var(--text-3); padding: 6px 14px;
+  border-bottom: 1px solid var(--border-2); background: #fff9fb;
+}
+.mb-tag {
+  font-size: 11px; padding: 1px 6px; border-radius: 3px;
+  background: #e91e63; color: #fff; font-weight: 600; flex-shrink: 0; margin-right: 4px;
+}
+.mb-remind-badge {
+  font-size: 11px; color: var(--text-3); padding: 1px 6px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 100px; white-space: nowrap;
+}
+/* meta 列：廠區/發布日期 */
+.rest-card-meta {
+  font-size: 13px; color: var(--text-2); padding: 5px 14px 7px;
+  background: var(--bg-2); border-bottom: 1px solid var(--border-2);
+}
+/* 品項行（MB 用）*/
+.mb-item-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-bottom: 1px solid var(--border-2); font-size: 14px;
+}
+.mb-item-row:last-child { border-bottom: none; }
+.mb-item-name { flex: 1; }
+.mb-item-qty { color: var(--text-3); font-size: 12px; white-space: nowrap; }
+.mb-item-price { color: var(--text-2); font-size: 12px; white-space: nowrap; }
+.mb-item-note { color: var(--text-3); font-size: 11px; font-style: italic; }
+/* MB modal 品項列表 */
+.mb-picker-item-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border-bottom: 1px solid var(--border-2); font-size: 13px;
+}
+.mb-picker-item-row:last-child { border-bottom: none; }
+.mb-picker-item-row label { display: flex; align-items: center; gap: 6px; flex: 1; cursor: pointer; }
+.mb-picker-item-row .mb-qty-input {
+  width: 58px; padding: 3px 6px; border: 1px solid var(--border);
+  border-radius: 5px; font-size: 13px; text-align: center;
+}
+.mb-picker-item-row .mb-note-input {
+  flex: 1; padding: 3px 8px; border: 1px solid var(--border);
+  border-radius: 5px; font-size: 12px; min-width: 0;
+}
+
 @media (max-width: 900px) {
   .cal-week-header, .cal-week-row { grid-template-columns: 36px repeat(7, minmax(80px,1fr)); }
 }
@@ -586,6 +677,8 @@ body {
         <div id="export-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
           <div class="export-opt" onclick="exportCSV()">CSV 格式</div>
           <div class="export-opt" onclick="exportJSON()">JSON 格式</div>
+          <div style="height:1px;background:var(--border);margin:2px 0"></div>
+          <div class="export-opt" style="color:#c2185b" onclick="openExportMeetingModal()">會議餐匯出</div>
         </div>
       </div>
       <div style="position:relative" id="import-wrap">
@@ -676,6 +769,17 @@ body {
       </div>
       <div class="inline-error" id="rest-picker-err" style="margin-top:8px">⚠ 請先選擇餐廳</div>
 
+      <!-- 分店選擇（選餐廳後依需顯示） -->
+      <div id="branch-select-section" style="margin-top:14px;display:none">
+        <div class="form-group" style="margin-bottom:0">
+          <div class="form-label">選擇分店</div>
+          <select class="form-select" id="branch-select" onchange="pickerBranchId=this.value;document.getElementById('branch-picker-err').classList.remove('show')" style="margin-top:4px">
+            <option value="">請選擇分店…</option>
+          </select>
+          <div class="inline-error" id="branch-picker-err" style="margin-top:6px">⚠ 請選擇分店</div>
+        </div>
+      </div>
+
       <!-- 品項複選區 -->
       <div id="item-checklist-section" style="margin-top:18px;display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -689,6 +793,83 @@ body {
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('rest-picker-modal')">取消</button>
       <button class="btn btn-primary" onclick="confirmAddRest()">確認新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 新增/編輯會議便當 -->
+<div class="overlay" id="meeting-bento-modal">
+  <div class="modal modal-lg modal-full">
+    <div class="modal-head">
+      <div class="modal-title" id="mb-modal-title">新增會議便當</div>
+      <button class="modal-close" onclick="closeModal('meeting-bento-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <div class="form-label">人員名稱 <span style="font-size:13px;color:var(--text-3);font-weight:400">（如「楊秘書」）</span></div>
+        <input type="text" class="form-input" id="mb-person-label" placeholder="楊秘書、陳主任…" autocomplete="off">
+        <div class="inline-error" id="mb-person-err" style="margin-top:6px">⚠ 請填寫人員名稱</div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">餐期</div>
+        <select class="form-select" id="mb-meal-type" style="margin-top:4px">
+          <option value="breakfast">早餐</option>
+          <option value="lunch" selected>午餐</option>
+          <option value="afternoon">下午茶</option>
+          <option value="dinner">晚餐</option>
+          <option value="latenight">消夜</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">選擇店家</div>
+        <div class="custom-dropdown" id="mb-rest-dropdown">
+          <button class="dropdown-trigger" id="mb-rest-trigger" onclick="toggleMbRestDrop()">
+            <span id="mb-rest-trigger-text">請選擇店家…</span>
+            <span class="dropdown-arrow">▾</span>
+          </button>
+          <div class="dropdown-list" id="mb-rest-drop-list" style="display:none">
+            <div class="dropdown-search">
+              <input type="text" placeholder="搜尋店家…" id="mb-rest-search" oninput="filterMbRestDrop()" autocomplete="off">
+            </div>
+            <div id="mb-rest-options"></div>
+          </div>
+        </div>
+        <div class="inline-error" id="mb-rest-err" style="margin-top:6px">⚠ 請選擇店家</div>
+      </div>
+
+      <div id="mb-branch-section" style="display:none">
+        <div class="form-group">
+          <div class="form-label">選擇分店</div>
+          <select class="form-select" id="mb-branch-select" style="margin-top:4px">
+            <option value="">請選擇分店…</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">備註 <span style="font-size:13px;color:var(--text-3);font-weight:400">（包裝說明、特殊需求等）</span></div>
+        <input type="text" class="form-input" id="mb-note" placeholder="請分開包裝、素食…" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">當天提醒店家時間 <span style="font-size:13px;color:var(--text-3);font-weight:400">（選填）</span></div>
+        <input type="time" class="form-input" id="mb-remind-at" style="max-width:180px">
+      </div>
+
+      <div id="mb-item-section" style="margin-top:4px;display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="form-label" style="margin-bottom:0">品項與數量</div>
+        </div>
+        <div id="mb-item-list" style="border:1px solid var(--border);border-radius:8px;overflow:hidden"></div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('meeting-bento-modal')">取消</button>
+      <button class="btn btn-primary" onclick="confirmSaveMb()">確認儲存</button>
     </div>
   </div>
 </div>
@@ -850,6 +1031,36 @@ body {
 
 <div class="toast" id="toast"></div>
 
+<!-- Modal: 匯出會議餐 -->
+<div class="overlay" id="export-meeting-modal">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title">匯出會議餐</div>
+      <button class="modal-close" onclick="closeModal('export-meeting-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:10px">
+        <div class="form-group" style="flex:1">
+          <div class="form-label">起始日期</div>
+          <input type="date" class="form-input" id="mb-export-from" style="margin-top:4px">
+        </div>
+        <div class="form-group" style="flex:1">
+          <div class="form-label">結束日期</div>
+          <input type="date" class="form-input" id="mb-export-to" style="margin-top:4px">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <div class="form-label">廠區</div>
+        <div id="mb-export-sites" style="margin-top:6px;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('export-meeting-modal')">取消</button>
+      <button class="btn btn-primary" onclick="doExportMeetingCSV()">匯出 CSV</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: 通用二次確認 -->
 <div class="overlay" id="generic-confirm-modal">
   <div class="modal modal-sm">
@@ -896,6 +1107,7 @@ const sites = [
 const restaurants = [
   {
     id: 'S0001', name: 'OO 雞飯專門店',
+    branches: [{ id: 'S0001-B1', name: '新竹店' }, { id: 'S0001-B2', name: '竹北店' }],
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
@@ -907,6 +1119,7 @@ const restaurants = [
   },
   {
     id: 'S0002', name: 'XX 早餐店',
+    branches: [],
     closedWeekdays: { breakfast:[0], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-05-01'],
     mealTypes: { breakfast: true, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
@@ -919,6 +1132,7 @@ const restaurants = [
   },
   {
     id: 'S0003', name: '阿成便當',
+    branches: [{ id: 'S0003-B1', name: '光復路店' }, { id: 'S0003-B2', name: '中正路店' }, { id: 'S0003-B3', name: '東大路店' }],
     closedWeekdays: { breakfast:[], lunch:[6,0], afternoon:[], dinner:[6,0], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
@@ -929,6 +1143,7 @@ const restaurants = [
   },
   {
     id: 'S0004', name: '好味食堂',
+    branches: [],
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
@@ -939,6 +1154,7 @@ const restaurants = [
   },
   {
     id: 'S0005', name: '家鄉麵食館',
+    branches: [{ id: 'S0005-B1', name: '台中旗艦店' }],
     closedWeekdays: { breakfast:[], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-04-04'],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
@@ -949,10 +1165,15 @@ const restaurants = [
   },
 ];
 
-// scheduleData[siteId][dateStr] = [{ entryId, restaurantId, mealType, addedBy, publishedAt, dirtyAfterPublish, items:[{itemId,name,price,isAuto}] }]
+// scheduleData[siteId][dateStr] = [{ entryId, restaurantId, branchId, mealType, addedBy, publishedAt, dirtyAfterPublish, items:[{itemId,name,price,isAuto}] }]
 // publishedAt: null=未發布, string=發布時間; dirtyAfterPublish: true=發布後有修改
 const scheduleData = {};
 sites.forEach(s => { scheduleData[s.id] = {}; });
+
+// meetingBentoData[siteId][dateStr] = [{ bentoId, mealType, restaurantId, branchId,
+//   personLabel, note, remindAt, items:[{itemId,name,qty,price,itemNote}] }]
+const meetingBentoData = {};
+sites.forEach(s => { meetingBentoData[s.id] = {}; });
 
 /* ══════════════════════════════════════════════════
    STATE
@@ -965,14 +1186,20 @@ let mealFilter  = 'lunch'; // 'all' or meal id
 let detailDate  = null; // currently open detail panel date
 
 // rest picker
-let pickerDate    = null;
-let pickerRestId  = null;
+let pickerDate      = null;
+let pickerRestId    = null;
+let pickerBranchId  = null; // 新增店家時選取的分店
 
 // item picker
 let pickerItemDate    = null;
 let pickerItemEntryId = null;
 let pickerItemRestId  = null;
 let pickerItemId      = null;
+
+// meeting bento picker
+let mbPickerDate    = null;
+let mbPickerBentoId = null; // null=新增, 有值=編輯
+let mbPickerRestId  = null;
 
 // mgr rest selection
 let mgrSelectedRestId = '';
@@ -1056,12 +1283,15 @@ function renderCalendar() {
       const isToday  = dateStr === todayStr;
       const entries  = (scheduleData[curSiteId] || {})[dateStr] || [];
       const filtered = filterEntries(entries);
+      const mbEntries = (meetingBentoData[curSiteId] || {})[dateStr] || [];
 
       const numCls = isToday ? 'today' : (isWkend ? 'weekend' : '');
       html += `<div class="cal-cell${isWkend?' weekend':''}" onclick="openDetail('${dateStr}')">
         <div class="cal-day-num ${numCls}">${cell.day}</div>
         ${filtered.map(e => renderEntryChip(e, dateStr)).join('')}
+        ${filterMbEntries(mbEntries).map(mb => renderMbChip(mb, dateStr)).join('')}
         <button class="chip-add" onclick="event.stopPropagation();openRestPicker('${dateStr}')">＋ 新增店家</button>
+        <button class="chip-add-meeting" onclick="event.stopPropagation();openMbPicker('${dateStr}')">🍱 新增會議便當</button>
       </div>`;
     });
     html += `</div>`;
@@ -1111,21 +1341,22 @@ function closeDetail() {
 }
 
 function renderDetailBody(dateStr) {
-  const entries  = (scheduleData[curSiteId] || {})[dateStr] || [];
-  const filtered = filterEntries(entries);
-  const body     = document.getElementById('detail-body');
+  const entries   = (scheduleData[curSiteId] || {})[dateStr] || [];
+  const filtered  = filterEntries(entries);
+  const mbEntries = (meetingBentoData[curSiteId] || {})[dateStr] || [];
+  const body      = document.getElementById('detail-body');
 
   // ── Bulk bar ──
   const bulkBar = document.getElementById('detail-bulk-bar');
   const anyUnpublished = filtered.some(e => !e.publishedAt);
   const anyDirty       = filtered.some(e => e.publishedAt && e.dirtyAfterPublish);
-  let bulkHtml = `<span style="font-size:13px;color:var(--text-2);font-weight:500">批量操作：</span>`;
+  let bulkHtml = `<span style="font-size:15px;color:var(--text-2);font-weight:500">批量操作：</span>`;
   if (anyUnpublished)
     bulkHtml += `<button class="btn btn-sm" style="border-color:var(--green);color:var(--green)" onclick="bulkPublish('${dateStr}','all')">▶ 全部發布</button>`;
   if (anyDirty)
     bulkHtml += `<button class="btn btn-sm" style="border-color:var(--orange);color:var(--orange)" onclick="bulkPublish('${dateStr}','dirty')">↺ 更新已修改</button>`;
   if (!anyUnpublished && !anyDirty && filtered.length)
-    bulkHtml += `<span style="font-size:13px;color:var(--green)">✓ 全部已是最新發布</span>`;
+    bulkHtml += `<span style="font-size:15px;color:var(--green)">✓ 全部已是最新發布</span>`;
   bulkBar.style.display = filtered.length ? '' : 'none';
   bulkBar.innerHTML = bulkHtml;
 
@@ -1184,20 +1415,37 @@ function renderDetailBody(dateStr) {
     const revertBtn = entry.dirtyAfterPublish
       ? `<button class="pub-btn" style="border-color:var(--text-3);color:var(--text-3)" onclick="revertEntry('${dateStr}','${entry.entryId}')">取消變更</button>`
       : '';
+    const branchBadge = entry.branchId ? `<span class="branch-badge">${getBranchName(rest, entry.branchId)}</span>` : '';
+    const curSite     = sites.find(s => s.id === curSiteId);
+    const metaLine    = `<div class="rest-card-meta">廠區：${curSite?.name || '—'}　${entry.publishedAt ? `發布：${entry.publishedAt}` : '尚未發布'}</div>`;
     return `<div class="rest-card">
       <div class="rest-card-header">
-        <span class="rest-card-name">${rest.name}</span>
+        <span class="rest-card-name">${rest.name}</span>${branchBadge}
         <span class="rest-card-meal ${mi.tagCls}">${mi.label}</span>
         <div class="pub-status">${pubBadge}${revertBtn}${pubBtn}</div>
         <button class="rest-card-remove" onclick="removeEntry('${dateStr}','${entry.entryId}')">✕</button>
       </div>
+      ${metaLine}
       <ul class="item-list">${items}</ul>
       <button class="add-item-btn" onclick="openItemPicker('${dateStr}','${entry.entryId}','${entry.restaurantId}')">＋ 新增品項</button>
     </div>`;
   }).join('');
 
+  // 會議便當卡片
+  if (mbEntries.length) {
+    html += `<div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px;color:var(--text-3);font-size:12px">
+      <div style="flex:1;height:1px;background:var(--border-2)"></div>
+      <span>🍱 會議便當</span>
+      <div style="flex:1;height:1px;background:var(--border-2)"></div>
+    </div>`;
+    html += mbEntries.map(mb => renderMbCard(mb, dateStr)).join('');
+  }
+
   html += `<button class="detail-add-btn" onclick="openRestPicker('${dateStr}')">
     <span style="font-size:16px">＋</span> 新增店家
+  </button>`;
+  html += `<button class="detail-add-btn" style="border-color:#f8bbd0;color:#c2185b;margin-top:6px" onclick="openMbPicker('${dateStr}')">
+    <span style="font-size:16px">🍱</span> 新增會議便當
   </button>`;
 
   body.innerHTML = html;
@@ -1462,6 +1710,7 @@ document.addEventListener('click', e => {
   if (e.target.classList.contains('overlay')) e.target.classList.remove('open');
   if (!e.target.closest('#rest-dropdown')) closeRestDrop();
   if (!e.target.closest('#item-dropdown')) closeItemDrop();
+  if (!e.target.closest('#mb-rest-dropdown')) closeMbRestDrop();
 
   if (!e.target.closest('#export-wrap')) document.getElementById('export-menu').style.display = 'none';
   if (!e.target.closest('#import-wrap')) { const im = document.getElementById('import-menu'); if(im) im.style.display = 'none'; }
@@ -1469,11 +1718,14 @@ document.addEventListener('click', e => {
 
 /* ── Rest Picker ── */
 function openRestPicker(dateStr) {
-  pickerDate   = dateStr;
-  pickerRestId = null;
+  pickerDate    = dateStr;
+  pickerRestId  = null;
+  pickerBranchId = null;
   document.getElementById('rest-trigger-text').textContent = '請選擇餐廳…';
   // 餐期由外部 mealFilter 決定，無需設值
   document.getElementById('rest-picker-err').classList.remove('show');
+  document.getElementById('branch-picker-err').classList.remove('show');
+  document.getElementById('branch-select-section').style.display = 'none';
   document.getElementById('item-checklist-section').style.display = 'none';
   buildRestOptions(dateStr);
   openModal('rest-picker-modal');
@@ -1513,10 +1765,12 @@ function onPickerMealChange() {
 }
 
 function selectRestOption(id, name) {
-  pickerRestId = id;
+  pickerRestId   = id;
+  pickerBranchId = null;
   document.getElementById('rest-trigger-text').textContent = name;
   closeRestDrop();
   document.getElementById('rest-picker-err').classList.remove('show');
+  buildBranchSelect(id);
   buildNewRestItemChecklist();
 }
 
@@ -1619,6 +1873,11 @@ function filterRestDrop() {
 
 function confirmAddRest() {
   if (!pickerRestId) { document.getElementById('rest-picker-err').classList.add('show'); return; }
+  // 驗證分店
+  const rest = restaurants.find(r => r.id === pickerRestId);
+  if (rest?.branches?.length && !pickerBranchId) {
+    document.getElementById('branch-picker-err').classList.add('show'); return;
+  }
   const mealType = (mealFilter !== 'all') ? mealFilter : 'lunch';
   const entryId  = genEntryId();
   // collect checked items
@@ -1634,10 +1893,257 @@ function confirmAddRest() {
     return { itemId: id, name: inp.dataset.name, price, isAuto: inp.dataset.auto === 'true', cabinet, onlineQty, offlineQty, storeQty };
   });
   if (!scheduleData[curSiteId][pickerDate]) scheduleData[curSiteId][pickerDate] = [];
-  scheduleData[curSiteId][pickerDate].push({ entryId, restaurantId: pickerRestId, mealType, addedBy: CURRENT_USER, items });
+  scheduleData[curSiteId][pickerDate].push({ entryId, restaurantId: pickerRestId, branchId: pickerBranchId || null, mealType, addedBy: CURRENT_USER, items });
   closeModal('rest-picker-modal');
   rerenderCalendar();
   showToast('已新增店家', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   BRANCH HELPERS
+══════════════════════════════════════════════════ */
+function getBranchName(rest, branchId) {
+  if (!rest || !branchId) return '';
+  return rest.branches?.find(b => b.id === branchId)?.name || '';
+}
+
+function buildBranchSelect(restId) {
+  const rest     = restaurants.find(r => r.id === restId);
+  const section  = document.getElementById('branch-select-section');
+  const sel      = document.getElementById('branch-select');
+  if (!rest || !rest.branches || !rest.branches.length) {
+    section.style.display = 'none';
+    pickerBranchId = null;
+    return;
+  }
+  sel.innerHTML = `<option value="">請選擇分店…</option>` +
+    rest.branches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+  section.style.display = 'block';
+  pickerBranchId = null;
+}
+
+/* ══════════════════════════════════════════════════
+   MEETING BENTO — CALENDAR CHIP HELPERS
+══════════════════════════════════════════════════ */
+function filterMbEntries(mbEntries) {
+  if (mealFilter === 'all') return mbEntries;
+  return mbEntries.filter(mb => mb.mealType === mealFilter);
+}
+
+function renderMbChip(mb, dateStr) {
+  const mi = mealInfo(mb.mealType);
+  return `<div class="chip-meeting-bento" onclick="event.stopPropagation();openDetail('${dateStr}')">
+    <button class="entry-chip-del" onclick="event.stopPropagation();removeMb('${dateStr}','${mb.bentoId}')" title="移除">✕</button>
+    <div class="entry-chip-name"><span class="chip-mb-badge">會議</span>${mi.label}便當</div>
+    <div class="entry-chip-items">${mb.personLabel}</div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════
+   MEETING BENTO — DETAIL PANEL CARD
+══════════════════════════════════════════════════ */
+function renderMbCard(mb, dateStr) {
+  const rest   = restaurants.find(r => r.id === mb.restaurantId);
+  const mi     = mealInfo(mb.mealType);
+  const curSite = sites.find(s => s.id === curSiteId);
+  const branchBadge = mb.branchId && rest ? `<span class="branch-badge">${getBranchName(rest, mb.branchId)}</span>` : '';
+  const remindBadge = mb.remindAt ? `<span class="mb-remind-badge">⏰ ${mb.remindAt} 提醒</span>` : '';
+  const itemsHtml = (mb.items || []).map(it =>
+    `<div class="mb-item-row">
+      <span class="mb-item-name">${it.name}</span>
+      <span class="mb-item-qty">× ${it.qty}</span>
+      <span class="mb-item-price">$${it.price}</span>
+      ${it.itemNote ? `<span class="mb-item-note">${it.itemNote}</span>` : ''}
+    </div>`
+  ).join('');
+  const noteRow = mb.note ? `<div class="meeting-bento-note">📝 ${mb.note}</div>` : '';
+  return `<div class="rest-card meeting-bento-card">
+    <div class="rest-card-header" style="flex-wrap:wrap;gap:4px">
+      <span class="mb-tag">🍱 會議</span>
+      <span class="meeting-bento-person">${mb.personLabel}</span>
+      <span class="rest-card-meal ${mi.tagCls}">${mi.label}</span>
+      ${rest ? `<span class="rest-card-name" style="font-size:13px">${rest.name}</span>${branchBadge}` : ''}
+      ${remindBadge}
+      <div style="flex:1"></div>
+      <button class="btn btn-sm" style="border-color:#e91e63;color:#e91e63" onclick="openMbPicker('${dateStr}','${mb.bentoId}')">✎ 編輯</button>
+      <button class="rest-card-remove" onclick="removeMb('${dateStr}','${mb.bentoId}')">✕</button>
+    </div>
+    <div class="rest-card-meta">廠區：${curSite?.name || '—'}</div>
+    ${noteRow}
+    ${itemsHtml ? `<div style="border-top:1px solid var(--border-2)">${itemsHtml}</div>` : ''}
+  </div>`;
+}
+
+function removeMb(dateStr, bentoId) {
+  const d  = meetingBentoData[curSiteId];
+  if (!d || !d[dateStr]) return;
+  const mb = d[dateStr].find(b => b.bentoId === bentoId);
+  showConfirm(
+    '確認移除會議便當',
+    `確定要移除「${mb?.personLabel || '此會議便當'}」的排程嗎？`,
+    '移除', 'btn-danger',
+    () => {
+      d[dateStr] = d[dateStr].filter(b => b.bentoId !== bentoId);
+      rerenderCalendar();
+      showToast('已移除會議便當');
+    }
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   MEETING BENTO — MODAL
+══════════════════════════════════════════════════ */
+function openMbPicker(dateStr, bentoId) {
+  mbPickerDate   = dateStr;
+  mbPickerBentoId = bentoId || null;
+  mbPickerRestId  = null;
+
+  document.getElementById('mb-modal-title').textContent = bentoId ? '編輯會議便當' : '新增會議便當';
+  document.getElementById('mb-person-err').classList.remove('show');
+  document.getElementById('mb-rest-err').classList.remove('show');
+
+  if (bentoId) {
+    const mb = (meetingBentoData[curSiteId]?.[dateStr] || []).find(b => b.bentoId === bentoId);
+    if (mb) {
+      document.getElementById('mb-person-label').value = mb.personLabel || '';
+      document.getElementById('mb-meal-type').value    = mb.mealType    || 'lunch';
+      document.getElementById('mb-note').value         = mb.note        || '';
+      document.getElementById('mb-remind-at').value    = mb.remindAt    || '';
+      mbPickerRestId = mb.restaurantId;
+      const rest = restaurants.find(r => r.id === mb.restaurantId);
+      document.getElementById('mb-rest-trigger-text').textContent = rest?.name || '請選擇店家…';
+      buildMbRestOptions();
+      buildMbBranchSelect(mb.restaurantId, mb.branchId);
+      buildMbItemSection(mb.restaurantId, mb.items);
+    }
+  } else {
+    document.getElementById('mb-person-label').value = '';
+    document.getElementById('mb-meal-type').value    = (mealFilter !== 'all') ? mealFilter : 'lunch';
+    document.getElementById('mb-note').value         = '';
+    document.getElementById('mb-remind-at').value    = '';
+    document.getElementById('mb-rest-trigger-text').textContent = '請選擇店家…';
+    document.getElementById('mb-branch-section').style.display = 'none';
+    document.getElementById('mb-item-section').style.display   = 'none';
+    buildMbRestOptions();
+  }
+  openModal('meeting-bento-modal');
+}
+
+function buildMbRestOptions() {
+  const opts = document.getElementById('mb-rest-options');
+  opts.innerHTML = restaurants.map(r =>
+    `<div class="dropdown-option" data-name="${r.name}" onclick="selectMbRestOption('${r.id}','${r.name}')">${r.name}</div>`
+  ).join('');
+}
+
+function toggleMbRestDrop() {
+  const list = document.getElementById('mb-rest-drop-list');
+  const isOpen = list.style.display !== 'none';
+  if (isOpen) { closeMbRestDrop(); return; }
+  list.style.display = 'block';
+  document.getElementById('mb-rest-trigger').classList.add('open');
+  document.getElementById('mb-rest-search').value = '';
+  filterMbRestDrop();
+  document.getElementById('mb-rest-search').focus();
+}
+function closeMbRestDrop() {
+  document.getElementById('mb-rest-drop-list').style.display = 'none';
+  document.getElementById('mb-rest-trigger').classList.remove('open');
+}
+function filterMbRestDrop() {
+  const q = document.getElementById('mb-rest-search').value.toLowerCase();
+  document.querySelectorAll('#mb-rest-options .dropdown-option').forEach(el => {
+    el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function selectMbRestOption(id, name) {
+  mbPickerRestId = id;
+  document.getElementById('mb-rest-trigger-text').textContent = name;
+  closeMbRestDrop();
+  document.getElementById('mb-rest-err').classList.remove('show');
+  buildMbBranchSelect(id, null);
+  buildMbItemSection(id, []);
+}
+
+function buildMbBranchSelect(restId, selectedBranchId) {
+  const rest    = restaurants.find(r => r.id === restId);
+  const section = document.getElementById('mb-branch-section');
+  const sel     = document.getElementById('mb-branch-select');
+  if (!rest?.branches?.length) { section.style.display = 'none'; return; }
+  sel.innerHTML = `<option value="">請選擇分店…</option>` +
+    rest.branches.map(b => `<option value="${b.id}"${b.id === selectedBranchId ? ' selected' : ''}>${b.name}</option>`).join('');
+  section.style.display = 'block';
+}
+
+function buildMbItemSection(restId, existingItems) {
+  const rest    = restaurants.find(r => r.id === restId);
+  const section = document.getElementById('mb-item-section');
+  const list    = document.getElementById('mb-item-list');
+  if (!rest?.items?.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = rest.items.map(item => {
+    const tier    = getPriceForDate(item, mbPickerDate || new Date().toISOString().slice(0,10));
+    const existing = existingItems?.find(e => e.itemId === item.id);
+    const checked  = !!existing;
+    const qty      = existing?.qty  || 1;
+    const itemNote = existing?.itemNote || '';
+    return `<div class="mb-picker-item-row">
+      <label>
+        <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" ${checked ? 'checked' : ''}>
+        <span>${item.name}</span>
+        <span style="color:var(--text-3);font-size:12px">$${tier.price}</span>
+      </label>
+      <input type="number" class="mb-qty-input" min="1" value="${qty}" placeholder="數量" title="數量">
+      <input type="text"   class="mb-note-input" value="${itemNote}" placeholder="品項備註（如：不要辣）">
+    </div>`;
+  }).join('');
+}
+
+function confirmSaveMb() {
+  const personLabel = document.getElementById('mb-person-label').value.trim();
+  if (!personLabel) { document.getElementById('mb-person-err').classList.add('show'); return; }
+  if (!mbPickerRestId) { document.getElementById('mb-rest-err').classList.add('show'); return; }
+
+  const mealType  = document.getElementById('mb-meal-type').value;
+  const note      = document.getElementById('mb-note').value.trim();
+  const remindAt  = document.getElementById('mb-remind-at').value || null;
+  const branchId  = document.getElementById('mb-branch-select')?.value || null;
+
+  // 收集品項
+  const rows  = document.querySelectorAll('#mb-item-list .mb-picker-item-row');
+  const items = [];
+  rows.forEach(row => {
+    const cb  = row.querySelector('input[type=checkbox]');
+    if (!cb?.checked) return;
+    const qty      = parseInt(row.querySelector('.mb-qty-input')?.value) || 1;
+    const itemNote = row.querySelector('.mb-note-input')?.value?.trim() || '';
+    const rest     = restaurants.find(r => r.id === mbPickerRestId);
+    const itemDef  = rest?.items.find(i => i.id === cb.value);
+    const price    = itemDef ? getPriceForDate(itemDef, mbPickerDate).price : Number(cb.dataset.price);
+    items.push({ itemId: cb.value, name: cb.dataset.name, qty, price, itemNote });
+  });
+
+  if (!meetingBentoData[curSiteId][mbPickerDate]) meetingBentoData[curSiteId][mbPickerDate] = [];
+  const dateArr = meetingBentoData[curSiteId][mbPickerDate];
+
+  if (mbPickerBentoId) {
+    // 編輯
+    const idx = dateArr.findIndex(b => b.bentoId === mbPickerBentoId);
+    if (idx >= 0) {
+      dateArr[idx] = { ...dateArr[idx], personLabel, mealType, restaurantId: mbPickerRestId,
+        branchId: branchId || null, note, remindAt, items };
+    }
+    showToast('已更新會議便當', 'success');
+  } else {
+    // 新增
+    dateArr.push({ bentoId: genEntryId(), mealType, restaurantId: mbPickerRestId,
+      branchId: branchId || null, personLabel, note, remindAt, items });
+    showToast('已新增會議便當', 'success');
+  }
+
+  closeModal('meeting-bento-modal');
+  rerenderCalendar();
 }
 
 /* ── Item Picker（追加品項至既有店家）── */
@@ -1710,19 +2216,37 @@ function confirmAddItem() {
 
 /* ── Remove ── */
 function removeEntry(dateStr, entryId) {
-  const d = scheduleData[curSiteId];
-  if (!d || !d[dateStr]) return;
-  d[dateStr] = d[dateStr].filter(e => e.entryId !== entryId);
-  rerenderCalendar();
-  showToast('已移除店家排程');
+  const entry = getEntry(dateStr, entryId);
+  const rest  = entry ? restaurants.find(r => r.id === entry.restaurantId) : null;
+  showConfirm(
+    '確認移除店家排程',
+    `確定要移除「${rest?.name || '此店家'}」的排程嗎？此操作無法復原。`,
+    '移除', 'btn-danger',
+    () => {
+      const d = scheduleData[curSiteId];
+      if (!d || !d[dateStr]) return;
+      d[dateStr] = d[dateStr].filter(e => e.entryId !== entryId);
+      rerenderCalendar();
+      showToast('已移除店家排程');
+    }
+  );
 }
 
 function removeItem(dateStr, entryId, itemId) {
   const entry = getEntry(dateStr, entryId);
   if (!entry) return;
-  entry.items = entry.items.filter(i => i.itemId !== itemId);
-  markDirty(dateStr, entryId);
-  rerenderCalendar();
+  const item = entry.items.find(i => i.itemId === itemId);
+  showConfirm(
+    '確認移除品項',
+    `確定要移除品項「${item?.name || '此品項'}」嗎？`,
+    '移除', 'btn-danger',
+    () => {
+      entry.items = entry.items.filter(i => i.itemId !== itemId);
+      markDirty(dateStr, entryId);
+      rerenderCalendar();
+      showToast('已移除品項');
+    }
+  );
 }
 
 /* ── Copy entire month to other sites ── */
@@ -2064,9 +2588,32 @@ function doPublish() {
 }
 
 function executePublish() {
-  const { total, monthVal } = window._pendingPublish || {};
+  const { monthVal, selSites, selMeals, total } = window._pendingPublish || {};
   closeModal('publish-confirm-modal');
   closeModal('publish-modal');
+
+  const now = new Date();
+  const ts  = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const targetYear  = curYear;
+  const targetMonth = monthVal; // 0-based (同 doPublish)
+
+  (selSites || []).forEach(siteId => {
+    const siteData = scheduleData[siteId] || {};
+    Object.keys(siteData).forEach(dateStr => {
+      const d = new Date(dateStr);
+      if (d.getFullYear() !== targetYear || d.getMonth() !== targetMonth) return;
+      siteData[dateStr].forEach(entry => {
+        if (!(selMeals || []).includes(entry.mealType)) return;
+        entry.publishedAt       = ts;
+        entry.dirtyAfterPublish = false;
+        entry.publishedSnapshot = entry.items.map(i => ({ ...i }));
+      });
+    });
+  });
+
+  // 若目前開啟的 detail panel 也在範圍內，重新渲染
+  if (curDetailDate) renderDetailBody(curDetailDate);
+
   showToast(`已發佈 ${total||0} 筆排程至店家端（${curYear}年${MONTH_NAMES[monthVal]}）`, 'success');
 }
 
@@ -2080,7 +2627,7 @@ function toggleExportMenu() {
 
 function exportCSV() {
   document.getElementById('export-menu').style.display = 'none';
-  const rows = [['日期', '星期', '廠區', '餐廳', '餐期', '品項', '售價']];
+  const rows = [['日期', '星期', '廠區', '餐廳', '分店', '餐期', '品項', '售價']];
   const site = sites.find(s => s.id === curSiteId);
   const siteData = scheduleData[curSiteId] || {};
   const days = new Date(curYear, curMonth+1, 0).getDate();
@@ -2089,15 +2636,16 @@ function exportCSV() {
     const dateStr = getDateStr(curYear, curMonth, d);
     const wd      = new Date(curYear, curMonth, d).getDay();
     const entries = siteData[dateStr] || [];
-    if (!entries.length) { rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, '', '', '', '']); continue; }
+    if (!entries.length) { rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, '', '', '', '', '']); continue; }
     entries.forEach(entry => {
       const rest      = restaurants.find(r => r.id === entry.restaurantId);
+      const branchName = getBranchName(rest, entry.branchId);
       const mealLabel = mealInfo(entry.mealType).label;
       if (!entry.items.length) {
-        rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, rest?.name||'', mealLabel, '', '']);
+        rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, rest?.name||'', branchName, mealLabel, '', '']);
       } else {
         entry.items.forEach(it => {
-          rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, rest?.name||'', mealLabel, it.name, it.price]);
+          rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, rest?.name||'', branchName, mealLabel, it.name, it.price]);
         });
       }
     });
@@ -2172,6 +2720,77 @@ function exportJSON() {
   });
 
   showToast(`JSON 已匯出（共 ${mealEntries.length} 個餐期檔案）`, 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   MEETING BENTO EXPORT
+══════════════════════════════════════════════════ */
+function openExportMeetingModal() {
+  document.getElementById('export-menu').style.display = 'none';
+  // 預設本月第一天至最後一天
+  const firstDay = getDateStr(curYear, curMonth, 1);
+  const lastDay  = getDateStr(curYear, curMonth, new Date(curYear, curMonth+1, 0).getDate());
+  document.getElementById('mb-export-from').value = firstDay;
+  document.getElementById('mb-export-to').value   = lastDay;
+
+  // 廠區複選框
+  const container = document.getElementById('mb-export-sites');
+  container.innerHTML = sites.map(s =>
+    `<label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+      <input type="checkbox" value="${s.id}" checked> ${s.name}
+    </label>`
+  ).join('');
+  openModal('export-meeting-modal');
+}
+
+function doExportMeetingCSV() {
+  const fromStr = document.getElementById('mb-export-from').value;
+  const toStr   = document.getElementById('mb-export-to').value;
+  if (!fromStr || !toStr || fromStr > toStr) { showToast('請設定正確的日期區間', 'error'); return; }
+
+  const selectedSiteIds = [...document.querySelectorAll('#mb-export-sites input:checked')].map(cb => cb.value);
+  if (!selectedSiteIds.length) { showToast('請至少選擇一個廠區', 'error'); return; }
+
+  const WD_LABEL = ['日','一','二','三','四','五','六'];
+  const rows = [['日期','星期','廠區','店家','分店','餐期','人員名稱','品項名稱','數量','售價','小計','備註','提醒時間']];
+
+  // 遍歷每個廠區、每天
+  selectedSiteIds.forEach(siteId => {
+    const site     = sites.find(s => s.id === siteId);
+    const siteData = meetingBentoData[siteId] || {};
+    Object.keys(siteData).sort().forEach(dateStr => {
+      if (dateStr < fromStr || dateStr > toStr) return;
+      const wd = new Date(dateStr).getDay();
+      (siteData[dateStr] || []).forEach(mb => {
+        const rest       = restaurants.find(r => r.id === mb.restaurantId);
+        const branchName = getBranchName(rest, mb.branchId);
+        const mealLabel  = mealInfo(mb.mealType).label;
+        if (!mb.items?.length) {
+          rows.push([dateStr, `週${WD_LABEL[wd]}`, site.name, rest?.name||'', branchName,
+            mealLabel, mb.personLabel, '', '', '', '', mb.note||'', mb.remindAt||'']);
+        } else {
+          mb.items.forEach(it => {
+            rows.push([dateStr, `週${WD_LABEL[wd]}`, site.name, rest?.name||'', branchName,
+              mealLabel, mb.personLabel, it.name, it.qty, it.price, it.qty * it.price,
+              (it.itemNote ? `${it.itemNote}　` : '') + (mb.note || ''), mb.remindAt||'']);
+          });
+        }
+      });
+    });
+  });
+
+  if (rows.length <= 1) { showToast('選定期間無會議便當資料', 'error'); return; }
+
+  const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `會議餐_${fromStr}_${toStr}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  closeModal('export-meeting-modal');
+  showToast('會議餐 CSV 已匯出', 'success');
 }
 
 /* ══════════════════════════════════════════════════
