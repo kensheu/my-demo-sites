@@ -59,8 +59,16 @@
           },
           {
             label: '問題單&ECR',
+            group: true,
             url: 'issue-and-ecr.html',
-            match: function (p) { return p.file === 'issue-and-ecr.html'; }
+            match: function (p) { return p.file === 'issue-and-ecr.html'; },
+            children: [
+              { label: '📝 新增問題單', url: 'issue-and-ecr.html?tab=report', tab: 'report' },
+              { label: '📋 問題清單',   url: 'issue-and-ecr.html?tab=list',   tab: 'list'   },
+              { label: '🔄 新增 ECR',   url: 'issue-and-ecr.html?tab=ecr-form', tab: 'ecr-form' },
+              { label: '📑 ECR 清單',   url: 'issue-and-ecr.html?tab=ecr-list', tab: 'ecr-list' },
+              { label: '📖 填寫指南',   url: 'issue-and-ecr.html?tab=guide',  tab: 'guide'  }
+            ]
           }
         ]
       },
@@ -161,7 +169,25 @@
   }
 
   function buildSidebar(activeSystem, activePage) {
+    var pageInfo = getPageInfo();
+    var activeTab = new URLSearchParams(window.location.search).get('tab');
     var items = activeSystem.pages.map(function (pg) {
+      if (pg.group) {
+        var isGroupActive = pg.match(pageInfo);
+        var headerCls = 'gn-nav-group-header' + (isGroupActive ? ' gn-open' : '');
+        var childrenCls = 'gn-nav-group-items' + (isGroupActive ? ' gn-open' : '');
+        var children = pg.children.map(function (ch) {
+          var isActive = isGroupActive && activeTab === ch.tab;
+          var cls = 'gn-nav-child-item' + (isActive ? ' gn-active' : '');
+          return '<a class="' + cls + '" href="' + esc(ch.url) + '" onclick="gnTabClick(event,\'' + esc(ch.tab) + '\')">' + esc(ch.label) + '</a>';
+        }).join('');
+        return (
+          '<button class="' + headerCls + '" onclick="gnGroupToggle(this)">' +
+            esc(pg.label) + '<span class="gn-nav-arrow">▶</span>' +
+          '</button>' +
+          '<div class="' + childrenCls + '">' + children + '</div>'
+        );
+      }
       var cls = 'gn-nav-item' + (pg === activePage ? ' gn-active' : '');
       return '<a class="' + cls + '" href="' + esc(pg.url) + '">' + esc(pg.label) + '</a>';
     }).join('');
@@ -176,7 +202,25 @@
     }).join('');
 
     // Pages of active system
+    var pageInfo2 = getPageInfo();
+    var activeTab2 = new URLSearchParams(window.location.search).get('tab');
     var pages = activeSystem.pages.map(function (pg) {
+      if (pg.group) {
+        var isGroupActive = pg.match(pageInfo2);
+        var headerCls = 'gn-drawer-group-header' + (isGroupActive ? ' gn-open' : '');
+        var childrenCls = 'gn-drawer-group-items' + (isGroupActive ? ' gn-open' : '');
+        var children = pg.children.map(function (ch) {
+          var isActive = isGroupActive && activeTab2 === ch.tab;
+          var cls = 'gn-drawer-child-item' + (isActive ? ' gn-active' : '');
+          return '<a class="' + cls + '" href="' + esc(ch.url) + '" onclick="gnNavClose()">' + esc(ch.label) + '</a>';
+        }).join('');
+        return (
+          '<button class="' + headerCls + '" onclick="gnGroupToggle(this)">' +
+            esc(pg.label) + '<span class="gn-nav-arrow">▶</span>' +
+          '</button>' +
+          '<div class="' + childrenCls + '">' + children + '</div>'
+        );
+      }
       var cls = 'gn-drawer-nav-item' + (pg === activePage ? ' gn-active' : '');
       return '<a class="' + cls + '" href="' + esc(pg.url) + '" onclick="gnNavClose()">' + esc(pg.label) + '</a>';
     }).join('');
@@ -243,6 +287,36 @@
     } else {
       drawer.classList.add('gn-open');
       if (overlay) overlay.classList.add('gn-open');
+    }
+  };
+
+  window.gnGroupToggle = function (header) {
+    var items = header.nextElementSibling;
+    var isOpen = header.classList.contains('gn-open');
+    if (isOpen) {
+      header.classList.remove('gn-open');
+      if (items) items.classList.remove('gn-open');
+    } else {
+      header.classList.add('gn-open');
+      if (items) items.classList.add('gn-open');
+    }
+  };
+
+  window.gnTabClick = function (e, tab) {
+    if (typeof switchTab === 'function') {
+      e.preventDefault();
+      switchTab(tab);
+      // 更新 URL 不重新載入
+      var url = new URL(window.location.href);
+      url.searchParams.set('tab', tab);
+      history.replaceState(null, '', url.toString());
+      // 更新側邊欄 active 狀態
+      document.querySelectorAll('.gn-nav-child-item').forEach(function (el) {
+        el.classList.remove('gn-active');
+        if (el.getAttribute('href') && el.getAttribute('href').indexOf('tab=' + tab) !== -1) {
+          el.classList.add('gn-active');
+        }
+      });
     }
   };
 
