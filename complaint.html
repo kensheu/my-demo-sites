@@ -647,7 +647,7 @@
   <!-- 管理後台 -->
   <div id="adminView" style="display:none">
     <div class="tab-bar">
-      <button class="tab-btn active">📋 案件列表</button>
+      <button class="tab-btn active" onclick="openCreateModal()">建立客訴</button>
     </div>
     <div class="panel">
       <div class="filter-bar">
@@ -689,6 +689,77 @@
     <div class="modal-body" id="modalBody"></div>
     <div style="padding:14px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end">
       <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- 建立客訴 Modal -->
+<div class="modal-overlay" id="createModalOverlay" onclick="onCreateOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>建立客訴</h2>
+      <button class="modal-close" onclick="closeCreateModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="crtForm" onsubmit="submitAdminCreate(event)">
+        <div class="form-section">
+          <h3>訂單資訊</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>會員姓名 <span class="req">*</span></label>
+              <div style="position:relative">
+                <input type="text" id="crtMemberSearch" placeholder="搜尋會員…" autocomplete="off"
+                  oninput="filterMemberOptions(this.value)" onfocus="showMemberDropdown()" onblur="hideMemberDropdown()"
+                  style="width:100%">
+                <div id="crtMemberDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--primary);border-top:none;border-radius:0 0 var(--radius) var(--radius);z-index:10;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>
+              </div>
+              <input type="hidden" id="crtMemberId">
+            </div>
+            <div class="form-group">
+              <label>聯絡電話</label>
+              <input type="text" id="crtMemberPhone" readonly placeholder="—" style="background:var(--bg);color:var(--text-light);cursor:default">
+            </div>
+            <div class="form-group">
+              <label>訂單編號 <span class="req">*</span></label>
+              <input type="text" id="crtOrderId" placeholder="例：ORD-20260401-001">
+            </div>
+            <div class="form-group">
+              <label>據點 <span class="req">*</span></label>
+              <div style="position:relative">
+                <input type="text" id="crtLocSearch" placeholder="搜尋據點…" autocomplete="off"
+                  oninput="filterLocOptions(this.value)" onfocus="showLocDropdown()" onblur="hideLocDropdown()"
+                  style="width:100%">
+                <div id="crtLocDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--primary);border-top:none;border-radius:0 0 var(--radius) var(--radius);z-index:10;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>
+              </div>
+              <input type="hidden" id="crtLocation">
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3>客訴內容</h3>
+          <div class="form-group" style="margin-bottom:16px">
+            <label>客訴類型 <span class="req">*</span></label>
+            <div class="pill-group" id="crtTypePills"></div>
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label>問題說明 <span class="req">*</span></label>
+            <textarea id="crtDesc" rows="4" placeholder="請詳細描述您遇到的問題…" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>附件照片（選填，最多 3 張）</label>
+            <div class="photo-upload-area" onclick="document.getElementById('crtPhotos').click()">
+              <div style="font-size:28px">📷</div>
+              <p class="upload-hint">點擊上傳照片（支援 JPG / PNG）</p>
+              <input type="file" id="crtPhotos" accept="image/*" multiple onchange="adminAddPhotos(this)">
+            </div>
+            <div class="photo-previews" id="crtPhotoPreviews"></div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn btn-secondary" onclick="closeCreateModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitAdminCreate(event)">建立</button>
     </div>
   </div>
 </div>
@@ -1029,7 +1100,7 @@ function cardHtml(c, isAdmin) {
     <div class="c-card-body">
       <div>
         <div class="c-card-title">${tpLabel}</div>
-        <div class="c-card-meta">${c.location} · 訂單 ${c.orderId}${isAdmin ? ' · ' + (mem ? mem.name : c.memberId) : ''}</div>
+        <div class="c-card-meta">${c.location} · 訂單 ${c.orderId || '—'}${isAdmin ? ' · ' + (mem ? mem.name : (c.memberId || '匿名')) : ''}</div>
         <div class="c-card-meta" style="margin-top:4px">${c.description.slice(0,60)}${c.description.length>60?'…':''}</div>
       </div>
     </div>
@@ -1052,10 +1123,12 @@ function renderAdminList(list) {
       const st = STATUSES.find(s => s.key === c.status);
       const tpLabel = typeLabel(c.type);
       const mem = MEMBERS[c.memberId];
+      const isAdminCreated = c.logs && c.logs[0] && c.logs[0].note === '由後台管理員代為建立';
+      const memDisplay = mem ? mem.name : (c.memberId || '匿名');
       return `<tr onclick="openModal('${c.id}',true)">
-        <td><strong style="color:var(--primary)">${c.id}</strong></td>
+        <td><strong style="color:var(--primary)">${c.id}</strong>${isAdminCreated ? ' <span class="badge s-accepted" style="font-size:11px;padding:2px 6px">🖊 後台</span>' : ''}</td>
         <td>${c.location}</td>
-        <td>${mem ? mem.name : c.memberId}</td>
+        <td>${memDisplay}</td>
         <td>${tpLabel}</td>
         <td><span class="badge ${st.cls}">${st.icon} ${st.label}</span></td>
         <td>${fmtShort(c.createdAt)}</td>
@@ -1088,7 +1161,7 @@ function openModal(id, isAdmin) {
   const c = complaints.find(x => x.id === id); if (!c) return;
   const st   = STATUSES.find(s => s.key === c.status);
   const tpLabel = typeLabel(c.type);
-  const mem  = MEMBERS[c.memberId] || { name: c.memberId, phone: '—' };
+  const mem  = MEMBERS[c.memberId] || { name: c.memberId || '匿名', phone: '—' };
   const sidx = STATUSES.findIndex(s => s.key === c.status);
 
   document.getElementById('modalTitle').textContent = `客訴詳情 ${c.id}`;
@@ -1236,6 +1309,138 @@ function toggleComp() {
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 function onOverlayClick(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+// ─── Create Complaint Modal (Admin) ───────────────────────────
+let adminUploadedPhotos = [];
+const LOC_OPTIONS = ['據點A', '據點B', '據點C'];
+
+function openCreateModal() {
+  adminUploadedPhotos = [];
+  // 填入客訴類型 pills
+  document.getElementById('crtTypePills').innerHTML = complaintTypes.map(t => {
+    const k = typeKey(t);
+    return `<label class="pill-item"><input type="radio" name="crtType" value="${k}"><span>${t}</span></label>`;
+  }).join('');
+  // 重設欄位
+  document.getElementById('crtMemberSearch').value = '';
+  document.getElementById('crtMemberId').value = '';
+  document.getElementById('crtMemberPhone').value = '';
+  document.getElementById('crtOrderId').value = '';
+  document.getElementById('crtLocSearch').value = '';
+  document.getElementById('crtLocation').value = '';
+  document.getElementById('crtDesc').value = '';
+  adminRenderThumbs();
+  document.getElementById('createModalOverlay').classList.add('open');
+}
+function closeCreateModal() {
+  document.getElementById('createModalOverlay').classList.remove('open');
+}
+function onCreateOverlayClick(e) {
+  if (e.target === document.getElementById('createModalOverlay')) closeCreateModal();
+}
+
+// 會員搜尋下拉
+function filterMemberOptions(q) {
+  const dd = document.getElementById('crtMemberDropdown');
+  const filtered = Object.entries(MEMBERS).filter(([, v]) => v.name.includes(q));
+  if (!filtered.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = filtered.map(([k, v]) =>
+    `<div style="padding:9px 14px;cursor:pointer;font-size:14px" onmousedown="selectMember('${k}')"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">${v.name}</div>`
+  ).join('');
+  dd.style.display = 'block';
+}
+function showMemberDropdown() {
+  filterMemberOptions(document.getElementById('crtMemberSearch').value);
+}
+function hideMemberDropdown() {
+  setTimeout(() => { document.getElementById('crtMemberDropdown').style.display = 'none'; }, 150);
+}
+function selectMember(id) {
+  const m = MEMBERS[id];
+  document.getElementById('crtMemberSearch').value = m.name;
+  document.getElementById('crtMemberId').value = id;
+  document.getElementById('crtMemberPhone').value = m.phone;
+  document.getElementById('crtMemberDropdown').style.display = 'none';
+}
+
+// 據點搜尋下拉
+function filterLocOptions(q) {
+  const dd = document.getElementById('crtLocDropdown');
+  const filtered = LOC_OPTIONS.filter(l => l.includes(q));
+  if (!filtered.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = filtered.map(l =>
+    `<div style="padding:9px 14px;cursor:pointer;font-size:14px" onmousedown="selectLoc('${l}')"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">${l}</div>`
+  ).join('');
+  dd.style.display = 'block';
+}
+function showLocDropdown() {
+  filterLocOptions(document.getElementById('crtLocSearch').value);
+}
+function hideLocDropdown() {
+  setTimeout(() => { document.getElementById('crtLocDropdown').style.display = 'none'; }, 150);
+}
+function selectLoc(val) {
+  document.getElementById('crtLocSearch').value = val;
+  document.getElementById('crtLocation').value = val;
+  document.getElementById('crtLocDropdown').style.display = 'none';
+}
+
+function adminAddPhotos(input) {
+  const files = Array.from(input.files);
+  files.forEach(f => {
+    if (adminUploadedPhotos.length >= 3) { showToast('最多上傳 3 張照片'); return; }
+    const reader = new FileReader();
+    reader.onload = e => resizeImg(e.target.result, 500, 500, d => {
+      adminUploadedPhotos.push({ name: f.name, dataUrl: d });
+      adminRenderThumbs();
+    });
+    reader.readAsDataURL(f);
+  });
+  input.value = '';
+}
+function adminRenderThumbs() {
+  document.getElementById('crtPhotoPreviews').innerHTML = adminUploadedPhotos.map((p, i) => `
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" alt="${p.name}">
+      <button class="rm-photo" onclick="adminRemovePhoto(${i})">✕</button>
+    </div>`).join('');
+}
+function adminRemovePhoto(i) { adminUploadedPhotos.splice(i, 1); adminRenderThumbs(); }
+
+function submitAdminCreate(e) {
+  if (e) e.preventDefault();
+  const memberName = document.getElementById('crtMemberSearch').value.trim();
+  if (!memberName) { showToast('請填寫會員姓名'); return; }
+  const orderId = document.getElementById('crtOrderId').value.trim();
+  if (!orderId) { showToast('請填寫訂單編號'); return; }
+  const typeEl = document.querySelector('input[name="crtType"]:checked');
+  if (!typeEl) { showToast('請選擇客訴類型'); return; }
+  const location = document.getElementById('crtLocation').value;
+  if (!location) { showToast('請選擇據點'); return; }
+  const desc = document.getElementById('crtDesc').value.trim();
+  if (!desc) { showToast('請填寫問題說明'); return; }
+  const memberId = document.getElementById('crtMemberId').value || null;
+  const c = {
+    id: genId(),
+    orderId,
+    location,
+    memberId,
+    type: typeEl.value,
+    description: desc,
+    photos: [...adminUploadedPhotos],
+    status: 'submitted',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    compensation: null,
+    logs: [{ time: new Date().toISOString(), action: '提報', operator: '客服人員', note: '由後台管理員代為建立' }]
+  };
+  complaints.unshift(c);
+  applyFilter();
+  closeCreateModal();
+  showToast('✅ 客訴案件已建立');
+}
 
 // ─── Category Modal ───────────────────────────────────────────
 let catWorkingList = []; // 編輯中的暫存清單
