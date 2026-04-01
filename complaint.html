@@ -1083,7 +1083,7 @@ function startComplaint(orderId, location) {
 // ─── Member: My list ──────────────────────────────────────────
 function renderMyList() {
   const el = document.getElementById('myListBody');
-  const mine = complaints.filter(c => c.memberId === ME);
+  const mine = complaints.filter(c => c.memberId === ME).slice().sort((a,b) => b.createdAt.localeCompare(a.createdAt));
   if (!mine.length) {
     el.innerHTML = `<div class="empty-state"><div class="ei">📭</div><p>目前沒有客訴紀錄</p></div>`; return;
   }
@@ -1112,6 +1112,7 @@ function cardHtml(c, isAdmin) {
 // ─── Admin list ───────────────────────────────────────────────
 function renderAdminList(list) {
   if (list === undefined) list = complaints;
+  list = list.slice().sort((a,b) => b.createdAt.localeCompare(a.createdAt));
   const el = document.getElementById('adminListBody');
   if (!list.length) {
     el.innerHTML = `<div class="empty-state"><div class="ei">🔍</div><p>沒有符合條件的案件</p></div>`; return;
