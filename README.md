@@ -18,18 +18,6 @@ https://kensheu.github.io/my-demo-sites/
 
 手機版（< 768px）：頂部列收合為 hamburger 選單，左側邊欄隱藏。
 
-## 頁面清單
-
-- [Portal 入口](https://kensheu.github.io/my-demo-sites/index.html)
-- [公告系統](https://kensheu.github.io/my-demo-sites/announcement.html)（內部後台 / 店家後台 / 訂餐前台 三合一）
-- [採購首頁](https://kensheu.github.io/my-demo-sites/purchasing-home.html)
-- [餐點管理（內部後台）](https://kensheu.github.io/my-demo-sites/menu-items.html)
-- [餐點管理（店家後台）](https://kensheu.github.io/my-demo-sites/store-menu.html)
-- [餐點異動紀錄](https://kensheu.github.io/my-demo-sites/price-change-log.html)
-- [店家異動審核](https://kensheu.github.io/my-demo-sites/change-review.html)
-- [菜單排程管理](https://kensheu.github.io/my-demo-sites/menu-schedule.html)
-- [客訴管理](https://kensheu.github.io/my-demo-sites/complaint.html?mode=admin)
-- [問題單 & ECR](https://kensheu.github.io/my-demo-sites/issue-and-ecr.html)
 
 ---
 
