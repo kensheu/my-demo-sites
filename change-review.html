@@ -903,6 +903,16 @@ document.querySelectorAll('.overlay').forEach(o => {
 /* ── Init ── */
 renderPending();
 renderDone();
+
+/* ── URL 參數自動篩選 ── */
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var filter = params.get('filter');
+  if (filter) {
+    var pill = document.querySelector('.pill[onclick*="\'' + filter + '\'"]');
+    if (pill) filterType(pill, filter);
+  }
+})();
 </script>
 </body>
 </html>

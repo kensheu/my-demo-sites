@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美編首頁</title>
+<link rel="stylesheet" href="shared-nav.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f3f2ef;
+  --card:     #ffffff;
+  --border:   #e5e5e4;
+  --text:     #1c1b1a;
+  --text-2:   #57534e;
+  --text-3:   #a8a29e;
+  --kpi:      rgb(0, 193, 215);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* ─── 主要區塊（KPI + 列表左右並排） ─── */
+.section {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 700px) {
+  .section { grid-template-columns: 1fr; }
+}
+
+/* ─── KPI 卡 ─── */
+.kpi-card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+.kpi-label {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.kpi-num {
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--kpi);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-unit {
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* ─── 列表卡 ─── */
+.list-card {
+  background: var(--card);
+  border-radius: 10px;
+  overflow: hidden;
+  max-height: 176px; /* 4列 × 44px */
+  overflow-y: auto;
+}
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+  cursor: default;
+}
+.list-row:last-child { border-bottom: none; }
+.list-row:hover { background: #f0f8ff; }
+a.list-row { text-decoration: none; color: inherit; cursor: pointer; }
+
+.row-name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.row-meta {
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 150px;
+  text-align: right;
+}
+.row-meta.date-col {
+  width: 130px;
+}
+.row-meta.publish-col {
+  width: 160px;
+}
+
+/* 刪除按鈕 */
+.btn-del {
+  flex-shrink: 0;
+  width: 72px;
+  margin-left: 0;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #9ca3af;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+.btn-del:hover {
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+/* 數字方形底色 */
+.num-badge {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 5px;
+  background: rgb(0, 193, 215);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 3px;
+  text-align: center;
+  margin-left: 4px;
+  line-height: 1.6;
+}
+
+/* EDM 左側標籤 */
+.edm-label {
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.edm-district {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-left: 6px;
+}
+
+/* ─── 內部公告 ─── */
+.announce-card {
+  background: var(--card);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.announce-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.announce-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.announce-tabs {
+  display: flex;
+  gap: 0;
+}
+.ann-tab {
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text-2);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+.ann-tab:hover { color: var(--text); }
+.ann-tab.active {
+  color: rgb(0, 193, 215);
+  border-bottom-color: rgb(0, 193, 215);
+  font-weight: 600;
+}
+
+.announce-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 10px 0 0;
+}
+
+.ann-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s, opacity 0.2s;
+}
+.ann-row:last-child { border-bottom: none; }
+.ann-row:hover { background: #f0f8ff; }
+.ann-row.read { opacity: 0.3; }
+
+.ann-text {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ann-tag {
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #e0f7fa;
+  color: #00838f;
+}
+.ann-tag.activity { background: #fef3c7; color: #b45309; }
+.ann-tag.other    { background: #f3f4f6; color: #6b7280; }
+.ann-date {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-3);
+  white-space: nowrap;
+  width: 160px;
+  text-align: right;
+}
+</style>
+</head>
+<body>
+<script src="shared-nav.js"></script>
+<div class="page">
+
+  <h1 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:20px;">美編首頁</h1>
+
+  <!-- ── 區塊一：新店家 ── -->
+  <div class="section" id="sec-store">
+    <div class="kpi-card">
+      <div class="kpi-label">新店家</div>
+      <div class="kpi-num" id="kpi-store">6</div>
+      <div class="kpi-unit">間</div>
+    </div>
+    <div class="list-card" id="list-store">
+      <div class="list-row" data-month="4">
+        <span class="row-name">OO 雞飯專門店 <span class="num-badge">6</span></span>
+        <span class="row-meta">預計使用月份：4 月</span>
+        <button class="btn-del" onclick="deleteRow(this,'store')">刪除通知</button>
+      </div>
+      <div class="list-row" data-month="5">
+        <span class="row-name">AA 鹹點專門店 <span class="num-badge">12</span></span>
+        <span class="row-meta">預計使用月份：5 月</span>
+        <button class="btn-del" onclick="deleteRow(this,'store')">刪除通知</button>
+      </div>
+      <div class="list-row" data-month="6">
+        <span class="row-name">BB 素食專門店 <span class="num-badge">3</span></span>
+        <span class="row-meta">預計使用月份：6 月</span>
+        <button class="btn-del" onclick="deleteRow(this,'store')">刪除通知</button>
+      </div>
+      <div class="list-row" data-month="6">
+        <span class="row-name">CC 日式便當 <span class="num-badge">8</span></span>
+        <span class="row-meta">預計使用月份：6 月</span>
+        <button class="btn-del" onclick="deleteRow(this,'store')">刪除通知</button>
+      </div>
+      <div class="list-row" data-month="7">
+        <span class="row-name">DD 韓式炸雞 <span class="num-badge">5</span></span>
+        <span class="row-meta">預計使用月份：7 月</span>
+        <button class="btn-del" onclick="deleteRow(this,'store')">刪除通知</button>
+      </div>
+      <div class="list-row" data-month="7">
+        <span class="row-name">EE 泰式料理 <span class="num-badge">9</span></span>
+        <span class="row-meta">預計使用月份：7 月</span>
+        <button class="btn-del" onclick="deleteRow(this,'store')">刪除通知</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 區塊二：待審圖片 ── -->
+  <div class="section" id="sec-review">
+    <div class="kpi-card">
+      <div class="kpi-label">待審圖片</div>
+      <div class="kpi-num" id="kpi-review">6</div>
+      <div class="kpi-unit">件</div>
+    </div>
+    <div class="list-card" id="list-review">
+      <a class="list-row" href="change-review.html?filter=image">
+        <span class="row-name">XX 早餐店 <span class="num-badge">6</span></span>
+        <span class="row-meta">預計使用月份：4 月</span>
+        <span class="row-meta date-col">申請日期：2026/3/5</span>
+      </a>
+      <a class="list-row" href="change-review.html?filter=image">
+        <span class="row-name">BB 壽司盒 <span class="num-badge">3</span></span>
+        <span class="row-meta">預計使用月份：5 月</span>
+        <span class="row-meta date-col">申請日期：2026/3/18</span>
+      </a>
+      <a class="list-row" href="change-review.html?filter=image">
+        <span class="row-name">CC 年糕盒 <span class="num-badge">2</span></span>
+        <span class="row-meta">預計使用月份：6 月</span>
+        <span class="row-meta date-col">申請日期：2026/3/22</span>
+      </a>
+      <a class="list-row" href="change-review.html?filter=image">
+        <span class="row-name">DD 便當盒 <span class="num-badge">4</span></span>
+        <span class="row-meta">預計使用月份：6 月</span>
+        <span class="row-meta date-col">申請日期：2026/3/29</span>
+      </a>
+      <a class="list-row" href="change-review.html?filter=image">
+        <span class="row-name">EE 壽喜燒 <span class="num-badge">7</span></span>
+        <span class="row-meta">預計使用月份：7 月</span>
+        <span class="row-meta date-col">申請日期：2026/4/2</span>
+      </a>
+      <a class="list-row" href="change-review.html?filter=image">
+        <span class="row-name">FF 義式披薩 <span class="num-badge">5</span></span>
+        <span class="row-meta">預計使用月份：7 月</span>
+        <span class="row-meta date-col">申請日期：2026/4/5</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ── 區塊三：可製作 EDM ── -->
+  <div class="section" id="sec-edm">
+    <div class="kpi-card">
+      <div class="kpi-label">可製作 EDM</div>
+      <div class="kpi-num" id="kpi-edm">6</div>
+      <div class="kpi-unit">通知</div>
+    </div>
+    <div class="list-card" id="list-edm">
+      <div class="list-row" data-date="20260320">
+        <span class="row-name"><span class="edm-label">2026年4月</span><span class="edm-district"> | 新竹A廠、新竹B廠</span></span>
+        <span class="row-meta publish-col">發布時間：2026/3/20</span>
+        <button class="btn-del" onclick="deleteRow(this,'edm')">刪除通知</button>
+      </div>
+      <div class="list-row" data-date="20260401">
+        <span class="row-name"><span class="edm-label">2026年4月</span><span class="edm-district"> | 台北A路</span></span>
+        <span class="row-meta publish-col">發布時間：2026/4/1</span>
+        <button class="btn-del" onclick="deleteRow(this,'edm')">刪除通知</button>
+      </div>
+      <div class="list-row" data-date="20260401">
+        <span class="row-name"><span class="edm-label">2026年4月</span><span class="edm-district"> | 台南A路</span></span>
+        <span class="row-meta publish-col">發布時間：2026/4/1</span>
+        <button class="btn-del" onclick="deleteRow(this,'edm')">刪除通知</button>
+      </div>
+      <div class="list-row" data-date="20260401">
+        <span class="row-name"><span class="edm-label">2026年4月</span><span class="edm-district"> | 台中A路</span></span>
+        <span class="row-meta publish-col">發布時間：2026/4/1</span>
+        <button class="btn-del" onclick="deleteRow(this,'edm')">刪除通知</button>
+      </div>
+      <div class="list-row" data-date="20260408">
+        <span class="row-name"><span class="edm-label">2026年4月</span><span class="edm-district"> | 竹北A廠</span></span>
+        <span class="row-meta publish-col">發布時間：2026/4/8</span>
+        <button class="btn-del" onclick="deleteRow(this,'edm')">刪除通知</button>
+      </div>
+      <div class="list-row" data-date="20260415">
+        <span class="row-name"><span class="edm-label">2026年4月</span><span class="edm-district"> | 桃園A廠、桃園B廠</span></span>
+        <span class="row-meta publish-col">發布時間：2026/4/15</span>
+        <button class="btn-del" onclick="deleteRow(this,'edm')">刪除通知</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 區塊四：內部公告 ── -->
+  <div class="announce-card">
+    <div class="announce-header">
+      <span class="announce-title">內部公告</span>
+      <div class="announce-tabs">
+        <button class="ann-tab active" onclick="annTab(this,'all')">全部</button>
+        <button class="ann-tab" onclick="annTab(this,'unread')">未讀</button>
+        <button class="ann-tab" onclick="annTab(this,'system')">系統公告</button>
+        <button class="ann-tab" onclick="annTab(this,'activity')">活動資訊</button>
+      </div>
+    </div>
+    <hr class="announce-divider">
+    <div id="ann-list" style="max-height:176px;overflow-y:auto;">
+      <div class="ann-row" data-cat="system" onclick="markRead(this)">
+        <span class="ann-tag">系統公告</span>
+        <span class="ann-text">系統維護通知：4/5 凌晨 00:00–01:00 停機維護</span>
+        <span class="ann-date">2026/4/1 09:00 發布</span>
+      </div>
+      <div class="ann-row" data-cat="system" onclick="markRead(this)">
+        <span class="ann-tag">系統公告</span>
+        <span class="ann-text">2026 Q2 美編排班規則更新說明</span>
+        <span class="ann-date">2026/3/28 14:30 發布</span>
+      </div>
+      <div class="ann-row read" data-cat="activity" onclick="markRead(this)">
+        <span class="ann-tag activity">活動資訊</span>
+        <span class="ann-text">4月員工旅遊報名截止提醒</span>
+        <span class="ann-date">2026/3/25 10:15 發布</span>
+      </div>
+      <div class="ann-row" data-cat="system" onclick="markRead(this)">
+        <span class="ann-tag">系統公告</span>
+        <span class="ann-text">新增廠區 EDM 操作教學影片</span>
+        <span class="ann-date">2026/3/20 16:00 發布</span>
+      </div>
+      <div class="ann-row read" data-cat="activity" onclick="markRead(this)">
+        <span class="ann-tag activity">活動資訊</span>
+        <span class="ann-text">3月生日壽星慶生活動</span>
+        <span class="ann-date">2026/3/15 11:00 發布</span>
+      </div>
+      <div class="ann-row" data-cat="other" onclick="markRead(this)">
+        <span class="ann-tag other">其他</span>
+        <span class="ann-text">美編部門 2026 Q2 工作目標公告</span>
+        <span class="ann-date">2026/3/10 09:30 發布</span>
+      </div>
+      <div class="ann-row" data-cat="system" onclick="markRead(this)">
+        <span class="ann-tag">系統公告</span>
+        <span class="ann-text">圖庫系統版本更新說明 v2.4.1</span>
+        <span class="ann-date">2026/3/5 13:45 發布</span>
+      </div>
+      <div class="ann-row read" data-cat="other" onclick="markRead(this)">
+        <span class="ann-tag other">其他</span>
+        <span class="ann-text">辦公室搬遷通知：新地址於 4/10 正式啟用</span>
+        <span class="ann-date">2026/2/28 17:00 發布</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── 刪除通知（區塊一 & 三） ── */
+  function deleteRow(btn, section) {
+    var row = btn.closest('.list-row');
+    var list = row.parentElement;
+    row.remove();
+    var kpiEl = document.getElementById('kpi-' + section);
+    kpiEl.textContent = list.querySelectorAll('.list-row').length;
+  }
+
+  /* ── 公告：點擊標記已讀 ── */
+  function markRead(row) {
+    row.classList.add('read');
+  }
+
+  /* ── 公告 Tab 篩選 ── */
+  function annTab(btn, cat) {
+    document.querySelectorAll('.ann-tab').forEach(function(t){ t.classList.remove('active'); });
+    btn.classList.add('active');
+
+    document.querySelectorAll('#ann-list .ann-row').forEach(function(row) {
+      var show;
+      if (cat === 'all') {
+        show = true;
+      } else if (cat === 'unread') {
+        show = !row.classList.contains('read');
+      } else {
+        show = row.dataset.cat === cat;
+      }
+      row.style.display = show ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>

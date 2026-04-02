@@ -33,6 +33,11 @@
             match: function (p) { return p.file === 'purchasing-home.html'; }
           },
           {
+            label: '美編首頁',
+            url: 'editorial-home.html',
+            match: function (p) { return p.file === 'editorial-home.html'; }
+          },
+          {
             label: '餐點管理',
             url: 'menu-items.html',
             match: function (p) { return p.file === 'menu-items.html'; }
