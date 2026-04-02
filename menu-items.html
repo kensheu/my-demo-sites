@@ -858,8 +858,8 @@ select {
           <img class="overlay-preview-img" src="圖片/僅供參考.png" alt="僅供參考">
         </div>
         <div class="overlay-setting-item" id="osi-blank" onclick="toggleOverlay('blank',this)">
-          <label><input type="checkbox" id="oc-blank" onclick="event.stopPropagation();toggleOverlay('blank',this.closest('.overlay-setting-item'))"> 截角圖（空白）</label>
-          <img class="overlay-preview-img" src="圖片/截角圖-空白.png" alt="截角圖-空白">
+          <label><input type="checkbox" id="oc-blank" onclick="event.stopPropagation();toggleOverlay('blank',this.closest('.overlay-setting-item'))"> 截角圖（透明）</label>
+          <img class="overlay-preview-img" src="圖片/截角圖-透明.png" alt="截角圖-透明">
         </div>
         <div class="overlay-setting-item" id="osi-random" onclick="toggleOverlay('random',this)">
           <label><input type="checkbox" id="oc-random" onclick="event.stopPropagation();toggleOverlay('random',this.closest('.overlay-setting-item'))"> 隨機出貨一款</label>
@@ -1676,7 +1676,7 @@ renderAll();
 const overlayOptions = {
   veggie: { src: '圖片/蛋奶素.png',          cbId: 'oc-veggie', itemId: 'osi-veggie' },
   ref:    { src: '圖片/僅供參考.png',         cbId: 'oc-ref',    itemId: 'osi-ref'    },
-  blank:  { src: '圖片/截角圖-空白.png',      cbId: 'oc-blank',  itemId: 'osi-blank'  },
+  blank:  { src: '圖片/截角圖-透明.png',      cbId: 'oc-blank',  itemId: 'osi-blank'  },
   random: { src: '圖片/隨機出貨一款-01.png',  cbId: 'oc-random', itemId: 'osi-random' },
 };
 let activeOverlays = new Set();
