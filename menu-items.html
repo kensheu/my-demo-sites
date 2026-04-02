@@ -698,6 +698,7 @@ select {
             <div class="img-hint">點擊縮圖或按鈕上傳圖片，支援 JPG / PNG。</div>
             <div class="img-btns">
               <button type="button" class="act-btn" onclick="document.getElementById('img-file-input').click()">上傳圖片</button>
+              <button type="button" class="act-btn" id="img-dl-btn" onclick="downloadEditImg()" style="display:none">下載圖片</button>
               <button type="button" class="act-btn danger" id="img-del-btn" onclick="clearImg()" style="display:none">移除圖片</button>
             </div>
           </div>
@@ -1392,6 +1393,7 @@ function calcPrices() {
 function resetImgUpload() {
   document.getElementById('img-thumb').innerHTML = `<span id="img-placeholder-icon">🖼</span>`;
   document.getElementById('img-del-btn').style.display = 'none';
+  document.getElementById('img-dl-btn').style.display = 'none';
   document.getElementById('img-file-input').value = '';
 }
 
@@ -1403,6 +1405,7 @@ function setThumbImg(src) {
   const thumb = document.getElementById('img-thumb');
   thumb.innerHTML = `<img src="${src}" alt="圖片預覽"><div class="img-thumb-zoom">🔍</div>`;
   document.getElementById('img-del-btn').style.display = '';
+  document.getElementById('img-dl-btn').style.display = '';
 }
 
 function loadImgUpload(item) {
@@ -1412,6 +1415,34 @@ function loadImgUpload(item) {
   } else {
     thumb.innerHTML = `<span id="img-placeholder-icon">🖼</span>`;
     document.getElementById('img-del-btn').style.display = 'none';
+    document.getElementById('img-dl-btn').style.display = 'none';
+  }
+}
+
+function downloadEditImg() {
+  const imgEl = document.getElementById('img-thumb').querySelector('img');
+  if (!imgEl) return;
+  const editId = editingId || 'image';
+  function doDownload() {
+    const canvas = document.createElement('canvas');
+    canvas.width = imgEl.naturalWidth;
+    canvas.height = imgEl.naturalHeight;
+    canvas.getContext('2d').drawImage(imgEl, 0, 0);
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = editId + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+  if (imgEl.complete && imgEl.naturalWidth) {
+    doDownload();
+  } else {
+    imgEl.onload = doDownload;
   }
 }
 
