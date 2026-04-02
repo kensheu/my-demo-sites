@@ -284,6 +284,7 @@ body {
 .item-name { flex: 1; }
 .item-price { font-size: 14px; color: var(--text-3); white-space: nowrap; }
 .item-price.auto-price { color: var(--green); }
+.item-cost-badge { font-size: 12px; color: #e65100; white-space: nowrap; }
 .item-del {
   background: none; border: none; color: var(--text-3); cursor: pointer;
   font-size: 14px; padding: 0; line-height: 1; flex-shrink: 0; opacity: 0;
@@ -291,10 +292,15 @@ body {
 .item-row:hover .item-del { opacity: 1; }
 .item-del:hover { color: var(--red); }
 .item-row-detail {
-  display: grid; grid-template-columns: auto 1fr 1fr 1fr 1fr;
-  gap: 0; border-top: 1px solid var(--border-2);
+  display: flex; flex-direction: column;
+  border-top: 1px solid var(--border-2);
   background: var(--bg-2);
 }
+.item-row-detail-line {
+  display: flex; border-bottom: 1px solid var(--border-2);
+}
+.item-row-detail-line:last-child { border-bottom: none; }
+.item-row-detail-line .item-row-detail-cell { flex: 1; }
 .item-row-detail-cell {
   padding: 9px 14px; border-right: 1px solid var(--border-2);
   font-size: 14px;
@@ -358,6 +364,17 @@ body {
 }
 .modal-close:hover { color: var(--text); }
 .modal-body { padding: 20px 22px; }
+.modal-context-bar {
+  display: flex; align-items: center; gap: 0;
+  background: var(--bg-2); border: 1px solid var(--border-2);
+  border-radius: 8px; padding: 8px 14px; margin-bottom: 18px;
+  font-size: 13px; color: var(--text-2); flex-wrap: wrap; gap: 4px;
+}
+.modal-context-bar:empty { display: none; }
+.ctx-site { font-weight: 600; color: var(--text-1); }
+.ctx-date { color: var(--text-2); }
+.ctx-sep  { color: var(--text-3); padding: 0 2px; }
+.ctx-meal { font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
 .modal-foot {
   padding: 14px 22px; border-top: 1px solid var(--border);
   display: flex; gap: 8px; justify-content: flex-end;
@@ -395,12 +412,16 @@ body {
 .item-check-row.already-added { opacity: .45; cursor: not-allowed; }
 .item-check-row.already-added:hover { background: none; }
 .item-check-name { flex: 1; font-size: 15px; }
+.item-check-cost { font-size: 12px; color: #e65100; white-space: nowrap; }
 .item-check-price { font-size: 14px; color: var(--text-3); white-space: nowrap; }
 .item-extra {
   display: none; padding: 10px 12px 12px 37px;
   background: var(--bg-2); border-bottom: 1px solid var(--border-2);
 }
-.item-extra.show { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: end; }
+.item-extra.show { display: flex; flex-direction: column; gap: 0; }
+.item-extra-row { display: flex; gap: 8px; align-items: end; padding: 0 0 8px; }
+.item-extra-row + .item-extra-row { padding-top: 8px; border-top: 1px solid var(--border-2); }
+.item-extra-row > div { flex: 1; }
 .item-extra-label { font-size: 13px; color: var(--text-2); margin-bottom: 4px; }
 .item-extra input[type=number] { width: 100%; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
 .item-extra .cabinet-opts { display: flex; gap: 12px; padding: 6px 0; }
@@ -576,24 +597,50 @@ body {
 }
 /* 品項行（MB 用）*/
 .mb-item-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; border-bottom: 1px solid var(--border-2); font-size: 14px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border-2);
 }
 .mb-item-row:last-child { border-bottom: none; }
-.mb-item-name { flex: 1; }
-.mb-item-qty { color: var(--text-3); font-size: 12px; white-space: nowrap; }
-.mb-item-price { color: var(--text-2); font-size: 12px; white-space: nowrap; }
-.mb-item-note { color: var(--text-3); font-size: 11px; font-style: italic; }
+.mb-item-name { font-size: 15px; font-weight: 500; color: var(--text-1); margin-bottom: 6px; }
+.mb-item-stats {
+  display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center;
+}
+.mb-item-stat {
+  display: flex; align-items: baseline; gap: 3px;
+}
+.mb-item-stat-label { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+.mb-item-qty .mb-item-stat-val { font-size: 15px; color: var(--text-2); font-weight: 500; }
+.mb-item-cost .mb-item-stat-val { font-size: 15px; color: #e65100; font-weight: 500; }
+.mb-item-payable .mb-item-stat-val { font-size: 15px; color: #e65100; font-weight: 600; }
+.mb-item-price .mb-item-stat-val { font-size: 15px; color: var(--text-2); font-weight: 500; }
+.mb-item-receivable .mb-item-stat-val { font-size: 15px; color: var(--green); font-weight: 600; }
+.mb-item-profit .mb-item-stat-val { font-size: 15px; color: var(--purple); font-weight: 700; }
+.mb-item-profit.negative .mb-item-stat-val { color: #d32f2f; }
+.mb-item-note { font-size: 12px; color: var(--text-3); font-style: italic; margin-top: 4px; }
 /* MB modal 品項列表 */
 .mb-picker-item-row {
   display: flex; align-items: center; gap: 8px;
   padding: 7px 14px; border-bottom: 1px solid var(--border-2); font-size: 13px;
 }
 .mb-picker-item-row:last-child { border-bottom: none; }
-.mb-picker-item-row label { display: flex; align-items: center; gap: 6px; flex: 1; cursor: pointer; }
+.mb-picker-item-check {
+  display: flex; align-items: center; gap: 6px;
+  flex: 1; min-width: 0; cursor: pointer;
+}
+.mb-picker-item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mb-picker-item-prices {
+  display: flex; align-items: center; gap: 8px;
+  width: 180px; flex-shrink: 0;
+}
+.mb-cost-label { font-size: 12px; color: #e65100; white-space: nowrap; flex: 1; }
+.mb-price-wrap { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.mb-price-label { font-size: 12px; color: var(--text-3); }
+.mb-price-input {
+  width: 64px; padding: 3px 6px; border: 1px solid var(--border);
+  border-radius: 5px; font-size: 13px; text-align: center;
+}
 .mb-picker-item-row .mb-qty-input {
   width: 58px; padding: 3px 6px; border: 1px solid var(--border);
-  border-radius: 5px; font-size: 13px; text-align: center;
+  border-radius: 5px; font-size: 13px; text-align: center; flex-shrink: 0;
 }
 .mb-picker-item-row .mb-note-input {
   flex: 1; padding: 3px 8px; border: 1px solid var(--border);
@@ -791,6 +838,7 @@ body {
       <button class="modal-close" onclick="closeModal('rest-picker-modal')">✕</button>
     </div>
     <div class="modal-body">
+      <div class="modal-context-bar" id="rest-picker-context"></div>
       <div class="form-group">
         <div class="form-label">選擇餐廳</div>
         <div class="custom-dropdown" id="rest-dropdown">
@@ -844,6 +892,7 @@ body {
       <button class="modal-close" onclick="closeModal('meeting-bento-modal')">✕</button>
     </div>
     <div class="modal-body">
+      <div class="modal-context-bar" id="mb-picker-context"></div>
 
       <div class="form-group" id="mb-site-group">
         <div class="form-label">廠區</div>
@@ -889,9 +938,10 @@ body {
       <div id="mb-branch-section" style="display:none">
         <div class="form-group">
           <div class="form-label">選擇分店</div>
-          <select class="form-select" id="mb-branch-select" style="margin-top:4px">
+          <select class="form-select" id="mb-branch-select" style="margin-top:4px" onchange="document.getElementById('mb-branch-err').classList.remove('show')">
             <option value="">請選擇分店…</option>
           </select>
+          <div class="inline-error" id="mb-branch-err" style="margin-top:6px">⚠ 請選擇分店</div>
         </div>
       </div>
 
@@ -910,6 +960,7 @@ body {
           <div class="form-label" style="margin-bottom:0">品項與數量</div>
         </div>
         <div id="mb-item-list" style="border:1px solid var(--border);border-radius:8px;overflow:hidden"></div>
+        <div class="inline-error" id="mb-item-err" style="margin-top:6px">⚠ 請至少勾選一個品項</div>
       </div>
 
     </div>
@@ -1225,10 +1276,10 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I001', name: '雞腿便當', en: 'Chicken Leg Bento', priceTiers: [{ price: 100, effectiveFrom: null }, { price: 110, effectiveFrom: '2026-05-01' }] },
-      { id: 'I002', name: '排骨便當', en: 'Pork Rib Bento',    priceTiers: [{ price: 95, effectiveFrom: null }] },
-      { id: 'I003', name: '控肉飯',   en: 'Braised Pork Rice', priceTiers: [{ price: 85, effectiveFrom: null }] },
-      { id: 'I004', name: '滷肉飯',   en: 'Minced Pork Rice',  priceTiers: [{ price: 75, effectiveFrom: null }, { price: 80, effectiveFrom: '2026-05-01' }] },
+      { id: 'I001', name: '雞腿便當', en: 'Chicken Leg Bento', priceTiers: [{ cost: 78, price: 100, effectiveFrom: null }, { cost: 85, price: 110, effectiveFrom: '2026-05-01' }] },
+      { id: 'I002', name: '排骨便當', en: 'Pork Rib Bento',    priceTiers: [{ cost: 72, price: 95, effectiveFrom: null }] },
+      { id: 'I003', name: '控肉飯',   en: 'Braised Pork Rice', priceTiers: [{ cost: 65, price: 85, effectiveFrom: null }] },
+      { id: 'I004', name: '滷肉飯',   en: 'Minced Pork Rice',  priceTiers: [{ cost: 55, price: 75, effectiveFrom: null }, { cost: 60, price: 80, effectiveFrom: '2026-05-01' }] },
     ]
   },
   {
@@ -1237,11 +1288,11 @@ const restaurants = [
     closedWeekdays: { breakfast:[0], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-05-01'],
     mealTypes: { breakfast: true, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I010', name: '奶油厚片',     en: 'Butter Toast',          priceTiers: [{ price: 40, effectiveFrom: null }] },
-      { id: 'I011', name: '原味蛋餅',     en: 'Plain Egg Crepe',        priceTiers: [{ price: 35, effectiveFrom: null }] },
-      { id: 'I012', name: '總匯蛋餅',     en: 'Club Egg Crepe',         priceTiers: [{ price: 55, effectiveFrom: null }] },
-      { id: 'I013', name: '火腿蛋餅',     en: 'Ham Egg Crepe',          priceTiers: [{ price: 50, effectiveFrom: null }] },
-      { id: 'I014', name: '起司雙層蛋餅', en: 'Double Cheese Egg Crepe',priceTiers: [{ price: 60, effectiveFrom: null }] },
+      { id: 'I010', name: '奶油厚片',     en: 'Butter Toast',          priceTiers: [{ cost: 28, price: 40, effectiveFrom: null }] },
+      { id: 'I011', name: '原味蛋餅',     en: 'Plain Egg Crepe',        priceTiers: [{ cost: 22, price: 35, effectiveFrom: null }] },
+      { id: 'I012', name: '總匯蛋餅',     en: 'Club Egg Crepe',         priceTiers: [{ cost: 38, price: 55, effectiveFrom: null }] },
+      { id: 'I013', name: '火腿蛋餅',     en: 'Ham Egg Crepe',          priceTiers: [{ cost: 35, price: 50, effectiveFrom: null }] },
+      { id: 'I014', name: '起司雙層蛋餅', en: 'Double Cheese Egg Crepe',priceTiers: [{ cost: 42, price: 60, effectiveFrom: null }] },
     ]
   },
   {
@@ -1250,9 +1301,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[6,0], afternoon:[], dinner:[6,0], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
-      { id: 'I020', name: '三層肉便當', en: 'Pork Belly Bento',     priceTiers: [{ price: 90, effectiveFrom: null }] },
-      { id: 'I021', name: '雞肉飯',     en: 'Chicken Rice',         priceTiers: [{ price: 70, effectiveFrom: null }] },
-      { id: 'I022', name: '素食便當',   en: 'Vegetarian Bento',     priceTiers: [{ price: 80, effectiveFrom: null }] },
+      { id: 'I020', name: '三層肉便當', en: 'Pork Belly Bento',     priceTiers: [{ cost: 68, price: 90, effectiveFrom: null }] },
+      { id: 'I021', name: '雞肉飯',     en: 'Chicken Rice',         priceTiers: [{ cost: 50, price: 70, effectiveFrom: null }] },
+      { id: 'I022', name: '素食便當',   en: 'Vegetarian Bento',     priceTiers: [{ cost: 58, price: 80, effectiveFrom: null }] },
     ]
   },
   {
@@ -1261,9 +1312,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
-      { id: 'I030', name: '紅燒牛腩飯', en: 'Braised Beef Brisket Rice', priceTiers: [{ price: 130, effectiveFrom: null }] },
-      { id: 'I031', name: '咖哩雞飯',   en: 'Curry Chicken Rice',        priceTiers: [{ price: 110, effectiveFrom: null }] },
-      { id: 'I032', name: '麻婆豆腐飯', en: 'Mapo Tofu Rice',            priceTiers: [{ price: 100, effectiveFrom: null }] },
+      { id: 'I030', name: '紅燒牛腩飯', en: 'Braised Beef Brisket Rice', priceTiers: [{ cost: 95, price: 130, effectiveFrom: null }] },
+      { id: 'I031', name: '咖哩雞飯',   en: 'Curry Chicken Rice',        priceTiers: [{ cost: 80, price: 110, effectiveFrom: null }] },
+      { id: 'I032', name: '麻婆豆腐飯', en: 'Mapo Tofu Rice',            priceTiers: [{ cost: 72, price: 100, effectiveFrom: null }] },
     ]
   },
   {
@@ -1272,9 +1323,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-04-04'],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I040', name: '陽春麵', en: 'Plain Noodle Soup',    priceTiers: [{ price: 55, effectiveFrom: null }] },
-      { id: 'I041', name: '牛肉麵', en: 'Beef Noodle Soup',     priceTiers: [{ price: 120, effectiveFrom: null }] },
-      { id: 'I042', name: '刀削麵', en: 'Knife-Cut Noodle Soup',priceTiers: [{ price: 85, effectiveFrom: null }] },
+      { id: 'I040', name: '陽春麵', en: 'Plain Noodle Soup',    priceTiers: [{ cost: 38, price: 55, effectiveFrom: null }] },
+      { id: 'I041', name: '牛肉麵', en: 'Beef Noodle Soup',     priceTiers: [{ cost: 88, price: 120, effectiveFrom: null }] },
+      { id: 'I042', name: '刀削麵', en: 'Knife-Cut Noodle Soup',priceTiers: [{ cost: 62, price: 85, effectiveFrom: null }] },
     ]
   },
 ];
@@ -1484,39 +1535,50 @@ function renderDetailBody(dateStr) {
     const items  = entry.items.map(it => {
       const hotChecked  = (it.cabinet || 'hot') === 'hot';
       const did = `${entry.entryId}-${it.itemId}`;
+      const itemDef = rest.items.find(i => i.id === it.itemId);
+      const costPrice = itemDef ? getCostForDate(itemDef, dateStr) : 0;
       return `<li class="item-row" data-item-id="${it.itemId}">
         <div class="item-row-top">
           <span class="item-name">${it.name}</span>
+          <span class="item-cost-badge">成本 $${costPrice}</span>
           <span class="item-price${it.isAuto?' auto-price':''}">$${it.price}${it.isAuto?' <span class="tag-auto">自動帶入</span>':''}</span>
           <button class="item-del" onclick="removeItem('${dateStr}','${entry.entryId}','${it.itemId}')">✕</button>
         </div>
         <div class="item-row-detail">
-          <div class="item-row-detail-cell">
-            <label>終端價</label>
-            <input type="number" min="0" value="${it.price}"
-              onchange="saveItemPrice('${dateStr}','${entry.entryId}','${it.itemId}',+this.value)">
-          </div>
-          <div class="item-row-detail-cell">
-            <label>櫃位</label>
-            <div class="cabinet-opts">
-              <label><input type="radio" name="det-cab-${did}" value="hot" ${hotChecked?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinet',this.value)"> 熱櫃</label>
-              <label><input type="radio" name="det-cab-${did}" value="cold" ${!hotChecked?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinet',this.value)"> 冷櫃</label>
+          <div class="item-row-detail-line">
+            <div class="item-row-detail-cell">
+              <label>成本價</label>
+              <div style="padding:4px 0;font-size:13px;color:var(--text-3)">$${costPrice}</div>
+            </div>
+            <div class="item-row-detail-cell">
+              <label>終端價</label>
+              <input type="number" min="0" value="${it.price}"
+                onchange="saveItemPrice('${dateStr}','${entry.entryId}','${it.itemId}',+this.value)">
+            </div>
+            <div class="item-row-detail-cell">
+              <label>櫃位</label>
+              <div class="cabinet-opts">
+                <label><input type="radio" name="det-cab-${did}" value="hot" ${hotChecked?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinet',this.value)"> 熱櫃</label>
+                <label><input type="radio" name="det-cab-${did}" value="cold" ${!hotChecked?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinet',this.value)"> 冷櫃</label>
+              </div>
             </div>
           </div>
-          <div class="item-row-detail-cell">
-            <label>線上可預約數</label>
-            <input type="number" min="0" placeholder="0" value="${it.onlineQty||0}"
-              onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','onlineQty',+this.value)">
-          </div>
-          <div class="item-row-detail-cell">
-            <label>線下可預約數</label>
-            <input type="number" min="0" placeholder="0" value="${it.offlineQty||0}"
-              onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','offlineQty',+this.value)">
-          </div>
-          <div class="item-row-detail-cell">
-            <label>店家預定數</label>
-            <input type="number" min="0" placeholder="0" value="${it.storeQty||0}"
-              onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','storeQty',+this.value)">
+          <div class="item-row-detail-line">
+            <div class="item-row-detail-cell">
+              <label>線上可預約數</label>
+              <input type="number" min="0" placeholder="0" value="${it.onlineQty||0}"
+                onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','onlineQty',+this.value)">
+            </div>
+            <div class="item-row-detail-cell">
+              <label>線下可預約數</label>
+              <input type="number" min="0" placeholder="0" value="${it.offlineQty||0}"
+                onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','offlineQty',+this.value)">
+            </div>
+            <div class="item-row-detail-cell">
+              <label>店家預定數</label>
+              <input type="number" min="0" placeholder="0" value="${it.storeQty||0}"
+                onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','storeQty',+this.value)">
+            </div>
           </div>
         </div>
       </li>`;
@@ -1910,6 +1972,11 @@ function getPriceForDate(item, dateStr) {
   return result;
 }
 
+function getCostForDate(item, dateStr) {
+  const tier = getPriceForDate(item, dateStr);
+  return tier.cost ?? 0;
+}
+
 function isRestClosed(rest, dateStr, mealType) {
   const wd = new Date(dateStr).getDay();
   const cw = rest.closedWeekdays;
@@ -2059,6 +2126,18 @@ function openRestPicker(dateStr) {
   document.getElementById('branch-picker-err').classList.remove('show');
   document.getElementById('branch-select-section').style.display = 'none';
   document.getElementById('item-checklist-section').style.display = 'none';
+  // 資訊列
+  const site     = sites.find(s => s.id === curSiteId);
+  const mealType = (mealFilter !== 'all') ? mealFilter : 'lunch';
+  const mi       = mealInfo(mealType);
+  const d        = new Date(dateStr);
+  const WD       = ['日','一','二','三','四','五','六'];
+  document.getElementById('rest-picker-context').innerHTML =
+    `<span class="ctx-site">${site?.name || '—'}</span>` +
+    `<span class="ctx-sep">／</span>` +
+    `<span class="ctx-date">${dateStr}（週${WD[d.getDay()]}）</span>` +
+    `<span class="ctx-sep">／</span>` +
+    `<span class="ctx-meal ${mi.tagCls}">${mi.label}</span>`;
   buildRestOptions(dateStr);
   openModal('rest-picker-modal');
 }
@@ -2117,37 +2196,47 @@ function buildNewRestItemChecklist() {
   const list = document.getElementById('item-checklist');
   list.innerHTML = rest.items.map(item => {
     const tier   = getPriceForDate(item, pickerDate);
+    const cost   = getCostForDate(item, pickerDate);
     const isAuto = !!tier.effectiveFrom;
     const eid    = 'iex-' + item.id;
     return `<div>
       <label class="item-check-row" onclick="toggleItemExtra('${eid}', this); updateNewRestItemCount()">
         <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" data-auto="${isAuto}" onclick="event.stopPropagation(); document.getElementById('${eid}').classList.toggle('show', this.checked); updateNewRestItemCount()">
         <span class="item-check-name">${item.name}</span>
+        <span class="item-check-cost">成本 $${cost}</span>
         <span class="item-check-price${isAuto?' is-auto':''}">$${tier.price}${isAuto?` <span class="item-check-auto-badge">自動帶入</span>`:''}</span>
       </label>
       <div class="item-extra" id="${eid}">
-        <div>
-          <div class="item-extra-label">終端價</div>
-          <input type="number" id="endprice-${item.id}" min="0" value="${tier.price}" style="width:100%">
-        </div>
-        <div>
-          <div class="item-extra-label">櫃位</div>
-          <div class="cabinet-opts">
-            <label><input type="radio" name="cabinet-${item.id}" value="hot" checked> 熱櫃</label>
-            <label><input type="radio" name="cabinet-${item.id}" value="cold"> 冷櫃</label>
+        <div class="item-extra-row">
+          <div>
+            <div class="item-extra-label">成本價</div>
+            <div style="padding:6px 0;font-size:13px;color:var(--text-3)">$${cost}</div>
+          </div>
+          <div>
+            <div class="item-extra-label">終端價</div>
+            <input type="number" id="endprice-${item.id}" min="0" value="${tier.price}" style="width:100%">
+          </div>
+          <div>
+            <div class="item-extra-label">櫃位</div>
+            <div class="cabinet-opts">
+              <label><input type="radio" name="cabinet-${item.id}" value="hot" checked> 熱櫃</label>
+              <label><input type="radio" name="cabinet-${item.id}" value="cold"> 冷櫃</label>
+            </div>
           </div>
         </div>
-        <div>
-          <div class="item-extra-label">線上可預約數</div>
-          <input type="number" id="online-${item.id}" min="0" value="30">
-        </div>
-        <div>
-          <div class="item-extra-label">線下可預約數</div>
-          <input type="number" id="offline-${item.id}" min="0" placeholder="0">
-        </div>
-        <div>
-          <div class="item-extra-label">店家預定數</div>
-          <input type="number" id="store-${item.id}" min="0" placeholder="0">
+        <div class="item-extra-row">
+          <div>
+            <div class="item-extra-label">線上可預約數</div>
+            <input type="number" id="online-${item.id}" min="0" value="30">
+          </div>
+          <div>
+            <div class="item-extra-label">線下可預約數</div>
+            <input type="number" id="offline-${item.id}" min="0" placeholder="0">
+          </div>
+          <div>
+            <div class="item-extra-label">店家預定數</div>
+            <input type="number" id="store-${item.id}" min="0" placeholder="0">
+          </div>
         </div>
       </div>
     </div>`;
@@ -2280,14 +2369,25 @@ function renderMbCard(mb, dateStr) {
   const curSite = sites.find(s => s.id === curSiteId);
   const branchBadge = mb.branchId && rest ? `<span class="branch-badge">${getBranchName(rest, mb.branchId)}</span>` : '';
   const remindBadge = mb.remindAt ? `<span class="mb-remind-badge">⏰ ${mb.remindAt} 提醒</span>` : '';
-  const itemsHtml = (mb.items || []).map(it =>
-    `<div class="mb-item-row">
-      <span class="mb-item-name">${it.name}</span>
-      <span class="mb-item-qty">× ${it.qty}</span>
-      <span class="mb-item-price">$${it.price}</span>
-      ${it.itemNote ? `<span class="mb-item-note">${it.itemNote}</span>` : ''}
-    </div>`
-  ).join('');
+  const itemsHtml = (mb.items || []).map(it => {
+    const itemDef   = rest?.items.find(i => i.id === it.itemId);
+    const costPrice = itemDef ? getCostForDate(itemDef, dateStr) : 0;
+    const payable   = it.qty * costPrice;
+    const receivable = it.qty * it.price;
+    const profit    = receivable - payable;
+    return `<div class="mb-item-row">
+      <div class="mb-item-name">${it.name}</div>
+      <div class="mb-item-stats">
+        <span class="mb-item-stat mb-item-qty"><span class="mb-item-stat-label">數量</span><span class="mb-item-stat-val">${it.qty}</span></span>
+        <span class="mb-item-stat mb-item-cost"><span class="mb-item-stat-label">成本</span><span class="mb-item-stat-val">$${costPrice}</span></span>
+        <span class="mb-item-stat mb-item-payable"><span class="mb-item-stat-label">應付</span><span class="mb-item-stat-val">$${payable}</span></span>
+        <span class="mb-item-stat mb-item-price"><span class="mb-item-stat-label">終端價</span><span class="mb-item-stat-val">$${it.price}</span></span>
+        <span class="mb-item-stat mb-item-receivable"><span class="mb-item-stat-label">應收</span><span class="mb-item-stat-val">$${receivable}</span></span>
+        <span class="mb-item-stat mb-item-profit${profit >= 0 ? '' : ' negative'}"><span class="mb-item-stat-label">利潤</span><span class="mb-item-stat-val">$${profit}</span></span>
+      </div>
+      ${it.itemNote ? `<div class="mb-item-note">${it.itemNote}</div>` : ''}
+    </div>`;
+  }).join('');
   const noteRow = mb.note ? `<div class="meeting-bento-note">📝 ${mb.note}</div>` : '';
   return `<div class="rest-card meeting-bento-card">
     <div class="rest-card-header" style="flex-wrap:wrap;gap:4px">
@@ -2350,6 +2450,8 @@ function openMbPicker(dateStr, bentoId) {
   document.getElementById('mb-site-group').style.display = 'none';
   document.getElementById('mb-person-err').classList.remove('show');
   document.getElementById('mb-rest-err').classList.remove('show');
+  document.getElementById('mb-branch-err').classList.remove('show');
+  document.getElementById('mb-item-err').classList.remove('show');
 
   // 建立廠區選單
   document.getElementById('mb-site-select').innerHTML =
@@ -2385,6 +2487,20 @@ function openMbPicker(dateStr, bentoId) {
     document.getElementById('mb-item-section').style.display   = 'none';
     buildMbRestOptions();
   }
+  // 資訊列
+  const _site = sites.find(s => s.id === curSiteId);
+  const _mealType = bentoId
+    ? (document.getElementById('mb-meal-type').value || 'lunch')
+    : ((mealFilter !== 'all') ? mealFilter : 'lunch');
+  const _mi  = mealInfo(_mealType);
+  const _d   = new Date(dateStr);
+  const _WD  = ['日','一','二','三','四','五','六'];
+  document.getElementById('mb-picker-context').innerHTML =
+    `<span class="ctx-site">${_site?.name || '—'}</span>` +
+    `<span class="ctx-sep">／</span>` +
+    `<span class="ctx-date">${dateStr}（週${_WD[_d.getDay()]}）</span>` +
+    `<span class="ctx-sep">／</span>` +
+    `<span class="ctx-meal ${_mi.tagCls}">${_mi.label}</span>`;
   openModal('meeting-bento-modal');
 }
 
@@ -2442,17 +2558,23 @@ function buildMbItemSection(restId, existingItems) {
   if (!rest?.items?.length) { section.style.display = 'none'; return; }
   section.style.display = 'block';
   list.innerHTML = rest.items.map(item => {
-    const tier    = getPriceForDate(item, mbPickerDate || new Date().toISOString().slice(0,10));
+    const dateKey  = mbPickerDate || new Date().toISOString().slice(0,10);
+    const tier     = getPriceForDate(item, dateKey);
+    const cost     = getCostForDate(item, dateKey);
     const existing = existingItems?.find(e => e.itemId === item.id);
     const checked  = !!existing;
     const qty      = existing?.qty  || 1;
+    const existingPrice = existing?.price ?? tier.price;
     const itemNote = existing?.itemNote || '';
     return `<div class="mb-picker-item-row">
-      <label>
+      <div class="mb-picker-item-check">
         <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" ${checked ? 'checked' : ''}>
-        <span>${item.name}</span>
-        <span style="color:var(--text-3);font-size:12px">$${tier.price}</span>
-      </label>
+        <span class="mb-picker-item-name">${item.name}</span>
+      </div>
+      <div class="mb-picker-item-prices">
+        <span class="mb-cost-label">成本 $${cost}</span>
+        <label class="mb-price-wrap"><span class="mb-price-label">終端價</span><input type="number" class="mb-price-input" min="0" value="${existingPrice}"></label>
+      </div>
       <input type="number" class="mb-qty-input" min="1" value="${qty}" placeholder="數量" title="數量">
       <input type="text"   class="mb-note-input" value="${itemNote}" placeholder="品項備註（如：不要辣）">
     </div>`;
@@ -2461,7 +2583,12 @@ function buildMbItemSection(restId, existingItems) {
 
 function confirmSaveMb() {
   const personLabel = document.getElementById('mb-person-label').value.trim();
-  if (!personLabel) { document.getElementById('mb-person-err').classList.add('show'); return; }
+  if (!personLabel) {
+    document.getElementById('mb-person-err').classList.add('show');
+    document.getElementById('mb-person-label').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('mb-person-label').focus();
+    return;
+  }
   if (!mbPickerRestId) { document.getElementById('mb-rest-err').classList.add('show'); return; }
 
   const mealType  = document.getElementById('mb-meal-type').value;
@@ -2469,19 +2596,35 @@ function confirmSaveMb() {
   const remindAt  = document.getElementById('mb-remind-at').value || null;
   const branchId  = document.getElementById('mb-branch-select')?.value || null;
 
+  // 驗證分店
+  const restForBranch = restaurants.find(r => r.id === mbPickerRestId);
+  if (restForBranch?.branches?.length && !branchId) {
+    document.getElementById('mb-branch-err').classList.add('show'); return;
+  }
+
   // 收集品項
+  document.getElementById('mb-item-err').classList.remove('show');
   const rows  = document.querySelectorAll('#mb-item-list .mb-picker-item-row');
   const items = [];
   rows.forEach(row => {
     const cb  = row.querySelector('input[type=checkbox]');
     if (!cb?.checked) return;
-    const qty      = parseInt(row.querySelector('.mb-qty-input')?.value) || 1;
-    const itemNote = row.querySelector('.mb-note-input')?.value?.trim() || '';
-    const rest     = restaurants.find(r => r.id === mbPickerRestId);
-    const itemDef  = rest?.items.find(i => i.id === cb.value);
-    const price    = itemDef ? getPriceForDate(itemDef, mbPickerDate).price : Number(cb.dataset.price);
+    const qty       = parseInt(row.querySelector('.mb-qty-input')?.value) || 1;
+    const itemNote  = row.querySelector('.mb-note-input')?.value?.trim() || '';
+    const priceInput = row.querySelector('.mb-price-input');
+    const rest      = restaurants.find(r => r.id === mbPickerRestId);
+    const itemDef   = rest?.items.find(i => i.id === cb.value);
+    const price     = priceInput && priceInput.value !== ''
+      ? Number(priceInput.value)
+      : (itemDef ? getPriceForDate(itemDef, mbPickerDate).price : Number(cb.dataset.price));
     items.push({ itemId: cb.value, name: cb.dataset.name, qty, price, itemNote });
   });
+
+  if (!items.length) {
+    document.getElementById('mb-item-err').classList.add('show');
+    document.getElementById('mb-item-list').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
 
   if (mbPickerBentoId) {
     // 編輯：從所有廠找到原資料並就地更新
@@ -3117,7 +3260,7 @@ function doExportMeetingCSV() {
   if (!selectedSiteIds.length) { showToast('請至少選擇一個廠區', 'error'); return; }
 
   const WD_LABEL = ['日','一','二','三','四','五','六'];
-  const rows = [['日期','星期','廠區','店家','分店','餐期','人員名稱','品項名稱','數量','售價','小計','備註','提醒時間']];
+  const rows = [['日期','星期','廠區','店家','分店','餐期','人員名稱','品項名稱','數量','成本價','應付帳款','售價','應收金額','利潤','備註','提醒時間']];
 
   // 遍歷每個廠區、每天
   selectedSiteIds.forEach(siteId => {
@@ -3132,11 +3275,16 @@ function doExportMeetingCSV() {
         const mealLabel  = mealInfo(mb.mealType).label;
         if (!mb.items?.length) {
           rows.push([dateStr, `週${WD_LABEL[wd]}`, site.name, rest?.name||'', branchName,
-            mealLabel, mb.personLabel, '', '', '', '', mb.note||'', mb.remindAt||'']);
+            mealLabel, mb.personLabel, '', '', '', '', '', '', '', mb.note||'', mb.remindAt||'']);
         } else {
           mb.items.forEach(it => {
+            const itemDef    = rest?.items.find(i => i.id === it.itemId);
+            const costPrice  = itemDef ? getCostForDate(itemDef, dateStr) : 0;
+            const payable    = it.qty * costPrice;
+            const receivable = it.qty * it.price;
+            const profit     = receivable - payable;
             rows.push([dateStr, `週${WD_LABEL[wd]}`, site.name, rest?.name||'', branchName,
-              mealLabel, mb.personLabel, it.name, it.qty, it.price, it.qty * it.price,
+              mealLabel, mb.personLabel, it.name, it.qty, costPrice, payable, it.price, receivable, profit,
               (it.itemNote ? `${it.itemNote}　` : '') + (mb.note || ''), mb.remindAt||'']);
           });
         }
