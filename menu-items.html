@@ -227,6 +227,25 @@ td { padding: 11px 14px; vertical-align: middle; }
   cursor: pointer; opacity: 0; transition: opacity .15s; z-index: 2;
 }
 .item-card:hover .card-img-upload-btn { opacity: 1; }
+.card-img-overlay {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+}
+.card-img-overlay img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
+/* 疊加圖片設定 modal */
+.overlay-setting-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px;
+}
+.overlay-setting-item {
+  border: 2px solid var(--border); border-radius: 8px; padding: 10px;
+  display: flex; flex-direction: column; gap: 8px; cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.overlay-setting-item:hover { background: var(--bg-2); }
+.overlay-setting-item.active { border-color: var(--blue); background: #eff6ff; }
+.overlay-setting-item label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; font-weight: 500; }
+.overlay-setting-item input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--blue); }
+.overlay-preview-img { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: var(--bg-3); border-radius: 5px; display: block; }
 .card-prices { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
 .card-price-row { display: flex; justify-content: flex-start; gap: 8px; font-size: 14px; color: var(--text-2); }
 .card-price-row span:last-child { font-weight: 500; font-variant-numeric: tabular-nums; }
@@ -598,10 +617,11 @@ select {
         <button class="view-toggle-btn active" id="btn-view-list" onclick="setView('list')">☰ 清單</button>
         <button class="view-toggle-btn" id="btn-view-grid" onclick="setView('grid')">⊞ 圖片</button>
       </div>
-      <button class="btn" onclick="bulkUploadImages()" title="批量上傳圖片&#10;檔名需以品項名稱開頭，例如 雙拼便當_1.jpg&#10;系統依品項名稱自動對應">🖼 批量上傳圖片 ⓘ</button>
-      <button class="btn" onclick="bulkDownloadImages()" title="下載目前篩選結果中有圖片的品項&#10;打包為 ZIP 壓縮檔">📥 批量下載圖片 ⓘ</button>
-      <button class="btn" onclick="openImport()">📥 Excel 匯入</button>
-      <button class="btn" onclick="exportExcel()">📤 Excel 匯出</button>
+      <button class="btn" onclick="openOverlaySetting()">疊加圖片設定</button>
+      <button class="btn" onclick="bulkUploadImages()" title="批量上傳圖片&#10;檔名需以品項名稱開頭，例如 雙拼便當_1.jpg&#10;系統依品項名稱自動對應">批量上傳圖片 ⓘ</button>
+      <button class="btn" onclick="bulkDownloadImages()" title="下載目前篩選結果中有圖片的品項&#10;打包為 ZIP 壓縮檔">批量下載圖片 ⓘ</button>
+      <button class="btn" onclick="openImport()">Excel 匯入</button>
+      <button class="btn" onclick="exportExcel()">Excel 匯出</button>
     </div>
     <div id="tbl-wrap" class="tbl-wrap"></div>
     <input type="file" id="bulk-img-input" accept="image/*" multiple style="display:none" onchange="handleBulkUpload(this)">
@@ -818,6 +838,41 @@ select {
 </div>
 
 <!-- ══ 批量上傳圖片 Modal ══ -->
+<!-- 疊加圖片設定 modal -->
+<div class="overlay" id="overlay-setting-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">疊加圖片設定</div>
+      <button class="modal-close" onclick="closeModal('overlay-setting-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:12px">勾選要疊加在餐點圖片上的標示圖，點「套用」後所有有圖片的品項都會顯示所選疊加圖。</div>
+      <div class="overlay-setting-grid">
+        <div class="overlay-setting-item" id="osi-veggie" onclick="toggleOverlay('veggie',this)">
+          <label><input type="checkbox" id="oc-veggie" onclick="event.stopPropagation();toggleOverlay('veggie',this.closest('.overlay-setting-item'))"> 蛋奶素</label>
+          <img class="overlay-preview-img" src="圖片/蛋奶素.png" alt="蛋奶素">
+        </div>
+        <div class="overlay-setting-item" id="osi-ref" onclick="toggleOverlay('ref',this)">
+          <label><input type="checkbox" id="oc-ref" onclick="event.stopPropagation();toggleOverlay('ref',this.closest('.overlay-setting-item'))"> 僅供參考</label>
+          <img class="overlay-preview-img" src="圖片/僅供參考.png" alt="僅供參考">
+        </div>
+        <div class="overlay-setting-item" id="osi-blank" onclick="toggleOverlay('blank',this)">
+          <label><input type="checkbox" id="oc-blank" onclick="event.stopPropagation();toggleOverlay('blank',this.closest('.overlay-setting-item'))"> 截角圖（空白）</label>
+          <img class="overlay-preview-img" src="圖片/截角圖-空白.png" alt="截角圖-空白">
+        </div>
+        <div class="overlay-setting-item" id="osi-random" onclick="toggleOverlay('random',this)">
+          <label><input type="checkbox" id="oc-random" onclick="event.stopPropagation();toggleOverlay('random',this.closest('.overlay-setting-item'))"> 隨機出貨一款</label>
+          <img class="overlay-preview-img" src="圖片/隨機出貨一款-01.png" alt="隨機出貨一款">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('overlay-setting-modal')">關閉</button>
+      <button class="btn btn-primary" onclick="applyOverlay()">套用至所有圖片</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="bulk-img-modal">
   <div class="modal modal-sm">
     <div class="modal-header">
@@ -1112,6 +1167,7 @@ function renderActive() {
           ${item.imgPreview
             ? `<img src="${item.imgPreview}" alt="${item.name}">`
             : `<span class="card-img-placeholder">🍽</span>`}
+          ${item.imgPreview ? buildOverlayHtml() : ''}
           <button class="card-img-upload-btn" onclick="event.stopPropagation();uploadCardImg('${item.id}')">${item.imgPreview ? '更新圖片' : '上傳圖片'}</button>
         </div>
         <div class="card-body">
@@ -1584,6 +1640,49 @@ document.querySelectorAll('.overlay').forEach(o =>
 );
 
 renderAll();
+
+/* ── 疊加圖片設定 ── */
+const overlayOptions = {
+  veggie: { src: '圖片/蛋奶素.png',          cbId: 'oc-veggie', itemId: 'osi-veggie' },
+  ref:    { src: '圖片/僅供參考.png',         cbId: 'oc-ref',    itemId: 'osi-ref'    },
+  blank:  { src: '圖片/截角圖-空白.png',      cbId: 'oc-blank',  itemId: 'osi-blank'  },
+  random: { src: '圖片/隨機出貨一款-01.png',  cbId: 'oc-random', itemId: 'osi-random' },
+};
+let activeOverlays = new Set();
+
+function openOverlaySetting() {
+  // 同步 checkbox 狀態
+  for (const [key, opt] of Object.entries(overlayOptions)) {
+    document.getElementById(opt.cbId).checked = activeOverlays.has(key);
+    document.getElementById(opt.itemId).classList.toggle('active', activeOverlays.has(key));
+  }
+  openModal('overlay-setting-modal');
+}
+
+function toggleOverlay(key, el) {
+  const cb = document.getElementById(overlayOptions[key].cbId);
+  const checked = !cb.checked;
+  cb.checked = checked;
+  el.classList.toggle('active', checked);
+}
+
+function applyOverlay() {
+  // 收集勾選狀態
+  activeOverlays.clear();
+  for (const [key, opt] of Object.entries(overlayOptions)) {
+    if (document.getElementById(opt.cbId).checked) activeOverlays.add(key);
+  }
+  renderActive();
+  closeModal('overlay-setting-modal');
+}
+
+function buildOverlayHtml() {
+  if (!activeOverlays.size) return '';
+  const imgs = [...activeOverlays].map(key =>
+    `<img src="${overlayOptions[key].src}" alt="">`
+  ).join('');
+  return `<div class="card-img-overlay">${imgs}</div>`;
+}
 
 /* ── Lightbox ── */
 function openLightbox(src) {
