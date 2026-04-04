@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>首頁儀表板</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --primary-text: #1e40af;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --success: #16a34a;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+
+      /* KPI 顏色 */
+      --kpi-red:    #dc2626; --kpi-red-bg:    #fef2f2; --kpi-red-border:    #fecaca;
+      --kpi-orange: #ea580c; --kpi-orange-bg: #fff7ed; --kpi-orange-border: #fed7aa;
+      --kpi-blue:   #2563eb; --kpi-blue-bg:   #eff6ff; --kpi-blue-border:   #bfdbfe;
+      --kpi-green:  #16a34a; --kpi-green-bg:  #f0fdf4; --kpi-green-border:  #bbf7d0;
+      --kpi-teal:   #0891b2; --kpi-teal-bg:   #ecfeff; --kpi-teal-border:   #a5f3fc;
+      --kpi-purple: #7c3aed; --kpi-purple-bg: #f5f3ff; --kpi-purple-border: #ddd6fe;
+      --kpi-indigo: #4f46e5; --kpi-indigo-bg: #eef2ff; --kpi-indigo-border: #c7d2fe;
+      --kpi-yellow: #ca8a04; --kpi-yellow-bg: #fefce8; --kpi-yellow-border: #fde68a;
+      --kpi-danger: #dc2626; --kpi-danger-bg: #fef2f2; --kpi-danger-border: #fecaca;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      font-size: 14px;
+    }
+
+    /* ── 頁面容器 ─────────────────────── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* ── 頁面標題列 ───────────────────── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .page-title-wrap {}
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    .page-sub {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-top: 2px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .role-selector-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .role-selector-label {
+      font-size: 13px;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    .role-selector {
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
+      padding: 6px 28px 6px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-700);
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .role-selector:focus { border-color: var(--primary); box-shadow: 0 0 0 2px #dbeafe; }
+    .btn-custom {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--gray-600);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .btn-custom:hover {
+      background: var(--primary-light);
+      border-color: var(--primary-border);
+      color: var(--primary);
+    }
+
+    /* ── 區塊卡片 ─────────────────────── */
+    .section-card {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--gray-100);
+      background: var(--gray-50);
+    }
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* ── KPI 網格 ─────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0;
+    }
+    .kpi-card {
+      padding: 20px 18px;
+      border-right: 1px solid var(--gray-100);
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .kpi-card:last-child { border-right: none; }
+    .kpi-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .kpi-unit {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .kpi-label {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-top: 2px;
+    }
+    /* 顏色 */
+    .kpi-card[data-color="red"]    { --c: var(--kpi-red);    --bg: var(--kpi-red-bg);    --bd: var(--kpi-red-border); }
+    .kpi-card[data-color="orange"] { --c: var(--kpi-orange); --bg: var(--kpi-orange-bg); --bd: var(--kpi-orange-border); }
+    .kpi-card[data-color="blue"]   { --c: var(--kpi-blue);   --bg: var(--kpi-blue-bg);   --bd: var(--kpi-blue-border); }
+    .kpi-card[data-color="green"]  { --c: var(--kpi-green);  --bg: var(--kpi-green-bg);  --bd: var(--kpi-green-border); }
+    .kpi-card[data-color="teal"]   { --c: var(--kpi-teal);   --bg: var(--kpi-teal-bg);   --bd: var(--kpi-teal-border); }
+    .kpi-card[data-color="purple"] { --c: var(--kpi-purple); --bg: var(--kpi-purple-bg); --bd: var(--kpi-purple-border); }
+    .kpi-card[data-color="indigo"] { --c: var(--kpi-indigo); --bg: var(--kpi-indigo-bg); --bd: var(--kpi-indigo-border); }
+    .kpi-card[data-color="yellow"] { --c: var(--kpi-yellow); --bg: var(--kpi-yellow-bg); --bd: var(--kpi-yellow-border); }
+    .kpi-card[data-color="danger"] { --c: var(--kpi-danger); --bg: var(--kpi-danger-bg); --bd: var(--kpi-danger-border); }
+    .kpi-card[data-color] .kpi-value { color: var(--c); }
+    .kpi-card[data-color] .kpi-unit  { color: var(--c); }
+
+    /* 空狀態 */
+    .grid-empty {
+      padding: 36px 24px;
+      text-align: center;
+      color: var(--gray-400);
+      font-size: 13px;
+    }
+
+    /* ── 常用功能網格 ─────────────────── */
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0;
+    }
+    .link-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 22px 12px;
+      text-decoration: none;
+      color: var(--gray-700);
+      border-right: 1px solid var(--gray-100);
+      border-bottom: 1px solid var(--gray-100);
+      transition: background 0.12s, color 0.12s;
+    }
+    .link-card:last-child { border-right: none; }
+    .link-card:hover {
+      background: var(--primary-light);
+      color: var(--primary-text);
+    }
+    .link-icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+    .link-label {
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* ── 公告區塊（美編首頁風格）────── */
+    .announce-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px 0;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .announce-heading {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    .announce-tabs {
+      display: flex;
+      gap: 0;
+    }
+    .ann-tab {
+      padding: 6px 14px;
+      font-size: 13px;
+      color: var(--gray-500);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    .ann-tab:hover { color: var(--gray-700); }
+    .ann-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 600;
+    }
+    .announce-divider {
+      border: none;
+      border-top: 1px solid var(--gray-200);
+      margin: 10px 0 0;
+    }
+    .ann-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 18px;
+      border-bottom: 1px solid var(--gray-100);
+      cursor: pointer;
+      transition: background 0.1s, opacity 0.2s;
+    }
+    .ann-row:last-child { border-bottom: none; }
+    .ann-row:hover { background: var(--primary-light); }
+    .ann-row.read { opacity: 0.4; }
+    .ann-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--gray-800);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ann-tag {
+      flex-shrink: 0;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      background: #e0f7fa;
+      color: #00838f;
+      white-space: nowrap;
+    }
+    .ann-tag.activity { background: #fef3c7; color: #b45309; }
+    .ann-tag.other    { background: var(--gray-100); color: var(--gray-500); }
+    .ann-date {
+      flex-shrink: 0;
+      font-size: 12px;
+      color: var(--gray-400);
+      white-space: nowrap;
+      text-align: right;
+      min-width: 120px;
+    }
+
+    /* ── Modal ──────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 { font-size: 16px; font-weight: 700; }
+    .modal-close {
+      background: none; border: none;
+      font-size: 18px; cursor: pointer;
+      color: var(--gray-400); padding: 4px; line-height: 1;
+    }
+    .modal-close:hover { color: var(--gray-700); }
+    .modal-body { padding: 18px 20px; max-height: 60vh; overflow-y: auto; }
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding: 14px 20px;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    .modal-sub {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-bottom: 14px;
+    }
+
+    /* Modal 內的 checkbox 格 */
+    .cb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 6px;
+    }
+    .cb-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--gray-700);
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .cb-label:hover { background: var(--primary-light); border-color: var(--primary-border); }
+    .cb-label input[type="checkbox"] { accent-color: var(--primary); width: 14px; height: 14px; flex-shrink: 0; }
+    .cb-label.checked { background: var(--primary-light); border-color: var(--primary-border); color: var(--primary-text); font-weight: 500; }
+    .cb-icon { font-size: 15px; }
+
+    /* 按鈕 */
+    .btn {
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      color: var(--gray-600);
+      transition: background 0.12s;
+    }
+    .btn:hover { background: var(--gray-50); }
+    .btn-primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-text); border-color: var(--primary-text); }
+
+    /* ── 公告詳情 Modal ─────────────────── */
+    .ann-modal-tag {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-bottom: 6px;
+    }
+    .ann-modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+    .ann-modal-meta {
+      font-size: 12px;
+      color: var(--gray-400);
+    }
+    .ann-modal-body {
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--gray-700);
+      white-space: pre-wrap;
+    }
+
+    /* ── 響應式 ────────────────────────── */
+    @media (max-width: 768px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .link-grid { grid-template-columns: repeat(2, 1fr); }
+      .cb-grid   { grid-template-columns: repeat(2, 1fr); }
+      .header-right { width: 100%; justify-content: space-between; }
+    }
+    @media (max-width: 400px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .link-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-title">首頁儀表板</div>
+      <div class="page-sub">依身份顯示關鍵指標與常用功能</div>
+    </div>
+    <div class="header-right">
+      <div class="role-selector-wrap">
+        <span class="role-selector-label">身份：</span>
+        <select class="role-selector" id="roleSelector" onchange="onRoleChange()"></select>
+      </div>
+      <button class="btn-custom" onclick="openCustomModal()">✦ 自訂版面</button>
+    </div>
+  </div>
+
+  <!-- KPI 區塊 -->
+  <div class="section-card">
+    <div class="section-head">
+      <span class="section-title">KPI 指標</span>
+    </div>
+    <div class="kpi-grid" id="kpiGrid"></div>
+  </div>
+
+  <!-- 常用功能區塊 -->
+  <div class="section-card">
+    <div class="section-head">
+      <span class="section-title">常用功能</span>
+    </div>
+    <div class="link-grid" id="linkGrid"></div>
+  </div>
+
+  <!-- 公告區塊 -->
+  <div class="section-card">
+    <div class="announce-header">
+      <span class="announce-heading">公告</span>
+      <div class="announce-tabs">
+        <button class="ann-tab active" onclick="annTab(this,'all')">全部</button>
+        <button class="ann-tab" onclick="annTab(this,'unread')">未讀</button>
+        <button class="ann-tab" onclick="annTab(this,'system')">系統公告</button>
+        <button class="ann-tab" onclick="annTab(this,'activity')">活動資訊</button>
+      </div>
+    </div>
+    <hr class="announce-divider">
+    <div id="announceList" style="max-height:220px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- 公告詳情 Modal -->
+<div class="modal-overlay" id="annModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="ann-modal-tag" id="annModalTag"></div>
+        <div class="ann-modal-title" id="annModalTitle"></div>
+        <div class="ann-modal-meta" id="annModalMeta"></div>
+      </div>
+      <button class="modal-close" onclick="closeAnnModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="ann-modal-body" id="annModalBody"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeAnnModal()">我知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- 自訂版面 Modal -->
+<div class="modal-overlay" id="customModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>自訂常用功能</h2>
+      <button class="modal-close" onclick="closeCustomModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-sub">勾選要在首頁顯示的快捷連結：</p>
+      <div class="cb-grid" id="customCbGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="resetDefault()">重置預設</button>
+      <button class="btn btn-primary" onclick="saveCustom()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   KPI 目錄
+══════════════════════════════════════════════ */
+var KPI_CATALOG = [
+  { id: 'kpi_pending_review',  label: '待審核異動',     value: 7,  unit: '件', color: 'red'    },
+  { id: 'kpi_week_effective',  label: '本週即將生效',   value: 3,  unit: '件', color: 'orange' },
+  { id: 'kpi_month_changed',   label: '本月有異動餐廳', value: 12, unit: '家', color: 'blue'   },
+  { id: 'kpi_month_new',       label: '本月新增品項',   value: 23, unit: '項', color: 'green'  },
+  { id: 'kpi_new_store',       label: '新店家',         value: 6,  unit: '家', color: 'teal'   },
+  { id: 'kpi_pending_image',   label: '待審圖片',       value: 6,  unit: '件', color: 'purple' },
+  { id: 'kpi_edm',             label: '可製作 EDM',     value: 4,  unit: '份', color: 'indigo' },
+  { id: 'kpi_unread_announce', label: '未讀公告',       value: 2,  unit: '則', color: 'yellow' },
+  { id: 'kpi_complaint',       label: '待處理客訴',     value: 1,  unit: '件', color: 'danger' }
+];
+
+/* ══════════════════════════════════════════════
+   常用功能目錄
+══════════════════════════════════════════════ */
+var LINK_CATALOG = [
+  { id: 'link_menu_items',    label: '餐點管理',     icon: '🍱', url: 'menu-items.html' },
+  { id: 'link_price_change',  label: '餐點異動紀錄', icon: '📋', url: 'price-change-log.html' },
+  { id: 'link_menu_schedule', label: '菜單排程管理', icon: '📅', url: 'menu-schedule.html' },
+  { id: 'link_change_review', label: '店家異動審核', icon: '🔍', url: 'change-review.html' },
+  { id: 'link_complaint',     label: '客訴管理',     icon: '💬', url: 'complaint.html?mode=admin' },
+  { id: 'link_issue',         label: '問題清單',     icon: '📝', url: 'issue-and-ecr.html?tab=list' },
+  { id: 'link_ecr',           label: 'ECR 清單',     icon: '🔄', url: 'issue-and-ecr.html?tab=ecr-list' },
+  { id: 'link_permissions',   label: '帳號管理',     icon: '👤', url: 'permissions.html' },
+  { id: 'link_purchasing',    label: '採購首頁',     icon: '🛒', url: 'purchasing-home.html' },
+  { id: 'link_editorial',     label: '美編首頁',     icon: '🎨', url: 'editorial-home.html' }
+];
+
+/* ══════════════════════════════════════════════
+   角色預設
+══════════════════════════════════════════════ */
+var ALL_KPI_IDS  = KPI_CATALOG.map(function(k) { return k.id; });
+var ALL_LINK_IDS = LINK_CATALOG.map(function(l) { return l.id; });
+
+var ROLE_DEFAULT_KPIS = {
+  'role_admin':     ALL_KPI_IDS,
+  'role_pur_mgr':   ['kpi_pending_review','kpi_week_effective','kpi_month_changed','kpi_month_new'],
+  'role_pur':       ['kpi_pending_review','kpi_week_effective','kpi_month_changed','kpi_month_new'],
+  'role_art':       ['kpi_new_store','kpi_pending_image','kpi_edm','kpi_unread_announce'],
+  'role_ops_mgr':   ['kpi_unread_announce','kpi_complaint'],
+  'role_ops':       ['kpi_unread_announce','kpi_complaint'],
+  'role_sales_mgr': ['kpi_unread_announce','kpi_complaint'],
+  'role_sales':     ['kpi_unread_announce','kpi_complaint'],
+  'role_mkt_mgr':   ['kpi_unread_announce'],
+  'role_mkt':       ['kpi_unread_announce'],
+  'role_hr':        ['kpi_unread_announce'],
+  'role_acc_mgr':   ['kpi_unread_announce'],
+  'role_acc':       ['kpi_unread_announce'],
+  'role_driver':    ['kpi_unread_announce']
+};
+
+var ROLE_DEFAULT_LINKS = {
+  'role_admin':     ALL_LINK_IDS,
+  'role_pur_mgr':   ['link_menu_items','link_price_change','link_menu_schedule','link_change_review'],
+  'role_pur':       ['link_menu_items','link_price_change','link_menu_schedule','link_change_review'],
+  'role_art':       ['link_change_review','link_menu_items','link_editorial'],
+  'role_ops_mgr':   ['link_complaint','link_issue'],
+  'role_ops':       ['link_complaint','link_issue'],
+  'role_sales_mgr': ['link_complaint'],
+  'role_sales':     ['link_complaint'],
+  'role_mkt_mgr':   ['link_menu_items','link_issue'],
+  'role_mkt':       ['link_issue'],
+  'role_hr':        ['link_permissions'],
+  'role_acc_mgr':   ['link_price_change','link_issue'],
+  'role_acc':       ['link_price_change'],
+  'role_driver':    ['link_issue']
+};
+
+/* ══════════════════════════════════════════════
+   公告（靜態範例）
+══════════════════════════════════════════════ */
+var ANNOUNCEMENTS = [
+  { id: 0, date: '2026/04/03 09:00', title: '4 月份菜單異動公告',       cat: 'system',   read: false, text: '4 月份菜單已完成審核，共異動 12 家餐廳、新增 23 個品項。請相關同仁確認異動內容並完成簽核。' },
+  { id: 1, date: '2026/04/01 14:30', title: '系統定期維護通知',         cat: 'system',   read: false, text: '4/5（六）凌晨 00:00–02:00 進行系統定期維護，期間所有後台功能暫停使用。請提前完成相關作業，造成不便敬請見諒。' },
+  { id: 2, date: '2026/03/28 10:00', title: '本週餐點更新通知',         cat: 'activity', read: true,  text: '本週（3/31–4/4）共有 8 家餐廳更新菜單，包含 3 家新增特餐、2 家調整售價。詳細清單請至餐點管理查看。' },
+  { id: 3, date: '2026/03/20 09:30', title: '清明假日出餐安排說明',     cat: 'other',    read: true,  text: '4/4（五）至 4/6（日）清明連假期間，部分據點調整出餐時間。請各單位提前確認所屬據點的出餐時段。' },
+  { id: 4, date: '2026/03/10 16:00', title: '新版帳號管理功能上線通知', cat: 'system',   read: true,  text: '帳號管理頁面全新改版，新增會員管理、角色權限設定及自訂版面功能。如有操作問題請聯繫 IT 支援。' },
+  { id: 5, date: '2026/03/05 11:00', title: '4 月員工旅遊報名開放',     cat: 'activity', read: true,  text: '4 月份員工旅遊（目的地：清境農場）即日起開放報名，截止日期為 3/20。請至人資系統填寫報名表單。' }
+];
+
+/* ══════════════════════════════════════════════
+   Storage
+══════════════════════════════════════════════ */
+var ROLE_KEY   = 'dashboard_role_v1';
+var CONFIG_KEY = 'dashboard_config_v1';
+
+var currentRoleId = 'role_pur_mgr';
+var dashConfig = {};   // { [roleId]: [linkId, ...] }
+var allRoles = [];     // [{ id, name }]
+
+function loadConfig() {
+  try {
+    var r = sessionStorage.getItem(ROLE_KEY);
+    if (r) currentRoleId = r;
+  } catch(e) {}
+  try {
+    var c = sessionStorage.getItem(CONFIG_KEY);
+    if (c) dashConfig = JSON.parse(c);
+  } catch(e) {}
+}
+
+function saveConfig() {
+  sessionStorage.setItem(ROLE_KEY, currentRoleId);
+  sessionStorage.setItem(CONFIG_KEY, JSON.stringify(dashConfig));
+}
+
+/* ══════════════════════════════════════════════
+   取得角色列表
+══════════════════════════════════════════════ */
+function getRoles() {
+  try {
+    var raw = sessionStorage.getItem('permissions_roles_v2');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && parsed.length) return parsed.map(function(r) { return { id: r.id, name: r.name }; });
+    }
+  } catch(e) {}
+  // fallback：從 ROLE_DEFAULT_KPIS 的鍵產生靜態列表
+  var nameMap = {
+    'role_admin':     'Admin',
+    'role_ops_mgr':   '營運主管',
+    'role_ops':       '營運',
+    'role_driver':    '司機',
+    'role_pur_mgr':   '採購主管',
+    'role_pur':       '採購',
+    'role_acc_mgr':   '會計主管',
+    'role_acc':       '會計',
+    'role_mkt_mgr':   '行銷主管',
+    'role_mkt':       '行銷',
+    'role_art':       '美編',
+    'role_hr':        '人資',
+    'role_sales_mgr': '業務主管',
+    'role_sales':     '業務'
+  };
+  return Object.keys(nameMap).map(function(id) { return { id: id, name: nameMap[id] }; });
+}
+
+/* ══════════════════════════════════════════════
+   取得有效 KPI / Link 列表
+══════════════════════════════════════════════ */
+function getActiveKpis(roleId) {
+  return ROLE_DEFAULT_KPIS[roleId] || ALL_KPI_IDS;
+}
+
+function getActiveLinks(roleId) {
+  if (dashConfig[roleId]) return dashConfig[roleId];
+  return ROLE_DEFAULT_LINKS[roleId] || ALL_LINK_IDS;
+}
+
+/* ══════════════════════════════════════════════
+   渲染
+══════════════════════════════════════════════ */
+function renderRoleSelector() {
+  var sel = document.getElementById('roleSelector');
+  sel.innerHTML = allRoles.map(function(r) {
+    return '<option value="' + escHtml(r.id) + '"' + (r.id === currentRoleId ? ' selected' : '') + '>' + escHtml(r.name) + '</option>';
+  }).join('');
+}
+
+function onRoleChange() {
+  currentRoleId = document.getElementById('roleSelector').value;
+  saveConfig();
+  renderKpiGrid();
+  renderLinkGrid();
+}
+
+function renderKpiGrid() {
+  var grid = document.getElementById('kpiGrid');
+  var activeIds = getActiveKpis(currentRoleId);
+  var items = KPI_CATALOG.filter(function(k) { return activeIds.indexOf(k.id) !== -1; });
+  if (!items.length) {
+    grid.innerHTML = '<div class="grid-empty">此角色尚無設定 KPI 指標</div>';
+    return;
+  }
+  grid.innerHTML = items.map(function(k) {
+    return '<div class="kpi-card" data-color="' + k.color + '">' +
+      '<div class="kpi-value-row">' +
+        '<span class="kpi-value">' + k.value + '</span>' +
+        '<span class="kpi-unit">' + escHtml(k.unit) + '</span>' +
+      '</div>' +
+      '<div class="kpi-label">' + escHtml(k.label) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderLinkGrid() {
+  var grid = document.getElementById('linkGrid');
+  var activeIds = getActiveLinks(currentRoleId);
+  var items = LINK_CATALOG.filter(function(l) { return activeIds.indexOf(l.id) !== -1; });
+  if (!items.length) {
+    grid.innerHTML = '<div class="grid-empty">尚未設定常用功能，點擊「自訂版面」新增</div>';
+    return;
+  }
+  grid.innerHTML = items.map(function(l) {
+    return '<a class="link-card" href="' + escHtml(l.url) + '">' +
+      '<span class="link-icon">' + l.icon + '</span>' +
+      '<span class="link-label">' + escHtml(l.label) + '</span>' +
+    '</a>';
+  }).join('');
+}
+
+var CAT_LABEL = { system: '系統公告', activity: '活動資訊', other: '其他' };
+var CAT_CLASS  = { system: '',         activity: 'activity',  other: 'other'  };
+
+function renderAnnouncements() {
+  var list = document.getElementById('announceList');
+  list.innerHTML = ANNOUNCEMENTS.map(function(a) {
+    return '<div class="ann-row' + (a.read ? ' read' : '') + '" data-cat="' + escHtml(a.cat) + '" data-id="' + a.id + '" onclick="openAnnModal(' + a.id + ')">' +
+      '<span class="ann-tag ' + (CAT_CLASS[a.cat] || '') + '">' + escHtml(CAT_LABEL[a.cat] || a.cat) + '</span>' +
+      '<span class="ann-text">' + escHtml(a.title) + '</span>' +
+      '<span class="ann-date">' + escHtml(a.date) + ' 發布</span>' +
+    '</div>';
+  }).join('');
+}
+
+function openAnnModal(id) {
+  var a = ANNOUNCEMENTS.find(function(x) { return x.id === id; });
+  if (!a) return;
+  document.getElementById('annModalTag').textContent = CAT_LABEL[a.cat] || a.cat;
+  document.getElementById('annModalTitle').textContent = a.title;
+  document.getElementById('annModalMeta').textContent = a.date + ' 發布';
+  document.getElementById('annModalBody').textContent = a.text;
+  document.getElementById('annModal').classList.add('open');
+  // 標記已讀
+  a.read = true;
+  var row = document.querySelector('#announceList [data-id="' + id + '"]');
+  if (row) row.classList.add('read');
+}
+
+function closeAnnModal() {
+  document.getElementById('annModal').classList.remove('open');
+}
+
+function annTab(btn, cat) {
+  document.querySelectorAll('.ann-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('#announceList .ann-row').forEach(function(row) {
+    var show = cat === 'all' ? true
+             : cat === 'unread' ? !row.classList.contains('read')
+             : row.dataset.cat === cat;
+    row.style.display = show ? '' : 'none';
+  });
+}
+
+/* ══════════════════════════════════════════════
+   自訂版面 Modal
+══════════════════════════════════════════════ */
+function openCustomModal() {
+  var activeIds = getActiveLinks(currentRoleId);
+  var grid = document.getElementById('customCbGrid');
+  grid.innerHTML = LINK_CATALOG.map(function(l) {
+    var checked = activeIds.indexOf(l.id) !== -1;
+    return '<label class="cb-label' + (checked ? ' checked' : '') + '" onclick="onCbChange(this)">' +
+      '<input type="checkbox" data-id="' + l.id + '"' + (checked ? ' checked' : '') + '>' +
+      '<span class="cb-icon">' + l.icon + '</span>' +
+      escHtml(l.label) +
+    '</label>';
+  }).join('');
+  document.getElementById('customModal').classList.add('open');
+}
+
+function onCbChange(label) {
+  var cb = label.querySelector('input[type="checkbox"]');
+  setTimeout(function() { label.classList.toggle('checked', cb.checked); }, 0);
+}
+
+function closeCustomModal() {
+  document.getElementById('customModal').classList.remove('open');
+}
+
+function saveCustom() {
+  var cbs = document.querySelectorAll('#customCbGrid input[type="checkbox"]');
+  var ids = [];
+  cbs.forEach(function(cb) { if (cb.checked) ids.push(cb.dataset.id); });
+  dashConfig[currentRoleId] = ids;
+  saveConfig();
+  closeCustomModal();
+  renderLinkGrid();
+}
+
+function resetDefault() {
+  delete dashConfig[currentRoleId];
+  saveConfig();
+  closeCustomModal();
+  renderLinkGrid();
+}
+
+document.addEventListener('click', function(e) {
+  if (e.target === document.getElementById('customModal')) closeCustomModal();
+  if (e.target === document.getElementById('annModal')) closeAnnModal();
+});
+
+/* ══════════════════════════════════════════════
+   工具
+══════════════════════════════════════════════ */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ══════════════════════════════════════════════
+   初始化
+══════════════════════════════════════════════ */
+loadConfig();
+allRoles = getRoles();
+// 確認 currentRoleId 存在於角色列表中，否則 fallback
+if (!allRoles.some(function(r) { return r.id === currentRoleId; })) {
+  currentRoleId = allRoles.length ? allRoles[0].id : 'role_pur_mgr';
+}
+renderRoleSelector();
+renderKpiGrid();
+renderLinkGrid();
+renderAnnouncements();
+</script>
+</body>
+</html>

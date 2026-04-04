@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>帳號管理</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --primary-text: #1e40af;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --danger-border: #fecaca;
+      --success: #16a34a;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      font-size: 14px;
+    }
+
+    /* ── 頁面容器 ─────────────────────── */
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+    .page-header {
+      margin-bottom: 20px;
+    }
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    .page-sub {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-top: 3px;
+    }
+
+    /* ── 主頁籤 ───────────────────────── */
+    .main-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--gray-200);
+      margin-bottom: 20px;
+    }
+    .main-tab {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-500);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .main-tab:hover { color: var(--gray-700); }
+    .main-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 600;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── 雙欄 Layout ─────────────────── */
+    .split-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .split-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── 左側面板（通用）──────────────── */
+    .left-panel {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+      position: sticky;
+      top: 68px;
+    }
+    .left-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    .left-panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .btn-add-icon {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      color: var(--gray-500);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .btn-add-icon:hover {
+      background: var(--primary-light);
+      border-color: var(--primary-border);
+      color: var(--primary);
+    }
+
+    /* 行內新增輸入列 */
+    .inline-add-row {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--primary-light);
+    }
+    .inline-add-row.visible { display: flex; }
+    .inline-add-input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--primary-border);
+      border-radius: 5px;
+      padding: 5px 8px;
+      font-size: 13px;
+      color: var(--gray-800);
+      outline: none;
+      font-family: inherit;
+    }
+    .inline-add-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px #dbeafe; }
+    .inline-add-input.error { border-color: var(--danger); box-shadow: 0 0 0 2px #fee2e2; }
+    .btn-inline {
+      width: 24px; height: 24px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .btn-inline.confirm { background: var(--primary); color: #fff; }
+    .btn-inline.confirm:hover { background: var(--primary-text); }
+    .btn-inline.cancel { background: var(--gray-200); color: var(--gray-600); }
+    .btn-inline.cancel:hover { background: var(--gray-300); }
+
+    /* 列表項目（通用） */
+    .item-list { overflow-y: auto; max-height: calc(100vh - 240px); }
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      border-bottom: 1px solid var(--gray-100);
+      transition: background 0.1s;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item:hover { background: #f0f4ff; }
+    .list-item.active {
+      background: var(--primary-light);
+      border-left-color: var(--primary);
+    }
+    .item-name {
+      flex: 1;
+      font-size: 14px;
+      color: var(--gray-700);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .list-item.active .item-name { color: var(--primary-text); font-weight: 600; }
+    .system-badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 100px;
+      background: var(--gray-100);
+      color: var(--gray-400);
+      border: 1px solid var(--gray-200);
+      flex-shrink: 0;
+    }
+    .btn-delete-item {
+      opacity: 0;
+      width: 20px; height: 20px;
+      border: none; background: none;
+      border-radius: 4px;
+      color: var(--danger);
+      font-size: 13px;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.15s, background 0.1s;
+    }
+    .list-item:hover .btn-delete-item { opacity: 1; }
+    .btn-delete-item:hover { background: var(--danger-light); }
+
+    /* ── 右側面板（通用）─────────────── */
+    .right-panel {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      min-height: 420px;
+    }
+
+    /* 空狀態 */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .empty-icon { font-size: 44px; margin-bottom: 14px; }
+    .empty-title { font-size: 15px; font-weight: 600; color: var(--gray-500); margin-bottom: 6px; }
+    .empty-sub { font-size: 13px; color: var(--gray-400); }
+
+    /* 右側標題列 */
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      border-radius: 10px 10px 0 0;
+    }
+    .detail-title-row { display: flex; align-items: center; gap: 8px; }
+    .detail-name { font-size: 16px; font-weight: 700; color: var(--gray-900); }
+    .detail-system-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: var(--primary-light);
+      color: var(--primary-text);
+      border: 1px solid var(--primary-border);
+    }
+    .detail-actions { display: flex; gap: 8px; align-items: center; }
+
+    /* 按鈕 */
+    .btn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      color: var(--gray-600);
+      transition: background 0.12s;
+    }
+    .btn:hover { background: var(--gray-50); }
+    .btn-primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-text); border-color: var(--primary-text); }
+    .btn-danger-outline {
+      border-color: var(--danger-border);
+      background: #fff;
+      color: var(--danger);
+    }
+    .btn-danger-outline:hover { background: var(--danger-light); }
+    .btn-modal-danger {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid var(--danger);
+      background: var(--danger);
+      color: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+    .btn-modal-danger:hover { background: #b91c1c; }
+    .btn-modal-cancel {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      color: var(--gray-600);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-modal-cancel:hover { background: var(--gray-50); }
+
+    /* ── 使用者詳情 ────────────────────── */
+    .user-detail-body { padding: 18px 20px; }
+
+    /* 角色選取區 */
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 10px;
+    }
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .role-cb-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 10px;
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--gray-700);
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .role-cb-label:hover { background: var(--primary-light); border-color: var(--primary-border); }
+    .role-cb-label input[type="checkbox"] { accent-color: var(--primary); width: 14px; height: 14px; }
+    .role-cb-label.checked { background: var(--primary-light); border-color: var(--primary-border); color: var(--primary-text); font-weight: 500; }
+
+    /* 有效權限預覽 */
+    .effective-section {
+      border-top: 1px solid var(--gray-200);
+      padding-top: 16px;
+      margin-top: 4px;
+    }
+    .effective-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .effective-count {
+      font-size: 12px;
+      color: var(--gray-400);
+    }
+    .perm-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .perm-tag {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: var(--primary-light);
+      color: var(--primary-text);
+      border: 1px solid var(--primary-border);
+    }
+    .no-perms {
+      font-size: 13px;
+      color: var(--gray-400);
+      font-style: italic;
+    }
+
+    /* Modal 表單 */
+    .form-group { margin-bottom: 14px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 5px; }
+    .form-label .req { color: var(--danger); }
+    .form-control {
+      width: 100%;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--gray-800);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 2px #dbeafe; }
+    .form-control.error { border-color: var(--danger); box-shadow: 0 0 0 2px #fee2e2; }
+
+    /* 使用者列表帳號副文字 */
+    .item-account {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 1px;
+    }
+    .list-item.active .item-account { color: var(--primary-text); opacity: 0.7; }
+    .item-name-col { flex: 1; min-width: 0; overflow: hidden; }
+    .item-name-col .item-name { display: block; }
+
+    /* ── 下拉搜尋 ───────────────────────── */
+    .select-wrap { position: relative; }
+    .select-input-row { position: relative; }
+    .loc-filter-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+    .select-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #fff;
+      border: 1px solid var(--primary-border);
+      border-radius: 7px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+      z-index: 200;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .select-dropdown.open { display: block; }
+    .select-option {
+      padding: 9px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--gray-700);
+    }
+    .select-option:hover { background: var(--primary-light); color: var(--primary-text); }
+    .select-option.no-result { color: var(--gray-400); cursor: default; font-style: italic; }
+    .select-option.no-result:hover { background: none; }
+
+    /* 使用者詳情資訊區 */
+    .user-info-block {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .user-info-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--gray-100);
+      gap: 12px;
+    }
+    .user-info-row:last-child { border-bottom: none; }
+    .user-info-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-400);
+      width: 36px;
+      flex-shrink: 0;
+    }
+    .user-info-value {
+      font-size: 14px;
+      color: var(--gray-700);
+    }
+
+    .detail-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      background: var(--gray-50);
+      border-radius: 0 0 10px 10px;
+    }
+
+    /* ── 角色詳情（權限 checkbox）─────── */
+    .perm-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+    .feature-group {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .feature-group-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .feature-group-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+    .group-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--gray-400);
+      cursor: pointer;
+    }
+    .group-toggle-label input { accent-color: var(--primary); }
+    .feature-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: background 0.1s;
+      border-right: 1px solid var(--gray-100);
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .feature-item:hover:not(.disabled) { background: var(--gray-50); }
+    .feature-item.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+    .feature-cb { accent-color: var(--primary); width: 14px; height: 14px; flex-shrink: 0; }
+    .feature-label { font-size: 13px; color: var(--gray-700); }
+
+    /* 系統角色保護提示 */
+    .system-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      border-radius: 7px;
+      font-size: 13px;
+      color: var(--primary-text);
+      margin-bottom: 4px;
+    }
+
+    /* ── Modal ──────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 { font-size: 16px; font-weight: 700; }
+    .modal-close {
+      background: none; border: none;
+      font-size: 18px; cursor: pointer;
+      color: var(--gray-400); padding: 4px; line-height: 1;
+    }
+    .modal-close:hover { color: var(--gray-700); }
+    .modal-body { padding: 20px; }
+    .modal-confirm-text { font-size: 14px; color: var(--gray-600); line-height: 1.7; }
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding: 14px 20px;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+
+    /* ── 搜尋框 ─────────────────────────── */
+    .list-search-wrap {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--gray-200);
+      background: #fff;
+    }
+    .list-search {
+      width: 100%;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      padding: 6px 10px 6px 28px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-700);
+      background: var(--gray-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 8px center;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .list-search:focus { border-color: var(--primary); box-shadow: 0 0 0 2px #dbeafe; background-color: #fff; }
+
+    /* ── 拖拉排序 ────────────────────────── */
+    .drag-handle {
+      color: var(--gray-300);
+      font-size: 16px;
+      cursor: grab;
+      flex-shrink: 0;
+      line-height: 1;
+      user-select: none;
+      padding: 0 2px;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .list-item.dragging { opacity: 0.4; }
+    .list-item.drag-over {
+      border-top: 2px solid var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* ── 角色名稱行內編輯 ────────────────── */
+    .role-name-edit-wrap { display: flex; align-items: center; gap: 6px; }
+    .role-name-input {
+      font-size: 16px;
+      font-weight: 700;
+      border: 1px solid var(--primary-border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-family: inherit;
+      color: var(--gray-900);
+      outline: none;
+      width: 160px;
+    }
+    .role-name-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px #dbeafe; }
+    .btn-edit-name {
+      width: 26px; height: 26px;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--gray-400);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: background 0.12s, color 0.12s;
+      flex-shrink: 0;
+    }
+    .btn-edit-name:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary-border); }
+    .btn-save-name { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-save-name:hover { background: var(--primary-text); border-color: var(--primary-text); }
+
+    /* ── 表格版面 ────────────────────────── */
+    .tbl-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .tbl-filters { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+    .tbl-search {
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
+      padding: 7px 10px 7px 32px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-700);
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+      outline: none;
+      width: 200px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .tbl-search:focus { border-color: var(--primary); box-shadow: 0 0 0 2px #dbeafe; }
+    .tbl-loc-select {
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
+      padding: 7px 28px 7px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-700);
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E") no-repeat right 10px center;
+      outline: none;
+      width: 140px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .tbl-loc-select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px #dbeafe; }
+    .tbl-card {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tbl-wrap { overflow-x: auto; }
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      padding: 10px 16px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      white-space: nowrap;
+    }
+    .tbl td {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--gray-700);
+      border-bottom: 1px solid var(--gray-100);
+      vertical-align: middle;
+    }
+    .tbl tbody tr:last-child td { border-bottom: none; }
+    .tbl tbody tr:hover td { background: #f8f9ff; }
+    .tbl-name { font-weight: 600; color: var(--gray-800); }
+    .tbl-muted { color: var(--gray-400); font-size: 13px; }
+    .tbl-actions { display: flex; gap: 6px; }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 5px;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      color: var(--gray-600);
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.1s;
+      white-space: nowrap;
+    }
+    .btn-sm:hover { background: var(--gray-50); }
+    .btn-sm-danger { border-color: var(--danger-border); color: var(--danger); }
+    .btn-sm-danger:hover { background: var(--danger-light); }
+    .role-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .role-chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: var(--primary-light);
+      color: var(--primary-text);
+      border: 1px solid var(--primary-border);
+      white-space: nowrap;
+    }
+    .loc-chip {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: var(--gray-100);
+      color: var(--gray-500);
+      border: 1px solid var(--gray-200);
+    }
+    .tbl-empty {
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--gray-400);
+      font-size: 14px;
+    }
+
+    /* ── Toast ──────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f2937;
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      z-index: 3000;
+      display: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+  </style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">帳號管理</div>
+    <div class="page-sub">管理使用者、角色與各功能的存取權限</div>
+  </div>
+
+  <!-- 主頁籤 -->
+  <div class="main-tabs">
+    <button class="main-tab active" onclick="switchTab('members')">會員管理</button>
+    <button class="main-tab" onclick="switchTab('users')">使用者管理</button>
+    <button class="main-tab" onclick="switchTab('roles')">角色管理</button>
+  </div>
+
+  <!-- ── 使用者管理頁籤 ─────────────────── -->
+  <div class="tab-panel" id="tab-users">
+    <div class="tbl-toolbar">
+      <div class="tbl-filters">
+        <input type="text" class="tbl-search" id="userSearch" placeholder="搜尋名稱或信箱…" oninput="renderUserTable()">
+      </div>
+      <button class="btn btn-primary" onclick="openAddUser()">＋ 新增使用者</button>
+    </div>
+    <div class="tbl-card">
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>名稱</th><th>信箱</th><th>套用角色</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="userTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 會員管理頁籤 ─────────────────── -->
+  <div class="tab-panel active" id="tab-members">
+    <div class="tbl-toolbar">
+      <div class="tbl-filters">
+        <input type="text" class="tbl-search" id="memberSearch" placeholder="搜尋名稱或信箱…" oninput="renderMemberTable()">
+        <div class="select-wrap" style="position:relative">
+          <input type="text" class="tbl-loc-select" id="memberLocFilter"
+                 placeholder="所有據點" autocomplete="off"
+                 oninput="filterMemberLocOpts()" onfocus="openMemberLocDropdown()" onblur="closeMemberLocDropdown()">
+          <div class="select-dropdown" id="memberLocDropdown"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="openAddMember()">＋ 新增會員</button>
+    </div>
+    <div class="tbl-card">
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>名稱</th><th>信箱</th><th>所屬據點</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="memberTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 角色管理頁籤 ─────────────────── -->
+  <div class="tab-panel" id="tab-roles">
+    <div class="split-layout">
+      <!-- 左：角色列表 -->
+      <div class="left-panel">
+        <div class="left-panel-header">
+          <span class="left-panel-title">角色列表</span>
+          <button class="btn-add-icon" onclick="openAddRole()" title="新增角色">＋</button>
+        </div>
+        <div class="inline-add-row" id="addRoleRow">
+          <input type="text" class="inline-add-input" id="addRoleInput"
+                 placeholder="輸入角色名稱"
+                 onkeydown="handleAddRoleKey(event)">
+          <button class="btn-inline confirm" onclick="confirmAddRole()">✓</button>
+          <button class="btn-inline cancel" onclick="cancelAddRole()">✕</button>
+        </div>
+        <div class="item-list" id="roleList"></div>
+      </div>
+      <!-- 右：角色詳情 -->
+      <div class="right-panel" id="roleDetailPanel">
+        <div class="empty-state" id="roleEmptyState">
+          <div class="empty-icon">🔐</div>
+          <div class="empty-title">請選擇一個角色</div>
+          <div class="empty-sub">從左側角色列表點選角色，即可設定其功能存取權限</div>
+        </div>
+        <div id="roleDetailContent" style="display:none">
+          <div class="detail-header">
+            <div class="detail-title-row">
+              <div class="role-name-edit-wrap" id="roleNameDisplay">
+                <span class="detail-name" id="roleDetailName"></span>
+                <span class="detail-system-badge" id="roleSystemBadge" style="display:none">系統角色</span>
+                <button class="btn-edit-name" id="btnStartRename" onclick="startRename()" title="重新命名" style="display:none">✏️</button>
+              </div>
+              <div class="role-name-edit-wrap" id="roleNameEditRow" style="display:none">
+                <input type="text" class="role-name-input" id="roleNameInput" onkeydown="handleRenameKey(event)">
+                <button class="btn-edit-name btn-save-name" onclick="confirmRename()" title="確認">✓</button>
+                <button class="btn-edit-name" onclick="cancelRename()" title="取消">✕</button>
+              </div>
+            </div>
+            <div class="detail-actions" id="roleDetailActions">
+              <button class="btn" onclick="selectAll()">全選</button>
+              <button class="btn" onclick="selectNone()">全不選</button>
+              <button class="btn btn-primary" onclick="savePermissions()">儲存</button>
+            </div>
+          </div>
+          <div class="perm-body" id="permBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 新增使用者 Modal -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>新增使用者</h2>
+      <button class="modal-close" onclick="closeModal('addUserModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">名稱 <span class="req">*</span></label>
+        <input type="text" class="form-control" id="newUserName" placeholder="請輸入名稱">
+      </div>
+      <div class="form-group">
+        <label class="form-label">信箱 <span class="req">*</span></label>
+        <input type="email" class="form-control" id="newUserAccount" placeholder="請輸入電子信箱" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">密碼 <span class="req">*</span></label>
+        <input type="password" class="form-control" id="newUserPassword" placeholder="請輸入密碼" autocomplete="new-password">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('addUserModal')">取消</button>
+      <button class="btn-modal-danger" style="background:var(--primary);border-color:var(--primary)" onclick="confirmAddUser()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- 編輯使用者角色 Modal -->
+<div class="modal-overlay" id="editUserModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h2 id="editUserTitle">編輯使用者</h2>
+      <button class="modal-close" onclick="closeModal('editUserModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="user-info-block" style="margin-bottom:16px">
+        <div class="user-info-row">
+          <span class="user-info-label">名稱</span>
+          <span class="user-info-value" id="editUserName"></span>
+        </div>
+        <div class="user-info-row">
+          <span class="user-info-label">信箱</span>
+          <span class="user-info-value" id="editUserAccount"></span>
+        </div>
+      </div>
+      <div class="section-label">套用的角色（可複選）</div>
+      <div class="roles-grid" id="rolesGrid"></div>
+      <div class="effective-section">
+        <div class="effective-header">
+          <div class="section-label" style="margin-bottom:0">有效權限預覽</div>
+          <span class="effective-count" id="effectiveCount"></span>
+        </div>
+        <div class="perm-tags" id="permTags"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('editUserModal')">取消</button>
+      <button class="btn-modal-danger" style="background:var(--primary);border-color:var(--primary)" onclick="saveUserRoles()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 刪除使用者 Modal -->
+<div class="modal-overlay" id="deleteUserModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>刪除使用者</h2>
+      <button class="modal-close" onclick="closeModal('deleteUserModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-confirm-text">確定要刪除使用者「<strong id="deleteUserName"></strong>」？<br>此操作無法復原。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('deleteUserModal')">取消</button>
+      <button class="btn-modal-danger" onclick="confirmDeleteUser()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新增會員 Modal -->
+<div class="modal-overlay" id="addMemberModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>新增會員</h2>
+      <button class="modal-close" onclick="closeModal('addMemberModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">名稱 <span class="req">*</span></label>
+        <input type="text" class="form-control" id="newMemName" placeholder="請輸入名稱">
+      </div>
+      <div class="form-group">
+        <label class="form-label">信箱 <span class="req">*</span></label>
+        <input type="email" class="form-control" id="newMemAccount" placeholder="請輸入電子信箱" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">密碼 <span class="req">*</span></label>
+        <input type="password" class="form-control" id="newMemPassword" placeholder="請輸入密碼" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">所屬據點</label>
+        <div class="select-wrap">
+          <input type="text" class="form-control" id="newMemLocation"
+                 placeholder="（選填）搜尋或選擇據點" autocomplete="off"
+                 oninput="filterMemLocOpts()" onfocus="openMemLocDropdown()" onblur="closeMemLocDropdown()">
+          <div class="select-dropdown" id="memLocDropdown"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('addMemberModal')">取消</button>
+      <button class="btn-modal-danger" style="background:var(--primary);border-color:var(--primary)" onclick="confirmAddMember()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- 編輯會員 Modal -->
+<div class="modal-overlay" id="editMemberModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>編輯會員</h2>
+      <button class="modal-close" onclick="closeModal('editMemberModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">名稱 <span class="req">*</span></label>
+        <input type="text" class="form-control" id="editMemName" placeholder="請輸入名稱">
+      </div>
+      <div class="form-group">
+        <label class="form-label">信箱 <span class="req">*</span></label>
+        <input type="email" class="form-control" id="editMemAccount" placeholder="請輸入電子信箱" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">所屬據點</label>
+        <div class="select-wrap">
+          <input type="text" class="form-control" id="editMemLocation"
+                 placeholder="（選填）搜尋或選擇據點" autocomplete="off"
+                 oninput="filterEditMemLocOpts()" onfocus="openEditMemLocDropdown()" onblur="closeEditMemLocDropdown()">
+          <div class="select-dropdown" id="editMemLocDropdown"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('editMemberModal')">取消</button>
+      <button class="btn-modal-danger" style="background:var(--primary);border-color:var(--primary)" onclick="confirmEditMember()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 刪除會員 Modal -->
+<div class="modal-overlay" id="deleteMemberModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>刪除會員</h2>
+      <button class="modal-close" onclick="closeModal('deleteMemberModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-confirm-text">確定要刪除會員「<strong id="deleteMemberName"></strong>」？<br>此操作無法復原。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('deleteMemberModal')">取消</button>
+      <button class="btn-modal-danger" onclick="confirmDeleteMember()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 刪除角色 Modal -->
+<div class="modal-overlay" id="deleteRoleModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>刪除角色</h2>
+      <button class="modal-close" onclick="closeModal('deleteRoleModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-confirm-text">確定要刪除角色「<strong id="deleteRoleName"></strong>」？<br>套用此角色的使用者將自動移除該角色，此操作無法復原。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('deleteRoleModal')">取消</button>
+      <button class="btn-modal-danger" onclick="confirmDeleteRole()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   據點清單（之後接據點管理頁時替換此陣列）
+══════════════════════════════════════════════ */
+var LOCATIONS = ['A 據點', 'B 據點'];
+
+/* ══════════════════════════════════════════════
+   靜態常數：功能分組
+══════════════════════════════════════════════ */
+var FEATURE_GROUPS = [
+  {
+    group: '公告管理',
+    items: [
+      { id: 'announce_home',   label: '首頁 & 公告' },
+      { id: 'announce_manage', label: '公告管理' },
+      { id: 'purchasing_home', label: '採購首頁' },
+      { id: 'editorial_home',  label: '美編首頁' }
+    ]
+  },
+  {
+    group: '餐點管理',
+    items: [
+      { id: 'menu_items',      label: '餐點管理' },
+      { id: 'price_change',    label: '餐點異動紀錄' },
+      { id: 'menu_schedule',   label: '菜單排程管理' }
+    ]
+  },
+  {
+    group: '店家管理',
+    items: [
+      { id: 'change_review_art', label: '美編審核圖片' },
+      { id: 'change_review_pur', label: '採購審核' }
+    ]
+  },
+  {
+    group: '客訴管理',
+    items: [
+      { id: 'complaint',       label: '客訴管理' }
+    ]
+  },
+  {
+    group: '問題與 ECR',
+    items: [
+      { id: 'issue_new',       label: '新增問題單' },
+      { id: 'issue_list',      label: '問題清單' },
+      { id: 'ecr_new',         label: '新增 ECR' },
+      { id: 'ecr_list',        label: 'ECR 清單' },
+      { id: 'ecr_guide',       label: '填寫指南' }
+    ]
+  },
+  {
+    group: '系統',
+    items: [
+      { id: 'permissions',     label: '帳號管理' }
+    ]
+  }
+];
+
+var ALL_FEATURE_IDS = FEATURE_GROUPS.reduce(function(acc, g) {
+  return acc.concat(g.items.map(function(i) { return i.id; }));
+}, []);
+
+/* ══════════════════════════════════════════════
+   預設資料
+══════════════════════════════════════════════ */
+function makePerms(ids) {
+  var p = {};
+  ALL_FEATURE_IDS.forEach(function(id) { p[id] = false; });
+  (ids || []).forEach(function(id) { p[id] = true; });
+  return p;
+}
+function allPerms() {
+  var p = {};
+  ALL_FEATURE_IDS.forEach(function(id) { p[id] = true; });
+  return p;
+}
+
+function defaultRoles() {
+  return [
+    { id: 'role_admin',       name: 'Admin',    system: true, permissions: allPerms() },
+    { id: 'role_ops_mgr',     name: '營運主管', system: false, permissions: makePerms(['announce_home','complaint','issue_list','ecr_list']) },
+    { id: 'role_ops',         name: '營運',     system: false, permissions: makePerms(['announce_home','complaint']) },
+    { id: 'role_driver',      name: '司機',     system: false, permissions: makePerms(['announce_home']) },
+    { id: 'role_pur_mgr',     name: '採購主管', system: false, permissions: makePerms(['announce_home','purchasing_home','menu_items','price_change','menu_schedule','change_review_pur']) },
+    { id: 'role_pur',         name: '採購',     system: false, permissions: makePerms(['announce_home','purchasing_home','menu_items','price_change','menu_schedule']) },
+    { id: 'role_acc_mgr',     name: '會計主管', system: false, permissions: makePerms(['announce_home','price_change']) },
+    { id: 'role_acc',         name: '會計',     system: false, permissions: makePerms(['announce_home','price_change']) },
+    { id: 'role_mkt_mgr',     name: '行銷主管', system: false, permissions: makePerms(['announce_home','announce_manage','menu_items']) },
+    { id: 'role_mkt',         name: '行銷',     system: false, permissions: makePerms(['announce_home']) },
+    { id: 'role_art',         name: '美編',     system: false, permissions: makePerms(['announce_home','editorial_home','menu_items','change_review_art']) },
+    { id: 'role_hr',          name: '人資',     system: false, permissions: makePerms(['announce_home','permissions']) },
+    { id: 'role_sales_mgr',   name: '業務主管', system: false, permissions: makePerms(['announce_home','announce_manage','complaint']) },
+    { id: 'role_sales',       name: '業務',     system: false, permissions: makePerms(['announce_home','complaint']) }
+  ];
+}
+
+function defaultUsers() {
+  return [
+    { id: 'user_1', name: '王小明', account: 'admin@company.com',        password: 'Admin@1234', roles: ['role_admin'] },
+    { id: 'user_2', name: '李大華', account: 'liodahua@company.com',     password: 'Pass@1234',  roles: ['role_ops_mgr', 'role_ops'] },
+    { id: 'user_3', name: '張美玲', account: 'zhangmeiling@company.com', password: 'Pass@1234',  roles: ['role_pur_mgr'] },
+    { id: 'user_4', name: '陳志偉', account: 'chenzhiwei@company.com',   password: 'Pass@1234',  roles: ['role_acc', 'role_mkt'] },
+    { id: 'user_5', name: '林雅芳', account: 'linyafang@company.com',    password: 'Pass@1234',  roles: ['role_sales'] }
+  ];
+}
+
+/* ══════════════════════════════════════════════
+   狀態
+══════════════════════════════════════════════ */
+var roles = [];
+var users = [];
+var selectedUserId = null;
+var selectedRoleId = null;
+var pendingDeleteUserId = null;
+var pendingDeleteRoleId = null;
+
+var ROLES_KEY = 'permissions_roles_v2';
+var USERS_KEY = 'permissions_users_v2';
+
+/* ══════════════════════════════════════════════
+   載入 / 儲存
+══════════════════════════════════════════════ */
+function load() {
+  try {
+    var r = sessionStorage.getItem(ROLES_KEY);
+    roles = r ? JSON.parse(r) : defaultRoles();
+  } catch(e) { roles = defaultRoles(); }
+  try {
+    var u = sessionStorage.getItem(USERS_KEY);
+    users = u ? JSON.parse(u) : defaultUsers();
+  } catch(e) { users = defaultUsers(); }
+  try {
+    var m = sessionStorage.getItem(MEMBERS_KEY);
+    members = m ? JSON.parse(m) : defaultMembers();
+  } catch(e) { members = defaultMembers(); }
+}
+
+function save() {
+  sessionStorage.setItem(ROLES_KEY, JSON.stringify(roles));
+  sessionStorage.setItem(USERS_KEY, JSON.stringify(users));
+  sessionStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
+}
+
+/* ══════════════════════════════════════════════
+   頁籤切換
+══════════════════════════════════════════════ */
+function switchTab(tab) {
+  document.querySelectorAll('.main-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  var idx = tab === 'members' ? 0 : tab === 'users' ? 1 : 2;
+  document.querySelectorAll('.main-tab')[idx].classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+/* ══════════════════════════════════════════════
+   Modal 共用
+══════════════════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.addEventListener('click', function(e) {
+  ['addUserModal','editUserModal','deleteUserModal','addMemberModal','editMemberModal','deleteMemberModal','deleteRoleModal'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && e.target === el) closeModal(id);
+  });
+});
+
+/* ══════════════════════════════════════════════
+   Toast
+══════════════════════════════════════════════ */
+var _toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { t.style.display = 'none'; }, 3000);
+}
+
+/* ══════════════════════════════════════════════
+   有效權限計算
+══════════════════════════════════════════════ */
+function computeEffectivePerms(roleIds) {
+  var effective = {};
+  ALL_FEATURE_IDS.forEach(function(id) { effective[id] = false; });
+  roleIds.forEach(function(rid) {
+    var role = roles.find(function(r) { return r.id === rid; });
+    if (role) {
+      ALL_FEATURE_IDS.forEach(function(id) {
+        if (role.permissions[id]) effective[id] = true;
+      });
+    }
+  });
+  return effective;
+}
+
+function getFeatureLabel(fid) {
+  for (var i = 0; i < FEATURE_GROUPS.length; i++) {
+    for (var j = 0; j < FEATURE_GROUPS[i].items.length; j++) {
+      if (FEATURE_GROUPS[i].items[j].id === fid) return FEATURE_GROUPS[i].items[j].label;
+    }
+  }
+  return fid;
+}
+
+/* ══════════════════════════════════════════════
+   使用者管理（表格版）
+══════════════════════════════════════════════ */
+function renderUserTable() {
+  var tbody = document.getElementById('userTbody');
+  var q = (document.getElementById('userSearch').value || '').trim().toLowerCase();
+  var filtered = q ? users.filter(function(u) {
+    return u.name.toLowerCase().indexOf(q) !== -1 || (u.account || '').toLowerCase().indexOf(q) !== -1;
+  }) : users;
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">' + (q ? '找不到符合的使用者' : '尚無使用者') + '</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(function(u) {
+    var roleChips = u.roles.length
+      ? u.roles.map(function(rid) {
+          var r = roles.find(function(r) { return r.id === rid; });
+          return r ? '<span class="role-chip">' + escHtml(r.name) + '</span>' : '';
+        }).join('')
+      : '<span class="tbl-muted">—</span>';
+    return '<tr>' +
+      '<td class="tbl-name">' + escHtml(u.name) + '</td>' +
+      '<td class="tbl-muted">' + escHtml(u.account || '—') + '</td>' +
+      '<td><div class="role-chips">' + roleChips + '</div></td>' +
+      '<td><div class="tbl-actions">' +
+        '<button class="btn-sm" onclick="openEditUser(\'' + u.id + '\')">編輯角色</button>' +
+        '<button class="btn-sm btn-sm-danger" onclick="openDeleteUserModal(\'' + u.id + '\')">刪除</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+/* 編輯使用者角色 */
+function openEditUser(uid) {
+  selectedUserId = uid;
+  var user = users.find(function(u) { return u.id === uid; });
+  if (!user) return;
+  document.getElementById('editUserTitle').textContent = '編輯角色 — ' + user.name;
+  document.getElementById('editUserName').textContent = user.name;
+  document.getElementById('editUserAccount').textContent = user.account || '—';
+  var grid = document.getElementById('rolesGrid');
+  grid.innerHTML = roles.map(function(r) {
+    var checked = user.roles.indexOf(r.id) !== -1;
+    return '<label class="role-cb-label' + (checked ? ' checked' : '') + '" onclick="onRoleCbChange(this)">' +
+      '<input type="checkbox" data-role-id="' + r.id + '"' + (checked ? ' checked' : '') + '> ' +
+      escHtml(r.name) +
+    '</label>';
+  }).join('');
+  updateEffectivePerms();
+  openModal('editUserModal');
+}
+
+function onRoleCbChange(label) {
+  var cb = label.querySelector('input[type="checkbox"]');
+  setTimeout(function() {
+    label.classList.toggle('checked', cb.checked);
+    updateEffectivePerms();
+  }, 0);
+}
+
+function getSelectedRoleIds() {
+  var cbs = document.querySelectorAll('#rolesGrid input[type="checkbox"]');
+  var ids = [];
+  cbs.forEach(function(cb) { if (cb.checked) ids.push(cb.dataset.roleId); });
+  return ids;
+}
+
+function updateEffectivePerms() {
+  var roleIds = getSelectedRoleIds();
+  var effective = computeEffectivePerms(roleIds);
+  var granted = ALL_FEATURE_IDS.filter(function(id) { return effective[id]; });
+  document.getElementById('effectiveCount').textContent = granted.length + ' / ' + ALL_FEATURE_IDS.length + ' 項功能';
+  var tagsEl = document.getElementById('permTags');
+  if (!granted.length) {
+    tagsEl.innerHTML = '<span class="no-perms">（此使用者目前沒有任何功能存取權限）</span>';
+  } else {
+    tagsEl.innerHTML = granted.map(function(id) {
+      return '<span class="perm-tag">' + escHtml(getFeatureLabel(id)) + '</span>';
+    }).join('');
+  }
+}
+
+function saveUserRoles() {
+  var user = users.find(function(u) { return u.id === selectedUserId; });
+  if (!user) return;
+  user.roles = getSelectedRoleIds();
+  save();
+  closeModal('editUserModal');
+  renderUserTable();
+  showToast('✅ 「' + user.name + '」的角色設定已儲存');
+}
+
+/* 新增使用者 */
+function openAddUser() {
+  ['newUserName','newUserAccount','newUserPassword'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('error');
+  });
+  openModal('addUserModal');
+  setTimeout(function() { document.getElementById('newUserName').focus(); }, 50);
+}
+
+function confirmAddUser() {
+  var nameEl = document.getElementById('newUserName');
+  var accountEl = document.getElementById('newUserAccount');
+  var pwEl = document.getElementById('newUserPassword');
+  var name = nameEl.value.trim(), account = accountEl.value.trim(), pw = pwEl.value;
+  var ok = true;
+  if (!name)    { nameEl.classList.add('error');    ok = false; } else { nameEl.classList.remove('error'); }
+  if (!account) { accountEl.classList.add('error'); ok = false; } else { accountEl.classList.remove('error'); }
+  if (!pw)      { pwEl.classList.add('error');      ok = false; } else { pwEl.classList.remove('error'); }
+  if (!ok) return;
+  if (users.some(function(u) { return u.account === account; })) {
+    accountEl.classList.add('error');
+    showToast('⚠️ 信箱「' + account + '」已存在');
+    return;
+  }
+  users.push({ id: 'user_' + Date.now(), name: name, account: account, password: pw, roles: [] });
+  save();
+  closeModal('addUserModal');
+  renderUserTable();
+  showToast('✅ 使用者「' + name + '」已新增');
+}
+
+/* 刪除使用者 */
+function openDeleteUserModal(uid) {
+  pendingDeleteUserId = uid;
+  var user = users.find(function(u) { return u.id === uid; });
+  document.getElementById('deleteUserName').textContent = user ? user.name : '';
+  openModal('deleteUserModal');
+}
+
+function confirmDeleteUser() {
+  users = users.filter(function(u) { return u.id !== pendingDeleteUserId; });
+  save();
+  renderUserTable();
+  closeModal('deleteUserModal');
+  showToast('🗑️ 使用者已刪除');
+}
+
+/* ══════════════════════════════════════════════
+   會員管理（表格版）
+══════════════════════════════════════════════ */
+var members = [];
+var pendingDeleteMemberId = null;
+var editingMemberId = null;
+var selectedMemberLocation = '';
+var MEMBERS_KEY = 'permissions_members_v1';
+
+function defaultMembers() {
+  return [
+    { id: 'mem_1', name: '陳大文', account: 'achen@mail.com',   password: 'Pass@1234', location: 'A 據點' },
+    { id: 'mem_2', name: '林小花', account: 'lflower@mail.com', password: 'Pass@1234', location: 'A 據點' },
+    { id: 'mem_3', name: '黃阿明', account: 'haming@mail.com',  password: 'Pass@1234', location: 'B 據點' },
+    { id: 'mem_4', name: '吳美麗', account: 'wmei@mail.com',    password: 'Pass@1234', location: 'B 據點' },
+    { id: 'mem_5', name: '張建國', account: 'zjian@mail.com',   password: 'Pass@1234', location: '' }
+  ];
+}
+
+function renderMemberTable() {
+  var tbody = document.getElementById('memberTbody');
+  var q = (document.getElementById('memberSearch').value || '').trim().toLowerCase();
+  var filtered = members.filter(function(m) {
+    if (q && m.name.toLowerCase().indexOf(q) === -1 && (m.account || '').toLowerCase().indexOf(q) === -1) return false;
+    if (selectedMemberLocation && (m.location || '') !== selectedMemberLocation) return false;
+    return true;
+  });
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">' + (q || selectedMemberLocation ? '找不到符合的會員' : '尚無會員') + '</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(function(m) {
+    var locHtml = m.location ? '<span class="loc-chip">' + escHtml(m.location) + '</span>' : '<span class="tbl-muted">—</span>';
+    return '<tr>' +
+      '<td class="tbl-name">' + escHtml(m.name) + '</td>' +
+      '<td class="tbl-muted">' + escHtml(m.account || '—') + '</td>' +
+      '<td>' + locHtml + '</td>' +
+      '<td><div class="tbl-actions">' +
+        '<button class="btn-sm" onclick="openEditMember(\'' + m.id + '\')">編輯</button>' +
+        '<button class="btn-sm btn-sm-danger" onclick="openDeleteMemberModal(\'' + m.id + '\')">刪除</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+/* 篩選據點下拉 */
+function openMemberLocDropdown() {
+  filterMemberLocOpts();
+  document.getElementById('memberLocDropdown').classList.add('open');
+}
+function closeMemberLocDropdown() {
+  setTimeout(function() {
+    document.getElementById('memberLocDropdown').classList.remove('open');
+    // 若未選取任何據點，清空輸入框讓 placeholder 顯示目前篩選狀態
+    var inp = document.getElementById('memberLocFilter');
+    if (!selectedMemberLocation) inp.value = '';
+    else inp.value = selectedMemberLocation;
+  }, 150);
+}
+function filterMemberLocOpts() {
+  var q = (document.getElementById('memberLocFilter').value || '').toLowerCase();
+  var list = q ? LOCATIONS.filter(function(l) { return l.toLowerCase().indexOf(q) !== -1; }) : LOCATIONS;
+  var dd = document.getElementById('memberLocDropdown');
+  var allOpt = !q ? '<div class="select-option" onmousedown="pickMemberLoc(\'\')">' + (!selectedMemberLocation ? '✓ ' : '') + '所有據點</div>' : '';
+  dd.innerHTML = allOpt + (list.length
+    ? list.map(function(l) {
+        return '<div class="select-option" onmousedown="pickMemberLoc(\'' + escHtml(l) + '\')">' + (selectedMemberLocation === l ? '✓ ' : '') + escHtml(l) + '</div>';
+      }).join('')
+    : '<div class="select-option no-result">無符合的據點</div>');
+}
+function pickMemberLoc(val) {
+  selectedMemberLocation = val;
+  var inp = document.getElementById('memberLocFilter');
+  inp.value = val || '';
+  inp.placeholder = val ? val : '所有據點';
+  document.getElementById('memberLocDropdown').classList.remove('open');
+  renderMemberTable();
+}
+
+/* 新增會員 */
+function openAddMember() {
+  ['newMemName','newMemAccount','newMemPassword','newMemLocation'].forEach(function(id) {
+    var el = document.getElementById(id); el.value = ''; el.classList.remove('error');
+  });
+  openModal('addMemberModal');
+  setTimeout(function() { document.getElementById('newMemName').focus(); }, 50);
+}
+function filterMemLocOpts() { renderLocDropdown('newMemLocation', 'memLocDropdown'); }
+function openMemLocDropdown() { filterMemLocOpts(); document.getElementById('memLocDropdown').classList.add('open'); }
+function closeMemLocDropdown() { setTimeout(function() { document.getElementById('memLocDropdown').classList.remove('open'); }, 150); }
+
+function confirmAddMember() {
+  var nameEl = document.getElementById('newMemName');
+  var accountEl = document.getElementById('newMemAccount');
+  var pwEl = document.getElementById('newMemPassword');
+  var name = nameEl.value.trim(), account = accountEl.value.trim(), pw = pwEl.value;
+  var ok = true;
+  if (!name)    { nameEl.classList.add('error');    ok = false; } else { nameEl.classList.remove('error'); }
+  if (!account) { accountEl.classList.add('error'); ok = false; } else { accountEl.classList.remove('error'); }
+  if (!pw)      { pwEl.classList.add('error');      ok = false; } else { pwEl.classList.remove('error'); }
+  if (!ok) return;
+  if (members.some(function(m) { return m.account === account; })) {
+    accountEl.classList.add('error');
+    showToast('⚠️ 信箱「' + account + '」已存在');
+    return;
+  }
+  var loc = document.getElementById('newMemLocation').value.trim();
+  members.push({ id: 'mem_' + Date.now(), name: name, account: account, password: pw, location: loc });
+  save();
+  closeModal('addMemberModal');
+  renderMemberTable();
+  showToast('✅ 會員「' + name + '」已新增');
+}
+
+/* 編輯會員 */
+function openEditMember(mid) {
+  editingMemberId = mid;
+  var m = members.find(function(m) { return m.id === mid; });
+  if (!m) return;
+  document.getElementById('editMemName').value = m.name;
+  document.getElementById('editMemAccount').value = m.account || '';
+  document.getElementById('editMemLocation').value = m.location || '';
+  ['editMemName','editMemAccount','editMemLocation'].forEach(function(id) {
+    document.getElementById(id).classList.remove('error');
+  });
+  openModal('editMemberModal');
+  setTimeout(function() { document.getElementById('editMemName').focus(); }, 50);
+}
+function filterEditMemLocOpts() { renderLocDropdown('editMemLocation', 'editMemLocDropdown'); }
+function openEditMemLocDropdown() { filterEditMemLocOpts(); document.getElementById('editMemLocDropdown').classList.add('open'); }
+function closeEditMemLocDropdown() { setTimeout(function() { document.getElementById('editMemLocDropdown').classList.remove('open'); }, 150); }
+
+function confirmEditMember() {
+  var nameEl = document.getElementById('editMemName');
+  var accountEl = document.getElementById('editMemAccount');
+  var name = nameEl.value.trim(), account = accountEl.value.trim();
+  var ok = true;
+  if (!name)    { nameEl.classList.add('error');    ok = false; } else { nameEl.classList.remove('error'); }
+  if (!account) { accountEl.classList.add('error'); ok = false; } else { accountEl.classList.remove('error'); }
+  if (!ok) return;
+  if (members.some(function(m) { return m.account === account && m.id !== editingMemberId; })) {
+    accountEl.classList.add('error');
+    showToast('⚠️ 信箱「' + account + '」已存在');
+    return;
+  }
+  var m = members.find(function(m) { return m.id === editingMemberId; });
+  m.name = name;
+  m.account = account;
+  m.location = document.getElementById('editMemLocation').value.trim();
+  save();
+  closeModal('editMemberModal');
+  renderMemberTable();
+  showToast('✅ 會員資料已儲存');
+}
+
+/* 刪除會員 */
+function openDeleteMemberModal(mid) {
+  pendingDeleteMemberId = mid;
+  var m = members.find(function(m) { return m.id === mid; });
+  document.getElementById('deleteMemberName').textContent = m ? m.name : '';
+  openModal('deleteMemberModal');
+}
+function confirmDeleteMember() {
+  members = members.filter(function(m) { return m.id !== pendingDeleteMemberId; });
+  save();
+  renderMemberTable();
+  closeModal('deleteMemberModal');
+  showToast('🗑️ 會員已刪除');
+}
+
+/* 共用據點下拉渲染 */
+function renderLocDropdown(inputId, dropdownId) {
+  var q = (document.getElementById(inputId).value || '').toLowerCase();
+  var list = q ? LOCATIONS.filter(function(l) { return l.toLowerCase().indexOf(q) !== -1; }) : LOCATIONS;
+  var dd = document.getElementById(dropdownId);
+  dd.innerHTML = list.length
+    ? list.map(function(l) { return '<div class="select-option" onmousedown="pickLocFor(\'' + inputId + '\',\'' + dropdownId + '\',\'' + escHtml(l) + '\')">' + escHtml(l) + '</div>'; }).join('')
+    : '<div class="select-option no-result">無符合的據點</div>';
+}
+function pickLocFor(inputId, dropdownId, val) {
+  document.getElementById(inputId).value = val;
+  document.getElementById(dropdownId).classList.remove('open');
+}
+
+/* ══════════════════════════════════════════════
+   角色管理
+══════════════════════════════════════════════ */
+function renderRoleList() {
+  var list = document.getElementById('roleList');
+  list.innerHTML = roles.map(function(r) {
+    return '<div class="list-item' + (r.id === selectedRoleId ? ' active' : '') + '" data-rid="' + r.id + '"' +
+      ' draggable="true"' +
+      ' onclick="selectRole(\'' + r.id + '\')"' +
+      ' ondragstart="onDragStart(event,\'' + r.id + '\')"' +
+      ' ondragover="onDragOver(event)"' +
+      ' ondragleave="onDragLeave(event)"' +
+      ' ondrop="onDrop(event,\'' + r.id + '\')"' +
+      ' ondragend="onDragEnd(event)">' +
+      '<span class="drag-handle" title="拖曳排序">⠿</span>' +
+      '<span class="item-name">' + escHtml(r.name) + '</span>' +
+      (r.system ? '<span class="system-badge">系統</span>' : '') +
+      (!r.system ? '<button class="btn-delete-item" onclick="openDeleteRoleModal(event,\'' + r.id + '\')" title="刪除角色">✕</button>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function selectRole(rid) {
+  selectedRoleId = rid;
+  renderRoleList();
+  renderPermContent();
+}
+
+function renderPermContent() {
+  var role = roles.find(function(r) { return r.id === selectedRoleId; });
+  if (!role) {
+    document.getElementById('roleEmptyState').style.display = '';
+    document.getElementById('roleDetailContent').style.display = 'none';
+    return;
+  }
+  document.getElementById('roleEmptyState').style.display = 'none';
+  document.getElementById('roleDetailContent').style.display = '';
+  document.getElementById('roleDetailName').textContent = role.name;
+
+  var badge = document.getElementById('roleSystemBadge');
+  badge.style.display = role.system ? '' : 'none';
+
+  // 重命名按鈕：非系統角色才顯示
+  var btnRename = document.getElementById('btnStartRename');
+  btnRename.style.display = role.system ? 'none' : '';
+  // 確保編輯列是收起狀態
+  document.getElementById('roleNameDisplay').style.display = '';
+  document.getElementById('roleNameEditRow').style.display = 'none';
+
+  var actions = document.getElementById('roleDetailActions');
+  actions.style.display = role.system ? 'none' : '';
+
+  var body = document.getElementById('permBody');
+  var html = '';
+
+  if (role.system) {
+    html += '<div class="system-notice">🔒 此為系統角色，擁有全部功能的存取權限，不可修改。</div>';
+  }
+
+  html += FEATURE_GROUPS.map(function(g, gi) {
+    var allChecked = g.items.every(function(item) { return role.permissions[item.id]; });
+    var someChecked = g.items.some(function(item) { return role.permissions[item.id]; });
+    var indeterminate = !allChecked && someChecked;
+
+    return '<div class="feature-group">' +
+      '<div class="feature-group-hdr">' +
+        '<span class="feature-group-name">' + escHtml(g.group) + '</span>' +
+        (!role.system ? '<label class="group-toggle-label"><input type="checkbox" class="group-toggle-cb"' +
+          ' data-group-idx="' + gi + '"' +
+          (allChecked ? ' checked' : '') +
+          ' onchange="onGroupToggle(this)"> 全組選取</label>' : '') +
+      '</div>' +
+      '<div class="feature-items">' +
+        g.items.map(function(item) {
+          return '<label class="feature-item' + (role.system ? ' disabled' : '') + '">' +
+            '<input type="checkbox" class="feature-cb" data-id="' + item.id + '"' +
+            (role.permissions[item.id] ? ' checked' : '') +
+            (role.system ? ' disabled' : '') +
+            ' onchange="onFeatureCbChange(this)">' +
+            '<span class="feature-label">' + escHtml(item.label) + '</span>' +
+          '</label>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  body.innerHTML = html;
+
+  // 設定 indeterminate（需 JS 設定）
+  FEATURE_GROUPS.forEach(function(g, gi) {
+    var gtoggle = body.querySelector('.group-toggle-cb[data-group-idx="' + gi + '"]');
+    if (gtoggle) {
+      var allCh = g.items.every(function(item) { return role.permissions[item.id]; });
+      var someCh = g.items.some(function(item) { return role.permissions[item.id]; });
+      gtoggle.indeterminate = !allCh && someCh;
+    }
+  });
+}
+
+function onGroupToggle(cb) {
+  var gi = parseInt(cb.dataset.groupIdx);
+  var g = FEATURE_GROUPS[gi];
+  var checked = cb.checked;
+  g.items.forEach(function(item) {
+    var fcb = document.querySelector('.feature-cb[data-id="' + item.id + '"]');
+    if (fcb) fcb.checked = checked;
+  });
+  cb.indeterminate = false;
+}
+
+function onFeatureCbChange(cb) {
+  // 找到所屬分組，更新 group toggle 狀態
+  var fid = cb.dataset.id;
+  FEATURE_GROUPS.forEach(function(g, gi) {
+    if (g.items.some(function(i) { return i.id === fid; })) {
+      var gtoggle = document.querySelector('.group-toggle-cb[data-group-idx="' + gi + '"]');
+      if (gtoggle) {
+        var allCh = g.items.every(function(item) {
+          var fc = document.querySelector('.feature-cb[data-id="' + item.id + '"]');
+          return fc ? fc.checked : false;
+        });
+        var someCh = g.items.some(function(item) {
+          var fc = document.querySelector('.feature-cb[data-id="' + item.id + '"]');
+          return fc ? fc.checked : false;
+        });
+        gtoggle.checked = allCh;
+        gtoggle.indeterminate = !allCh && someCh;
+      }
+    }
+  });
+}
+
+function selectAll() {
+  document.querySelectorAll('.feature-cb:not([disabled])').forEach(function(cb) { cb.checked = true; });
+  document.querySelectorAll('.group-toggle-cb').forEach(function(cb) { cb.checked = true; cb.indeterminate = false; });
+}
+
+function selectNone() {
+  document.querySelectorAll('.feature-cb:not([disabled])').forEach(function(cb) { cb.checked = false; });
+  document.querySelectorAll('.group-toggle-cb').forEach(function(cb) { cb.checked = false; cb.indeterminate = false; });
+}
+
+function savePermissions() {
+  var role = roles.find(function(r) { return r.id === selectedRoleId; });
+  if (!role || role.system) return;
+  document.querySelectorAll('.feature-cb').forEach(function(cb) {
+    role.permissions[cb.dataset.id] = cb.checked;
+  });
+  save();
+  showToast('✅ 「' + role.name + '」的權限設定已儲存');
+}
+
+/* 新增角色 */
+function openAddRole() {
+  var row = document.getElementById('addRoleRow');
+  row.classList.add('visible');
+  var inp = document.getElementById('addRoleInput');
+  inp.value = '';
+  inp.classList.remove('error');
+  inp.focus();
+}
+
+function cancelAddRole() {
+  document.getElementById('addRoleRow').classList.remove('visible');
+  document.getElementById('addRoleInput').value = '';
+}
+
+function handleAddRoleKey(e) {
+  if (e.key === 'Enter') confirmAddRole();
+  if (e.key === 'Escape') cancelAddRole();
+}
+
+function confirmAddRole() {
+  var inp = document.getElementById('addRoleInput');
+  var name = inp.value.trim();
+  if (!name) { inp.classList.add('error'); inp.focus(); return; }
+  if (roles.some(function(r) { return r.name === name; })) {
+    inp.classList.add('error');
+    showToast('⚠️ 已有同名角色「' + name + '」');
+    inp.focus();
+    return;
+  }
+  inp.classList.remove('error');
+  var newRole = { id: 'role_' + Date.now(), name: name, system: false, permissions: makePerms([]) };
+  roles.push(newRole);
+  save();
+  cancelAddRole();
+  renderRoleList();
+  selectRole(newRole.id);
+  renderUserTable();
+  showToast('✅ 角色「' + name + '」已新增');
+}
+
+/* 刪除角色 */
+function openDeleteRoleModal(e, rid) {
+  e.stopPropagation();
+  pendingDeleteRoleId = rid;
+  var role = roles.find(function(r) { return r.id === rid; });
+  document.getElementById('deleteRoleName').textContent = role ? role.name : '';
+  openModal('deleteRoleModal');
+}
+
+function confirmDeleteRole() {
+  // 從所有使用者的 roles 陣列中移除該角色
+  users.forEach(function(u) {
+    u.roles = u.roles.filter(function(rid) { return rid !== pendingDeleteRoleId; });
+  });
+  roles = roles.filter(function(r) { return r.id !== pendingDeleteRoleId; });
+  if (selectedRoleId === pendingDeleteRoleId) {
+    selectedRoleId = null;
+    document.getElementById('roleEmptyState').style.display = '';
+    document.getElementById('roleDetailContent').style.display = 'none';
+  }
+  save();
+  renderRoleList();
+  renderUserTable();
+  closeModal('deleteRoleModal');
+  showToast('🗑️ 角色已刪除');
+}
+
+/* ══════════════════════════════════════════════
+   角色改名
+══════════════════════════════════════════════ */
+function startRename() {
+  var role = roles.find(function(r) { return r.id === selectedRoleId; });
+  if (!role || role.system) return;
+  var inp = document.getElementById('roleNameInput');
+  inp.value = role.name;
+  inp.classList.remove('error');
+  document.getElementById('roleNameDisplay').style.display = 'none';
+  document.getElementById('roleNameEditRow').style.display = '';
+  inp.focus();
+  inp.select();
+}
+
+function cancelRename() {
+  document.getElementById('roleNameDisplay').style.display = '';
+  document.getElementById('roleNameEditRow').style.display = 'none';
+}
+
+function handleRenameKey(e) {
+  if (e.key === 'Enter') confirmRename();
+  if (e.key === 'Escape') cancelRename();
+}
+
+function confirmRename() {
+  var role = roles.find(function(r) { return r.id === selectedRoleId; });
+  if (!role) return;
+  var newName = document.getElementById('roleNameInput').value.trim();
+  if (!newName) { document.getElementById('roleNameInput').classList.add('error'); return; }
+  if (newName !== role.name && roles.some(function(r) { return r.name === newName; })) {
+    showToast('⚠️ 已有同名角色「' + newName + '」');
+    document.getElementById('roleNameInput').classList.add('error');
+    return;
+  }
+  role.name = newName;
+  save();
+  document.getElementById('roleDetailName').textContent = newName;
+  cancelRename();
+  renderRoleList();
+  renderUserTable();
+  showToast('✅ 角色已重新命名為「' + newName + '」');
+}
+
+/* ══════════════════════════════════════════════
+   拖拉排序
+══════════════════════════════════════════════ */
+var _dragRoleId = null;
+
+function onDragStart(e, rid) {
+  _dragRoleId = rid;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e, targetRid) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!_dragRoleId || _dragRoleId === targetRid) return;
+  var fromIdx = roles.findIndex(function(r) { return r.id === _dragRoleId; });
+  var toIdx   = roles.findIndex(function(r) { return r.id === targetRid; });
+  if (fromIdx === -1 || toIdx === -1) return;
+  var moved = roles.splice(fromIdx, 1)[0];
+  roles.splice(toIdx, 0, moved);
+  save();
+  renderRoleList();
+  renderUserTable();
+}
+
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.list-item.drag-over').forEach(function(el) {
+    el.classList.remove('drag-over');
+  });
+  _dragRoleId = null;
+}
+
+/* ══════════════════════════════════════════════
+   工具函式
+══════════════════════════════════════════════ */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ══════════════════════════════════════════════
+   初始化
+══════════════════════════════════════════════ */
+load();
+renderUserTable();
+renderMemberTable();
+renderRoleList();
+</script>
+</body>
+</html>

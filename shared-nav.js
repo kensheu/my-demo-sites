@@ -13,44 +13,54 @@
         defaultUrl: 'purchasing-home.html',
         pages: [
           {
-            label: '首頁&公告',
-            url: 'announcement.html?view=admin&page=notify',
+            label: '首頁',
+            group: true,
+            url: 'home.html',
             match: function (p) {
-              return p.file === 'announcement.html' && p.view === 'admin' && p.page !== 'manage' && p.sys !== 'store';
-            }
-          },
-          {
-            label: '公告管理',
-            url: 'announcement.html?view=admin&page=manage',
-            _exactMatch: true,
-            match: function (p) {
-              return p.file === 'announcement.html' && p.view === 'admin' && p.page === 'manage' && p.sys !== 'store';
-            }
-          },
-          {
-            label: '採購首頁',
-            url: 'purchasing-home.html',
-            match: function (p) { return p.file === 'purchasing-home.html'; }
-          },
-          {
-            label: '美編首頁',
-            url: 'editorial-home.html',
-            match: function (p) { return p.file === 'editorial-home.html'; }
+              return p.file === 'home.html' ||
+                     p.file === 'purchasing-home.html' ||
+                     p.file === 'editorial-home.html' ||
+                     (p.file === 'announcement.html' && p.view === 'admin' && p.sys !== 'store');
+            },
+            children: [
+              {
+                label: '首頁儀表板',
+                url: 'home.html',
+                match: function (p) { return p.file === 'home.html'; }
+              },
+              {
+                label: '採購首頁',
+                url: 'purchasing-home.html',
+                match: function (p) { return p.file === 'purchasing-home.html'; }
+              },
+              {
+                label: '美編首頁',
+                url: 'editorial-home.html',
+                match: function (p) { return p.file === 'editorial-home.html'; }
+              },
+              {
+                label: '公告管理',
+                url: 'announcement.html?view=admin&page=manage',
+                match: function (p) {
+                  return p.file === 'announcement.html' && p.view === 'admin' && p.page === 'manage' && p.sys !== 'store';
+                }
+              }
+            ]
           },
           {
             label: '餐點管理',
+            group: true,
             url: 'menu-items.html',
-            match: function (p) { return p.file === 'menu-items.html'; }
-          },
-          {
-            label: '餐點異動紀錄',
-            url: 'price-change-log.html',
-            match: function (p) { return p.file === 'price-change-log.html'; }
-          },
-          {
-            label: '店家異動審核',
-            url: 'change-review.html',
-            match: function (p) { return p.file === 'change-review.html'; }
+            match: function (p) {
+              return p.file === 'menu-items.html' ||
+                     p.file === 'price-change-log.html' ||
+                     p.file === 'change-review.html';
+            },
+            children: [
+              { label: '餐點管理',     url: 'menu-items.html',      match: function (p) { return p.file === 'menu-items.html'; } },
+              { label: '餐點異動紀錄', url: 'price-change-log.html', match: function (p) { return p.file === 'price-change-log.html'; } },
+              { label: '店家異動審核', url: 'change-review.html',    match: function (p) { return p.file === 'change-review.html'; } }
+            ]
           },
           {
             label: '菜單排程管理',
@@ -63,16 +73,21 @@
             match: function (p) { return p.file === 'complaint.html' && p.mode === 'admin'; }
           },
           {
+            label: '帳號管理',
+            url: 'permissions.html',
+            match: function (p) { return p.file === 'permissions.html'; }
+          },
+          {
             label: '問題單&ECR',
             group: true,
             url: 'issue-and-ecr.html',
             match: function (p) { return p.file === 'issue-and-ecr.html'; },
             children: [
-              { label: '📝 新增問題單', url: 'issue-and-ecr.html?tab=report', tab: 'report' },
-              { label: '📋 問題清單',   url: 'issue-and-ecr.html?tab=list',   tab: 'list'   },
+              { label: '📝 新增問題單', url: 'issue-and-ecr.html?tab=report',   tab: 'report'   },
+              { label: '📋 問題清單',   url: 'issue-and-ecr.html?tab=list',     tab: 'list'     },
               { label: '🔄 新增 ECR',   url: 'issue-and-ecr.html?tab=ecr-form', tab: 'ecr-form' },
               { label: '📑 ECR 清單',   url: 'issue-and-ecr.html?tab=ecr-list', tab: 'ecr-list' },
-              { label: '📖 填寫指南',   url: 'issue-and-ecr.html?tab=guide',  tab: 'guide'  }
+              { label: '📖 填寫指南',   url: 'issue-and-ecr.html?tab=guide',    tab: 'guide'    }
             ]
           }
         ]
@@ -182,9 +197,10 @@
         var headerCls = 'gn-nav-group-header' + (isGroupActive ? ' gn-open' : '');
         var childrenCls = 'gn-nav-group-items' + (isGroupActive ? ' gn-open' : '');
         var children = pg.children.map(function (ch) {
-          var isActive = isGroupActive && activeTab === ch.tab;
+          var isActive = isGroupActive && (ch.match ? ch.match(pageInfo) : activeTab === ch.tab);
           var cls = 'gn-nav-child-item' + (isActive ? ' gn-active' : '');
-          return '<a class="' + cls + '" href="' + esc(ch.url) + '" onclick="gnTabClick(event,\'' + esc(ch.tab) + '\')">' + esc(ch.label) + '</a>';
+          var clickAttr = ch.tab ? ' onclick="gnTabClick(event,\'' + esc(ch.tab) + '\')"' : '';
+          return '<a class="' + cls + '" href="' + esc(ch.url) + '"' + clickAttr + '>' + esc(ch.label) + '</a>';
         }).join('');
         return (
           '<button class="' + headerCls + '" onclick="gnGroupToggle(this)">' +
@@ -215,7 +231,7 @@
         var headerCls = 'gn-drawer-group-header' + (isGroupActive ? ' gn-open' : '');
         var childrenCls = 'gn-drawer-group-items' + (isGroupActive ? ' gn-open' : '');
         var children = pg.children.map(function (ch) {
-          var isActive = isGroupActive && activeTab2 === ch.tab;
+          var isActive = isGroupActive && (ch.match ? ch.match(pageInfo2) : activeTab2 === ch.tab);
           var cls = 'gn-drawer-child-item' + (isActive ? ' gn-active' : '');
           return '<a class="' + cls + '" href="' + esc(ch.url) + '" onclick="gnNavClose()">' + esc(ch.label) + '</a>';
         }).join('');

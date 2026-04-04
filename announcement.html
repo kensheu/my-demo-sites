@@ -144,39 +144,64 @@
     /* 公告列表 */
     .card {
       background: #fff;
+      border: 1px solid var(--gray-200);
       border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
       overflow: hidden;
     }
     .card-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--gray-100);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-50);
     }
-    .card-title { font-size: 15px; font-weight: 600; }
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
 
     /* 篩選列 */
     .filter-row {
       display: flex;
-      gap: 10px;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--gray-100);
-      background: var(--gray-50);
+      gap: 8px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--gray-200);
+      background: #fff;
       flex-wrap: wrap;
     }
-    .filter-row input, .filter-row select {
-      padding: 7px 12px;
-      border: 1px solid var(--gray-300);
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
+    .filter-row input {
+      flex: 1;
+      min-width: 180px;
+      padding: 7px 10px 7px 32px;
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
+      font-size: 13px;
+      font-family: inherit;
       color: var(--gray-700);
-      background: #fff;
+      background: var(--gray-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 9px center;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .filter-row input:focus, .filter-row select:focus { border-color: var(--primary); }
-    .filter-row input { flex: 1; min-width: 180px; }
+    .filter-row select {
+      padding: 7px 28px 7px 10px;
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--gray-700);
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .filter-row input:focus, .filter-row select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px #dbeafe;
+    }
 
     table { width: 100%; border-collapse: collapse; }
     th {
@@ -207,9 +232,56 @@
       font-weight: 600;
       line-height: 18px;
     }
-    .tag-update { background: #dbeafe; color: var(--tag-update); }
-    .tag-maintenance { background: #fef3c7; color: var(--tag-maintenance); }
-    .tag-event { background: #dcfce7; color: var(--tag-event); }
+    .tag-update      { background: #e0f7fa; color: #00838f; }
+    .tag-maintenance { background: #fef3c7; color: #b45309; }
+    .tag-event       { background: var(--gray-100); color: var(--gray-500); }
+
+    /* ── 店家後台 ann-row 樣式（同 home.html）── */
+    .ann-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 18px;
+      border-bottom: 1px solid var(--gray-100);
+      cursor: pointer;
+      transition: background 0.1s, opacity 0.2s;
+    }
+    .ann-row:last-child { border-bottom: none; }
+    .ann-row:hover { background: #f0f4ff; }
+    .ann-row.read { opacity: 0.4; }
+    .ann-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--gray-800);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ann-tag {
+      flex-shrink: 0;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      background: #e0f7fa;
+      color: #00838f;
+      white-space: nowrap;
+    }
+    .ann-tag.activity { background: #fef3c7; color: #b45309; }
+    .ann-tag.other    { background: var(--gray-100); color: var(--gray-500); }
+    .ann-date {
+      flex-shrink: 0;
+      font-size: 12px;
+      color: var(--gray-400);
+      white-space: nowrap;
+      text-align: right;
+      min-width: 80px;
+    }
+    .store-ann-list {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+    }
 
     .status-dot {
       display: inline-flex;
@@ -632,9 +704,9 @@
       font-size: 18px;
       flex-shrink: 0;
     }
-    .notify-icon.update { background: #dbeafe; }
-    .notify-icon.maint { background: #fef3c7; }
-    .notify-icon.event { background: #dcfce7; }
+    .notify-icon.update { background: #e0f7fa; }
+    .notify-icon.maint  { background: #fef3c7; }
+    .notify-icon.event  { background: var(--gray-100); }
     .notify-body { flex: 1; min-width: 0; }
     .notify-body h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
     .notify-card.read .notify-body h4 { font-weight: 400; color: var(--gray-600); }
@@ -1056,7 +1128,7 @@
   <div class="popup-card">
     <div class="popup-top">
       <div>
-        <div style="font-size:11px;opacity:.7;margin-bottom:4px" id="notify-popup-tag">📢 更新通知</div>
+        <div style="font-size:11px;opacity:.7;margin-bottom:4px" id="notify-popup-tag">🔔 系統公告</div>
         <h3 id="notify-popup-title"></h3>
         <div class="popup-meta" id="notify-popup-time"></div>
       </div>
@@ -1250,7 +1322,7 @@
   <div class="popup-card">
     <div class="popup-top">
       <div>
-        <div style="font-size:11px;opacity:.7;margin-bottom:4px" id="popup-tag-line">📢 更新通知</div>
+        <div style="font-size:11px;opacity:.7;margin-bottom:4px" id="popup-tag-line">🔔 系統公告</div>
         <h3 id="popup-title">系統版本 v3.5 更新說明</h3>
         <div class="popup-meta" id="popup-meta">2026/03/24 · 系統管理員</div>
       </div>
@@ -1303,9 +1375,9 @@
 
 <script>
   // ─── 分類資料（動態管理） ───
-  let annCats = ['更新通知', '維護公告', '活動訊息'];
+  let annCats = ['系統公告', '活動資訊', '其他'];
 
-  // 依分類索引取得固定 CSS class（第 0 → update, 1 → maintenance, 2 → event，其餘 → ann-extra）
+  // 依分類索引取得固定 CSS class（0 → update／系統公告, 1 → maintenance／活動資訊, 2 → event／其他）
   const CAT_CSS = ['update', 'maintenance', 'event'];
   function catClass(catName) {
     const idx = annCats.indexOf(catName);
@@ -1313,7 +1385,7 @@
   }
 
   // 分類對應圖示（依索引）
-  const CAT_ICONS = ['🔄', '🔧', '🎉'];
+  const CAT_ICONS = ['🔔', '🎉', '📢'];
   function catIcon(catName) {
     const idx = annCats.indexOf(catName);
     return CAT_ICONS[idx] !== undefined ? CAT_ICONS[idx] : '📢';
@@ -1321,10 +1393,10 @@
 
   // ─── 公告管理資料 ───
   const manageAnnouncements = [
-    { id: 0, title: '系統版本 v3.5 更新說明', desc: '新增多項功能優化...', category: '更新通知', locations: ['admin', 'fe'], schedule: '2026/03/24 09:00', readRate: 72, status: 'active' },
-    { id: 1, title: '3/28 凌晨系統維護公告', desc: '預計 01:00–04:00 暫停服務...', category: '維護公告', locations: ['fe'], schedule: '2026/03/28 00:00', readRate: 38, status: 'scheduled' },
-    { id: 2, title: '清明節週末訂餐優惠活動', desc: '4/4–4/6 全館享九折優惠...', category: '活動訊息', locations: ['fe'], schedule: '2026/04/04 00:00', readRate: null, status: 'scheduled' },
-    { id: 3, title: '春節假期訂餐暫停公告', desc: '1/27–2/4 暫停接單服務', category: '維護公告', locations: ['admin', 'fe'], schedule: '2026/01/27', readRate: 95, status: 'expired' },
+    { id: 0, title: '系統版本 v3.5 更新說明', desc: '新增多項功能優化...', category: '系統公告', locations: ['admin', 'fe'], schedule: '2026/03/24 09:00', readRate: 72, status: 'active' },
+    { id: 1, title: '3/28 凌晨系統維護公告', desc: '預計 01:00–04:00 暫停服務...', category: '系統公告', locations: ['fe'], schedule: '2026/03/28 00:00', readRate: 38, status: 'scheduled' },
+    { id: 2, title: '清明節週末訂餐優惠活動', desc: '4/4–4/6 全館享九折優惠...', category: '活動資訊', locations: ['fe'], schedule: '2026/04/04 00:00', readRate: null, status: 'scheduled' },
+    { id: 3, title: '春節假期訂餐暫停公告', desc: '1/27–2/4 暫停接單服務', category: '系統公告', locations: ['admin', 'fe'], schedule: '2026/01/27', readRate: 95, status: 'expired' },
   ];
 
   const statusMap = {
@@ -1405,27 +1477,48 @@
 
   // ─── 內部後台公告資料 ───
   let adminAnnouncements = [
-    { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: '更新通知', icon: '🔄', time: '10 分鐘前', read: false, text: '本次更新包含訂單追蹤改版、評分調整及問題修復，請重新登入以套用新功能。' },
-    { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: '維護公告', icon: '🔧', time: '2 小時前', read: false, text: '3月28日 01:00–04:00 進行系統例行維護，期間後台功能暫停使用。' },
-    { id: 2, title: '春節假期系統暫停公告', category: '更新通知', icon: '📌', time: '2026/01/20', read: true, text: '1/27–2/4 春節假期系統暫停服務，緊急問題請聯繫值班人員。' },
+    { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: '系統公告', icon: '🔔', time: '10 分鐘前', read: false, text: '本次更新包含訂單追蹤改版、評分調整及問題修復，請重新登入以套用新功能。' },
+    { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: '系統公告', icon: '🔔', time: '2 小時前', read: false, text: '3月28日 01:00–04:00 進行系統例行維護，期間後台功能暫停使用。' },
+    { id: 2, title: '春節假期系統暫停公告', category: '系統公告', icon: '🔔', time: '2026/01/20', read: true, text: '1/27–2/4 春節假期系統暫停服務，緊急問題請聯繫值班人員。' },
   ];
 
   // ─── 店家後台公告資料 ───
   const storeAnnouncements = [
-    { id: 200, title: '新版訂單確認流程上線', category: '更新通知', icon: '🔄', time: '剛剛', read: false, text: '新版訂單確認流程已於今日上線，請各店家確認操作流程並更新相關設定。如有疑問請聯繫系統管理員。' },
+    { id: 200, title: '新版訂單確認流程上線', category: '系統公告', icon: '🔔', time: '剛剛', read: false, text: '新版訂單確認流程已於今日上線，請各店家確認操作流程並更新相關設定。如有疑問請聯繫系統管理員。' },
   ];
 
   let adminFilter = 'all';
+  let isStoreMode = false;
+
+  /* 取得 ann-tag 的 CSS class（同 home.html 命名） */
+  function annTagClass(catName) {
+    if (catName === '活動資訊') return 'activity';
+    if (catName === '其他') return 'other';
+    return '';  /* 系統公告 — 預設 teal */
+  }
 
   function renderAdmin() {
     const list = document.getElementById('admin-notify-list');
-    const items = adminAnnouncements.filter(a => {
+    let items = adminAnnouncements.filter(a => {
+      if (isStoreMode) {
+        // 店家後台只顯示系統公告
+        if (a.category !== '系統公告') return false;
+      }
       if (adminFilter === 'unread') return !a.read;
       if (adminFilter !== 'all' && adminFilter !== 'unread') return a.category === adminFilter;
       return true;
     });
     if (items.length === 0) {
       list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>目前沒有公告</p></div>`;
+    } else if (isStoreMode) {
+      /* 店家後台：ann-row 樣式（同 home.html），全為系統公告不顯示標籤 */
+      list.classList.add('store-ann-list');
+      list.innerHTML = items.map(a => `
+        <div class="ann-row${a.read ? ' read' : ''}" onclick="openNotifyPopup(${a.id})">
+          <span class="ann-text">${a.title}${!a.read ? ' <span style="display:inline-block;background:#e0f7fa;color:#00838f;font-size:10px;padding:1px 6px;border-radius:10px;vertical-align:middle">未讀</span>' : ''}</span>
+          <span class="ann-date">${a.time}</span>
+        </div>
+      `).join('');
     } else {
       list.innerHTML = items.map(a => `
         <div class="notify-card ${a.read ? 'read' : 'unread'} ${catClass(a.category) === 'maintenance' ? 'maint' : ''}" onclick="openNotifyPopup(${a.id})" style="cursor:pointer">
@@ -1514,9 +1607,9 @@
 
   // ─── 前台公告資料 ───
   const feAnnouncements = [
-    { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: '更新通知', time: '03/24', read: false, text: '本次系統版本 v3.5 更新包含訂單追蹤改版、評分系統調整及數項問題修復。', attach: true },
-    { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: '維護公告', time: '03/23', read: false, text: '3月28日 01:00–04:00 將進行系統維護，期間暫停接單，請提前安排。', attach: false },
-    { id: 2, manageRef: 2, title: '清明節週末訂餐優惠活動', category: '活動訊息', time: '03/20', read: true, text: '4/4–4/6 全館享九折優惠，並贈送限定小點！', attach: false },
+    { id: 0, manageRef: 0, title: '系統版本 v3.5 更新說明', category: '系統公告', time: '03/24', read: false, text: '本次系統版本 v3.5 更新包含訂單追蹤改版、評分系統調整及數項問題修復。', attach: true },
+    { id: 1, manageRef: 1, title: '3/28 凌晨系統維護公告', category: '系統公告', time: '03/23', read: false, text: '3月28日 01:00–04:00 將進行系統維護，期間暫停接單，請提前安排。', attach: false },
+    { id: 2, manageRef: 2, title: '清明節週末訂餐優惠活動', category: '活動資訊', time: '03/20', read: true, text: '4/4–4/6 全館享九折優惠，並贈送限定小點！', attach: false },
   ];
 
 
@@ -1524,7 +1617,7 @@
   function switchView(name) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + name).classList.add('active');
-    if (name === 'frontend') { renderFE(); showUnreadQueue(); }
+    if (name === 'frontend') { renderFE(); }
   }
 
   // ─── 前台渲染 ───
@@ -2146,13 +2239,14 @@
     var _page = _p.get('page');
     var _sys  = _p.get('sys');
     if (_sys === 'store') {
+      isStoreMode = true;
       adminAnnouncements = storeAnnouncements;
       var subtitle = document.querySelector('#admin-page-notify .page-subtitle');
       if (subtitle) subtitle.textContent = '系統發布給店家後台的公告';
     }
     if (_view) switchView(_view);
     if (_page) switchAdminPage(_page);
-    if (_view !== 'frontend' && _page !== 'manage') showAdminUnreadQueue();
+    // 已移除自動彈出公告
   })();
 </script>
 </body>
