@@ -699,6 +699,8 @@
       width: 140px;
       cursor: pointer;
       transition: border-color 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
     }
     .tbl-loc-select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px #dbeafe; }
     .tbl-card {
@@ -773,6 +775,77 @@
       font-size: 14px;
     }
 
+    /* ── 會員狀態 chip ──────────────────── */
+    .status-chip {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 9px;
+      border-radius: 100px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .status-chip.status-active { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-chip.status-frozen { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+    /* 凍結按鈕 */
+    .btn-sm-warn { border-color: #fed7aa; color: #c2410c; }
+    .btn-sm-warn:hover { background: #fff7ed; }
+    .btn-sm-primary { border-color: var(--primary-border); color: var(--primary); }
+    .btn-sm-primary:hover { background: var(--primary-light); }
+
+    /* Modal 兩欄 grid */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 14px;
+    }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* 詳情 Modal 欄位 */
+    .detail-modal-section {
+      margin-bottom: 18px;
+    }
+    .detail-modal-section:last-child { margin-bottom: 0; }
+    .detail-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+    }
+    @media (max-width: 480px) { .detail-grid { grid-template-columns: 1fr; } }
+    .detail-field-label {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-bottom: 2px;
+    }
+    .detail-field-value {
+      font-size: 14px;
+      color: var(--gray-800);
+      word-break: break-all;
+    }
+
+    /* 唯讀欄位 */
+    .form-control-readonly {
+      width: 100%;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--gray-500);
+      background: var(--gray-50);
+      cursor: default;
+    }
+
     /* ── Toast ──────────────────────────── */
     #toast {
       position: fixed;
@@ -837,13 +910,24 @@
   <div class="tab-panel active" id="tab-members">
     <div class="tbl-toolbar">
       <div class="tbl-filters">
-        <input type="text" class="tbl-search" id="memberSearch" placeholder="搜尋名稱或信箱…" oninput="renderMemberTable()">
+        <input type="text" class="tbl-search" id="memberSearch" placeholder="搜尋名稱、公司或電話…" oninput="renderMemberTable()">
+        <div class="select-wrap" style="position:relative">
+          <input type="text" class="tbl-loc-select" id="memberCompanyFilter"
+                 placeholder="所有公司" autocomplete="off"
+                 oninput="filterMemberCompanyOpts()" onfocus="openMemberCompanyDropdown()" onblur="closeMemberCompanyDropdown()">
+          <div class="select-dropdown" id="memberCompanyDropdown"></div>
+        </div>
         <div class="select-wrap" style="position:relative">
           <input type="text" class="tbl-loc-select" id="memberLocFilter"
                  placeholder="所有據點" autocomplete="off"
                  oninput="filterMemberLocOpts()" onfocus="openMemberLocDropdown()" onblur="closeMemberLocDropdown()">
           <div class="select-dropdown" id="memberLocDropdown"></div>
         </div>
+        <select class="tbl-loc-select" id="memberStatusFilter" onchange="renderMemberTable()" style="width:110px">
+          <option value="">所有狀態</option>
+          <option value="啟用">啟用</option>
+          <option value="凍結">凍結</option>
+        </select>
       </div>
       <button class="btn btn-primary" onclick="openAddMember()">＋ 新增會員</button>
     </div>
@@ -852,7 +936,7 @@
         <table class="tbl">
           <thead>
             <tr>
-              <th>名稱</th><th>信箱</th><th>所屬據點</th><th>操作</th>
+              <th>會員編號</th><th>會員名稱</th><th>公司</th><th>據點</th><th>信箱</th><th>狀態</th><th>操作</th>
             </tr>
           </thead>
           <tbody id="memberTbody"></tbody>
@@ -995,29 +1079,51 @@
 
 <!-- 新增會員 Modal -->
 <div class="modal-overlay" id="addMemberModal">
-  <div class="modal">
+  <div class="modal" style="max-width:520px">
     <div class="modal-header">
       <h2>新增會員</h2>
       <button class="modal-close" onclick="closeModal('addMemberModal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">名稱 <span class="req">*</span></label>
-        <input type="text" class="form-control" id="newMemName" placeholder="請輸入名稱">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">會員名稱 <span class="req">*</span></label>
+          <input type="text" class="form-control" id="newMemName" placeholder="請輸入姓名">
+        </div>
+        <div class="form-group">
+          <label class="form-label">信箱 <span class="req">*</span></label>
+          <input type="email" class="form-control" id="newMemAccount" placeholder="請輸入電子信箱" autocomplete="off">
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">信箱 <span class="req">*</span></label>
-        <input type="email" class="form-control" id="newMemAccount" placeholder="請輸入電子信箱" autocomplete="off">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">密碼 <span class="req">*</span></label>
+          <input type="password" class="form-control" id="newMemPassword" placeholder="請輸入密碼" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">連絡電話</label>
+          <input type="tel" class="form-control" id="newMemPhone" placeholder="（選填）">
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">密碼 <span class="req">*</span></label>
-        <input type="password" class="form-control" id="newMemPassword" placeholder="請輸入密碼" autocomplete="new-password">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">會員載具</label>
+          <input type="text" class="form-control" id="newMemCarrier" placeholder="（選填）/XXX-XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">公司</label>
+          <div class="select-wrap">
+            <input type="text" class="form-control" id="newMemCompany" placeholder="（選填）搜尋或選擇公司" autocomplete="off"
+                   oninput="filterNewMemCompanyOpts()" onfocus="openNewMemCompanyDropdown()" onblur="closeNewMemCompanyDropdown()">
+            <div class="select-dropdown" id="newMemCompanyDropdown"></div>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">所屬據點</label>
         <div class="select-wrap">
           <input type="text" class="form-control" id="newMemLocation"
-                 placeholder="（選填）搜尋或選擇據點" autocomplete="off"
+                 placeholder="請先選擇公司" autocomplete="off"
                  oninput="filterMemLocOpts()" onfocus="openMemLocDropdown()" onblur="closeMemLocDropdown()">
           <div class="select-dropdown" id="memLocDropdown"></div>
         </div>
@@ -1032,27 +1138,68 @@
 
 <!-- 編輯會員 Modal -->
 <div class="modal-overlay" id="editMemberModal">
-  <div class="modal">
+  <div class="modal" style="max-width:520px">
     <div class="modal-header">
       <h2>編輯會員</h2>
       <button class="modal-close" onclick="closeModal('editMemberModal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">名稱 <span class="req">*</span></label>
-        <input type="text" class="form-control" id="editMemName" placeholder="請輸入名稱">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">會員名稱 <span class="req">*</span></label>
+          <input type="text" class="form-control" id="editMemName" placeholder="請輸入姓名">
+        </div>
+        <div class="form-group">
+          <label class="form-label">公司</label>
+          <input type="text" class="form-control" id="editMemCompany" placeholder="（選填）">
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">信箱 <span class="req">*</span></label>
-        <input type="email" class="form-control" id="editMemAccount" placeholder="請輸入電子信箱" autocomplete="off">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">信箱 <span class="req">*</span></label>
+          <input type="email" class="form-control" id="editMemAccount" placeholder="請輸入電子信箱" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">連絡電話</label>
+          <input type="tel" class="form-control" id="editMemPhone" placeholder="（選填）">
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">所屬據點</label>
-        <div class="select-wrap">
-          <input type="text" class="form-control" id="editMemLocation"
-                 placeholder="（選填）搜尋或選擇據點" autocomplete="off"
-                 oninput="filterEditMemLocOpts()" onfocus="openEditMemLocDropdown()" onblur="closeEditMemLocDropdown()">
-          <div class="select-dropdown" id="editMemLocDropdown"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">會員載具</label>
+          <input type="text" class="form-control" id="editMemCarrier" placeholder="（選填）/XXX-XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">所屬據點</label>
+          <div class="select-wrap">
+            <input type="text" class="form-control" id="editMemLocation"
+                   placeholder="（選填）搜尋或選擇據點" autocomplete="off"
+                   oninput="filterEditMemLocOpts()" onfocus="openEditMemLocDropdown()" onblur="closeEditMemLocDropdown()">
+            <div class="select-dropdown" id="editMemLocDropdown"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">點數</label>
+          <div class="form-control-readonly" id="editMemPoints">—</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">會員狀態</label>
+          <select class="form-control" id="editMemStatus">
+            <option value="啟用">啟用</option>
+            <option value="凍結">凍結</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">最後訂單日</label>
+          <div class="form-control-readonly" id="editMemLastOrder">—</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">訂單數</label>
+          <div class="form-control-readonly" id="editMemOrderCount">—</div>
         </div>
       </div>
     </div>
@@ -1076,6 +1223,97 @@
     <div class="modal-footer">
       <button class="btn-modal-cancel" onclick="closeModal('deleteMemberModal')">取消</button>
       <button class="btn-modal-danger" onclick="confirmDeleteMember()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 詳細資料 Modal -->
+<div class="modal-overlay" id="memberDetailModal">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <h2>會員詳細資料</h2>
+      <button class="modal-close" onclick="closeModal('memberDetailModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-modal-section">
+        <div class="detail-section-label">基本資料</div>
+        <div class="detail-grid">
+          <div>
+            <div class="detail-field-label">會員編號</div>
+            <div class="detail-field-value" id="detailMemNo">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">會員名稱</div>
+            <div class="detail-field-value" id="detailMemName">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">公司</div>
+            <div class="detail-field-value" id="detailMemCompany">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">所屬據點</div>
+            <div class="detail-field-value" id="detailMemLocation">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">信箱</div>
+            <div class="detail-field-value" id="detailMemAccount">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">連絡電話</div>
+            <div class="detail-field-value" id="detailMemPhone">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">會員載具</div>
+            <div class="detail-field-value" id="detailMemCarrier">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">註冊日期</div>
+            <div class="detail-field-value" id="detailMemRegDate">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">會員狀態</div>
+            <div class="detail-field-value" id="detailMemStatus">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-modal-section">
+        <div class="detail-section-label">訂單統計</div>
+        <div class="detail-grid">
+          <div>
+            <div class="detail-field-label">最後訂單日</div>
+            <div class="detail-field-value" id="detailMemLastOrder">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">訂單數</div>
+            <div class="detail-field-value" id="detailMemOrderCount">—</div>
+          </div>
+          <div>
+            <div class="detail-field-label">點數</div>
+            <div class="detail-field-value" id="detailMemPoints">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('memberDetailModal')">關閉</button>
+      <button class="btn-modal-danger" style="background:var(--primary);border-color:var(--primary)" id="detailEditBtn" onclick="">編輯</button>
+    </div>
+  </div>
+</div>
+
+<!-- 凍結/解凍會員 Modal -->
+<div class="modal-overlay" id="freezeMemberModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="freezeModalTitle">凍結會員</h2>
+      <button class="modal-close" onclick="closeModal('freezeMemberModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-confirm-text" id="freezeModalText"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('freezeMemberModal')">取消</button>
+      <button class="btn-modal-danger" id="freezeConfirmBtn" onclick="confirmFreezeMember()">確認凍結</button>
     </div>
   </div>
 </div>
@@ -1260,7 +1498,7 @@ function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 document.addEventListener('click', function(e) {
-  ['addUserModal','editUserModal','deleteUserModal','addMemberModal','editMemberModal','deleteMemberModal','deleteRoleModal'].forEach(function(id) {
+  ['addUserModal','editUserModal','deleteUserModal','addMemberModal','editMemberModal','deleteMemberModal','memberDetailModal','freezeMemberModal','deleteRoleModal'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el && e.target === el) closeModal(id);
   });
@@ -1450,40 +1688,99 @@ function confirmDeleteUser() {
 ══════════════════════════════════════════════ */
 var members = [];
 var pendingDeleteMemberId = null;
+var pendingFreezeMemberId = null;
 var editingMemberId = null;
 var selectedMemberLocation = '';
-var MEMBERS_KEY = 'permissions_members_v1';
+var MEMBERS_KEY = 'permissions_members_v2';
 
 function defaultMembers() {
   return [
-    { id: 'mem_1', name: '陳大文', account: 'achen@mail.com',   password: 'Pass@1234', location: 'A 據點' },
-    { id: 'mem_2', name: '林小花', account: 'lflower@mail.com', password: 'Pass@1234', location: 'A 據點' },
-    { id: 'mem_3', name: '黃阿明', account: 'haming@mail.com',  password: 'Pass@1234', location: 'B 據點' },
-    { id: 'mem_4', name: '吳美麗', account: 'wmei@mail.com',    password: 'Pass@1234', location: 'B 據點' },
-    { id: 'mem_5', name: '張建國', account: 'zjian@mail.com',   password: 'Pass@1234', location: '' }
+    { id: 'mem_1', memberNo: 'M0001', name: '陳大文', company: '大文股份有限公司', account: 'achen@mail.com',   password: 'Pass@1234', phone: '0912345678', carrier: '/ABC-1234', location: 'A 據點', registerDate: '2024-01-15', lastOrderDate: '2026-03-20', orderCount: 12, points: 350, status: '啟用' },
+    { id: 'mem_2', memberNo: 'M0002', name: '林小花', company: '小花有限公司',     account: 'lflower@mail.com', password: 'Pass@1234', phone: '0923456789',  carrier: '',           location: 'A 據點', registerDate: '2024-02-03', lastOrderDate: '2026-03-28', orderCount: 8,  points: 200, status: '啟用' },
+    { id: 'mem_3', memberNo: 'M0003', name: '黃阿明', company: '',               account: 'haming@mail.com',  password: 'Pass@1234', phone: '',             carrier: '/DEF-5678', location: 'B 據點', registerDate: '2024-03-10', lastOrderDate: '2026-02-14', orderCount: 5,  points: 80,  status: '啟用' },
+    { id: 'mem_4', memberNo: 'M0004', name: '吳美麗', company: '美麗企業',        account: 'wmei@mail.com',    password: 'Pass@1234', phone: '0934567890',  carrier: '',           location: 'B 據點', registerDate: '2024-04-22', lastOrderDate: '2025-12-01', orderCount: 3,  points: 0,   status: '凍結' },
+    { id: 'mem_5', memberNo: 'M0005', name: '張建國', company: '',               account: 'zjian@mail.com',   password: 'Pass@1234', phone: '0945678901',  carrier: '',           location: '',       registerDate: '2024-06-18', lastOrderDate: '',           orderCount: 0,  points: 0,   status: '啟用' }
   ];
+}
+
+var selectedMemberCompany = '';
+
+function getUniqueCompanies() {
+  var list = [];
+  members.forEach(function(m) {
+    if (m.company && list.indexOf(m.company) === -1) list.push(m.company);
+  });
+  return list.sort();
+}
+function openMemberCompanyDropdown() { filterMemberCompanyOpts(); document.getElementById('memberCompanyDropdown').classList.add('open'); }
+function closeMemberCompanyDropdown() {
+  setTimeout(function() {
+    document.getElementById('memberCompanyDropdown').classList.remove('open');
+    var inp = document.getElementById('memberCompanyFilter');
+    inp.value = selectedMemberCompany || '';
+    inp.placeholder = selectedMemberCompany || '所有公司';
+  }, 150);
+}
+function filterMemberCompanyOpts() {
+  var q = (document.getElementById('memberCompanyFilter').value || '').toLowerCase();
+  var list = getUniqueCompanies();
+  var filtered = q ? list.filter(function(c) { return c.toLowerCase().indexOf(q) !== -1; }) : list;
+  var dd = document.getElementById('memberCompanyDropdown');
+  var allOpt = !q ? '<div class="select-option" onmousedown="pickMemberCompany(\'\')">' + (!selectedMemberCompany ? '✓ ' : '') + '所有公司</div>' : '';
+  dd.innerHTML = allOpt + (filtered.length
+    ? filtered.map(function(c) {
+        return '<div class="select-option" onmousedown="pickMemberCompany(\'' + escHtml(c) + '\')">' + (selectedMemberCompany === c ? '✓ ' : '') + escHtml(c) + '</div>';
+      }).join('')
+    : '<div class="select-option no-result">無符合的公司</div>');
+}
+function pickMemberCompany(val) {
+  selectedMemberCompany = val;
+  var inp = document.getElementById('memberCompanyFilter');
+  inp.value = val || '';
+  inp.placeholder = val || '所有公司';
+  document.getElementById('memberCompanyDropdown').classList.remove('open');
+  renderMemberTable();
 }
 
 function renderMemberTable() {
   var tbody = document.getElementById('memberTbody');
   var q = (document.getElementById('memberSearch').value || '').trim().toLowerCase();
+  var companyFilter = selectedMemberCompany;
+  var statusFilter = document.getElementById('memberStatusFilter').value;
   var filtered = members.filter(function(m) {
-    if (q && m.name.toLowerCase().indexOf(q) === -1 && (m.account || '').toLowerCase().indexOf(q) === -1) return false;
+    if (q) {
+      var hay = (m.name + ' ' + (m.company || '') + ' ' + (m.phone || '') + ' ' + (m.account || '')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    if (companyFilter && (m.company || '') !== companyFilter) return false;
     if (selectedMemberLocation && (m.location || '') !== selectedMemberLocation) return false;
+    if (statusFilter && (m.status || '啟用') !== statusFilter) return false;
     return true;
   });
+  var hasFilter = q || companyFilter || selectedMemberLocation || statusFilter;
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">' + (q || selectedMemberLocation ? '找不到符合的會員' : '尚無會員') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="tbl-empty">' + (hasFilter ? '找不到符合的會員' : '尚無會員') + '</td></tr>';
     return;
   }
   tbody.innerHTML = filtered.map(function(m) {
     var locHtml = m.location ? '<span class="loc-chip">' + escHtml(m.location) + '</span>' : '<span class="tbl-muted">—</span>';
+    var status = m.status || '啟用';
+    var statusClass = status === '凍結' ? 'status-frozen' : 'status-active';
+    var statusHtml = '<span class="status-chip ' + statusClass + '">' + escHtml(status) + '</span>';
+    var freezeBtn = status === '凍結'
+      ? '<button class="btn-sm btn-sm-primary" onclick="openFreezeMemberModal(\'' + m.id + '\')">解凍</button>'
+      : '<button class="btn-sm btn-sm-warn" onclick="openFreezeMemberModal(\'' + m.id + '\')">凍結</button>';
     return '<tr>' +
+      '<td class="tbl-muted">' + escHtml(m.memberNo || '—') + '</td>' +
       '<td class="tbl-name">' + escHtml(m.name) + '</td>' +
-      '<td class="tbl-muted">' + escHtml(m.account || '—') + '</td>' +
+      '<td class="tbl-muted">' + escHtml(m.company || '—') + '</td>' +
       '<td>' + locHtml + '</td>' +
+      '<td class="tbl-muted">' + escHtml(m.account || '—') + '</td>' +
+      '<td>' + statusHtml + '</td>' +
       '<td><div class="tbl-actions">' +
+        '<button class="btn-sm" onclick="openMemberDetail(\'' + m.id + '\')">詳細資料</button>' +
         '<button class="btn-sm" onclick="openEditMember(\'' + m.id + '\')">編輯</button>' +
+        freezeBtn +
         '<button class="btn-sm btn-sm-danger" onclick="openDeleteMemberModal(\'' + m.id + '\')">刪除</button>' +
       '</div></td>' +
     '</tr>';
@@ -1526,15 +1823,85 @@ function pickMemberLoc(val) {
 
 /* 新增會員 */
 function openAddMember() {
-  ['newMemName','newMemAccount','newMemPassword','newMemLocation'].forEach(function(id) {
+  ['newMemName','newMemCompany','newMemAccount','newMemPassword','newMemPhone','newMemCarrier','newMemLocation'].forEach(function(id) {
     var el = document.getElementById(id); el.value = ''; el.classList.remove('error');
   });
+  document.getElementById('newMemLocation').placeholder = '請先選擇公司';
   openModal('addMemberModal');
   setTimeout(function() { document.getElementById('newMemName').focus(); }, 50);
 }
-function filterMemLocOpts() { renderLocDropdown('newMemLocation', 'memLocDropdown'); }
-function openMemLocDropdown() { filterMemLocOpts(); document.getElementById('memLocDropdown').classList.add('open'); }
+/* 新增會員：公司下拉 */
+function getCompanyLocations(company) {
+  /* 從現有會員資料找出該公司用過的據點 */
+  var locs = [];
+  members.forEach(function(m) {
+    if (m.company === company && m.location && locs.indexOf(m.location) === -1) locs.push(m.location);
+  });
+  return locs.length ? locs : LOCATIONS; /* 新公司則顯示全部 */
+}
+function openNewMemCompanyDropdown() { filterNewMemCompanyOpts(); document.getElementById('newMemCompanyDropdown').classList.add('open'); }
+function closeNewMemCompanyDropdown() {
+  setTimeout(function() { document.getElementById('newMemCompanyDropdown').classList.remove('open'); }, 150);
+}
+function filterNewMemCompanyOpts() {
+  var q = (document.getElementById('newMemCompany').value || '').toLowerCase();
+  var list = getUniqueCompanies();
+  var filtered = q ? list.filter(function(c) { return c.toLowerCase().indexOf(q) !== -1; }) : list;
+  var dd = document.getElementById('newMemCompanyDropdown');
+  dd.innerHTML = filtered.length
+    ? filtered.map(function(c) {
+        return '<div class="select-option" onmousedown="pickNewMemCompany(\'' + escHtml(c) + '\')">' + escHtml(c) + '</div>';
+      }).join('')
+    : '<div class="select-option no-result">無符合的公司</div>';
+}
+function pickNewMemCompany(company) {
+  document.getElementById('newMemCompany').value = company;
+  document.getElementById('newMemCompanyDropdown').classList.remove('open');
+  /* 自動帶出據點 */
+  var locs = getCompanyLocations(company);
+  var locInp = document.getElementById('newMemLocation');
+  locInp.placeholder = '搜尋或選擇據點';
+  if (locs.length === 1) {
+    locInp.value = locs[0];
+  } else {
+    locInp.value = '';
+  }
+}
+
+/* 新增會員：據點下拉（依已選公司篩選可用據點） */
+function filterMemLocOpts() {
+  var company = document.getElementById('newMemCompany').value.trim();
+  var locs = company ? getCompanyLocations(company) : LOCATIONS;
+  var q = (document.getElementById('newMemLocation').value || '').toLowerCase();
+  var filtered = q ? locs.filter(function(l) { return l.toLowerCase().indexOf(q) !== -1; }) : locs;
+  var dd = document.getElementById('memLocDropdown');
+  dd.innerHTML = filtered.length
+    ? filtered.map(function(l) {
+        return '<div class="select-option" onmousedown="pickLocFor(\'newMemLocation\',\'memLocDropdown\',\'' + escHtml(l) + '\')">' + escHtml(l) + '</div>';
+      }).join('')
+    : '<div class="select-option no-result">無符合的據點</div>';
+}
+function openMemLocDropdown() {
+  var company = document.getElementById('newMemCompany').value.trim();
+  if (!company) return; /* 未選公司不開 */
+  filterMemLocOpts();
+  document.getElementById('memLocDropdown').classList.add('open');
+}
 function closeMemLocDropdown() { setTimeout(function() { document.getElementById('memLocDropdown').classList.remove('open'); }, 150); }
+
+function genMemberNo() {
+  var nums = members.map(function(m) {
+    var n = parseInt((m.memberNo || '').replace(/\D/g, ''), 10);
+    return isNaN(n) ? 0 : n;
+  });
+  var next = (nums.length ? Math.max.apply(null, nums) : 0) + 1;
+  return 'M' + String(next).padStart(4, '0');
+}
+
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 
 function confirmAddMember() {
   var nameEl = document.getElementById('newMemName');
@@ -1551,12 +1918,48 @@ function confirmAddMember() {
     showToast('⚠️ 信箱「' + account + '」已存在');
     return;
   }
-  var loc = document.getElementById('newMemLocation').value.trim();
-  members.push({ id: 'mem_' + Date.now(), name: name, account: account, password: pw, location: loc });
+  members.push({
+    id: 'mem_' + Date.now(),
+    memberNo: genMemberNo(),
+    name: name,
+    company: document.getElementById('newMemCompany').value.trim(),
+    account: account,
+    password: pw,
+    phone: document.getElementById('newMemPhone').value.trim(),
+    carrier: document.getElementById('newMemCarrier').value.trim(),
+    location: document.getElementById('newMemLocation').value.trim(),
+    registerDate: todayStr(),
+    lastOrderDate: '',
+    orderCount: 0,
+    points: 0,
+    status: '啟用'
+  });
   save();
   closeModal('addMemberModal');
   renderMemberTable();
   showToast('✅ 會員「' + name + '」已新增');
+}
+
+/* 詳細資料 */
+function openMemberDetail(mid) {
+  var m = members.find(function(m) { return m.id === mid; });
+  if (!m) return;
+  document.getElementById('detailMemNo').textContent        = m.memberNo || '—';
+  document.getElementById('detailMemName').textContent      = m.name || '—';
+  document.getElementById('detailMemCompany').textContent   = m.company || '—';
+  document.getElementById('detailMemLocation').textContent  = m.location || '—';
+  document.getElementById('detailMemAccount').textContent   = m.account || '—';
+  document.getElementById('detailMemPhone').textContent     = m.phone || '—';
+  document.getElementById('detailMemCarrier').textContent   = m.carrier || '—';
+  document.getElementById('detailMemRegDate').textContent   = m.registerDate || '—';
+  var status = m.status || '啟用';
+  var statusClass = status === '凍結' ? 'status-chip status-frozen' : 'status-chip status-active';
+  document.getElementById('detailMemStatus').innerHTML = '<span class="' + statusClass + '">' + escHtml(status) + '</span>';
+  document.getElementById('detailMemLastOrder').textContent = m.lastOrderDate || '—';
+  document.getElementById('detailMemOrderCount').textContent = m.orderCount != null ? m.orderCount : '—';
+  document.getElementById('detailMemPoints').textContent    = m.points != null ? m.points : '—';
+  document.getElementById('detailEditBtn').setAttribute('onclick', 'closeModal(\'memberDetailModal\'); openEditMember(\'' + mid + '\')');
+  openModal('memberDetailModal');
 }
 
 /* 編輯會員 */
@@ -1564,10 +1967,17 @@ function openEditMember(mid) {
   editingMemberId = mid;
   var m = members.find(function(m) { return m.id === mid; });
   if (!m) return;
-  document.getElementById('editMemName').value = m.name;
-  document.getElementById('editMemAccount').value = m.account || '';
+  document.getElementById('editMemName').value     = m.name || '';
+  document.getElementById('editMemCompany').value  = m.company || '';
+  document.getElementById('editMemAccount').value  = m.account || '';
+  document.getElementById('editMemPhone').value    = m.phone || '';
+  document.getElementById('editMemCarrier').value  = m.carrier || '';
   document.getElementById('editMemLocation').value = m.location || '';
-  ['editMemName','editMemAccount','editMemLocation'].forEach(function(id) {
+  document.getElementById('editMemPoints').textContent = m.points != null ? m.points : 0;
+  document.getElementById('editMemStatus').value   = m.status || '啟用';
+  document.getElementById('editMemLastOrder').textContent   = m.lastOrderDate || '—';
+  document.getElementById('editMemOrderCount').textContent  = m.orderCount != null ? m.orderCount : '—';
+  ['editMemName','editMemAccount'].forEach(function(id) {
     document.getElementById(id).classList.remove('error');
   });
   openModal('editMemberModal');
@@ -1591,9 +2001,13 @@ function confirmEditMember() {
     return;
   }
   var m = members.find(function(m) { return m.id === editingMemberId; });
-  m.name = name;
-  m.account = account;
+  m.name     = name;
+  m.company  = document.getElementById('editMemCompany').value.trim();
+  m.account  = account;
+  m.phone    = document.getElementById('editMemPhone').value.trim();
+  m.carrier  = document.getElementById('editMemCarrier').value.trim();
   m.location = document.getElementById('editMemLocation').value.trim();
+  m.status   = document.getElementById('editMemStatus').value;
   save();
   closeModal('editMemberModal');
   renderMemberTable();
@@ -1613,6 +2027,39 @@ function confirmDeleteMember() {
   renderMemberTable();
   closeModal('deleteMemberModal');
   showToast('🗑️ 會員已刪除');
+}
+
+/* 凍結 / 解凍會員 */
+function openFreezeMemberModal(mid) {
+  pendingFreezeMemberId = mid;
+  var m = members.find(function(m) { return m.id === mid; });
+  if (!m) return;
+  var isFrozen = (m.status === '凍結');
+  document.getElementById('freezeModalTitle').textContent = isFrozen ? '解凍會員' : '凍結會員';
+  document.getElementById('freezeModalText').innerHTML = isFrozen
+    ? '確定要解凍會員「<strong>' + escHtml(m.name) + '</strong>」？解凍後會員將恢復正常使用。'
+    : '確定要凍結會員「<strong>' + escHtml(m.name) + '</strong>」？凍結後會員將無法登入。';
+  var btn = document.getElementById('freezeConfirmBtn');
+  if (isFrozen) {
+    btn.textContent = '確認解凍';
+    btn.style.background = 'var(--primary)';
+    btn.style.borderColor = 'var(--primary)';
+  } else {
+    btn.textContent = '確認凍結';
+    btn.style.background = 'var(--danger)';
+    btn.style.borderColor = 'var(--danger)';
+  }
+  openModal('freezeMemberModal');
+}
+function confirmFreezeMember() {
+  var m = members.find(function(m) { return m.id === pendingFreezeMemberId; });
+  if (!m) return;
+  var wasFrozen = (m.status === '凍結');
+  m.status = wasFrozen ? '啟用' : '凍結';
+  save();
+  renderMemberTable();
+  closeModal('freezeMemberModal');
+  showToast(wasFrozen ? '✅ 會員「' + m.name + '」已解凍' : '🔒 會員「' + m.name + '」已凍結');
 }
 
 /* 共用據點下拉渲染 */
