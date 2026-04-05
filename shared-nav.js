@@ -163,6 +163,19 @@
     return { system: NAV_CONFIG.systems[0], page: null };
   }
 
+  /* ── 群組展開狀態（sessionStorage）─────────── */
+  var GN_GROUPS_KEY = 'gn_open_groups';
+  function getOpenGroups() {
+    try { return JSON.parse(sessionStorage.getItem(GN_GROUPS_KEY) || '{}'); } catch(e) { return {}; }
+  }
+  function setGroupOpen(groupLabel, isOpen) {
+    try {
+      var state = getOpenGroups();
+      state[groupLabel] = isOpen;
+      sessionStorage.setItem(GN_GROUPS_KEY, JSON.stringify(state));
+    } catch(e) {}
+  }
+
   /* ── 建構 HTML ────────────────────────────── */
   function esc(s) {
     return String(s)
@@ -191,11 +204,14 @@
   function buildSidebar(activeSystem, activePage) {
     var pageInfo = getPageInfo();
     var activeTab = new URLSearchParams(window.location.search).get('tab');
+    var openGroups = getOpenGroups();
     var items = activeSystem.pages.map(function (pg) {
       if (pg.group) {
         var isGroupActive = pg.match(pageInfo);
-        var headerCls = 'gn-nav-group-header' + (isGroupActive ? ' gn-open' : '');
-        var childrenCls = 'gn-nav-group-items' + (isGroupActive ? ' gn-open' : '');
+        /* 當前頁在此群組 → 強制展開；否則以 sessionStorage 記憶為準 */
+        var isOpen = isGroupActive || openGroups[pg.label] === true;
+        var headerCls = 'gn-nav-group-header' + (isOpen ? ' gn-open' : '');
+        var childrenCls = 'gn-nav-group-items' + (isOpen ? ' gn-open' : '');
         var children = pg.children.map(function (ch) {
           var isActive = isGroupActive && (ch.match ? ch.match(pageInfo) : activeTab === ch.tab);
           var cls = 'gn-nav-child-item' + (isActive ? ' gn-active' : '');
@@ -203,7 +219,7 @@
           return '<a class="' + cls + '" href="' + esc(ch.url) + '"' + clickAttr + '>' + esc(ch.label) + '</a>';
         }).join('');
         return (
-          '<button class="' + headerCls + '" onclick="gnGroupToggle(this)">' +
+          '<button class="' + headerCls + '" data-group="' + esc(pg.label) + '" onclick="gnGroupToggle(this)">' +
             esc(pg.label) + '<span class="gn-nav-arrow">▶</span>' +
           '</button>' +
           '<div class="' + childrenCls + '">' + children + '</div>'
@@ -225,18 +241,20 @@
     // Pages of active system
     var pageInfo2 = getPageInfo();
     var activeTab2 = new URLSearchParams(window.location.search).get('tab');
+    var openGroups2 = getOpenGroups();
     var pages = activeSystem.pages.map(function (pg) {
       if (pg.group) {
         var isGroupActive = pg.match(pageInfo2);
-        var headerCls = 'gn-drawer-group-header' + (isGroupActive ? ' gn-open' : '');
-        var childrenCls = 'gn-drawer-group-items' + (isGroupActive ? ' gn-open' : '');
+        var isOpen2 = isGroupActive || openGroups2[pg.label] === true;
+        var headerCls = 'gn-drawer-group-header' + (isOpen2 ? ' gn-open' : '');
+        var childrenCls = 'gn-drawer-group-items' + (isOpen2 ? ' gn-open' : '');
         var children = pg.children.map(function (ch) {
           var isActive = isGroupActive && (ch.match ? ch.match(pageInfo2) : activeTab2 === ch.tab);
           var cls = 'gn-drawer-child-item' + (isActive ? ' gn-active' : '');
           return '<a class="' + cls + '" href="' + esc(ch.url) + '" onclick="gnNavClose()">' + esc(ch.label) + '</a>';
         }).join('');
         return (
-          '<button class="' + headerCls + '" onclick="gnGroupToggle(this)">' +
+          '<button class="' + headerCls + '" data-group="' + esc(pg.label) + '" onclick="gnGroupToggle(this)">' +
             esc(pg.label) + '<span class="gn-nav-arrow">▶</span>' +
           '</button>' +
           '<div class="' + childrenCls + '">' + children + '</div>'
@@ -259,6 +277,7 @@
 
   /* ── 注入 Body Padding ───────────────────── */
   function injectBodyStyle(hasSidebar) {
+    if (document.getElementById('gn-body-style')) return; /* 已注入則跳過 */
     var style = document.createElement('style');
     style.id = 'gn-body-style';
     style.textContent = [
@@ -314,12 +333,15 @@
   window.gnGroupToggle = function (header) {
     var items = header.nextElementSibling;
     var isOpen = header.classList.contains('gn-open');
+    var groupLabel = header.getAttribute('data-group') || '';
     if (isOpen) {
       header.classList.remove('gn-open');
       if (items) items.classList.remove('gn-open');
+      setGroupOpen(groupLabel, false);
     } else {
       header.classList.add('gn-open');
       if (items) items.classList.add('gn-open');
+      setGroupOpen(groupLabel, true);
     }
   };
 
@@ -353,6 +375,14 @@
   };
 
   /* ── 初始化 ──────────────────────────────── */
+  /* 提前同步注入 body 樣式，防止頁面載入時閃爍位移 */
+  (function () {
+    var _info = getPageInfo();
+    var _active = detectActive(_info);
+    var _hasSidebar = _active.system.id === 'internal' || _active.system.id === 'frontend' || _active.system.id === 'store';
+    injectBodyStyle(_hasSidebar);
+  })();
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', injectNav);
   } else {
