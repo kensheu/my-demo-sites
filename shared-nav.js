@@ -324,7 +324,11 @@
   };
 
   window.gnTabClick = function (e, tab) {
-    if (typeof switchTab === 'function') {
+    var linkHref = e.currentTarget ? e.currentTarget.getAttribute('href') : '';
+    var linkFile = linkHref ? linkHref.split('?')[0].split('/').pop() : '';
+    var curFile  = window.location.pathname.split('/').pop() || 'index.html';
+    var onSamePage = linkFile === curFile;
+    if (onSamePage && typeof switchTab === 'function') {
       e.preventDefault();
       switchTab(tab);
       // 更新 URL 不重新載入
