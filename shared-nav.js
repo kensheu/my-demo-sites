@@ -10,7 +10,7 @@
       {
         id: 'internal',
         label: '內部後台',
-        defaultUrl: 'purchasing-home.html',
+        defaultUrl: 'home.html',
         pages: [
           {
             label: '首頁',
