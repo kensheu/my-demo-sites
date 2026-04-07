@@ -565,6 +565,50 @@ var LINK_CATALOG = [
 ];
 
 /* ══════════════════════════════════════════════
+   權限 → 常用功能 對應
+══════════════════════════════════════════════ */
+var PERM_TO_LINK = {
+  'menu_items':       ['link_menu_items'],
+  'price_change':     ['link_price_change'],
+  'menu_schedule':    ['link_menu_schedule'],
+  'change_review_art':['link_change_review'],
+  'change_review_pur':['link_change_review'],
+  'complaint':        ['link_complaint'],
+  'issue_list':       ['link_issue'],
+  'ecr_list':         ['link_ecr'],
+  'permissions':      ['link_permissions'],
+  'purchasing_home':  ['link_purchasing'],
+  'editorial_home':   ['link_editorial']
+};
+
+/* 從 permissions_roles_v2 取得角色允許的 link id 集合 */
+function getAllowedLinks(roleId) {
+  try {
+    var raw = sessionStorage.getItem('permissions_roles_v2');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      var role = parsed && parsed.find(function(r) { return r.id === roleId; });
+      var allowed = [];
+      if (role && role.permissions) {
+        Object.keys(role.permissions).forEach(function(permId) {
+          if (role.permissions[permId] && PERM_TO_LINK[permId]) {
+            PERM_TO_LINK[permId].forEach(function(linkId) {
+              if (allowed.indexOf(linkId) === -1) allowed.push(linkId);
+            });
+          }
+        });
+      } else if (!role) {
+        // 帳號管理中找不到此角色，以 ROLE_DEFAULT_LINKS 推算
+        return ROLE_DEFAULT_LINKS[roleId] != null ? ROLE_DEFAULT_LINKS[roleId] : ALL_LINK_IDS;
+      }
+      return allowed;
+    }
+  } catch(e) {}
+  // 未讀到帳號管理資料時，以 ROLE_DEFAULT_LINKS 推算允許的 link
+  return ROLE_DEFAULT_LINKS[roleId] != null ? ROLE_DEFAULT_LINKS[roleId] : ALL_LINK_IDS;
+}
+
+/* ══════════════════════════════════════════════
    角色預設
 ══════════════════════════════════════════════ */
 var ALL_KPI_IDS  = KPI_CATALOG.map(function(k) { return k.id; });
@@ -591,29 +635,31 @@ var ROLE_DEFAULT_LINKS = {
   'role_admin':     ALL_LINK_IDS,
   'role_pur_mgr':   ['link_menu_items','link_price_change','link_menu_schedule','link_change_review'],
   'role_pur':       ['link_menu_items','link_price_change','link_menu_schedule','link_change_review'],
-  'role_art':       ['link_change_review','link_menu_items','link_editorial'],
+  'role_art':       ['link_change_review','link_menu_items'],
   'role_ops_mgr':   ['link_complaint','link_issue'],
   'role_ops':       ['link_complaint','link_issue'],
   'role_sales_mgr': ['link_complaint'],
   'role_sales':     ['link_complaint'],
   'role_mkt_mgr':   ['link_menu_items','link_issue'],
   'role_mkt':       ['link_issue'],
-  'role_hr':        ['link_permissions'],
+  'role_hr':        [],
   'role_acc_mgr':   ['link_price_change','link_issue'],
   'role_acc':       ['link_price_change'],
-  'role_driver':    ['link_issue']
+  'role_driver':    []
 };
 
 /* ══════════════════════════════════════════════
    公告（靜態範例）
 ══════════════════════════════════════════════ */
 var ANNOUNCEMENTS = [
-  { id: 0, date: '2026/04/03 09:00', title: '4 月份菜單異動公告',       cat: 'system',   read: false, text: '4 月份菜單已完成審核，共異動 12 家餐廳、新增 23 個品項。請相關同仁確認異動內容並完成簽核。' },
-  { id: 1, date: '2026/04/01 14:30', title: '系統定期維護通知',         cat: 'system',   read: false, text: '4/5（六）凌晨 00:00–02:00 進行系統定期維護，期間所有後台功能暫停使用。請提前完成相關作業，造成不便敬請見諒。' },
-  { id: 2, date: '2026/03/28 10:00', title: '本週餐點更新通知',         cat: 'activity', read: true,  text: '本週（3/31–4/4）共有 8 家餐廳更新菜單，包含 3 家新增特餐、2 家調整售價。詳細清單請至餐點管理查看。' },
-  { id: 3, date: '2026/03/20 09:30', title: '清明假日出餐安排說明',     cat: 'other',    read: true,  text: '4/4（五）至 4/6（日）清明連假期間，部分據點調整出餐時間。請各單位提前確認所屬據點的出餐時段。' },
-  { id: 4, date: '2026/03/10 16:00', title: '新版帳號管理功能上線通知', cat: 'system',   read: true,  text: '帳號管理頁面全新改版，新增會員管理、角色權限設定及自訂版面功能。如有操作問題請聯繫 IT 支援。' },
-  { id: 5, date: '2026/03/05 11:00', title: '4 月員工旅遊報名開放',     cat: 'activity', read: true,  text: '4 月份員工旅遊（目的地：清境農場）即日起開放報名，截止日期為 3/20。請至人資系統填寫報名表單。' }
+  { id: 0, date: '2026/04/03 09:00', title: '4 月份菜單異動公告',           cat: 'system',   read: false, text: '4 月份菜單已完成審核，共異動 12 家餐廳、新增 23 個品項。請相關同仁確認異動內容並完成簽核。' },
+  { id: 1, date: '2026/04/01 14:30', title: '系統定期維護通知',             cat: 'system',   read: false, text: '4/5（六）凌晨 00:00–02:00 進行系統定期維護，期間所有後台功能暫停使用。請提前完成相關作業，造成不便敬請見諒。' },
+  { id: 6, date: '2026/04/06 10:00', title: '店家異動審核通知：待審圖片',   cat: 'system',   read: false, text: '目前有 6 筆店家異動申請待您審核圖片，請至「店家異動審核」頁面確認並完成圖片審核作業。', roles: ['role_art'] },
+  { id: 7, date: '2026/04/06 10:00', title: '店家異動審核通知：待審項目',   cat: 'system',   read: false, text: '目前有 4 筆店家異動申請待採購審核，請至「店家異動審核」頁面確認品項資訊並完成審核作業。', roles: ['role_pur_mgr','role_pur'] },
+  { id: 2, date: '2026/03/28 10:00', title: '本週餐點更新通知',             cat: 'activity', read: true,  text: '本週（3/31–4/4）共有 8 家餐廳更新菜單，包含 3 家新增特餐、2 家調整售價。詳細清單請至餐點管理查看。' },
+  { id: 3, date: '2026/03/20 09:30', title: '清明假日出餐安排說明',         cat: 'other',    read: true,  text: '4/4（五）至 4/6（日）清明連假期間，部分據點調整出餐時間。請各單位提前確認所屬據點的出餐時段。' },
+  { id: 4, date: '2026/03/10 16:00', title: '新版帳號管理功能上線通知',     cat: 'system',   read: true,  text: '帳號管理頁面全新改版，新增會員管理、角色權限設定及自訂版面功能。如有操作問題請聯繫 IT 支援。' },
+  { id: 5, date: '2026/03/05 11:00', title: '4 月員工旅遊報名開放',         cat: 'activity', read: true,  text: '4 月份員工旅遊（目的地：清境農場）即日起開放報名，截止日期為 3/20。請至人資系統填寫報名表單。' }
 ];
 
 /* ══════════════════════════════════════════════
@@ -681,8 +727,9 @@ function getActiveKpis(roleId) {
 }
 
 function getActiveLinks(roleId) {
-  if (dashConfig[roleId]) return dashConfig[roleId];
-  return ROLE_DEFAULT_LINKS[roleId] || ALL_LINK_IDS;
+  var allowed = getAllowedLinks(roleId);
+  var ids = dashConfig[roleId] || ROLE_DEFAULT_LINKS[roleId] || ALL_LINK_IDS;
+  return ids.filter(function(id) { return allowed.indexOf(id) !== -1; });
 }
 
 /* ══════════════════════════════════════════════
@@ -700,6 +747,7 @@ function onRoleChange() {
   saveConfig();
   renderKpiGrid();
   renderLinkGrid();
+  renderAnnouncements();
 }
 
 function renderKpiGrid() {
@@ -742,7 +790,10 @@ var CAT_CLASS  = { system: '',         activity: 'activity',  other: 'other'  };
 
 function renderAnnouncements() {
   var list = document.getElementById('announceList');
-  list.innerHTML = ANNOUNCEMENTS.map(function(a) {
+  var visible = ANNOUNCEMENTS.filter(function(a) {
+    return !a.roles || a.roles.indexOf(currentRoleId) !== -1;
+  });
+  list.innerHTML = visible.map(function(a) {
     return '<div class="ann-row' + (a.read ? ' read' : '') + '" data-cat="' + escHtml(a.cat) + '" data-id="' + a.id + '" onclick="openAnnModal(' + a.id + ')">' +
       '<span class="ann-tag ' + (CAT_CLASS[a.cat] || '') + '">' + escHtml(CAT_LABEL[a.cat] || a.cat) + '</span>' +
       '<span class="ann-text">' + escHtml(a.title) + '</span>' +
@@ -785,8 +836,10 @@ function annTab(btn, cat) {
 ══════════════════════════════════════════════ */
 function openCustomModal() {
   var activeIds = getActiveLinks(currentRoleId);
+  var allowedIds = getAllowedLinks(currentRoleId);
   var grid = document.getElementById('customCbGrid');
-  grid.innerHTML = LINK_CATALOG.map(function(l) {
+  var items = LINK_CATALOG.filter(function(l) { return allowedIds.indexOf(l.id) !== -1; });
+  grid.innerHTML = items.map(function(l) {
     var checked = activeIds.indexOf(l.id) !== -1;
     return '<label class="cb-label' + (checked ? ' checked' : '') + '" onclick="onCbChange(this)">' +
       '<input type="checkbox" data-id="' + l.id + '"' + (checked ? ' checked' : '') + '>' +
