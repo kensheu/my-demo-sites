@@ -31,11 +31,13 @@
               {
                 label: '採購首頁',
                 url: 'purchasing-home.html',
+                hidden: true,
                 match: function (p) { return p.file === 'purchasing-home.html'; }
               },
               {
                 label: '美編首頁',
                 url: 'editorial-home.html',
+                hidden: true,
                 match: function (p) { return p.file === 'editorial-home.html'; }
               },
               {
@@ -212,7 +214,7 @@
         var isOpen = isGroupActive || openGroups[pg.label] === true;
         var headerCls = 'gn-nav-group-header' + (isOpen ? ' gn-open' : '');
         var childrenCls = 'gn-nav-group-items' + (isOpen ? ' gn-open' : '');
-        var children = pg.children.map(function (ch) {
+        var children = pg.children.filter(function (ch) { return !ch.hidden; }).map(function (ch) {
           var isActive = isGroupActive && (ch.match ? ch.match(pageInfo) : activeTab === ch.tab);
           var cls = 'gn-nav-child-item' + (isActive ? ' gn-active' : '');
           var clickAttr = ch.tab ? ' onclick="gnTabClick(event,\'' + esc(ch.tab) + '\')"' : '';
@@ -248,7 +250,7 @@
         var isOpen2 = isGroupActive || openGroups2[pg.label] === true;
         var headerCls = 'gn-drawer-group-header' + (isOpen2 ? ' gn-open' : '');
         var childrenCls = 'gn-drawer-group-items' + (isOpen2 ? ' gn-open' : '');
-        var children = pg.children.map(function (ch) {
+        var children = pg.children.filter(function (ch) { return !ch.hidden; }).map(function (ch) {
           var isActive = isGroupActive && (ch.match ? ch.match(pageInfo2) : activeTab2 === ch.tab);
           var cls = 'gn-drawer-child-item' + (isActive ? ' gn-active' : '');
           return '<a class="' + cls + '" href="' + esc(ch.url) + '" onclick="gnNavClose()">' + esc(ch.label) + '</a>';

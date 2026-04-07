@@ -559,8 +559,8 @@ var LINK_CATALOG = [
   { id: 'link_issue',         label: '問題清單',     icon: '📝', url: 'issue-and-ecr.html?tab=list' },
   { id: 'link_ecr',           label: 'ECR 清單',     icon: '🔄', url: 'issue-and-ecr.html?tab=ecr-list' },
   { id: 'link_permissions',   label: '帳號管理',     icon: '👤', url: 'permissions.html' },
-  { id: 'link_purchasing',    label: '採購首頁',     icon: '🛒', url: 'purchasing-home.html' },
-  { id: 'link_editorial',     label: '美編首頁',     icon: '🎨', url: 'editorial-home.html' }
+  { id: 'link_purchasing',    label: '採購首頁',     icon: '🛒', url: 'purchasing-home.html', hidden: true },
+  { id: 'link_editorial',     label: '美編首頁',     icon: '🎨', url: 'editorial-home.html',  hidden: true }
 ];
 
 /* ══════════════════════════════════════════════
@@ -837,7 +837,7 @@ function openCustomModal() {
   var activeIds = getActiveLinks(currentRoleId);
   var allowedIds = getAllowedLinks(currentRoleId);
   var grid = document.getElementById('customCbGrid');
-  var items = LINK_CATALOG.filter(function(l) { return allowedIds.indexOf(l.id) !== -1; });
+  var items = LINK_CATALOG.filter(function(l) { return !l.hidden && allowedIds.indexOf(l.id) !== -1; });
   grid.innerHTML = items.map(function(l) {
     var checked = activeIds.indexOf(l.id) !== -1;
     return '<label class="cb-label' + (checked ? ' checked' : '') + '" onclick="onCbChange(this)">' +
