@@ -558,6 +558,7 @@ var LINK_CATALOG = [
   { id: 'link_complaint',     label: '客訴管理',     icon: '💬', url: 'complaint.html?mode=admin' },
   { id: 'link_issue',         label: '問題清單',     icon: '📝', url: 'issue-and-ecr.html?tab=list' },
   { id: 'link_ecr',           label: 'ECR 清單',     icon: '🔄', url: 'issue-and-ecr.html?tab=ecr-list' },
+  { id: 'link_announce_manage', label: '公告管理',   icon: '📢', url: 'announcement.html?view=admin&page=manage' },
   { id: 'link_permissions',   label: '帳號管理',     icon: '👤', url: 'permissions.html' },
   { id: 'link_purchasing',    label: '採購首頁',     icon: '🛒', url: 'purchasing-home.html', hidden: true },
   { id: 'link_editorial',     label: '美編首頁',     icon: '🎨', url: 'editorial-home.html',  hidden: true }
@@ -593,11 +594,11 @@ var ROLE_DEFAULT_LINKS = {
   'role_art':       ['link_change_review','link_menu_items'],
   'role_ops_mgr':   ['link_complaint','link_issue'],
   'role_ops':       ['link_complaint','link_issue'],
-  'role_sales_mgr': ['link_complaint'],
+  'role_sales_mgr': ['link_announce_manage','link_complaint'],
   'role_sales':     ['link_complaint'],
-  'role_mkt_mgr':   ['link_menu_items','link_issue'],
+  'role_mkt_mgr':   ['link_announce_manage','link_menu_items','link_issue'],
   'role_mkt':       ['link_issue'],
-  'role_hr':        [],
+  'role_hr':        ['link_announce_manage'],
   'role_acc_mgr':   ['link_price_change','link_issue'],
   'role_acc':       ['link_price_change'],
   'role_driver':    []
@@ -615,6 +616,7 @@ var PERM_TO_LINK = {
   'complaint':        ['link_complaint'],
   'issue_list':       ['link_issue'],
   'ecr_list':         ['link_ecr'],
+  'announce_manage':  ['link_announce_manage'],
   'permissions':      ['link_permissions'],
   'purchasing_home':  ['link_purchasing'],
   'editorial_home':   ['link_editorial']
