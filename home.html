@@ -773,7 +773,7 @@ function renderKpiGrid() {
 function renderLinkGrid() {
   var grid = document.getElementById('linkGrid');
   var activeIds = getActiveLinks(currentRoleId);
-  var items = LINK_CATALOG.filter(function(l) { return activeIds.indexOf(l.id) !== -1; });
+  var items = LINK_CATALOG.filter(function(l) { return !l.hidden && activeIds.indexOf(l.id) !== -1; });
   if (!items.length) {
     grid.innerHTML = '<div class="grid-empty">尚未設定常用功能，點擊「自訂版面」新增</div>';
     return;
