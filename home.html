@@ -158,6 +158,11 @@
       gap: 4px;
     }
     .kpi-card:last-child { border-right: none; }
+    .kpi-label {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-bottom: 2px;
+    }
     .kpi-value-row {
       display: flex;
       align-items: baseline;
@@ -172,10 +177,12 @@
       font-size: 13px;
       font-weight: 500;
     }
-    .kpi-label {
-      font-size: 13px;
-      color: var(--gray-500);
-      margin-top: 2px;
+    /* 文字型 KPI（熱門店家/餐點） */
+    .kpi-text-value {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--c, var(--gray-800));
     }
     /* 顏色 */
     .kpi-card[data-color="red"]    { --c: var(--kpi-red);    --bg: var(--kpi-red-bg);    --bd: var(--kpi-red-border); }
@@ -546,9 +553,13 @@ var KPI_CATALOG = [
   { id: 'kpi_unread_announce', label: '未讀公告',       value: 2,  unit: '則', color: 'yellow' },
   { id: 'kpi_complaint',       label: '待處理客訴',     value: 1,  unit: '件', color: 'danger' },
   { id: 'kpi_store_count',       label: '負責店家數',   value: 18, unit: '家', color: 'blue'   },
-  { id: 'kpi_contract_progress', label: '簽約進度',    value: 75, unit: '%',  color: 'green'  },
+  { id: 'kpi_contract_progress', label: '簽約進度',    value: '15 / 20', unit: '家',  color: 'green'  },
   { id: 'kpi_headcount_gap',     label: '人力缺口',    value: 5,  unit: '人', color: 'red'    },
-  { id: 'kpi_interview_schedule',label: '面試安排',    value: 8,  unit: '場', color: 'teal'   }
+  { id: 'kpi_interview_schedule',label: '面試安排',    value: 8,  unit: '場', color: 'teal'   },
+  { id: 'kpi_daily_orders',     label: '今日訂單量總計', value: 186, unit: '筆', color: 'blue'  },
+  { id: 'kpi_gross_profit',     label: '銷售毛利總計',   value: 42850, unit: '元', color: 'green' },
+  { id: 'kpi_hot_store',        label: '熱門店家',       value: '好味食堂', color: 'orange', textValue: true },
+  { id: 'kpi_hot_item',         label: '熱門餐點',       value: '雞腿飯',   color: 'teal',   textValue: true },
 ];
 
 /* ══════════════════════════════════════════════
@@ -576,35 +587,25 @@ var ALL_LINK_IDS = LINK_CATALOG.map(function(l) { return l.id; });
 
 var ROLE_DEFAULT_KPIS = {
   'role_admin':     ALL_KPI_IDS,
-  'role_pur_mgr':   ['kpi_pending_review','kpi_week_effective','kpi_month_changed','kpi_month_new'],
   'role_pur':       ['kpi_pending_review','kpi_week_effective','kpi_month_changed','kpi_month_new'],
   'role_art':       ['kpi_new_store','kpi_pending_image','kpi_edm','kpi_unread_announce'],
-  'role_ops_mgr':   ['kpi_unread_announce','kpi_complaint'],
-  'role_ops':       ['kpi_unread_announce','kpi_complaint'],
-  'role_sales_mgr': ['kpi_store_count','kpi_contract_progress','kpi_unread_announce','kpi_complaint'],
-  'role_sales':     ['kpi_store_count','kpi_contract_progress','kpi_unread_announce'],
-  'role_mkt_mgr':   ['kpi_unread_announce'],
+  'role_ops':       ['kpi_daily_orders','kpi_gross_profit','kpi_hot_store','kpi_hot_item','kpi_complaint'],
+  'role_sales':     ['kpi_store_count','kpi_contract_progress','kpi_unread_announce','kpi_complaint'],
   'role_mkt':       ['kpi_unread_announce'],
   'role_hr':        ['kpi_headcount_gap','kpi_interview_schedule','kpi_unread_announce'],
-  'role_acc_mgr':   ['kpi_unread_announce'],
   'role_acc':       ['kpi_unread_announce'],
   'role_driver':    ['kpi_unread_announce']
 };
 
 var ROLE_DEFAULT_LINKS = {
   'role_admin':     ALL_LINK_IDS,
-  'role_pur_mgr':   ['link_menu_items','link_price_change','link_menu_schedule','link_change_review'],
   'role_pur':       ['link_menu_items','link_price_change','link_menu_schedule','link_change_review'],
   'role_art':       ['link_change_review','link_menu_items'],
-  'role_ops_mgr':   ['link_complaint','link_issue'],
   'role_ops':       ['link_complaint','link_issue'],
-  'role_sales_mgr': ['link_announce_manage','link_complaint'],
-  'role_sales':     ['link_complaint'],
-  'role_mkt_mgr':   ['link_announce_manage','link_menu_items','link_issue'],
-  'role_mkt':       ['link_issue'],
+  'role_sales':     ['link_announce_manage','link_complaint'],
+  'role_mkt':       ['link_announce_manage','link_menu_items','link_issue'],
   'role_hr':        ['link_announce_manage'],
-  'role_acc_mgr':   ['link_price_change','link_issue'],
-  'role_acc':       ['link_price_change'],
+  'role_acc':       ['link_price_change','link_issue'],
   'role_driver':    []
 };
 
@@ -660,7 +661,7 @@ var ANNOUNCEMENTS = [
   { id: 0, date: '2026/04/03 09:00', title: '4 月份菜單異動公告',           cat: 'system',   read: false, text: '4 月份菜單已完成審核，共異動 12 家餐廳、新增 23 個品項。請相關同仁確認異動內容並完成簽核。' },
   { id: 1, date: '2026/04/01 14:30', title: '系統定期維護通知',             cat: 'system',   read: false, text: '4/5（六）凌晨 00:00–02:00 進行系統定期維護，期間所有後台功能暫停使用。請提前完成相關作業，造成不便敬請見諒。' },
   { id: 6, date: '2026/04/06 10:00', title: '店家異動審核通知：待審圖片',   cat: 'system',   read: false, text: '目前有 6 筆店家異動申請待您審核圖片，請至「店家異動審核」頁面確認並完成圖片審核作業。', roles: ['role_art'] },
-  { id: 7, date: '2026/04/06 10:00', title: '店家異動審核通知：待審項目',   cat: 'system',   read: false, text: '目前有 4 筆店家異動申請待採購審核，請至「店家異動審核」頁面確認品項資訊並完成審核作業。', roles: ['role_pur_mgr','role_pur'] },
+  { id: 7, date: '2026/04/06 10:00', title: '店家異動審核通知：待審項目',   cat: 'system',   read: false, text: '目前有 4 筆店家異動申請待採購審核，請至「店家異動審核」頁面確認品項資訊並完成審核作業。', roles: ['role_pur'] },
   { id: 2, date: '2026/03/28 10:00', title: '本週餐點更新通知',             cat: 'activity', read: true,  text: '本週（3/31–4/4）共有 8 家餐廳更新菜單，包含 3 家新增特餐、2 家調整售價。詳細清單請至餐點管理查看。' },
   { id: 3, date: '2026/03/20 09:30', title: '清明假日出餐安排說明',         cat: 'other',    read: true,  text: '4/4（五）至 4/6（日）清明連假期間，部分據點調整出餐時間。請各單位提前確認所屬據點的出餐時段。' },
   { id: 4, date: '2026/03/10 16:00', title: '新版帳號管理功能上線通知',     cat: 'system',   read: true,  text: '帳號管理頁面全新改版，新增會員管理、角色權限設定及自訂版面功能。如有操作問題請聯繫 IT 支援。' },
@@ -707,18 +708,13 @@ function getRoles() {
   // fallback：從 ROLE_DEFAULT_KPIS 的鍵產生靜態列表
   var nameMap = {
     'role_admin':     'Admin',
-    'role_ops_mgr':   '營運主管',
     'role_ops':       '營運',
     'role_driver':    '司機',
-    'role_pur_mgr':   '採購主管',
     'role_pur':       '採購',
-    'role_acc_mgr':   '會計主管',
     'role_acc':       '會計',
-    'role_mkt_mgr':   '行銷主管',
     'role_mkt':       '行銷',
     'role_art':       '美編',
     'role_hr':        '人資',
-    'role_sales_mgr': '業務主管',
     'role_sales':     '業務'
   };
   return Object.keys(nameMap).map(function(id) { return { id: id, name: nameMap[id] }; });
@@ -764,12 +760,18 @@ function renderKpiGrid() {
     return;
   }
   grid.innerHTML = items.map(function(k) {
+    if (k.textValue) {
+      return '<div class="kpi-card" data-color="' + k.color + '">' +
+        '<div class="kpi-label">' + escHtml(k.label) + '</div>' +
+        '<div class="kpi-text-value">' + escHtml(k.value) + '</div>' +
+      '</div>';
+    }
     return '<div class="kpi-card" data-color="' + k.color + '">' +
+      '<div class="kpi-label">' + escHtml(k.label) + '</div>' +
       '<div class="kpi-value-row">' +
         '<span class="kpi-value">' + k.value + '</span>' +
         '<span class="kpi-unit">' + escHtml(k.unit) + '</span>' +
       '</div>' +
-      '<div class="kpi-label">' + escHtml(k.label) + '</div>' +
     '</div>';
   }).join('');
 }
