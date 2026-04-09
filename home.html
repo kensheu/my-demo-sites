@@ -554,6 +554,8 @@ var KPI_CATALOG = [
   { id: 'kpi_complaint',       label: '待處理客訴',     value: 1,  unit: '件', color: 'danger' },
   { id: 'kpi_store_count',       label: '負責店家數',   value: 18, unit: '家', color: 'blue'   },
   { id: 'kpi_headcount_gap',     label: '人力缺口',    value: 5,  unit: '人', color: 'red'    },
+  { id: 'kpi_issue_notify',      label: '問題單通知',  value: 8,  unit: '則', color: 'orange' },
+  { id: 'kpi_ecr_notify',        label: 'ECR 通知',    value: 3,  unit: '則', color: 'purple' },
   { id: 'kpi_daily_orders',     label: '今日訂單量總計', value: 186, unit: '筆', color: 'blue'  },
   { id: 'kpi_gross_profit',     label: '銷售毛利總計',   value: 42850, unit: '元', color: 'green' },
   { id: 'kpi_hot_store',        label: '熱門店家',       value: '好味食堂', color: 'orange', textValue: true },
@@ -592,7 +594,8 @@ var ROLE_DEFAULT_KPIS = {
   'role_mkt':       ['kpi_unread_announce'],
   'role_hr':        ['kpi_headcount_gap','kpi_unread_announce'],
   'role_acc':       ['kpi_unread_announce'],
-  'role_driver':    ['kpi_unread_announce']
+  'role_driver':    ['kpi_unread_announce'],
+  'role_it':        ['kpi_issue_notify','kpi_ecr_notify','kpi_unread_announce']
 };
 
 var ROLE_DEFAULT_LINKS = {
@@ -604,7 +607,8 @@ var ROLE_DEFAULT_LINKS = {
   'role_mkt':       ['link_announce_manage','link_menu_items','link_issue'],
   'role_hr':        ['link_announce_manage'],
   'role_acc':       ['link_price_change','link_issue'],
-  'role_driver':    []
+  'role_driver':    [],
+  'role_it':        ['link_issue','link_ecr','link_announce_manage','link_permissions']
 };
 
 /* ══════════════════════════════════════════════
@@ -713,7 +717,8 @@ function getRoles() {
     'role_mkt':       '行銷',
     'role_art':       '美編',
     'role_hr':        '人資',
-    'role_sales':     '業務'
+    'role_sales':     '業務',
+    'role_it':        'IT'
   };
   return Object.keys(nameMap).map(function(id) { return { id: id, name: nameMap[id] }; });
 }
