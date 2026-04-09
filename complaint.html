@@ -1252,10 +1252,10 @@ function openModal(id, isAdmin) {
 
 function compFormHtml(id) {
   return `<div style="margin-bottom:14px">
-    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:8px">補償方式</label>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:8px">補償方式（可複選）</label>
     <div class="pill-group">
-      <label class="pill-item"><input type="radio" name="compType" value="coupon" onchange="toggleComp()"><span>🎟 發折價券</span></label>
-      <label class="pill-item"><input type="radio" name="compType" value="refund" onchange="toggleComp()"><span>💳 退款</span></label>
+      <label class="pill-item"><input type="checkbox" name="compType" value="coupon" onchange="toggleComp()"><span>🎟 發折價券</span></label>
+      <label class="pill-item"><input type="checkbox" name="compType" value="refund" onchange="toggleComp()"><span>💳 退款</span></label>
     </div>
   </div>
   <div id="couponFields" style="display:none">
@@ -1264,7 +1264,6 @@ function compFormHtml(id) {
       <div class="form-group"><label>有效期限</label><input type="date" id="inpCouponExp"></div>
       <div class="form-group" style="grid-column:1/-1"><label>備註</label><input type="text" id="inpCouponNote" placeholder="補償說明"></div>
     </div>
-    <button class="btn btn-success" onclick="applyComp('${id}','coupon')">🎟 核發折價券</button>
   </div>
   <div id="refundFields" style="display:none">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
@@ -1273,23 +1272,38 @@ function compFormHtml(id) {
         <select id="inpRefundStat"><option value="pending">待處理</option><option value="processing">處理中</option><option value="completed">已完成</option></select>
       </div>
       <div class="form-group" style="grid-column:1/-1"><label>備註</label><input type="text" id="inpRefundNote" placeholder="退款說明"></div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>是否扣款店家</label>
+        <div class="pill-group" style="margin-top:6px">
+          <label class="pill-item"><input type="radio" name="chargeStore" value="no" checked onchange="toggleChargeStore()"><span>否</span></label>
+          <label class="pill-item"><input type="radio" name="chargeStore" value="yes" onchange="toggleChargeStore()"><span>是</span></label>
+        </div>
+      </div>
+      <div class="form-group" id="chargeAmtField" style="display:none;grid-column:1/-1">
+        <label>扣款金額（元）</label>
+        <input type="number" id="inpChargeAmt" placeholder="例：120" min="1">
+      </div>
     </div>
-    <button class="btn btn-success" onclick="applyComp('${id}','refund')">💳 建立退款</button>
-  </div>`;
+  </div>
+  <div id="compSubmitArea" data-cid="${id}" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"></div>`;
 }
 
 function compResultHtml(c) {
   const cp = c.compensation;
   const smap = { pending:'待處理', processing:'處理中', completed:'已完成' };
-  if (cp.type === 'coupon') {
-    return `<div class="comp-done">
+  let html = '';
+  if (cp.type === 'coupon' || cp.type === 'both') {
+    const note = cp.couponNote || cp.note || '';
+    html += `<div class="comp-done" style="margin-bottom:12px">
       <div class="comp-done-title">🎟 已核發折價券</div>
-      <div class="comp-done-body">券號：<strong>${cp.couponCode}</strong><br>金額：<strong>$${cp.amount}</strong>　有效期限：${cp.expiry}<br>${cp.note ? '備註：' + esc(cp.note) : ''}</div>
+      <div class="comp-done-body">券號：<strong>${cp.couponCode}</strong><br>金額：<strong>$${cp.amount}</strong>　有效期限：${cp.expiry}${note ? '<br>備註：'+esc(note) : ''}</div>
     </div>`;
-  } else {
-    return `<div class="comp-done" style="margin-bottom:12px">
+  }
+  if (cp.type === 'refund' || cp.type === 'both') {
+    const note = cp.refundNote || cp.note || '';
+    html += `<div class="comp-done" style="margin-bottom:12px">
       <div class="comp-done-title">💳 退款追蹤</div>
-      <div class="comp-done-body">退款金額：<strong>$${cp.refundAmount}</strong>　狀態：<strong>${smap[cp.refundStatus]||cp.refundStatus}</strong>${cp.refundTime ? '　完成：'+fmtDate(cp.refundTime) : ''}<br>${cp.note ? '備註：'+esc(cp.note) : ''}</div>
+      <div class="comp-done-body">退款金額：<strong>$${cp.refundAmount}</strong>　狀態：<strong>${smap[cp.refundStatus]||cp.refundStatus}</strong>${cp.refundTime ? '　完成：'+fmtDate(cp.refundTime) : ''}${cp.chargeStore ? '<br>扣款店家：<strong>$'+cp.chargeAmount+'</strong>' : ''}${note ? '<br>備註：'+esc(note) : ''}</div>
     </div>
     <div style="display:flex;gap:10px;align-items:center">
       <label style="font-size:13px;font-weight:500;white-space:nowrap">更新退款狀態：</label>
@@ -1301,12 +1315,36 @@ function compResultHtml(c) {
       <button class="btn btn-secondary btn-sm" onclick="updateRefund('${c.id}')">更新</button>
     </div>`;
   }
+  return html;
 }
 
 function toggleComp() {
-  const v = document.querySelector('input[name="compType"]:checked')?.value;
-  document.getElementById('couponFields').style.display = v==='coupon' ? '' : 'none';
-  document.getElementById('refundFields').style.display = v==='refund' ? '' : 'none';
+  const vals = Array.from(document.querySelectorAll('input[name="compType"]:checked')).map(cb => cb.value);
+  const hasCoupon = vals.includes('coupon');
+  const hasRefund = vals.includes('refund');
+  document.getElementById('couponFields').style.display = hasCoupon ? '' : 'none';
+  document.getElementById('refundFields').style.display = hasRefund ? '' : 'none';
+  const area = document.getElementById('compSubmitArea');
+  const cid = area.dataset.cid;
+  if (!hasCoupon && !hasRefund) {
+    area.style.display = 'none'; area.innerHTML = '';
+  } else if (hasCoupon && hasRefund) {
+    area.style.display = '';
+    area.innerHTML = `<button class="btn btn-success" onclick="applyComp('${cid}','both')">✅ 同時提交補償</button>`;
+  } else if (hasCoupon) {
+    area.style.display = '';
+    area.innerHTML = `<button class="btn btn-success" onclick="applyComp('${cid}','coupon')">🎟 核發折價券</button>`;
+  } else {
+    area.style.display = '';
+    area.innerHTML = `<button class="btn btn-success" onclick="applyComp('${cid}','refund')">💳 建立退款</button>`;
+  }
+}
+
+function toggleChargeStore() {
+  const v = document.querySelector('input[name="chargeStore"]:checked')?.value;
+  const field = document.getElementById('chargeAmtField');
+  field.style.display = (v === 'yes') ? '' : 'none';
+  if (v !== 'yes') document.getElementById('inpChargeAmt').value = '';
 }
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
@@ -1592,26 +1630,38 @@ function updateStatus(id) {
 
 function applyComp(id, type) {
   const c = complaints.find(x => x.id === id); if (!c) return;
-  if (type === 'coupon') {
+  const smap = { pending:'待處理', processing:'處理中', completed:'已完成' };
+  let comp = { type, couponCode:null, amount:0, expiry:null, couponNote:'', refundAmount:0, refundStatus:null, refundTime:null, refundNote:'', chargeStore:false, chargeAmount:0 };
+  if (type === 'coupon' || type === 'both') {
     const amt = parseInt(document.getElementById('inpCouponAmt').value);
     const exp = document.getElementById('inpCouponExp').value;
     const note = document.getElementById('inpCouponNote').value.trim();
     if (!amt || amt <= 0) { showToast('請輸入有效金額'); return; }
     if (!exp) { showToast('請選擇有效期限'); return; }
     const code = genCoupon();
-    c.compensation = { type:'coupon', couponCode:code, amount:amt, expiry:exp, note, refundStatus:null, refundAmount:0, refundTime:null };
+    comp.couponCode = code; comp.amount = amt; comp.expiry = exp; comp.couponNote = note;
     c.logs.push({ time:new Date().toISOString(), action:'補償處理', operator:'客服人員', note:`核發折價券 ${code}，$${amt}，有效至 ${exp}` });
-    showToast(`🎟 折價券已核發：${code}`);
-  } else {
+    if (type === 'coupon') showToast(`🎟 折價券已核發：${code}`);
+  }
+  if (type === 'refund' || type === 'both') {
     const amt = parseInt(document.getElementById('inpRefundAmt').value);
     const stat = document.getElementById('inpRefundStat').value;
     const note = document.getElementById('inpRefundNote').value.trim();
     if (!amt || amt <= 0) { showToast('請輸入有效退款金額'); return; }
-    const smap = { pending:'待處理', processing:'處理中', completed:'已完成' };
-    c.compensation = { type:'refund', couponCode:null, amount:0, expiry:null, note, refundStatus:stat, refundAmount:amt, refundTime: stat==='completed' ? new Date().toISOString() : null };
-    c.logs.push({ time:new Date().toISOString(), action:'補償處理', operator:'客服人員', note:`建立退款 $${amt}，狀態：${smap[stat]}` });
-    showToast(`💳 退款已建立：$${amt}`);
+    const chargeStore = document.querySelector('input[name="chargeStore"]:checked')?.value === 'yes';
+    let chargeAmount = 0;
+    if (chargeStore) {
+      chargeAmount = parseInt(document.getElementById('inpChargeAmt').value) || 0;
+      if (chargeAmount <= 0) { showToast('請輸入扣款金額'); return; }
+    }
+    comp.refundAmount = amt; comp.refundStatus = stat; comp.refundNote = note;
+    comp.refundTime = stat === 'completed' ? new Date().toISOString() : null;
+    comp.chargeStore = chargeStore; comp.chargeAmount = chargeAmount;
+    c.logs.push({ time:new Date().toISOString(), action:'補償處理', operator:'客服人員', note:`建立退款 $${amt}，狀態：${smap[stat]}${chargeStore ? `，扣款店家 $${chargeAmount}` : ''}` });
+    if (type === 'refund') showToast(`💳 退款已建立：$${amt}`);
   }
+  if (type === 'both') showToast('✅ 折價券與退款補償已同時提交');
+  c.compensation = comp;
   if (c.status !== 'compensating' && c.status !== 'closed') {
     c.status = 'compensating';
     c.logs.push({ time:new Date().toISOString(), action:'狀態更新：補償處理', operator:'系統', note:'補償操作後自動更新' });
