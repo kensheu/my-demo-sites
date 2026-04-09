@@ -553,9 +553,7 @@ var KPI_CATALOG = [
   { id: 'kpi_unread_announce', label: '未讀公告',       value: 2,  unit: '則', color: 'yellow' },
   { id: 'kpi_complaint',       label: '待處理客訴',     value: 1,  unit: '件', color: 'danger' },
   { id: 'kpi_store_count',       label: '負責店家數',   value: 18, unit: '家', color: 'blue'   },
-  { id: 'kpi_contract_progress', label: '簽約進度',    value: '15 / 20', unit: '家',  color: 'green'  },
   { id: 'kpi_headcount_gap',     label: '人力缺口',    value: 5,  unit: '人', color: 'red'    },
-  { id: 'kpi_interview_schedule',label: '面試安排',    value: 8,  unit: '場', color: 'teal'   },
   { id: 'kpi_daily_orders',     label: '今日訂單量總計', value: 186, unit: '筆', color: 'blue'  },
   { id: 'kpi_gross_profit',     label: '銷售毛利總計',   value: 42850, unit: '元', color: 'green' },
   { id: 'kpi_hot_store',        label: '熱門店家',       value: '好味食堂', color: 'orange', textValue: true },
@@ -590,9 +588,9 @@ var ROLE_DEFAULT_KPIS = {
   'role_pur':       ['kpi_pending_review','kpi_week_effective','kpi_month_changed','kpi_month_new'],
   'role_art':       ['kpi_new_store','kpi_pending_image','kpi_edm','kpi_unread_announce'],
   'role_ops':       ['kpi_daily_orders','kpi_gross_profit','kpi_hot_store','kpi_hot_item','kpi_complaint'],
-  'role_sales':     ['kpi_store_count','kpi_contract_progress','kpi_unread_announce','kpi_complaint'],
+  'role_sales':     ['kpi_store_count','kpi_unread_announce','kpi_complaint'],
   'role_mkt':       ['kpi_unread_announce'],
-  'role_hr':        ['kpi_headcount_gap','kpi_interview_schedule','kpi_unread_announce'],
+  'role_hr':        ['kpi_headcount_gap','kpi_unread_announce'],
   'role_acc':       ['kpi_unread_announce'],
   'role_driver':    ['kpi_unread_announce']
 };
