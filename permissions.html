@@ -1143,6 +1143,12 @@
           <div class="select-dropdown" id="memLocDropdown"></div>
         </div>
       </div>
+      <div class="form-group" style="margin-top:4px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.92rem">
+          <input type="checkbox" id="newMemCanSwitch" style="width:16px;height:16px;cursor:pointer">
+          允許會員在訂餐前台自行切換據點
+        </label>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-modal-cancel" onclick="closeModal('addMemberModal')">取消</button>
@@ -1884,6 +1890,7 @@ function openAddMember() {
   ['newMemName','newMemCompany','newMemAccount','newMemPassword','newMemPhone','newMemCarrier','newMemLocation'].forEach(function(id) {
     var el = document.getElementById(id); el.value = ''; el.classList.remove('error');
   });
+  document.getElementById('newMemCanSwitch').checked = false;
   document.getElementById('newMemLocation').placeholder = '請先選擇公司';
   openModal('addMemberModal');
   setTimeout(function() { document.getElementById('newMemName').focus(); }, 50);
@@ -1986,6 +1993,7 @@ function confirmAddMember() {
     phone: document.getElementById('newMemPhone').value.trim(),
     carrier: document.getElementById('newMemCarrier').value.trim(),
     location: document.getElementById('newMemLocation').value.trim(),
+    canSwitchLocation: document.getElementById('newMemCanSwitch').checked,
     registerDate: todayStr(),
     lastOrderDate: '',
     orderCount: 0,
