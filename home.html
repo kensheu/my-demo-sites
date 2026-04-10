@@ -676,15 +676,11 @@ var ANNOUNCEMENTS = [
 var ROLE_KEY   = 'dashboard_role_v1';
 var CONFIG_KEY = 'dashboard_config_v1';
 
-var currentRoleId = 'role_pur_mgr';
+var currentRoleId = 'role_admin';
 var dashConfig = {};   // { [roleId]: [linkId, ...] }
 var allRoles = [];     // [{ id, name }]
 
 function loadConfig() {
-  try {
-    var r = sessionStorage.getItem(ROLE_KEY);
-    if (r) currentRoleId = r;
-  } catch(e) {}
   try {
     var c = sessionStorage.getItem(CONFIG_KEY);
     if (c) dashConfig = JSON.parse(c);
@@ -692,7 +688,6 @@ function loadConfig() {
 }
 
 function saveConfig() {
-  sessionStorage.setItem(ROLE_KEY, currentRoleId);
   sessionStorage.setItem(CONFIG_KEY, JSON.stringify(dashConfig));
 }
 
@@ -704,7 +699,9 @@ function getRoles() {
     var raw = sessionStorage.getItem('permissions_roles_v2');
     if (raw) {
       var parsed = JSON.parse(raw);
-      if (parsed && parsed.length) return parsed.map(function(r) { return { id: r.id, name: r.name }; });
+      if (parsed && parsed.length) return parsed
+        .filter(function(r) { return r.name.indexOf('主管') === -1; })
+        .map(function(r) { return { id: r.id, name: r.name }; });
     }
   } catch(e) {}
   // fallback：從 ROLE_DEFAULT_KPIS 的鍵產生靜態列表
@@ -907,9 +904,9 @@ function escHtml(str) {
 ══════════════════════════════════════════════ */
 loadConfig();
 allRoles = getRoles();
-// 確認 currentRoleId 存在於角色列表中，否則 fallback
+// 確認 currentRoleId 存在於角色列表中，否則 fallback 到 role_admin
 if (!allRoles.some(function(r) { return r.id === currentRoleId; })) {
-  currentRoleId = allRoles.length ? allRoles[0].id : 'role_pur_mgr';
+  currentRoleId = 'role_admin';
 }
 renderRoleSelector();
 renderKpiGrid();

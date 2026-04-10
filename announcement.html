@@ -909,6 +909,33 @@
     .ann-modal-item .am-meta { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
 
     /* 通知下拉 */
+    /* 據點切換 */
+    .loc-switch-wrap { position: relative; }
+    .loc-switch-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 20px;
+      border: 1px solid var(--gray-200); background: #fff;
+      font-size: 13px; font-weight: 500; color: var(--gray-700);
+      cursor: pointer; white-space: nowrap;
+    }
+    .loc-switch-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .loc-switch-btn .loc-icon { font-size: 14px; }
+    .loc-switch-btn .loc-arrow { font-size: 10px; color: var(--gray-400); }
+    .loc-dropdown {
+      display: none; position: absolute; top: calc(100% + 6px); right: 0;
+      min-width: 160px; background: #fff; border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.12); z-index: 500; overflow: hidden;
+      border: 1px solid var(--gray-100);
+    }
+    .loc-dropdown.open { display: block; }
+    .loc-dropdown-header { padding: 10px 14px 6px; font-size: 11px; font-weight: 700; color: var(--gray-400); letter-spacing: .05em; }
+    .loc-option {
+      padding: 9px 14px; font-size: 14px; cursor: pointer; color: var(--gray-700);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .loc-option:hover { background: var(--primary-light); color: var(--primary); }
+    .loc-option.active { color: var(--primary); font-weight: 600; }
+    .loc-option.active::after { content: '✓'; font-size: 12px; }
     .bell-wrap { position: relative; }
     .notif-dropdown {
       display: none;
@@ -1151,6 +1178,18 @@
     <nav class="frontend-nav">
       <div class="nav-logo">🍱 BTW_企業訂餐平台</div>
       <div class="nav-right">
+        <!-- 據點切換 -->
+        <div class="loc-switch-wrap" id="locSwitchWrap">
+          <button class="loc-switch-btn" onclick="toggleLocDropdown()" id="locSwitchBtn">
+            <span class="loc-icon">📍</span>
+            <span id="locSwitchLabel">A 據點</span>
+            <span class="loc-arrow">▼</span>
+          </button>
+          <div class="loc-dropdown" id="locDropdown">
+            <div class="loc-dropdown-header">切換據點</div>
+            <div id="locOptions"></div>
+          </div>
+        </div>
         <div class="bell-wrap">
           <div class="bell-btn" onclick="toggleNotifDropdown()">🔔<span class="badge" id="fe-badge">2</span></div>
           <div class="notif-dropdown" id="notif-dropdown">
@@ -2227,10 +2266,50 @@
     renderAnnModal();
   }
 
+  // ── 據點切換 ───────────────────────────────────────────────
+  const FE_LOCATIONS = ['A 據點', 'B 據點', 'C 據點'];
+  // 模擬：目前登入會員的據點與切換權限
+  const ME_LOCATION = 'A 據點';
+  const ME_CAN_SWITCH = true;   // false = 不顯示切換按鈕
+
+  let currentLocation = ME_LOCATION;
+
+  function initLocSwitch() {
+    const wrap = document.getElementById('locSwitchWrap');
+    if (!ME_CAN_SWITCH) { wrap.style.display = 'none'; return; }
+    renderLocOptions();
+  }
+
+  function renderLocOptions() {
+    document.getElementById('locSwitchLabel').textContent = currentLocation;
+    document.getElementById('locOptions').innerHTML = FE_LOCATIONS.map(loc => `
+      <div class="loc-option${loc === currentLocation ? ' active' : ''}"
+           onmousedown="pickLocation('${loc}')">${loc}</div>`).join('');
+  }
+
+  function toggleLocDropdown() {
+    document.getElementById('locDropdown').classList.toggle('open');
+  }
+
+  function pickLocation(loc) {
+    currentLocation = loc;
+    document.getElementById('locDropdown').classList.remove('open');
+    renderLocOptions();
+    showToast('✅ 已切換至「' + loc + '」');
+  }
+
+  document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('locSwitchWrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('locDropdown').classList.remove('open');
+    }
+  });
+
   // 初始化：預設顯示公告通知頁，並自動彈出未讀公告
   populateCatSelects();
   populateCatTabs();
   switchAdminPage('notify');
+  initLocSwitch();
 
   // URL 參數初始化（供全域導覽使用）
   (function () {

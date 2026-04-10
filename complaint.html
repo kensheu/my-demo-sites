@@ -290,6 +290,25 @@
     }
     .filter-bar select, .filter-bar input[type="date"] { padding: 7px 10px; font-size: 14px; min-width: 120px; }
     .filter-bar .btn { padding: 7px 16px; font-size: 14px; }
+    /* Searchable dropdown in filter-bar */
+    .filter-search-wrap { position: relative; width: 140px; }
+    .filter-search-wrap input {
+      padding: 7px 10px; font-size: 14px;
+      border: 1px solid #ccc; border-radius: 4px;
+      background: #fff; width: 100%;
+    }
+    .filter-search-wrap input:focus { outline: none; border-color: var(--primary); }
+    .filter-search-dd {
+      display: none; position: absolute; top: calc(100% + 3px); left: 0; min-width: 100%;
+      background: #fff; border: 1px solid var(--primary); border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 300; max-height: 200px; overflow-y: auto;
+    }
+    .filter-search-dd.open { display: block; }
+    .filter-search-opt { padding: 8px 12px; font-size: 14px; cursor: pointer; }
+    .filter-search-opt:hover { background: #eff6ff; }
+    .filter-search-opt.placeholder { color: #999; font-style: italic; }
+    .filter-search-opt.no-result { color: #aaa; font-style: italic; cursor: default; }
+    .filter-search-opt.no-result:hover { background: none; }
     /* Table */
     .adm-table { width: 100%; border-collapse: collapse; }
     .adm-table th {
@@ -646,34 +665,56 @@
 
   <!-- 管理後台 -->
   <div id="adminView" style="display:none">
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="openCreateModal()">建立客訴</button>
-    </div>
-    <div class="panel">
-      <div class="filter-bar">
-        <select id="fLoc" onchange="applyFilter()">
-          <option value="">所有據點</option>
-          <option>據點A</option>
-          <option>據點B</option>
-          <option>據點C</option>
-        </select>
-        <select id="fType" onchange="applyFilter()">
-          <option value="">所有類型</option>
-        </select>
-        <select id="fStat" onchange="applyFilter()">
-          <option value="">所有狀態</option>
-          <option value="submitted">提報</option>
-          <option value="accepted">受理中</option>
-          <option value="investigating">調查中</option>
-          <option value="compensating">補償處理</option>
-          <option value="closed">結案</option>
-        </select>
-        <input type="date" id="fFrom" onchange="applyFilter()">
-        <input type="date" id="fTo" onchange="applyFilter()">
-        <button class="btn btn-secondary" onclick="clearFilter()">清除篩選</button>
-        <button class="btn btn-secondary" onclick="openCatModal()">⚙ 管理類型</button>
+    <!-- 訂單管理 -->
+    <div id="adminOrdersSection" style="display:none">
+      <div class="panel">
+        <div class="filter-bar">
+          <input type="text" id="aOrderSearch" placeholder="搜尋訂單編號或會員編號" style="padding:7px 10px;font-size:14px;min-width:200px;border:1px solid #ccc;border-radius:4px" oninput="renderAdminOrders()">
+          <!-- 據點搜尋下拉 -->
+          <div class="filter-search-wrap">
+            <input id="aOrderLocInput" placeholder="所有據點" autocomplete="off"
+              oninput="filterAdminOrderDD('loc')" onfocus="openAdminOrderDD('loc')" onblur="closeAdminOrderDD('loc')">
+            <input type="hidden" id="aOrderLoc">
+            <div class="filter-search-dd" id="aOrderLocDD"></div>
+          </div>
+          <input type="date" id="aOrderFrom" onchange="renderAdminOrders()">
+          <input type="date" id="aOrderTo" onchange="renderAdminOrders()">
+          <button class="btn btn-secondary" onclick="clearAdminOrderFilter()">清除篩選</button>
+        </div>
+        <div id="adminOrdersBody"></div>
       </div>
-      <div id="adminListBody"></div>
+    </div>
+    <!-- 客訴管理 -->
+    <div id="adminComplaintsSection">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="openCreateModal()">建立客訴</button>
+      </div>
+      <div class="panel">
+        <div class="filter-bar">
+          <select id="fLoc" onchange="applyFilter()">
+            <option value="">所有據點</option>
+            <option>據點A</option>
+            <option>據點B</option>
+            <option>據點C</option>
+          </select>
+          <select id="fType" onchange="applyFilter()">
+            <option value="">所有類型</option>
+          </select>
+          <select id="fStat" onchange="applyFilter()">
+            <option value="">所有狀態</option>
+            <option value="submitted">提報</option>
+            <option value="accepted">受理中</option>
+            <option value="investigating">調查中</option>
+            <option value="compensating">補償處理</option>
+            <option value="closed">結案</option>
+          </select>
+          <input type="date" id="fFrom" onchange="applyFilter()">
+          <input type="date" id="fTo" onchange="applyFilter()">
+          <button class="btn btn-secondary" onclick="clearFilter()">清除篩選</button>
+          <button class="btn btn-secondary" onclick="openCatModal()">⚙ 管理類型</button>
+        </div>
+        <div id="adminListBody"></div>
+      </div>
     </div>
   </div>
 
@@ -797,11 +838,13 @@ const STATUSES = [
   { key: 'closed',        label: '結案',    icon: '✅', cls: 's-closed' },
 ];
 const MEMBERS = {
-  M001: { name: '張小明', phone: '0912-345-678' },
-  M002: { name: '李美華', phone: '0923-456-789' },
-  M003: { name: '王大偉', phone: '0934-567-890' },
+  M0001: { name: '陳大文', phone: '0912-345-678' },
+  M0002: { name: '林小花', phone: '0923-456-789' },
+  M0003: { name: '黃阿明', phone: '0934-567-890' },
+  M0004: { name: '吳美麗', phone: '0934-567-890' },
+  M0005: { name: '張建國', phone: '0945-678-901' },
 };
-const ME = 'M001';
+const ME = 'M0001';
 let complaints = [];
 let uploadedPhotos = [];
 let currentRole = 'member';
@@ -862,8 +905,18 @@ function populateTypeSelects() {
 function save() { sessionStorage.setItem('cmp_v1', JSON.stringify(complaints)); }
 function load() {
   const raw = sessionStorage.getItem('cmp_v1');
-  if (raw) { complaints = JSON.parse(raw); }
-  else { complaints = defaultData(); save(); }
+  if (raw) {
+    const data = JSON.parse(raw);
+    // 若資料還是舊格式（M001），清掉重載
+    if (data.length && data[0].memberId && !data[0].memberId.startsWith('M000')) {
+      sessionStorage.removeItem('cmp_v1');
+      complaints = defaultData(); save();
+    } else {
+      complaints = data;
+    }
+  } else {
+    complaints = defaultData(); save();
+  }
 }
 
 function daysAgo(n) {
@@ -875,7 +928,7 @@ function defaultData() {
   return [
     {
       id: cmpId(8,1), orderId: 'ORD-20250301-042', location: '據點A',
-      memberId: 'M001', type: 'quality',
+      memberId: 'M0001', type: 'quality',
       description: '餐點中發現疑似蟲子的異物，且餐點有明顯異味，完全無法食用。',
       photos: [], status: 'investigating',
       createdAt: daysAgo(8), updatedAt: daysAgo(2), compensation: null,
@@ -887,7 +940,7 @@ function defaultData() {
     },
     {
       id: cmpId(5,1), orderId: 'ORD-20250305-017', location: '據點B',
-      memberId: 'M002', type: 'delivery',
+      memberId: 'M0002', type: 'delivery',
       description: '訂單預計 12:30 送達，遲至 13:45 才收到，外送員態度不佳。',
       photos: [], status: 'compensating',
       createdAt: daysAgo(5), updatedAt: daysAgo(1),
@@ -901,7 +954,7 @@ function defaultData() {
     },
     {
       id: cmpId(3,1), orderId: 'ORD-20250308-089', location: '據點C',
-      memberId: 'M003', type: 'quantity',
+      memberId: 'M0003', type: 'quantity',
       description: '點了 3 份套餐只收到 2 份，少了一份雞腿便當（$120）。',
       photos: [], status: 'closed',
       createdAt: daysAgo(3), updatedAt: daysAgo(0),
@@ -916,7 +969,7 @@ function defaultData() {
     },
     {
       id: cmpId(1,1), orderId: 'ORD-20250309-024', location: '據點A',
-      memberId: 'M001', type: 'other',
+      memberId: 'M0001', type: 'other',
       description: '餐點包裝嚴重破損，湯品溢出，導致其他餐點受污染。',
       photos: [], status: 'accepted',
       createdAt: daysAgo(1), updatedAt: daysAgo(0), compensation: null,
@@ -927,7 +980,7 @@ function defaultData() {
     },
     {
       id: cmpId(0,1), orderId: 'ORD-20250310-055', location: '據點B',
-      memberId: 'M002', type: 'quality',
+      memberId: 'M0002', type: 'quality',
       description: '食物中發現碎玻璃，已造成口腔輕微受傷，情況嚴重。',
       photos: [], status: 'submitted',
       createdAt: daysAgo(0), updatedAt: daysAgo(0), compensation: null,
@@ -1025,16 +1078,16 @@ function resetCForm() {
 
 // ─── Orders data ──────────────────────────────────────────────
 const ORDERS = [
-  { id: 'ORD-20250325-011', location: '據點B', date: '2025-03-25', items: ['雞腿便當 x1', '湯 x1'], total: 140 },
-  { id: 'ORD-20250322-008', location: '據點C', date: '2025-03-22', items: ['排骨飯 x2', '飲料 x1'], total: 230 },
-  { id: 'ORD-20250318-007', location: '據點C', date: '2025-03-18', items: ['雞腿便當 x2', '飲料 x1'], total: 210 },
-  { id: 'ORD-20250315-019', location: '據點B', date: '2025-03-15', items: ['排骨飯 x1', '湯 x1'], total: 130 },
-  { id: 'ORD-20250312-033', location: '據點A', date: '2025-03-12', items: ['招牌便當 x1', '飲料 x2'], total: 190 },
-  { id: 'ORD-20250309-024', location: '據點A', date: '2025-03-09', items: ['雞排飯 x1', '飲料 x2'], total: 220 },
-  { id: 'ORD-20250305-016', location: '據點C', date: '2025-03-05', items: ['雞腿便當 x3'], total: 330 },
-  { id: 'ORD-20250301-042', location: '據點A', date: '2025-03-01', items: ['招牌便當 x3'], total: 360 },
-  { id: 'ORD-20250226-009', location: '據點B', date: '2025-02-26', items: ['排骨飯 x2', '湯 x2'], total: 280 },
-  { id: 'ORD-20250220-031', location: '據點A', date: '2025-02-20', items: ['雞排飯 x2', '飲料 x1'], total: 270 },
+  { id: 'ORD-20260320-041', memberId: 'M0001', location: 'A 據點', date: '2026-03-20', items: ['雞腿便當 x1', '湯 x1'], total: 280 },
+  { id: 'ORD-20260328-055', memberId: 'M0002', location: 'A 據點', date: '2026-03-28', items: ['排骨飯 x2', '飲料 x1'], total: 210 },
+  { id: 'ORD-20260314-036', memberId: 'M0001', location: 'A 據點', date: '2026-03-14', items: ['招牌便當 x1', '飲料 x2'], total: 150 },
+  { id: 'ORD-20260215-022', memberId: 'M0003', location: 'B 據點', date: '2026-02-14', items: ['排骨飯 x1', '湯 x1'], total: 130 },
+  { id: 'ORD-20260321-048', memberId: 'M0002', location: 'A 據點', date: '2026-03-21', items: ['招牌便當 x1', '飲料 x2'], total: 140 },
+  { id: 'ORD-20260307-029', memberId: 'M0001', location: 'B 據點', date: '2026-03-07', items: ['雞排飯 x1', '飲料 x2'], total: 320 },
+  { id: 'ORD-20260205-017', memberId: 'M0003', location: 'B 據點', date: '2026-02-05', items: ['雞腿便當 x3'], total: 260 },
+  { id: 'ORD-20260310-039', memberId: 'M0002', location: 'A 據點', date: '2026-03-10', items: ['招牌便當 x3'], total: 190 },
+  { id: 'ORD-20260118-009', memberId: 'M0003', location: 'B 據點', date: '2026-01-18', items: ['排骨飯 x2', '湯 x2'], total: 180 },
+  { id: 'ORD-20251201-011', memberId: 'M0004', location: 'B 據點', date: '2025-12-01', items: ['雞排飯 x2', '飲料 x1'], total: 120 },
 ];
 let ordersShown = 5;
 
@@ -1070,6 +1123,92 @@ function renderOrders() {
 function loadMoreOrders() {
   ordersShown = Math.min(ordersShown + 5, ORDERS.length);
   renderOrders();
+}
+
+// ─── Admin: Orders ────────────────────────────────────────────
+let adminOrdersShown = 5;
+
+function showAdminTab(tab) {
+  document.getElementById('adminOrdersSection').style.display    = tab === 'orders' ? '' : 'none';
+  document.getElementById('adminComplaintsSection').style.display = tab === 'orders' ? 'none' : '';
+  if (tab === 'orders') renderAdminOrders();
+}
+
+function renderAdminOrders() {
+  const el = document.getElementById('adminOrdersBody');
+  const search = document.getElementById('aOrderSearch').value.trim().toLowerCase();
+  const loc    = document.getElementById('aOrderLoc').value;
+  const from   = document.getElementById('aOrderFrom').value;
+  const to     = document.getElementById('aOrderTo').value;
+  const filtered = ORDERS.filter(o => {
+    const matchSearch = !search ||
+      o.id.toLowerCase().includes(search) ||
+      (o.memberId || '').toLowerCase().includes(search);
+    return matchSearch &&
+      (!loc  || o.location === loc) &&
+      (!from || o.date >= from) &&
+      (!to   || o.date <= to);
+  });
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">📭</div><p>目前沒有符合條件的訂單</p></div>`;
+    return;
+  }
+  const hasComplaint = id => complaints.some(c => c.orderId === id);
+  const rows = filtered.map(o => {
+    const mem = MEMBERS[o.memberId] || {};
+    const complained = hasComplaint(o.id);
+    return `<tr>
+      <td><strong style="color:var(--primary)">${o.id}</strong></td>
+      <td>${o.date}</td>
+      <td>${o.memberId || '—'}<br><span style="font-size:12px;color:var(--text-light)">${mem.name || ''}</span></td>
+      <td>${o.location}</td>
+      <td>${o.items.join('、')}</td>
+      <td style="text-align:right;font-weight:600">$${o.total}</td>
+      <td style="text-align:center">${complained ? '<span class="badge s-investigating" style="white-space:nowrap">有客訴</span>' : '—'}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<div class="adm-table-wrap"><table class="adm-table">
+    <thead><tr>
+      <th>訂單編號</th><th>日期</th><th>會員</th><th>據點</th><th>品項</th><th style="text-align:right">合計</th><th style="text-align:center">客訴</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+function clearAdminOrderFilter() {
+  document.getElementById('aOrderSearch').value   = '';
+  document.getElementById('aOrderLocInput').value = '';
+  document.getElementById('aOrderLoc').value      = '';
+  document.getElementById('aOrderFrom').value     = '';
+  document.getElementById('aOrderTo').value       = '';
+  renderAdminOrders();
+}
+
+// ─── Admin order searchable dropdown（據點）─────────────────
+const ADMIN_ORDER_LOCS = ['據點A', '據點B', '據點C'];
+
+function openAdminOrderDD(type) {
+  filterAdminOrderDD(type);
+  document.getElementById('aOrderLocDD').classList.add('open');
+}
+function closeAdminOrderDD(type) {
+  setTimeout(() => { document.getElementById('aOrderLocDD').classList.remove('open'); }, 150);
+}
+function filterAdminOrderDD(type) {
+  const q = document.getElementById('aOrderLocInput').value.toLowerCase();
+  const dd = document.getElementById('aOrderLocDD');
+  const filtered = q ? ADMIN_ORDER_LOCS.filter(x => x.toLowerCase().includes(q)) : ADMIN_ORDER_LOCS;
+  const allOpt = `<div class="filter-search-opt placeholder" onmousedown="pickAdminOrderLoc('','')">所有據點</div>`;
+  dd.innerHTML = allOpt + (filtered.length
+    ? filtered.map(x => `<div class="filter-search-opt" onmousedown="pickAdminOrderLoc('${x}','${x}')">${x}</div>`).join('')
+    : `<div class="filter-search-opt no-result">無符合結果</div>`);
+  dd.classList.add('open');
+}
+function pickAdminOrderLoc(value, label) {
+  document.getElementById('aOrderLocInput').value = label;
+  document.getElementById('aOrderLoc').value      = value;
+  document.getElementById('aOrderLocDD').classList.remove('open');
+  renderAdminOrders();
 }
 
 function startComplaint(orderId, location) {
@@ -1752,10 +1891,16 @@ renderOrders();
 // URL 參數初始化（供全域導覽使用）
 (function () {
   var _p = new URLSearchParams(location.search);
-  var _mode = _p.get('mode');
-  var _tab  = _p.get('tab');
+  var _mode   = _p.get('mode');
+  var _tab    = _p.get('tab');
+  var _member = _p.get('member');
   if (_mode) switchRole(_mode);
-  if (_tab)  showMTab(_tab);
+  if (_mode === 'admin' && _tab) showAdminTab(_tab);
+  else if (_tab) showMTab(_tab);
+  if (_mode === 'admin' && _tab === 'orders' && _member) {
+    document.getElementById('aOrderSearch').value = _member;
+    renderAdminOrders();
+  }
 })();
 </script>
 </body>

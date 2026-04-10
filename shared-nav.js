@@ -70,9 +70,14 @@
             match: function (p) { return p.file === 'menu-schedule.html'; }
           },
           {
+            label: '訂單管理',
+            url: 'complaint.html?mode=admin&tab=orders',
+            match: function (p) { return p.file === 'complaint.html' && p.mode === 'admin' && p.tab === 'orders'; }
+          },
+          {
             label: '客訴管理',
             url: 'complaint.html?mode=admin',
-            match: function (p) { return p.file === 'complaint.html' && p.mode === 'admin'; }
+            match: function (p) { return p.file === 'complaint.html' && p.mode === 'admin' && p.tab !== 'orders'; }
           },
           {
             label: '帳號管理',
