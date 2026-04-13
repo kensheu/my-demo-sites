@@ -123,7 +123,7 @@ body {
 .cal-week-header .wh-spacer { border-right: 1px solid var(--border-2); }
 .cal-wh-cell {
   padding: 10px 8px; text-align: center;
-  font-size: 14px; font-weight: 500; color: var(--text-3);
+  font-size: 20px; font-weight: 500; color: var(--text-3);
   letter-spacing: .04em; border-right: 1px solid var(--border-2);
 }
 .cal-wh-cell:last-child { border-right: none; }
@@ -148,7 +148,7 @@ body {
   background: var(--bg-2);
   font-size: 12px; color: var(--text-3); gap: 2px;
 }
-.cal-week-label .wk-num { font-weight: 600; font-size: 14px; color: var(--text-2); }
+.cal-week-label .wk-num { font-weight: 600; font-size: 20px; color: var(--text-2); text-align: center; line-height: 1.3; }
 
 .cal-cell {
   padding: 8px 6px; border-right: 1px solid var(--border-2);
@@ -163,7 +163,7 @@ body {
 .cal-cell:hover:not(.other-month) { background: var(--blue-bg); }
 
 .cal-day-num {
-  font-size: 14px; font-weight: 600; color: var(--text-2);
+  font-size: 16px; font-weight: 600; color: var(--text-2);
   line-height: 1; margin-bottom: 2px;
 }
 .cal-day-num.today {
@@ -198,11 +198,21 @@ body {
 
 .chip-add {
   border: 1.5px dashed var(--border); background: transparent;
-  color: var(--text-3); cursor: pointer; font-size: 13px;
+  color: var(--text-3); cursor: pointer; font-size: 18px;
   border-radius: 5px; padding: 4px 6px;
   text-align: left; width: 100%; transition: all .1s;
 }
 .chip-add:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+.cal-holiday-badge {
+  font-size: 20px;
+  font-weight: 600;
+  color: #dc2626;
+  line-height: 1.4;
+  text-align: right;
+  pointer-events: none;
+  user-select: none;
+  display: block;
+}
 
 /* ─── Calendar Tooltip ─── */
 #cal-tooltip {
@@ -415,7 +425,7 @@ body {
   display: flex; align-items: center; gap: 0;
   background: var(--bg-2); border: 1px solid var(--border-2);
   border-radius: 8px; padding: 8px 14px; margin-bottom: 18px;
-  font-size: 13px; color: var(--text-2); flex-wrap: wrap; gap: 4px;
+  font-size: 16px; color: var(--text-2); flex-wrap: wrap; gap: 4px;
 }
 .modal-context-bar:empty { display: none; }
 .ctx-site { font-weight: 600; color: var(--text-1); }
@@ -610,7 +620,7 @@ body {
 /* ─── Meeting bento add button (月曆格) ─── */
 .chip-add-meeting {
   border: 1.5px dashed #f8bbd0; background: transparent; color: #c2185b;
-  cursor: pointer; font-size: 13px; border-radius: 5px; padding: 4px 6px;
+  cursor: pointer; font-size: 18px; border-radius: 5px; padding: 4px 6px;
   text-align: left; width: 100%; transition: all .1s; margin-top: 2px;
   display: block;
 }
@@ -1463,6 +1473,14 @@ function getDateStr(y, m, d) {
   return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 }
 
+// ─── 台灣固定國定假日（MM-DD），每年皆適用 ───
+const TW_FIXED_HOLIDAYS = {
+  '01-01': '元旦',
+  '02-28': '228 紀念日',
+  '05-01': '勞動節',
+  '10-10': '國慶日',
+};
+
 function renderCalendar() {
   const firstDay = new Date(curYear, curMonth, 1).getDay(); // 0=Sun
   const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
@@ -1487,7 +1505,7 @@ function renderCalendar() {
     // week number label (use ISO or just ordinal)
     const weekNum = w + 1;
     html += `<div class="cal-week-row">
-      <div class="cal-week-label"><span class="wk-num">第${weekNum}週</span></div>`;
+      <div class="cal-week-label"><span class="wk-num">${('第'+weekNum+'週').split('').join('<br>')}</span></div>`;
     weekCells.forEach((cell, wi) => {
       if (!cell.day) {
         html += `<div class="cal-cell other-month${wi===0||wi===6?' weekend':''}"></div>`;
@@ -1501,10 +1519,13 @@ function renderCalendar() {
       const mbEntries = (meetingBentoData[curSiteId] || {})[dateStr] || [];
 
       const numCls = isToday ? 'today' : (isWkend ? 'weekend' : '');
+      const holidayName = TW_FIXED_HOLIDAYS[dateStr.slice(5)] || '';
+      const holidayHtml = holidayName ? `<div class="cal-holiday-badge">${holidayName}</div>` : '';
       html += `<div class="cal-cell${isWkend?' weekend':''}" onclick="openDetail('${dateStr}')">
         <div class="cal-day-num ${numCls}">${cell.day}</div>
         ${filtered.map(e => renderEntryChip(e, dateStr)).join('')}
         ${filterMbEntries(mbEntries).map(mb => renderMbChip(mb, dateStr)).join('')}
+        ${holidayHtml}
         <button class="chip-add" onclick="event.stopPropagation();openRestPicker('${dateStr}')">＋ 新增店家</button>
         <button class="chip-add-meeting" onclick="event.stopPropagation();openMbPicker('${dateStr}')">🍱 新增會議餐</button>
       </div>`;
