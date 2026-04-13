@@ -204,6 +204,56 @@ body {
 }
 .chip-add:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
 
+/* ─── Calendar Tooltip ─── */
+#cal-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: #1e293b;
+  color: #f1f5f9;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 17px;
+  line-height: 1.8;
+  max-width: 320px;
+  pointer-events: none;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  display: none;
+}
+#cal-tooltip .tt-meal {
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#cal-tooltip .tt-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+#cal-tooltip .tt-rest {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+#cal-tooltip .tt-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  margin: 8px 0;
+}
+#cal-tooltip .tt-item {
+  color: #cbd5e1;
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+#cal-tooltip .tt-price {
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
 /* ─── Detail panel (below calendar) ─── */
 .detail-panel {
   margin-top: 16px; background: var(--card);
@@ -1471,7 +1521,7 @@ function renderEntryChip(entry, dateStr) {
   if (!rest) return '';
   const mi = mealInfo(entry.mealType);
   const itemCount = entry.items.length;
-  return `<div class="entry-chip ${mi.chipCls}" onclick="event.stopPropagation();openDetail('${dateStr}')">
+  return `<div class="entry-chip ${mi.chipCls}" onclick="event.stopPropagation();openDetail('${dateStr}')" data-tooltip-type="entry" data-entry-id="${entry.entryId}" data-date="${dateStr}">
     <button class="entry-chip-del" onclick="event.stopPropagation();removeEntry('${dateStr}','${entry.entryId}')" title="移除">✕</button>
     <div class="entry-chip-name">${rest.name}</div>
     <div class="entry-chip-items">${mi.label}　${itemCount} 品項</div>
@@ -2348,7 +2398,7 @@ function filterMbEntries(mbEntries) {
 
 function renderMbChip(mb, dateStr) {
   const mi = mealInfo(mb.mealType);
-  return `<div class="chip-meeting-bento" onclick="event.stopPropagation();openDetail('${dateStr}')">
+  return `<div class="chip-meeting-bento" onclick="event.stopPropagation();openDetail('${dateStr}')" data-tooltip-type="mb" data-bento-id="${mb.bentoId}" data-date="${dateStr}">
     <button class="entry-chip-del" onclick="event.stopPropagation();removeMb('${dateStr}','${mb.bentoId}')" title="移除">✕</button>
     <div class="entry-chip-name"><span class="chip-mb-badge">會議</span>${mi.label}便當</div>
     <div class="entry-chip-items">${mb.personLabel}</div>
@@ -3433,6 +3483,83 @@ function showToast(msg, type = '') {
    START
 ══════════════════════════════════════════════════ */
 init();
+
+/* ── Calendar Chip Tooltip ── */
+(function() {
+  const tip = document.createElement('div');
+  tip.id = 'cal-tooltip';
+  document.body.appendChild(tip);
+
+  const MEAL_DOT_COLOR = {
+    breakfast: '#facc15',
+    lunch:     '#f97316',
+    afternoon: '#14b8a6',
+    dinner:    '#a855f7',
+    latenight: '#94a3b8'
+  };
+
+  function buildEntryTooltip(entryId, dateStr) {
+    const dayData = (scheduleData[curSiteId] || {})[dateStr] || [];
+    const entry = dayData.find(e => e.entryId === entryId);
+    if (!entry) return null;
+    const rest = restaurants.find(r => r.id === entry.restaurantId);
+    if (!rest) return null;
+    const mi = mealInfo(entry.mealType);
+    const dot = MEAL_DOT_COLOR[entry.mealType] || '#94a3b8';
+    const items = entry.items.map(it => `<div class="tt-item"><span>• ${it.name}</span><span class="tt-price">$${it.price}</span></div>`).join('');
+    return `<div class="tt-meal"><span class="tt-dot" style="background:${dot}"></span>${mi.label}</div>
+<div class="tt-rest">${rest.name}</div>
+<hr class="tt-divider">
+${items}`;
+  }
+
+  function buildMbTooltip(bentoId, dateStr) {
+    const dayData = (meetingBentoData[curSiteId] || {})[dateStr] || [];
+    const mb = dayData.find(b => b.bentoId === bentoId);
+    if (!mb) return null;
+    const mi = mealInfo(mb.mealType);
+    const dot = MEAL_DOT_COLOR[mb.mealType] || '#94a3b8';
+    const items = (mb.items || []).map(it => `<div class="tt-item"><span>• ${it.name}${it.qty > 1 ? ' ×' + it.qty : ''}</span><span class="tt-price">$${it.price}</span></div>`).join('');
+    return `<div class="tt-meal"><span class="tt-dot" style="background:${dot}"></span>會議 ${mi.label}便當</div>
+<div class="tt-rest">訂購人：${mb.personLabel}</div>
+<hr class="tt-divider">
+${items}`;
+  }
+
+  document.addEventListener('mouseover', function(e) {
+    const chip = e.target.closest('[data-tooltip-type]');
+    if (!chip) return;
+    const type = chip.dataset.tooltipType;
+    const dateStr = chip.dataset.date;
+    let html = null;
+    if (type === 'entry') {
+      html = buildEntryTooltip(chip.dataset.entryId, dateStr);
+    } else if (type === 'mb') {
+      html = buildMbTooltip(chip.dataset.bentoId, dateStr);
+    }
+    if (!html) return;
+    tip.innerHTML = html;
+    tip.style.display = 'block';
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (tip.style.display === 'none') return;
+    const x = e.clientX + 14;
+    const y = e.clientY + 14;
+    const tw = tip.offsetWidth;
+    const th = tip.offsetHeight;
+    tip.style.left = (x + tw > window.innerWidth  ? e.clientX - tw - 8 : x) + 'px';
+    tip.style.top  = (y + th > window.innerHeight ? e.clientY - th - 8 : y) + 'px';
+  });
+
+  document.addEventListener('mouseout', function(e) {
+    const chip = e.target.closest('[data-tooltip-type]');
+    if (!chip) return;
+    if (!chip.contains(e.relatedTarget)) {
+      tip.style.display = 'none';
+    }
+  });
+})();
 </script>
 </body>
 </html>
