@@ -1143,12 +1143,6 @@
           <div class="select-dropdown" id="memLocDropdown"></div>
         </div>
       </div>
-      <div class="form-group" style="margin-top:4px">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.92rem">
-          <input type="checkbox" id="newMemCanSwitch" style="width:16px;height:16px;cursor:pointer">
-          允許會員在訂餐前台自行切換據點
-        </label>
-      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-modal-cancel" onclick="closeModal('addMemberModal')">取消</button>
@@ -1223,13 +1217,6 @@
           <div class="form-control-readonly" id="editMemOrderCount">—</div>
         </div>
       </div>
-      <div class="form-group" style="margin-top:4px">
-        <label class="form-label">據點切換權限</label>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:4px">
-          <input type="checkbox" id="editMemCanSwitch" style="width:16px;height:16px;cursor:pointer">
-          <span style="font-size:14px;color:var(--gray-700)">允許會員在訂餐前台自行切換據點</span>
-        </label>
-      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-modal-cancel" onclick="closeModal('editMemberModal')">取消</button>
@@ -1301,10 +1288,6 @@
           <div>
             <div class="detail-field-label">會員狀態</div>
             <div class="detail-field-value" id="detailMemStatus">—</div>
-          </div>
-          <div>
-            <div class="detail-field-label">據點切換權限</div>
-            <div class="detail-field-value" id="detailMemCanSwitch">—</div>
           </div>
         </div>
       </div>
@@ -1738,31 +1721,31 @@ var MEMBERS_KEY = 'permissions_members_v2';
 
 function defaultMembers() {
   return [
-    { id: 'mem_1', memberNo: 'M0001', name: '陳大文', company: '大文股份有限公司', account: 'achen@mail.com',   password: 'Pass@1234', phone: '0912345678', carrier: '/ABC-1234', location: 'A 據點', registerDate: '2024-01-15', lastOrderDate: '2026-03-20', orderCount: 12, points: 350, status: '啟用', canSwitchLocation: true,
+    { id: 'mem_1', memberNo: 'M0001', name: '陳大文', company: '大文股份有限公司', account: 'achen@mail.com',   password: 'Pass@1234', phone: '0912345678', carrier: '/ABC-1234', location: 'A 據點', registerDate: '2024-01-15', lastOrderDate: '2026-03-20', orderCount: 12, points: 350, status: '啟用',
       recentOrders: [
         { id: 'ORD-20260320-041', date: '2026-03-20', location: 'A 據點', total: 280 },
         { id: 'ORD-20260314-036', date: '2026-03-14', location: 'A 據點', total: 150 },
         { id: 'ORD-20260307-029', date: '2026-03-07', location: 'B 據點', total: 320 }
       ]},
-    { id: 'mem_2', memberNo: 'M0002', name: '林小花', company: '小花有限公司',     account: 'lflower@mail.com', password: 'Pass@1234', phone: '0923456789',  carrier: '',           location: 'A 據點', registerDate: '2024-02-03', lastOrderDate: '2026-03-28', orderCount: 8,  points: 200, status: '啟用', canSwitchLocation: false,
+    { id: 'mem_2', memberNo: 'M0002', name: '林小花', company: '小花有限公司',     account: 'lflower@mail.com', password: 'Pass@1234', phone: '0923456789',  carrier: '',           location: 'A 據點', registerDate: '2024-02-03', lastOrderDate: '2026-03-28', orderCount: 8,  points: 200, status: '啟用',
       recentOrders: [
         { id: 'ORD-20260328-055', date: '2026-03-28', location: 'A 據點', total: 210 },
         { id: 'ORD-20260321-048', date: '2026-03-21', location: 'A 據點', total: 140 },
         { id: 'ORD-20260310-039', date: '2026-03-10', location: 'A 據點', total: 190 }
       ]},
-    { id: 'mem_3', memberNo: 'M0003', name: '黃阿明', company: '',               account: 'haming@mail.com',  password: 'Pass@1234', phone: '',             carrier: '/DEF-5678', location: 'B 據點', registerDate: '2024-03-10', lastOrderDate: '2026-02-14', orderCount: 5,  points: 80,  status: '啟用', canSwitchLocation: true,
+    { id: 'mem_3', memberNo: 'M0003', name: '黃阿明', company: '',               account: 'haming@mail.com',  password: 'Pass@1234', phone: '',             carrier: '/DEF-5678', location: 'B 據點', registerDate: '2024-03-10', lastOrderDate: '2026-02-14', orderCount: 5,  points: 80,  status: '啟用',
       recentOrders: [
         { id: 'ORD-20260214-022', date: '2026-02-14', location: 'B 據點', total: 130 },
         { id: 'ORD-20260205-017', date: '2026-02-05', location: 'B 據點', total: 260 },
         { id: 'ORD-20260118-009', date: '2026-01-18', location: 'B 據點', total: 180 }
       ]},
-    { id: 'mem_4', memberNo: 'M0004', name: '吳美麗', company: '美麗企業',        account: 'wmei@mail.com',    password: 'Pass@1234', phone: '0934567890',  carrier: '',           location: 'B 據點', registerDate: '2024-04-22', lastOrderDate: '2025-12-01', orderCount: 3,  points: 0,   status: '凍結', canSwitchLocation: false,
+    { id: 'mem_4', memberNo: 'M0004', name: '吳美麗', company: '美麗企業',        account: 'wmei@mail.com',    password: 'Pass@1234', phone: '0934567890',  carrier: '',           location: 'B 據點', registerDate: '2024-04-22', lastOrderDate: '2025-12-01', orderCount: 3,  points: 0,   status: '凍結',
       recentOrders: [
         { id: 'ORD-20251201-011', date: '2025-12-01', location: 'B 據點', total: 120 },
         { id: 'ORD-20251115-007', date: '2025-11-15', location: 'B 據點', total: 220 },
         { id: 'ORD-20251030-003', date: '2025-10-30', location: 'B 據點', total: 160 }
       ]},
-    { id: 'mem_5', memberNo: 'M0005', name: '張建國', company: '',               account: 'zjian@mail.com',   password: 'Pass@1234', phone: '0945678901',  carrier: '',           location: '',       registerDate: '2024-06-18', lastOrderDate: '',           orderCount: 0,  points: 0,   status: '啟用', canSwitchLocation: false,
+    { id: 'mem_5', memberNo: 'M0005', name: '張建國', company: '',               account: 'zjian@mail.com',   password: 'Pass@1234', phone: '0945678901',  carrier: '',           location: '',       registerDate: '2024-06-18', lastOrderDate: '',           orderCount: 0,  points: 0,   status: '啟用',
       recentOrders: []}
   ];
 }
@@ -1890,7 +1873,6 @@ function openAddMember() {
   ['newMemName','newMemCompany','newMemAccount','newMemPassword','newMemPhone','newMemCarrier','newMemLocation'].forEach(function(id) {
     var el = document.getElementById(id); el.value = ''; el.classList.remove('error');
   });
-  document.getElementById('newMemCanSwitch').checked = false;
   document.getElementById('newMemLocation').placeholder = '請先選擇公司';
   openModal('addMemberModal');
   setTimeout(function() { document.getElementById('newMemName').focus(); }, 50);
@@ -1993,7 +1975,6 @@ function confirmAddMember() {
     phone: document.getElementById('newMemPhone').value.trim(),
     carrier: document.getElementById('newMemCarrier').value.trim(),
     location: document.getElementById('newMemLocation').value.trim(),
-    canSwitchLocation: document.getElementById('newMemCanSwitch').checked,
     registerDate: todayStr(),
     lastOrderDate: '',
     orderCount: 0,
@@ -2021,9 +2002,6 @@ function openMemberDetail(mid) {
   var status = m.status || '啟用';
   var statusClass = status === '凍結' ? 'status-chip status-frozen' : 'status-chip status-active';
   document.getElementById('detailMemStatus').innerHTML = '<span class="' + statusClass + '">' + escHtml(status) + '</span>';
-  document.getElementById('detailMemCanSwitch').innerHTML = m.canSwitchLocation
-    ? '<span class="status-chip status-active">允許</span>'
-    : '<span class="status-chip status-frozen">不允許</span>';
   document.getElementById('detailMemLastOrder').textContent = m.lastOrderDate || '—';
   document.getElementById('detailMemOrderCount').textContent = m.orderCount != null ? m.orderCount : '—';
   document.getElementById('detailMemPoints').textContent    = m.points != null ? m.points : '—';
@@ -2060,7 +2038,6 @@ function openEditMember(mid) {
   document.getElementById('editMemLocation').value = m.location || '';
   document.getElementById('editMemPoints').textContent = m.points != null ? m.points : 0;
   document.getElementById('editMemStatus').value   = m.status || '啟用';
-  document.getElementById('editMemCanSwitch').checked = !!m.canSwitchLocation;
   document.getElementById('editMemLastOrder').textContent   = m.lastOrderDate || '—';
   document.getElementById('editMemOrderCount').textContent  = m.orderCount != null ? m.orderCount : '—';
   ['editMemName','editMemAccount'].forEach(function(id) {
@@ -2094,7 +2071,6 @@ function confirmEditMember() {
   m.carrier  = document.getElementById('editMemCarrier').value.trim();
   m.location          = document.getElementById('editMemLocation').value.trim();
   m.status            = document.getElementById('editMemStatus').value;
-  m.canSwitchLocation = document.getElementById('editMemCanSwitch').checked;
   save();
   closeModal('editMemberModal');
   renderMemberTable();
