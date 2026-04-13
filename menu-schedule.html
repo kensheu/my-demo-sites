@@ -920,6 +920,7 @@ body {
           <div class="form-label" style="margin-bottom:0">選擇品項 <span id="item-check-count" style="font-size:13px;color:var(--text-3);font-weight:400"></span></div>
           <button class="btn btn-sm" onclick="toggleAllItems()" id="toggle-all-btn">全選</button>
         </div>
+        <input type="text" id="item-checklist-search" placeholder="搜尋品項…" oninput="filterItemChecklist()" style="width:100%;box-sizing:border-box;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:6px;outline:none">
         <div class="item-checklist" id="item-checklist"></div>
       </div>
 
@@ -1006,6 +1007,7 @@ body {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div class="form-label" style="margin-bottom:0">品項與數量</div>
         </div>
+        <input type="text" id="mb-item-search" placeholder="搜尋品項…" oninput="filterMbItemList()" style="width:100%;box-sizing:border-box;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:6px;outline:none">
         <div id="mb-item-list" style="border:1px solid var(--border);border-radius:8px;overflow:hidden"></div>
         <div class="inline-error" id="mb-item-err" style="margin-top:6px">⚠ 請至少勾選一個品項</div>
       </div>
@@ -1032,6 +1034,7 @@ body {
           <div class="form-label" style="margin-bottom:0">選擇品項 <span id="add-item-check-count" style="font-size:13px;color:var(--text-3);font-weight:400"></span></div>
           <button class="btn btn-sm" onclick="toggleAllAddItems()" id="add-toggle-all-btn">全選</button>
         </div>
+        <input type="text" id="add-item-search" placeholder="搜尋品項…" oninput="filterAddItemChecklist()" style="width:100%;box-sizing:border-box;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:6px;outline:none">
         <div class="item-checklist" id="add-item-checklist"></div>
       </div>
     </div>
@@ -2238,6 +2241,7 @@ function buildNewRestItemChecklist() {
     return;
   }
   document.getElementById('item-checklist-section').style.display = 'block';
+  document.getElementById('item-checklist-search').value = '';
   const list = document.getElementById('item-checklist');
   list.innerHTML = rest.items.map(item => {
     const tier   = getPriceForDate(item, pickerDate);
@@ -2294,6 +2298,30 @@ function updateNewRestItemCount() {
   const checked = [...inputs].filter(i => i.checked).length;
   document.getElementById('item-check-count').textContent = checked ? `已選 ${checked} / ${inputs.length}` : `共 ${inputs.length} 項`;
   document.getElementById('toggle-all-btn').textContent = (checked === inputs.length) ? '取消全選' : '全選';
+}
+
+function filterItemChecklist() {
+  const q = document.getElementById('item-checklist-search').value.trim().toLowerCase();
+  document.querySelectorAll('#item-checklist > div').forEach(row => {
+    const name = row.querySelector('.item-check-name')?.textContent.toLowerCase() || '';
+    row.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
+}
+
+function filterMbItemList() {
+  const q = document.getElementById('mb-item-search').value.trim().toLowerCase();
+  document.querySelectorAll('#mb-item-list .mb-picker-item-row').forEach(row => {
+    const name = row.querySelector('.mb-picker-item-name')?.textContent.toLowerCase() || '';
+    row.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
+}
+
+function filterAddItemChecklist() {
+  const q = document.getElementById('add-item-search').value.trim().toLowerCase();
+  document.querySelectorAll('#add-item-checklist label').forEach(row => {
+    const name = row.querySelector('.item-check-name')?.textContent.toLowerCase() || '';
+    row.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
 }
 
 function toggleItemExtra(eid, labelEl) {
@@ -2602,6 +2630,7 @@ function buildMbItemSection(restId, existingItems) {
   const list    = document.getElementById('mb-item-list');
   if (!rest?.items?.length) { section.style.display = 'none'; return; }
   section.style.display = 'block';
+  document.getElementById('mb-item-search').value = '';
   list.innerHTML = rest.items.map(item => {
     const dateKey  = mbPickerDate || new Date().toISOString().slice(0,10);
     const tier     = getPriceForDate(item, dateKey);
@@ -2712,6 +2741,7 @@ function openItemPicker(dateStr, entryId, restId) {
   document.getElementById('item-picker-ctx').textContent =
     `${rest?.name||''} — ${dateStr.slice(5).replace('-','/')}`;
 
+  document.getElementById('add-item-search').value = '';
   const list = document.getElementById('add-item-checklist');
   const avail = (rest?.items || []).filter(item => !existingIds.includes(item.id));
   if (!avail.length) {
