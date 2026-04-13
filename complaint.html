@@ -288,14 +288,15 @@
       background: var(--bg);
       border-radius: var(--radius);
     }
-    .filter-bar select, .filter-bar input[type="date"] { padding: 7px 10px; font-size: 14px; min-width: 120px; }
-    .filter-bar .btn { padding: 7px 16px; font-size: 14px; }
+    .filter-bar select, .filter-bar input[type="date"] { padding: 7px 10px; font-size: 15px; min-width: 120px; }
+    .filter-bar .btn { padding: 7px 16px; font-size: 15px; }
     /* Searchable dropdown in filter-bar */
-    .filter-search-wrap { position: relative; width: 140px; }
+    .filter-search-wrap { position: relative; width: 140px; align-self: stretch; }
     .filter-search-wrap input {
-      padding: 7px 10px; font-size: 14px;
+      padding: 0 10px; font-size: 15px;
       border: 1px solid #ccc; border-radius: 4px;
-      background: #fff; width: 100%;
+      background: #fff; width: 100%; box-sizing: border-box;
+      height: 100%;
     }
     .filter-search-wrap input:focus { outline: none; border-color: var(--primary); }
     .filter-search-dd {
@@ -304,7 +305,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 300; max-height: 200px; overflow-y: auto;
     }
     .filter-search-dd.open { display: block; }
-    .filter-search-opt { padding: 8px 12px; font-size: 14px; cursor: pointer; }
+    .filter-search-opt { padding: 8px 12px; font-size: 15px; cursor: pointer; }
     .filter-search-opt:hover { background: #eff6ff; }
     .filter-search-opt.placeholder { color: #999; font-style: italic; }
     .filter-search-opt.no-result { color: #aaa; font-style: italic; cursor: default; }
@@ -315,14 +316,14 @@
       background: var(--bg);
       padding: 10px 14px;
       text-align: left;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--text-light);
       text-transform: uppercase;
       letter-spacing: 0.3px;
       border-bottom: 1px solid var(--border);
     }
-    .adm-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .adm-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 15px; }
     .adm-table tr:last-child td { border-bottom: none; }
     .adm-table tr:hover td { background: var(--bg); cursor: pointer; }
     /* Modal */
@@ -669,7 +670,7 @@
     <div id="adminOrdersSection" style="display:none">
       <div class="panel">
         <div class="filter-bar">
-          <input type="text" id="aOrderSearch" placeholder="搜尋訂單編號或會員編號" style="padding:7px 10px;font-size:14px;min-width:200px;border:1px solid #ccc;border-radius:4px" oninput="renderAdminOrders()">
+          <input type="text" id="aOrderSearch" placeholder="搜尋訂單編號、會員編號或電話" style="padding:7px 10px;font-size:15px;flex:1;min-width:0;border:1px solid #ccc;border-radius:4px" oninput="renderAdminOrders()">
           <!-- 據點搜尋下拉 -->
           <div class="filter-search-wrap">
             <input id="aOrderLocInput" placeholder="所有據點" autocomplete="off"
@@ -838,11 +839,11 @@ const STATUSES = [
   { key: 'closed',        label: '結案',    icon: '✅', cls: 's-closed' },
 ];
 const MEMBERS = {
-  M0001: { name: '陳大文', phone: '0912-345-678' },
-  M0002: { name: '林小花', phone: '0923-456-789' },
-  M0003: { name: '黃阿明', phone: '0934-567-890' },
-  M0004: { name: '吳美麗', phone: '0934-567-890' },
-  M0005: { name: '張建國', phone: '0945-678-901' },
+  M0001: { name: '陳大文', phone: '0912345678' },
+  M0002: { name: '林小花', phone: '0923456789' },
+  M0003: { name: '黃阿明', phone: '0934567890' },
+  M0004: { name: '吳美麗', phone: '0934567890' },
+  M0005: { name: '張建國', phone: '0945678901' },
 };
 const ME = 'M0001';
 let complaints = [];
@@ -1143,7 +1144,8 @@ function renderAdminOrders() {
   const filtered = ORDERS.filter(o => {
     const matchSearch = !search ||
       o.id.toLowerCase().includes(search) ||
-      (o.memberId || '').toLowerCase().includes(search);
+      (o.memberId || '').toLowerCase().includes(search) ||
+      ((MEMBERS[o.memberId] || {}).phone || '').includes(search);
     return matchSearch &&
       (!loc  || o.location === loc) &&
       (!from || o.date >= from) &&
@@ -1161,6 +1163,7 @@ function renderAdminOrders() {
       <td><strong style="color:var(--primary)">${o.id}</strong></td>
       <td>${o.date}</td>
       <td>${o.memberId || '—'}<br><span style="font-size:12px;color:var(--text-light)">${mem.name || ''}</span></td>
+      <td>${mem.phone || '—'}</td>
       <td>${o.location}</td>
       <td>${o.items.join('、')}</td>
       <td style="text-align:right;font-weight:600">$${o.total}</td>
@@ -1169,7 +1172,7 @@ function renderAdminOrders() {
   }).join('');
   el.innerHTML = `<div class="adm-table-wrap"><table class="adm-table">
     <thead><tr>
-      <th>訂單編號</th><th>日期</th><th>會員</th><th>據點</th><th>品項</th><th style="text-align:right">合計</th><th style="text-align:center">客訴</th>
+      <th>訂單編號</th><th>日期</th><th>會員</th><th>電話</th><th>據點</th><th>品項</th><th style="text-align:right">合計</th><th style="text-align:center">客訴</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
