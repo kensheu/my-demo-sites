@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>點餐</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --primary-text: #1e40af;
+      --teal: rgb(0,190,214);
+      --teal-bg: #e0f8fb;
+      --teal-border: #a5eaf0;
+      --gold: #b45309;
+      --gold-light: #fefce8;
+      --gold-border: #fde68a;
+      --danger: #dc2626;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      font-size: 18px;
+      min-height: 100vh;
+    }
+
+    /* ── 前台 Nav ── */
+    .frontend-nav {
+      position: sticky; top: 48px; z-index: 900;
+      background: #fff; border-bottom: 1px solid var(--gray-200);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 56px;
+    }
+    .nav-logo { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .member-sim-wrap { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-500); }
+    .member-sim-select {
+      border: 1px solid var(--gray-300); border-radius: 6px;
+      padding: 4px 8px; font-size: 13px; color: var(--gray-700); background: #fff;
+    }
+
+    /* ── 訂閱狀態 Badge ── */
+    .sub-chip {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 100px; white-space: nowrap;
+    }
+    .sub-chip-none    { background:#f3f4f6; color:#4b5563; border:1px solid #d1d5db; }
+    .sub-chip-basic   { background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; }
+    .sub-chip-premium { background:#fefce8; color:#92400e; border:1px solid #fde68a; }
+
+    /* ── 頁面容器 ── */
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    /* ── 兩欄佈局 ── */
+    .page-layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    .page-menu-area {
+      flex: 1;
+      min-width: 0;
+    }
+    .page-cart-area {
+      width: 320px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 116px;
+      height: fit-content;
+    }
+    @media (max-width: 760px) {
+      .page-layout { flex-direction: column; }
+      .page-cart-area { width: 100%; position: static; }
+    }
+
+    /* ── 訂閱提示 banner ── */
+    .sub-info-bar {
+      background: #fff; border: 1px solid var(--gray-200);
+      border-radius: 10px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .sub-info-text { font-size: 13px; color: var(--gray-600); flex: 1; }
+    .sub-info-link { font-size: 13px; color: var(--primary); text-decoration: none; white-space: nowrap; }
+    .sub-info-link:hover { text-decoration: underline; }
+    .sub-discount-badge {
+      background: var(--teal-bg); color: var(--teal);
+      border: 1px solid var(--teal-border); border-radius: 100px;
+      font-size: 12px; font-weight: 700; padding: 3px 10px;
+    }
+
+    /* ── 餐點列表 ── */
+    .section-title { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 14px; }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .menu-card {
+      background: #fff; border: 1px solid var(--gray-200);
+      border-radius: 12px; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: box-shadow .15s;
+    }
+    .menu-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+
+    /* 圖片佔位區 */
+    .menu-img-area {
+      height: 130px; background: var(--gray-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; flex-shrink: 0;
+    }
+
+    /* 內容區 */
+    .menu-card-body { padding: 12px; display: flex; flex-direction: column; flex: 1; }
+    .menu-item-name { font-size: 14px; font-weight: 700; color: var(--gray-900); margin-bottom: 3px; }
+    .menu-item-desc { font-size: 12px; color: var(--gray-400); margin-bottom: 10px; min-height: 16px; }
+    .price-section { margin-top: auto; }
+
+    /* 已訂閱：只顯示訂閱價 */
+    .price-sub-only { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+    .price-sub-num { font-size: 22px; font-weight: 800; color: var(--teal); }
+    .price-sub-label {
+      background: var(--teal-bg); color: var(--teal);
+      border: 1px solid var(--teal-border); border-radius: 4px;
+      font-size: 10px; font-weight: 700; padding: 1px 5px;
+    }
+
+    /* 未訂閱：顯示原價 + 訂閱價對比 */
+    .price-original-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+    .price-original-num { font-size: 22px; font-weight: 800; color: var(--gray-900); }
+    .price-sub-rows { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+    .price-sub-row {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--teal-bg); border: 1px solid var(--teal-border);
+      border-radius: 6px; padding: 4px 8px;
+    }
+    .price-sub-tag { font-size: 10px; font-weight: 700; color: var(--teal); white-space: nowrap; }
+    .price-sub-val { font-size: 13px; font-weight: 700; color: var(--teal); }
+    .price-sub-strike { font-size: 12px; color: var(--gray-400); }
+
+    /* 卡片數量選擇器 */
+    .card-qty-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-bottom: 8px;
+    }
+    .card-qty-btn {
+      width: 28px; height: 28px;
+      border: 1px solid var(--gray-300); border-radius: 6px;
+      background: #fff; font-size: 15px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-700); font-family: inherit;
+    }
+    .card-qty-btn:hover { background: var(--gray-100); }
+    .card-qty-num { font-size: 14px; font-weight: 600; min-width: 20px; text-align: center; }
+
+    /* 加入購物車按鈕 */
+    .btn-add-cart {
+      width: 100%; padding: 8px 0; border: none; border-radius: 8px;
+      background: var(--primary); color: #fff;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-add-cart:hover { background: #1d4ed8; }
+
+    /* ── 購物車 ── */
+    .cart-section {
+      background: #fff; border: 1px solid var(--gray-200);
+      border-radius: 12px; padding: 20px 22px;
+    }
+    .cart-empty { font-size: 13px; color: var(--gray-400); text-align: center; padding: 16px 0; }
+    .cart-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--gray-100);
+    }
+    .cart-item:last-of-type { border-bottom: none; }
+    .cart-item-name { flex: 1; font-size: 14px; font-weight: 600; }
+    .cart-item-price { font-size: 14px; color: var(--teal); font-weight: 700; min-width: 50px; text-align: right; }
+    .cart-qty-wrap { display: flex; align-items: center; gap: 6px; }
+    .cart-qty-btn {
+      width: 26px; height: 26px; border: 1px solid var(--gray-300); border-radius: 6px;
+      background: #fff; font-size: 15px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; line-height: 1;
+      color: var(--gray-700); font-family: inherit;
+    }
+    .cart-qty-btn:hover { background: var(--gray-100); }
+    .cart-qty-num { font-size: 14px; font-weight: 600; min-width: 18px; text-align: center; }
+
+    /* 折價券區塊 */
+    .coupon-section {
+      border-top: 1px solid var(--gray-100); margin-top: 14px; padding-top: 14px;
+    }
+    .coupon-section-title { font-size: 13px; font-weight: 600; color: var(--gray-600); margin-bottom: 10px; }
+    .coupon-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+    .coupon-chip {
+      display: flex; align-items: center; gap: 5px;
+      border: 1.5px solid var(--gray-200); border-radius: 8px;
+      padding: 5px 10px; font-size: 12px; cursor: pointer;
+      background: #fff; transition: all .15s; color: var(--gray-700);
+    }
+    .coupon-chip:hover { border-color: var(--teal); color: var(--teal); }
+    .coupon-chip.selected {
+      border-color: var(--teal); background: var(--teal-bg); color: var(--teal); font-weight: 600;
+    }
+    .coupon-chip-amount { font-weight: 700; }
+    .coupon-chip-code { font-family: monospace; font-size: 11px; opacity: .7; }
+    .coupon-no-coupons { font-size: 12px; color: var(--gray-400); }
+
+    /* 合計列 */
+    .cart-summary {
+      border-top: 1px solid var(--gray-200); margin-top: 14px; padding-top: 14px;
+    }
+    .cart-summary-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px; color: var(--gray-600); margin-bottom: 6px;
+    }
+    .cart-summary-row.total {
+      font-size: 17px; font-weight: 700; color: var(--gray-900); margin-top: 8px; margin-bottom: 0;
+    }
+    .cart-summary-coupon { color: var(--danger); font-weight: 600; }
+    .btn-checkout {
+      width: 100%; margin-top: 16px; padding: 12px 0;
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 10px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: background .15s;
+    }
+    .btn-checkout:hover { background: #1d4ed8; }
+    .btn-checkout:disabled { background: var(--gray-300); cursor: default; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1f2937; color: #fff; padding: 11px 18px;
+      border-radius: 8px; font-size: 13px; z-index: 3000;
+      display: none; box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+  </style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<nav class="frontend-nav">
+  <div class="nav-logo">🍱 BY THE WAY</div>
+  <div class="nav-right">
+    <div id="subStatusBadge"></div>
+    <div class="member-sim-wrap">
+      <span>模擬會員：</span>
+      <select class="member-sim-select" id="memberSim" onchange="onMemberChange()">
+        <!-- 由 JS 填入 -->
+      </select>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <!-- 訂閱提示 bar -->
+  <div class="sub-info-bar" id="subInfoBar"><!-- JS 渲染 --></div>
+
+  <div class="page-layout">
+    <!-- 左側：餐點列表 -->
+    <div class="page-menu-area">
+      <div class="section-title">今日菜單</div>
+      <div class="menu-grid" id="menuGrid"><!-- JS 渲染 --></div>
+    </div>
+
+    <!-- 右側：sticky 購物車 -->
+    <div class="page-cart-area">
+      <div class="section-title">購物車</div>
+      <div class="cart-section" id="cartSection"><!-- JS 渲染 --></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var MEMBERS_KEY   = 'permissions_members_v2';
+var SUB_PLANS_KEY = 'subscription_plans_v1';
+var COUPON_KEY    = 'coupon_settings_v1';
+
+var PLAN_INFO = {
+  plan_none:    { name: '一般方案', chipClass: 'sub-chip-none' },
+  plan_basic:   { name: '月訂閱',   chipClass: 'sub-chip-basic' },
+  plan_premium: { name: '年訂閱',   chipClass: 'sub-chip-premium' }
+};
+
+/* ── 折扣金額 ── */
+function loadDiscountAmount() {
+  try {
+    var s = sessionStorage.getItem(SUB_PLANS_KEY);
+    if (s) { var d = JSON.parse(s); return d.discountAmount != null ? d.discountAmount : 10; }
+  } catch(e) {}
+  return 10;
+}
+
+/* ── 菜單資料 ── */
+var menuItems = [
+  { id:'A001', name:'奶油厚片',     desc:'',                         storePrice: 40 },
+  { id:'A002', name:'原味蛋餅',     desc:'',                         storePrice: 35 },
+  { id:'A003', name:'總匯蛋餅',     desc:'',                         storePrice: 55 },
+  { id:'A005', name:'起司雙層蛋餅', desc:'雙層起司，口感濃郁香滑。', storePrice: 50 },
+  { id:'A013', name:'冰美式（中）', desc:'',                         storePrice: 35 },
+  { id:'A012', name:'紅茶（中）',   desc:'',                         storePrice: 25 },
+  { id:'B001', name:'雞腿便當',     desc:'附湯品、小菜各一。',       storePrice: 110 },
+  { id:'B002', name:'排骨便當',     desc:'附湯品、小菜各一。',       storePrice: 110 },
+  { id:'B003', name:'控肉飯',       desc:'',                         storePrice: 90 },
+  { id:'B004', name:'素食便當',     desc:'附湯品、小菜各一。',       storePrice: 100 }
+];
+
+/* ── 會員 ── */
+var members = [];
+var FE_SIM_MEMBER_KEY = 'fe_sim_member';
+var currentMemberId = 'mem_1';
+
+function loadMembers() {
+  try {
+    var s = sessionStorage.getItem(MEMBERS_KEY);
+    var raw = s ? JSON.parse(s) : null;
+    members = (raw && raw.length >= 2) ? raw.slice(0, 2) : defaultMembers();
+  } catch(e) { members = defaultMembers(); }
+}
+
+function saveMembers() {
+  try {
+    var s = sessionStorage.getItem(MEMBERS_KEY);
+    var all = s ? JSON.parse(s) : [];
+    members.forEach(function(m) {
+      var idx = all.findIndex(function(x) { return x.id === m.id; });
+      if (idx >= 0) all[idx] = Object.assign({}, all[idx], m);
+      else all.push(m);
+    });
+    sessionStorage.setItem(MEMBERS_KEY, JSON.stringify(all));
+  } catch(e) {
+    sessionStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
+  }
+}
+
+function defaultMembers() {
+  return [
+    { id: 'mem_1', name: '無訂閱', subscriptionPlan: 'plan_none',    coupons: [{ code: 'WELC-A1B2C', amount: 10, expiry: '2026-07-15', reason: '新會員贈券', used: false, source: 'gift' }] },
+    { id: 'mem_2', name: '有訂閱', subscriptionPlan: 'plan_premium',
+      coupons: [{ code: 'COMP-K8X2F', amount: 10, expiry: '2026-07-15', reason: '推薦獎勵', used: false, source: 'referral' }] }
+  ];
+}
+
+function getCurrentMember() {
+  return members.find(function(m) { return m.id === currentMemberId; }) || members[0];
+}
+
+function onMemberChange() {
+  currentMemberId = document.getElementById('memberSim').value;
+  sessionStorage.setItem(FE_SIM_MEMBER_KEY, currentMemberId);
+  cart = {};
+  cardQty = {};
+  selectedCouponCode = null;
+  renderAll();
+}
+
+function renderMemberSelect() {
+  var sel = document.getElementById('memberSim');
+  sel.innerHTML = members.map(function(m) {
+    return '<option value="' + m.id + '"' + (m.id === currentMemberId ? ' selected' : '') + '>' + escHtml(m.name) + '</option>';
+  }).join('');
+}
+
+/* ── 購物車狀態 ── */
+var cart = {};              // { itemId: qty }
+var cardQty = {};           // 卡片暫存數量 { itemId: qty }
+var selectedCouponCode = null;
+
+function changeCardQty(itemId, delta) {
+  var cur = cardQty[itemId] || 1;
+  cardQty[itemId] = Math.max(1, cur + delta);
+  renderMenuGrid();
+}
+
+function addToCart(itemId) {
+  var qty = cardQty[itemId] || 1;
+  cart[itemId] = (cart[itemId] || 0) + qty;
+  cardQty[itemId] = 1;
+  renderMenuGrid();
+  renderCart();
+  showToast('已加入購物車');
+}
+
+function changeQty(itemId, delta) {
+  cart[itemId] = (cart[itemId] || 0) + delta;
+  if (cart[itemId] <= 0) delete cart[itemId];
+  // 若購物車清空，取消已選折價券
+  if (Object.keys(cart).length === 0) selectedCouponCode = null;
+  renderCart();
+}
+
+function getCartTotal(isSubscribed, discountAmt) {
+  var total = 0;
+  Object.keys(cart).forEach(function(id) {
+    var item = menuItems.find(function(m) { return m.id === id; });
+    if (!item) return;
+    var price = isSubscribed ? Math.max(0, item.storePrice - discountAmt) : item.storePrice;
+    total += price * cart[id];
+  });
+  return total;
+}
+
+function getSelectedCoupon() {
+  if (!selectedCouponCode) return null;
+  var me = getCurrentMember();
+  return (me.coupons || []).find(function(c) { return c.code === selectedCouponCode && !c.used; }) || null;
+}
+
+function toggleCoupon(code) {
+  selectedCouponCode = selectedCouponCode === code ? null : code;
+  renderCart();
+}
+
+/* ── 確認訂單 ── */
+function checkout() {
+  var me = getCurrentMember();
+  var keys = Object.keys(cart);
+  if (!keys.length) return;
+
+  var coupon = getSelectedCoupon();
+  if (coupon) {
+    // 標記折價券為已使用
+    var c = (me.coupons || []).find(function(x) { return x.code === coupon.code; });
+    if (c) c.used = true;
+    saveMembers();
+    // 同步回寫到 coupon_settings_v1（若存在）
+    try {
+      var cs = sessionStorage.getItem(COUPON_KEY);
+      if (cs) {
+        var cdata = JSON.parse(cs);
+        if (cdata.coupons) {
+          var cc = cdata.coupons.find(function(x) { return x.code === coupon.code; });
+          if (cc) { cc.used = true; sessionStorage.setItem(COUPON_KEY, JSON.stringify(cdata)); }
+        }
+      }
+    } catch(e) {}
+  }
+
+  // 重置購物車
+  cart = {};
+  selectedCouponCode = null;
+  // 重新載入會員（確保折價券狀態最新）
+  loadMembers();
+  renderAll();
+  showToast('✅ 訂單已送出！' + (coupon ? '折價券 ' + coupon.code + ' 已使用。' : ''));
+}
+
+/* ── 渲染 ── */
+function renderAll() {
+  var me = getCurrentMember();
+  var plan = me.subscriptionPlan || 'plan_none';
+  var info = PLAN_INFO[plan] || PLAN_INFO.plan_none;
+  var isSubscribed = plan !== 'plan_none';
+  var discountAmt = loadDiscountAmount();
+
+  // 訂閱狀態 badge
+  document.getElementById('subStatusBadge').innerHTML =
+    '<span class="sub-chip ' + info.chipClass + '">' + escHtml(info.name) + '</span>';
+
+  // 訂閱提示 bar
+  var barHtml;
+  if (isSubscribed) {
+    barHtml = '<span class="sub-discount-badge">每道折 $' + discountAmt + '</span>' +
+      '<span class="sub-info-text">您已訂閱「' + escHtml(info.name) + '」，以下餐點價格已自動套用訂閱折扣（每道餐點折抵 $' + discountAmt + ' 元）。</span>';
+  } else {
+    barHtml = '<span class="sub-info-text">您目前為一般方案，以原價計算。以下顯示訂閱後的折扣參考價，讓您了解可省下多少。</span>' +
+      '<a class="sub-info-link" href="subscription.html">查看訂閱方案 →</a>';
+  }
+  document.getElementById('subInfoBar').innerHTML = barHtml;
+
+  // 餐點列表
+  renderMenuGrid();
+
+  renderCart();
+}
+
+function renderMenuGrid() {
+  var me = getCurrentMember();
+  var plan = me.subscriptionPlan || 'plan_none';
+  var isSubscribed = plan !== 'plan_none';
+  var discountAmt = loadDiscountAmount();
+  document.getElementById('menuGrid').innerHTML = menuItems.map(function(item) {
+    return renderMenuCard(item, discountAmt, isSubscribed);
+  }).join('');
+}
+
+function renderMenuCard(item, discountAmt, isSubscribed) {
+  var priceHtml;
+  if (isSubscribed) {
+    var subPrice = Math.max(0, item.storePrice - discountAmt);
+    priceHtml = '<div class="price-section">' +
+      '<div class="price-sub-only">' +
+        '<span class="price-sub-num">$' + subPrice + '</span>' +
+        '<span class="price-sub-label">訂閱價</span>' +
+      '</div>' +
+    '</div>';
+  } else {
+    var subPrice = Math.max(0, item.storePrice - discountAmt);
+    priceHtml = '<div class="price-section">' +
+      '<div class="price-compare">' +
+        '<div class="price-original-row">' +
+          '<span class="price-original-num">$' + item.storePrice + '</span>' +
+          '<span style="font-size:12px;color:var(--gray-400)">原價</span>' +
+        '</div>' +
+        '<div class="price-sub-rows">' +
+          '<div class="price-sub-row">' +
+            '<span class="price-sub-tag">訂閱價</span>' +
+            '<span class="price-sub-val">$' + subPrice + '</span>' +
+            '<span class="price-sub-strike">省 $' + discountAmt + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  var qty = cardQty[item.id] || 1;
+  var emoji = item.id.charAt(0) === 'B' ? '🍱' : '🍳';
+  return '<div class="menu-card">' +
+    '<div class="menu-img-area">' + emoji + '</div>' +
+    '<div class="menu-card-body">' +
+      '<div class="menu-item-name">' + escHtml(item.name) + '</div>' +
+      '<div class="menu-item-desc">' + escHtml(item.desc) + '</div>' +
+      priceHtml +
+      '<div class="card-qty-wrap">' +
+        '<button class="card-qty-btn" onclick="changeCardQty(\'' + item.id + '\',-1)">−</button>' +
+        '<span class="card-qty-num">' + qty + '</span>' +
+        '<button class="card-qty-btn" onclick="changeCardQty(\'' + item.id + '\',1)">＋</button>' +
+      '</div>' +
+      '<button class="btn-add-cart" onclick="addToCart(\'' + item.id + '\')">加入購物車</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderCart() {
+  var me = getCurrentMember();
+  var plan = me.subscriptionPlan || 'plan_none';
+  var isSubscribed = plan !== 'plan_none';
+  var discountAmt = loadDiscountAmount();
+  var keys = Object.keys(cart);
+  var el = document.getElementById('cartSection');
+
+  if (!keys.length) {
+    el.innerHTML = '<div class="cart-empty">尚未加入任何餐點</div>';
+    return;
+  }
+
+  // 購物車品項
+  var itemsHtml = keys.map(function(id) {
+    var item = menuItems.find(function(m) { return m.id === id; });
+    if (!item) return '';
+    var price = isSubscribed ? Math.max(0, item.storePrice - discountAmt) : item.storePrice;
+    var qty = cart[id];
+    return '<div class="cart-item">' +
+      '<div class="cart-item-name">' + escHtml(item.name) + '</div>' +
+      '<div class="cart-qty-wrap">' +
+        '<button class="cart-qty-btn" onclick="changeQty(\'' + id + '\',-1)">−</button>' +
+        '<span class="cart-qty-num">' + qty + '</span>' +
+        '<button class="cart-qty-btn" onclick="changeQty(\'' + id + '\',1)">＋</button>' +
+      '</div>' +
+      '<div class="cart-item-price">$' + (price * qty) + '</div>' +
+    '</div>';
+  }).join('');
+
+  // 折價券區塊
+  var validCoupons = (me.coupons || []).filter(function(c) {
+    return !c.used && c.expiry >= todayStr();
+  });
+  var couponHtml = '<div class="coupon-section">' +
+    '<div class="coupon-section-title">折價券</div>';
+  if (validCoupons.length) {
+    couponHtml += '<div class="coupon-chips">' +
+      validCoupons.map(function(c) {
+        var sel = selectedCouponCode === c.code;
+        return '<button class="coupon-chip' + (sel ? ' selected' : '') + '" onclick="toggleCoupon(\'' + escHtml(c.code) + '\')">' +
+          '<span class="coupon-chip-amount">折 $' + c.amount + '</span>' +
+          '<span class="coupon-chip-code">' + escHtml(c.code) + '</span>' +
+          (sel ? '<span>✓</span>' : '') +
+        '</button>';
+      }).join('') +
+    '</div>';
+  } else {
+    couponHtml += '<div class="coupon-no-coupons">目前沒有可用折價券</div>';
+  }
+  couponHtml += '</div>';
+
+  // 合計
+  var subtotal = getCartTotal(isSubscribed, discountAmt);
+  var coupon = getSelectedCoupon();
+  var couponDiscount = coupon ? Math.min(coupon.amount, subtotal) : 0;
+  var finalTotal = subtotal - couponDiscount;
+
+  var summaryHtml = '<div class="cart-summary">' +
+    '<div class="cart-summary-row"><span>小計</span><span>$' + subtotal + '</span></div>';
+  if (couponDiscount > 0) {
+    summaryHtml += '<div class="cart-summary-row"><span>折價券折抵（' + escHtml(coupon.code) + '）</span>' +
+      '<span class="cart-summary-coupon">−$' + couponDiscount + '</span></div>';
+  }
+  summaryHtml += '<div class="cart-summary-row total"><span>合計</span><span>$' + finalTotal + '</span></div>' +
+    '</div>';
+
+  el.innerHTML = itemsHtml + couponHtml + summaryHtml +
+    '<button class="btn-checkout" onclick="checkout()">確認訂單</button>';
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+var _toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { t.style.display = 'none'; }, 3500);
+}
+
+var _savedMember = sessionStorage.getItem(FE_SIM_MEMBER_KEY);
+sessionStorage.clear();
+if (_savedMember) sessionStorage.setItem(FE_SIM_MEMBER_KEY, _savedMember);
+currentMemberId = _savedMember || 'mem_1';
+loadMembers();
+renderMemberSelect();
+renderAll();
+</script>
+</body>
+</html>

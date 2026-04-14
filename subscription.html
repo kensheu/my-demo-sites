@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>訂閱方案</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --primary-text: #1e40af;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --gold: #b45309;
+      --gold-light: #fefce8;
+      --gold-border: #fde68a;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      font-size: 18px;
+      min-height: 100vh;
+    }
+
+    /* ── 前台 Nav ── */
+    .frontend-nav {
+      position: sticky;
+      top: 48px;
+      z-index: 900;
+      background: #fff;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 56px;
+    }
+    .nav-logo { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .member-sim-wrap { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-500); }
+    .member-sim-select {
+      border: 1px solid var(--gray-300); border-radius: 6px;
+      padding: 4px 8px; font-size: 13px; color: var(--gray-700);
+      background: #fff; cursor: pointer;
+    }
+
+    /* ── 頁面容器 ── */
+    .page { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* ── Hero ── */
+    .sub-hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+      border-radius: 14px;
+      padding: 36px 32px;
+      color: #fff;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sub-hero::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 50%;
+    }
+    .sub-hero-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+    .sub-hero-sub { font-size: 14px; opacity: 0.85; }
+
+    /* ── 方案卡片 ── */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 700px) { .plans-grid { grid-template-columns: 1fr; } }
+
+    .plan-card {
+      background: #fff;
+      border: 2px solid var(--gray-200);
+      border-radius: 14px;
+      padding: 24px 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow .15s;
+    }
+    .plan-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.09); }
+    .plan-card.plan-basic { border-color: var(--primary-border); }
+    .plan-card.plan-premium { border-color: var(--gold-border); background: var(--gold-light); }
+    .plan-badge-recommended {
+      position: absolute; top: -1px; right: 18px;
+      background: var(--gold);
+      color: #fff; font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 0 0 8px 8px;
+    }
+    .plan-name { font-size: 14px; font-weight: 700; color: var(--gray-600); margin-bottom: 10px; }
+    .plan-price { font-size: 28px; font-weight: 800; color: var(--gray-900); margin-bottom: 2px; }
+    .plan-price-note { font-size: 12px; color: var(--gray-400); margin-bottom: 16px; }
+    .plan-features { list-style: none; margin-bottom: 20px; flex: 1; }
+    .plan-features li { font-size: 13px; color: var(--gray-600); padding: 5px 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 6px; }
+    .plan-features li::before { content: '✓'; color: var(--success); font-weight: 700; }
+    .plan-features li.feature-neg::before { content: '—'; color: var(--gray-300); }
+    .plan-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .plan-btn-current { background: var(--gray-100); color: var(--gray-500); cursor: default; }
+    .plan-btn-primary { background: var(--primary); color: #fff; }
+    .plan-btn-primary:hover { background: var(--primary-text); }
+    .plan-btn-gold { background: var(--gold); color: #fff; }
+    .plan-btn-gold:hover { background: #92400e; }
+
+    /* ── 訂閱標籤 ── */
+    .sub-chip {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 100px; white-space: nowrap;
+    }
+    .sub-chip-none    { background:#f3f4f6; color:#4b5563; border:1px solid #d1d5db; }
+    .sub-chip-basic   { background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; }
+    .sub-chip-premium { background:#fefce8; color:#92400e; border:1px solid #fde68a; }
+
+    /* ── 我的訂閱狀態 ── */
+    .my-sub-card {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .my-sub-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+      font-size: 15px; font-weight: 700; color: var(--gray-800);
+    }
+    .my-sub-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px 20px;
+      margin-bottom: 14px;
+    }
+    .my-sub-field-label { font-size: 11px; color: var(--gray-400); font-weight: 600; text-transform: uppercase; margin-bottom: 2px; }
+    .my-sub-field-value { font-size: 14px; color: var(--gray-800); font-weight: 500; }
+    .copy-btn {
+      background: var(--gray-100); border: 1px solid var(--gray-200);
+      border-radius: 5px; padding: 2px 8px; font-size: 12px;
+      cursor: pointer; color: var(--gray-600);
+    }
+    .copy-btn:hover { background: var(--gray-200); }
+    .coupon-list { margin-top: 10px; }
+    .coupon-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid var(--gray-100);
+      font-size: 13px;
+    }
+    .coupon-amount { font-weight: 700; color: var(--success); min-width: 36px; }
+    .coupon-code { color: var(--gray-600); font-family: monospace; }
+    .coupon-expiry { color: var(--gray-400); font-size: 12px; }
+    .coupon-used { font-size: 11px; color: var(--gray-400); background: var(--gray-100); padding: 1px 6px; border-radius: 4px; }
+
+    /* ── 推薦碼輸入 ── */
+    .referral-card {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .referral-title { font-size: 15px; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+    .referral-desc { font-size: 13px; color: var(--gray-500); margin-bottom: 14px; }
+    .referral-input-row { display: flex; gap: 8px; }
+    .referral-input {
+      flex: 1; border: 1px solid var(--gray-300); border-radius: 7px;
+      padding: 9px 12px; font-size: 14px; font-family: inherit;
+      color: var(--gray-800);
+    }
+    .referral-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
+    .btn-referral {
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 7px; padding: 9px 18px; font-size: 14px;
+      font-weight: 600; cursor: pointer;
+    }
+    .btn-referral:hover { background: var(--primary-text); }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center; z-index: 2000;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 14px;
+      width: 90%; max-width: 440px;
+      padding: 28px; box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 20px; }
+    .modal-price-box {
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;
+      text-align: center;
+    }
+    .modal-price { font-size: 28px; font-weight: 800; color: var(--gray-900); }
+    .modal-price-label { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
+    .modal-footer-row { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-cancel {
+      background: var(--gray-100); color: var(--gray-700); border: none;
+      border-radius: 7px; padding: 10px 20px; font-size: 14px; cursor: pointer;
+    }
+    .btn-confirm {
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 7px; padding: 10px 20px; font-size: 14px;
+      font-weight: 600; cursor: pointer;
+    }
+    .btn-confirm:hover { background: var(--primary-text); }
+    .btn-confirm.gold { background: var(--gold); }
+    .btn-confirm.gold:hover { background: #92400e; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1f2937; color: #fff; padding: 11px 18px;
+      border-radius: 8px; font-size: 13px; z-index: 3000;
+      display: none; box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 16px; font-weight: 700; color: var(--gray-900);
+      margin-bottom: 12px;
+    }
+  </style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<nav class="frontend-nav">
+  <div class="nav-logo">🍱 BY THE WAY</div>
+  <div class="nav-right">
+    <div class="member-sim-wrap">
+      <span>模擬會員：</span>
+      <select class="member-sim-select" id="memberSim" onchange="onMemberChange()">
+        <!-- 由 JS 填入 -->
+      </select>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <!-- Hero -->
+  <div class="sub-hero">
+    <div class="sub-hero-title">💎 訂閱方案</div>
+    <div class="sub-hero-sub">訂閱後享受餐點折扣優惠，每日可訂更多份餐，並獲得推薦獎勵機制</div>
+  </div>
+
+  <!-- 方案卡片 -->
+  <div class="section-title">選擇方案</div>
+  <div class="plans-grid" id="plansGrid"><!-- JS 渲染 --></div>
+
+  <!-- 我的訂閱狀態 -->
+  <div class="section-title">我的訂閱狀態</div>
+  <div class="my-sub-card" id="mySubCard"><!-- JS 渲染 --></div>
+
+  <!-- 推薦碼輸入 -->
+  <div class="section-title">推薦人機制</div>
+  <div class="referral-card">
+    <div class="referral-title">輸入推薦碼</div>
+    <div class="referral-desc">若您是透過朋友推薦加入，請輸入推薦人的推薦碼。雙方各完成至少一筆訂單後，即可各獲得一張 $10 折價券。<br>（每位會員限輸入一次，僅限尚未設定推薦人者使用）</div>
+    <div class="referral-input-row">
+      <input type="text" class="referral-input" id="referralInput" placeholder="例：REF-ACHEN" maxlength="20">
+      <button class="btn-referral" onclick="submitReferral()">確認送出</button>
+    </div>
+  </div>
+</div>
+
+<!-- 訂閱確認 Modal -->
+<div class="modal-overlay" id="subModal">
+  <div class="modal">
+    <div class="modal-title" id="subModalTitle">確認訂閱</div>
+    <div class="modal-sub" id="subModalSub"></div>
+    <div class="modal-price-box">
+      <div class="modal-price" id="subModalPrice"></div>
+      <div class="modal-price-label" id="subModalPriceLabel"></div>
+    </div>
+    <p style="font-size:13px;color:var(--gray-500);margin-bottom:20px">這是 Demo 模擬，點擊「確認訂閱」後將直接套用訂閱狀態。</p>
+    <div class="modal-footer-row">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-confirm" id="subModalConfirm" onclick="confirmSubscribe()">確認訂閱（Demo 模擬）</button>
+    </div>
+  </div>
+</div>
+
+<!-- 取消訂閱確認 Modal -->
+<div class="modal-overlay" id="cancelSubModal">
+  <div class="modal" style="padding:28px 28px 24px">
+    <div class="modal-title" style="color:#dc2626">取消訂閱</div>
+    <div class="modal-sub" style="margin-bottom:20px">確定要取消訂閱嗎？剩餘效期將不退款，推薦碼仍保留。</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="closeCancelModal()" style="background:var(--gray-100);color:var(--gray-700);border:none;border-radius:7px;padding:9px 18px;font-size:13px;cursor:pointer">返回</button>
+      <button onclick="confirmCancel()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer">確認取消</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var MEMBERS_KEY = 'permissions_members_v2';
+var SUB_PLANS_KEY = 'subscription_plans_v1';
+var FE_SIM_MEMBER_KEY = 'fe_sim_member';
+
+var PLAN_DEFS = [
+  { id: 'plan_none',    name: '一般方案', dailyOrderCap: 1, fee: 0,    feeLabel: '免費',    feeNote: '無月費',            chipClass: 'sub-chip-none',    btnClass: 'plan-btn-current', btnLabel: '目前方案' },
+  { id: 'plan_basic',   name: '月訂閱',   dailyOrderCap: 2, fee: 199,  feeLabel: '$199',    feeNote: '/ 月',              chipClass: 'sub-chip-basic',   btnClass: 'plan-btn-primary', btnLabel: '立即加入' },
+  { id: 'plan_premium', name: '年訂閱',   dailyOrderCap: 3, fee: 1799, feeLabel: '$1,799', feeNote: '/ 年（約 $150/月）', chipClass: 'sub-chip-premium', btnClass: 'plan-btn-gold',    btnLabel: '立即加入', recommended: true }
+];
+
+function loadSubSettings() {
+  try {
+    var s = sessionStorage.getItem(SUB_PLANS_KEY);
+    if (s) {
+      var d = JSON.parse(s);
+      // 同步費用與折抵金額
+      var discountAmt = d.discountAmount != null ? d.discountAmount : 10;
+      (d.plans || []).forEach(function(p) {
+        var def = PLAN_DEFS.find(function(x) { return x.id === p.id; });
+        if (def) {
+          if (p.fee != null) { def.fee = p.fee; def.feeLabel = p.fee === 0 ? '免費' : '$' + p.fee.toLocaleString(); }
+          if (p.dailyOrderCap != null) def.dailyOrderCap = p.dailyOrderCap;
+        }
+      });
+      return discountAmt;
+    }
+  } catch(e) {}
+  return 10;
+}
+
+var members = [];
+var currentMemberId = 'mem_1';
+var pendingPlanId = null;
+
+function loadMembers() {
+  try {
+    var s = sessionStorage.getItem(MEMBERS_KEY);
+    var raw = s ? JSON.parse(s) : null;
+    // 只取前 2 筆（無訂閱、有訂閱）作為模擬會員
+    if (raw && raw.length >= 2) {
+      members = raw.slice(0, 2);
+    } else {
+      members = defaultMembers();
+    }
+  } catch(e) { members = defaultMembers(); }
+}
+
+function saveMembers() {
+  // 回寫時需合併完整資料（前 2 筆已修改）
+  try {
+    var s = sessionStorage.getItem(MEMBERS_KEY);
+    var all = s ? JSON.parse(s) : null;
+    if (all && all.length >= 2) {
+      all[0] = members[0];
+      all[1] = members[1];
+      sessionStorage.setItem(MEMBERS_KEY, JSON.stringify(all));
+    } else {
+      sessionStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
+    }
+  } catch(e) {
+    sessionStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
+  }
+}
+
+function defaultMembers() {
+  return [
+    { id: 'mem_1', memberNo: 'M0001', name: '無訂閱', points: 120, orderCount: 3,
+      subscriptionPlan: 'plan_none', subscriptionStart: '', subscriptionEnd: '',
+      referralCode: '', referredBy: '', referralCount: 0,
+      coupons: [{ code: 'WELC-A1B2C', amount: 10, expiry: '2026-07-15', reason: '新會員贈券', used: false, source: 'gift' }] },
+    { id: 'mem_2', memberNo: 'M0002', name: '有訂閱', points: 350, orderCount: 12,
+      subscriptionPlan: 'plan_premium', subscriptionStart: '2026-01-15', subscriptionEnd: '2027-01-15',
+      referralCode: 'REF-LFLOW', referredBy: '', referralCount: 1,
+      coupons: [{ code: 'COMP-K8X2F', amount: 10, expiry: '2026-07-15', reason: '推薦獎勵', used: false, source: 'referral' }] }
+  ];
+}
+
+function getCurrentMember() {
+  return members.find(function(m) { return m.id === currentMemberId; }) || members[0];
+}
+
+function onMemberChange() {
+  currentMemberId = document.getElementById('memberSim').value;
+  sessionStorage.setItem(FE_SIM_MEMBER_KEY, currentMemberId);
+  renderAll();
+}
+
+function renderMemberSelect() {
+  var sel = document.getElementById('memberSim');
+  sel.innerHTML = members.map(function(m) {
+    return '<option value="' + m.id + '"' + (m.id === currentMemberId ? ' selected' : '') + '>' + escHtml(m.name) + '</option>';
+  }).join('');
+}
+
+function renderAll() {
+  var discountAmt = loadSubSettings();
+  renderPlansGrid(discountAmt);
+  renderMySubCard(discountAmt);
+  renderReferralSection();
+}
+
+function renderPlansGrid(discountAmt) {
+  var me = getCurrentMember();
+  var myPlan = me.subscriptionPlan || 'plan_none';
+  var isSubscribed = myPlan !== 'plan_none';
+  document.getElementById('plansGrid').innerHTML = PLAN_DEFS.map(function(p) {
+    var isCurrent = (myPlan === p.id);
+    var btnClass, btnLabel, isDisabled;
+
+    if (isCurrent) {
+      btnClass = 'plan-btn plan-btn-current';
+      btnLabel = '訂閱中 ✓';
+      isDisabled = true;
+    } else if (isSubscribed && p.id === 'plan_none') {
+      // 已訂閱時 plan_none 不顯示「目前方案」
+      btnClass = 'plan-btn plan-btn-current';
+      btnLabel = '—';
+      isDisabled = true;
+    } else if (isSubscribed) {
+      // 已訂閱時其他方案也不可點
+      btnClass = 'plan-btn plan-btn-current';
+      btnLabel = p.btnLabel;
+      isDisabled = true;
+    } else {
+      // 未訂閱
+      btnClass = 'plan-btn ' + p.btnClass;
+      btnLabel = p.btnLabel;
+      isDisabled = (p.id === 'plan_none');
+    }
+
+    var features = [];
+    features.push('每日可訂 ' + p.dailyOrderCap + ' 筆');
+    if (p.id !== 'plan_none') features.push('每道餐點折抵 $' + discountAmt + ' 元');
+    else features.push({ text: '無折扣優惠', neg: true });
+    if (p.id !== 'plan_none') features.push('享有推薦碼回饋');
+    else features.push({ text: '無推薦碼回饋', neg: true });
+
+    return '<div class="plan-card' + (p.id === 'plan_basic' ? ' plan-basic' : p.id === 'plan_premium' ? ' plan-premium' : '') + '">' +
+      (p.recommended ? '<div class="plan-badge-recommended">★ 推薦</div>' : '') +
+      '<div class="plan-name"><span class="sub-chip ' + p.chipClass + '">' + escHtml(p.name) + '</span></div>' +
+      '<div class="plan-price">' + escHtml(p.feeLabel) + '</div>' +
+      '<div class="plan-price-note">' + escHtml(p.feeNote) + '</div>' +
+      '<ul class="plan-features">' +
+        features.map(function(f) {
+          if (typeof f === 'string') return '<li>' + escHtml(f) + '</li>';
+          return '<li class="feature-neg">' + escHtml(f.text) + '</li>';
+        }).join('') +
+      '</ul>' +
+      '<button class="' + btnClass + '" ' + (isDisabled ? 'disabled' : 'onclick="openSubModal(\'' + p.id + '\')"') + '>' + btnLabel + '</button>' +
+    '</div>';
+  }).join('');
+}
+
+function renderMySubCard(discountAmt) {
+  var me = getCurrentMember();
+  var plan = me.subscriptionPlan || 'plan_none';
+  var planDef = PLAN_DEFS.find(function(p) { return p.id === plan; }) || PLAN_DEFS[0];
+  var html = '<div class="my-sub-header"><span class="sub-chip ' + planDef.chipClass + '">' + escHtml(planDef.name) + '</span> 訂閱狀態</div>';
+
+  if (plan === 'plan_none') {
+    html += '<p style="color:var(--gray-500);font-size:14px">您目前尚未訂閱任何方案，餐點以原價計算，每日可訂 1 筆。</p>' +
+      '<p style="color:var(--gray-500);font-size:13px;margin-top:8px">立即訂閱可享每道餐點折抵 $' + discountAmt + ' 元，並取得專屬推薦碼！</p>';
+  } else {
+    html += '<div class="my-sub-grid">' +
+      '<div><div class="my-sub-field-label">方案</div><div class="my-sub-field-value"><span class="sub-chip ' + planDef.chipClass + '">' + escHtml(planDef.name) + '</span></div></div>' +
+      '<div><div class="my-sub-field-label">折扣優惠</div><div class="my-sub-field-value">每道餐點折抵 $' + discountAmt + ' 元</div></div>' +
+      '<div><div class="my-sub-field-label">訂閱開始</div><div class="my-sub-field-value">' + escHtml(me.subscriptionStart || '—') + '</div></div>' +
+      '<div><div class="my-sub-field-label">訂閱到期</div><div class="my-sub-field-value">' + escHtml(me.subscriptionEnd || '—') + '</div></div>' +
+      '<div><div class="my-sub-field-label">每日可訂</div><div class="my-sub-field-value">' + planDef.dailyOrderCap + ' 筆</div></div>' +
+      '<div><div class="my-sub-field-label">已推薦</div><div class="my-sub-field-value">' + (me.referralCount || 0) + ' 人</div></div>' +
+      '</div>';
+    if (me.referralCode) {
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--gray-100);margin-top:4px">' +
+        '<span style="font-size:13px;color:var(--gray-600)">我的推薦碼：</span>' +
+        '<strong style="font-size:14px;font-family:monospace;color:var(--primary)">' + escHtml(me.referralCode) + '</strong>' +
+        '<button class="copy-btn" onclick="copyRefCode(\'' + escHtml(me.referralCode) + '\')">複製</button>' +
+        '</div>';
+    }
+    html += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-100)">' +
+      '<button onclick="openCancelModal()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer">取消訂閱</button>' +
+      '<span style="font-size:12px;color:var(--gray-400);margin-left:10px">取消後剩餘效期不退款</span>' +
+      '</div>';
+  }
+  document.getElementById('mySubCard').innerHTML = html;
+}
+
+function renderReferralSection() {
+  var me = getCurrentMember();
+  var input = document.getElementById('referralInput');
+  if (me.referredBy) {
+    input.value = me.referredBy;
+    input.disabled = true;
+    input.style.background = 'var(--gray-50)';
+    input.style.color = 'var(--gray-400)';
+    input.nextElementSibling.disabled = true;
+    input.nextElementSibling.style.opacity = '0.5';
+    input.nextElementSibling.style.cursor = 'default';
+  } else {
+    input.value = '';
+    input.disabled = false;
+    input.style.background = '';
+    input.style.color = '';
+    input.nextElementSibling.disabled = false;
+    input.nextElementSibling.style.opacity = '';
+    input.nextElementSibling.style.cursor = '';
+  }
+}
+
+function openSubModal(planId) {
+  var me = getCurrentMember();
+  var planDef = PLAN_DEFS.find(function(p) { return p.id === planId; });
+  if (!planDef) return;
+  pendingPlanId = planId;
+  document.getElementById('subModalTitle').textContent = '確認訂閱 — ' + planDef.name;
+  document.getElementById('subModalSub').textContent = '您即將為「' + me.name + '」訂閱此方案。';
+  document.getElementById('subModalPrice').textContent = planDef.feeLabel;
+  document.getElementById('subModalPriceLabel').textContent = planDef.feeNote;
+  var confirmBtn = document.getElementById('subModalConfirm');
+  confirmBtn.className = 'btn-confirm' + (planDef.id === 'plan_premium' ? ' gold' : '');
+  document.getElementById('subModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('subModal').classList.remove('open');
+  pendingPlanId = null;
+}
+
+function genReferralCode(name) {
+  var c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var suffix = Array.from({length: 4}, function() { return c[Math.floor(Math.random() * c.length)]; }).join('');
+  return 'REF-' + suffix;
+}
+
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function addMonths(dateStr, months) {
+  var d = new Date(dateStr);
+  d.setMonth(d.getMonth() + months);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function confirmSubscribe() {
+  var me = getCurrentMember();
+  var planDef = PLAN_DEFS.find(function(p) { return p.id === pendingPlanId; });
+  if (!planDef) return;
+  var start = todayStr();
+  var end = planDef.id === 'plan_premium' ? addMonths(start, 12) : addMonths(start, 1);
+  me.subscriptionPlan = planDef.id;
+  me.subscriptionStart = start;
+  me.subscriptionEnd = end;
+  if (!me.referralCode) {
+    me.referralCode = genReferralCode(me.name);
+  }
+  saveMembers();
+  closeModal();
+  renderAll();
+  showToast('✅ 已成功訂閱「' + planDef.name + '」！');
+}
+
+function submitReferral() {
+  var code = (document.getElementById('referralInput').value || '').trim().toUpperCase();
+  if (!code) { showToast('⚠️ 請輸入推薦碼'); return; }
+  var me = getCurrentMember();
+  if (me.referredBy) { showToast('⚠️ 您已設定過推薦人'); return; }
+  if (me.referralCode && code === me.referralCode) { showToast('⚠️ 不能輸入自己的推薦碼'); return; }
+  // 防洗帳號：被推薦人需有至少一筆訂單
+  if ((me.orderCount || 0) < 1) {
+    showToast('⚠️ 您需要先完成至少一筆訂單，才能使用推薦碼');
+    return;
+  }
+  // 找推薦人
+  var referrer = members.find(function(m) { return m.referralCode === code; });
+  if (!referrer) { showToast('⚠️ 找不到此推薦碼，請再確認'); return; }
+  // 發放折價券給雙方
+  var expiry = addMonths(todayStr(), 3);
+  var couponMe = genCoupon();
+  var couponRef = genCoupon();
+  me.referredBy = code;
+  if (!me.coupons) me.coupons = [];
+  me.coupons.push({ code: couponMe, amount: 10, expiry: expiry, reason: '推薦獎勵（被推薦）', used: false, source: 'referral' });
+  if (!referrer.coupons) referrer.coupons = [];
+  referrer.coupons.push({ code: couponRef, amount: 10, expiry: expiry, reason: '推薦獎勵（推薦人）', used: false, source: 'referral' });
+  referrer.referralCount = (referrer.referralCount || 0) + 1;
+  saveMembers();
+  renderAll();
+  showToast('✅ 推薦碼驗證成功！您與「' + referrer.name + '」各獲得 $10 折價券');
+}
+
+function genCoupon() {
+  var c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return 'COMP-' + Array.from({length: 5}, function() { return c[Math.floor(Math.random() * c.length)]; }).join('');
+}
+
+function openCancelModal() {
+  document.getElementById('cancelSubModal').classList.add('open');
+}
+
+function closeCancelModal() {
+  document.getElementById('cancelSubModal').classList.remove('open');
+}
+
+function confirmCancel() {
+  var me = getCurrentMember();
+  me.subscriptionPlan = 'plan_none';
+  me.subscriptionStart = '';
+  me.subscriptionEnd = '';
+  saveMembers();
+  closeCancelModal();
+  renderAll();
+  showToast('已取消訂閱');
+}
+
+function copyRefCode(code) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(function() { showToast('✅ 推薦碼已複製到剪貼簿'); });
+  } else {
+    showToast('推薦碼：' + code);
+  }
+}
+
+var _toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { t.style.display = 'none'; }, 3000);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('subModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.getElementById('cancelSubModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCancelModal();
+});
+
+// 初始化
+var _savedMember = sessionStorage.getItem(FE_SIM_MEMBER_KEY);
+sessionStorage.clear();
+if (_savedMember) sessionStorage.setItem(FE_SIM_MEMBER_KEY, _savedMember);
+currentMemberId = _savedMember || 'mem_1';
+loadMembers();
+renderMemberSelect();
+renderAll();
+</script>
+</body>
+</html>

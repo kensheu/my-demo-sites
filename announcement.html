@@ -1176,7 +1176,7 @@
 <div class="view" id="view-frontend">
   <div class="frontend-layout">
     <nav class="frontend-nav">
-      <div class="nav-logo">🍱 BTW_企業訂餐平台</div>
+      <div class="nav-logo">🍱 BY THE WAY</div>
       <div class="nav-right">
         <!-- 據點切換 -->
         <div class="loc-switch-wrap" id="locSwitchWrap">
@@ -1205,10 +1205,25 @@
             <div class="notif-list" id="notif-pickup-list"></div>
           </div>
         </div>
-        <div style="width:34px;height:34px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">王</div>
+        <!-- 模擬會員切換 -->
+        <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-500)">
+          <span>模擬會員：</span>
+          <select id="feMemberSim" onchange="onFeMemberChange()" style="border:1px solid var(--gray-300);border-radius:6px;padding:3px 7px;font-size:13px;color:var(--gray-700);background:#fff">
+            <!-- JS 填入 -->
+          </select>
+        </div>
+        <div id="feSubBadge"></div>
       </div>
     </nav>
     <div class="frontend-content">
+      <!-- 訂閱到期提醒 banner -->
+      <div id="feExpiryWarn" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 18px;margin-bottom:14px;display:none;align-items:center;gap:10px">
+        <span style="font-size:14px">⚠️</span>
+        <span id="feExpiryText" style="flex:1;font-size:13px;color:#92400e"></span>
+        <a href="subscription.html" style="font-size:13px;font-weight:600;color:#b45309;text-decoration:none;white-space:nowrap">立即續訂 →</a>
+      </div>
+      <!-- 訂閱狀態卡片 -->
+      <div id="feSubCard" style="margin-bottom:16px"><!-- JS 渲染 --></div>
       <!-- 公告區塊 -->
       <div class="announce-banner">
         <div class="banner-header">
@@ -2305,11 +2320,113 @@
     }
   });
 
+  // ── 訂閱狀態功能 ──────────────────────────────
+  var FE_MEMBERS_KEY = 'permissions_members_v2';
+  var FE_SIM_MEMBER_KEY = 'fe_sim_member';
+  var feCurrentMemberId = sessionStorage.getItem('fe_sim_member') || 'mem_1';
+
+  function feDefaultMembers() {
+    return [
+      { id: 'mem_1', name: '無訂閱', subscriptionPlan: 'plan_none',    subscriptionEnd: '',           referralCode: '' },
+      { id: 'mem_2', name: '有訂閱', subscriptionPlan: 'plan_premium', subscriptionEnd: '2027-01-15', referralCode: 'REF-LFLOW' }
+    ];
+  }
+
+  function feLoadMembers() {
+    try {
+      var s = sessionStorage.getItem(FE_MEMBERS_KEY);
+      var raw = s ? JSON.parse(s) : null;
+      return (raw && raw.length >= 2) ? raw.slice(0, 2) : feDefaultMembers();
+    } catch(e) { return feDefaultMembers(); }
+  }
+
+  var fePlanInfo = {
+    plan_none:    { name: '一般方案',  chipClass: 'sub-chip-none' },
+    plan_basic:   { name: '月訂閱',    chipClass: 'sub-chip-basic' },
+    plan_premium: { name: '年訂閱',    chipClass: 'sub-chip-premium' }
+  };
+
+  function initFeMemberSim() {
+    var feMembers = feLoadMembers();
+    var sel = document.getElementById('feMemberSim');
+    if (!sel) return;
+    sel.innerHTML = feMembers.map(function(m) {
+      return '<option value="' + m.id + '"' + (m.id === feCurrentMemberId ? ' selected' : '') + '>' + m.name + '</option>';
+    }).join('');
+    renderFeSubStatus();
+  }
+
+  function onFeMemberChange() {
+    var sel = document.getElementById('feMemberSim');
+    feCurrentMemberId = sel ? sel.value : 'mem_1';
+    sessionStorage.setItem(FE_SIM_MEMBER_KEY, feCurrentMemberId);
+    renderFeSubStatus();
+  }
+
+  function renderFeSubStatus() {
+    var feMembers = feLoadMembers();
+    var me = feMembers.find(function(m) { return m.id === feCurrentMemberId; }) || feMembers[0];
+    var plan = me.subscriptionPlan || 'plan_none';
+    var info = fePlanInfo[plan] || fePlanInfo.plan_none;
+    var isSubscribed = plan !== 'plan_none';
+
+    // 訂閱狀態 badge
+    var badgeEl = document.getElementById('feSubBadge');
+    if (badgeEl) {
+      badgeEl.innerHTML = '<span style="display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;white-space:nowrap;' +
+        (plan === 'plan_none' ? 'background:#f3f4f6;color:#4b5563;border:1px solid #d1d5db' :
+         plan === 'plan_basic' ? 'background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe' :
+         'background:#fefce8;color:#92400e;border:1px solid #fde68a') + '">' + info.name + '</span>';
+    }
+
+    // 到期提醒 banner（距到期 <= 7 天）
+    var expiryWarn = document.getElementById('feExpiryWarn');
+    var expiryText = document.getElementById('feExpiryText');
+    if (expiryWarn && isSubscribed && me.subscriptionEnd) {
+      var daysLeft = Math.ceil((new Date(me.subscriptionEnd) - new Date()) / 86400000);
+      if (daysLeft >= 0 && daysLeft <= 7) {
+        expiryText.textContent = '您的「' + info.name + '」將於 ' + daysLeft + ' 天後（' + me.subscriptionEnd + '）到期，訂閱優惠即將失效。';
+        expiryWarn.style.display = 'flex';
+      } else {
+        expiryWarn.style.display = 'none';
+      }
+    } else if (expiryWarn) {
+      expiryWarn.style.display = 'none';
+    }
+
+    // 訂閱狀態卡片
+    var subCard = document.getElementById('feSubCard');
+    if (!subCard) return;
+    if (isSubscribed) {
+      subCard.innerHTML = '<div style="background:#fff;border:1px solid ' +
+        (plan === 'plan_premium' ? '#fde68a' : '#bfdbfe') +
+        ';border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
+        '<span style="font-size:20px">' + (plan === 'plan_premium' ? '★' : '✓') + '</span>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:14px;font-weight:700;color:#1f2937;margin-bottom:3px">您已訂閱「' + info.name + '」</div>' +
+          '<div style="font-size:12px;color:#6b7280">有效至 ' + (me.subscriptionEnd || '—') + (me.referralCode ? '　推薦碼：<strong>' + me.referralCode + '</strong>' : '') + '</div>' +
+        '</div>' +
+        '<a href="subscription.html" style="font-size:13px;color:#2563eb;text-decoration:none;white-space:nowrap">管理訂閱 →</a>' +
+      '</div>';
+    } else {
+      subCard.innerHTML = '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
+        '<span style="font-size:20px;color:#9ca3af">○</span>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:3px">目前為一般方案</div>' +
+          '<div style="font-size:12px;color:#6b7280">訂閱後享受最低 8 折優惠，每日最多 3 筆訂餐</div>' +
+        '</div>' +
+        '<a href="subscription.html" style="font-size:13px;font-weight:600;color:#2563eb;text-decoration:none;white-space:nowrap">立即查看訂閱方案 →</a>' +
+      '</div>';
+    }
+  }
+  // ── 訂閱狀態功能 END ──────────────────────────
+
   // 初始化：預設顯示公告通知頁，並自動彈出未讀公告
   populateCatSelects();
   populateCatTabs();
   switchAdminPage('notify');
   initLocSwitch();
+  initFeMemberSim();
 
   // URL 參數初始化（供全域導覽使用）
   (function () {

@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>折價券 & 點數管理</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --primary-text: #1e40af;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --teal: rgb(0,190,214);
+      --teal-bg: #e0f8fb;
+      --teal-border: #a5eaf0;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      font-size: 18px;
+    }
+    .page { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+    .page-title { font-size: 20px; font-weight: 700; color: var(--gray-900); }
+    .page-sub { font-size: 13px; color: var(--gray-900); margin-top: 3px; margin-bottom: 16px; }
+
+    /* ── 主頁籤 ── */
+    .main-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--gray-200); margin-bottom: 20px; }
+    .main-tab {
+      background: none; border: none; padding: 10px 22px;
+      font-size: 14px; font-weight: 600; color: var(--gray-900);
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+      transition: color .15s;
+    }
+    .main-tab:hover { color: var(--gray-900); }
+    .main-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── KPI 統計 ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card {
+      background: #fff; border: 1px solid var(--gray-200); border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .stat-num { font-size: 26px; font-weight: 800; color: var(--gray-900); }
+    .stat-label { font-size: 12px; color: var(--gray-900); margin-top: 2px; }
+    @media(max-width:700px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+
+    /* ── 工具列 ── */
+    .toolbar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .tbl-search {
+      flex: 1; min-width: 200px; border: 1px solid var(--gray-300); border-radius: 7px;
+      padding: 8px 12px; font-size: 13px; color: var(--gray-800);
+    }
+    .filter-select {
+      border: 1px solid var(--gray-300); border-radius: 7px; padding: 8px 10px;
+      font-size: 13px; color: var(--gray-700); background: #fff;
+    }
+    .btn-primary {
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 7px; padding: 8px 16px; font-size: 13px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+    }
+    .btn-primary:hover { background: var(--primary-text); }
+
+    /* ── 表格 ── */
+    .tbl-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: var(--gray-50); font-size: 12px; font-weight: 600;
+      color: var(--gray-900); text-align: left; padding: 11px 14px;
+      border-bottom: 1px solid var(--gray-200); white-space: nowrap;
+    }
+    td { padding: 11px 14px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--gray-50); }
+    .tbl-empty { text-align: center; padding: 40px; color: var(--gray-900); }
+    .tbl-mono { font-family: monospace; font-size: 13px; }
+    .tbl-muted { color: var(--gray-900); }
+
+    /* ── 狀態 chip ── */
+    .status-chip {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 100px;
+    }
+    .status-unused  { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-border); }
+    .status-used    { background: var(--gray-100); color: var(--gray-400); border: 1px solid var(--gray-200); }
+    .status-expired { background: var(--danger-light); color: var(--danger); border: 1px solid #fecaca; }
+
+    /* ── 來源 chip ── */
+    .source-chip {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 100px;
+    }
+    .src-compensation { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .src-promo        { background: var(--primary-light); color: var(--primary-text); border: 1px solid var(--primary-border); }
+    .src-referral     { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-border); }
+
+    /* ── 操作按鈕 ── */
+    .btn-void {
+      background: none; border: 1px solid var(--danger); color: var(--danger);
+      border-radius: 5px; padding: 3px 10px; font-size: 12px; cursor: pointer;
+    }
+    .btn-void:hover { background: var(--danger-light); }
+
+    /* ── 點數管理 Section 卡片 ── */
+    .section-card {
+      background: #fff; border: 1px solid var(--gray-200);
+      border-radius: 10px; padding: 22px 24px; margin-bottom: 18px;
+    }
+    .section-title {
+      font-size: 15px; font-weight: 700; color: var(--gray-900);
+      margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--gray-200);
+    }
+    .rule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px; }
+    @media(max-width:600px) { .rule-grid { grid-template-columns: 1fr; } }
+    .rule-box {
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      border-radius: 8px; padding: 16px;
+    }
+    .rule-label { font-size: 12px; color: var(--gray-900); font-weight: 600; margin-bottom: 10px; }
+    .rule-inline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 14px; color: var(--gray-900); }
+    .rule-input {
+      width: 64px; border: 1px solid var(--gray-300); border-radius: 6px;
+      padding: 5px 8px; font-size: 14px; font-family: inherit;
+      color: var(--gray-800); text-align: center;
+    }
+    .rule-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
+    .points-toolbar { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 12px; }
+
+    /* ── 促銷 chip ── */
+    .chip {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 100px;
+    }
+    .chip-active    { background: var(--success-bg); color: var(--success); border: 1px solid #bbf7d0; }
+    .chip-inactive  { background: var(--gray-100); color: var(--gray-400); border: 1px solid var(--gray-200); }
+    .chip-multiplier { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .chip-direct    { background: var(--primary-light); color: var(--primary-text); border: 1px solid var(--primary-border); }
+
+    /* 開關 */
+    .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: var(--gray-300); border-radius: 22px; transition: .2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      height: 16px; width: 16px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%; transition: .2s;
+    }
+    input:checked + .toggle-slider { background: var(--primary); }
+    input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+    .btn-sm {
+      background: none; border: 1px solid var(--gray-300); color: var(--gray-900);
+      border-radius: 5px; padding: 3px 10px; font-size: 12px; cursor: pointer;
+    }
+    .btn-sm:hover { background: var(--gray-50); }
+    .btn-sm-danger { border-color: var(--danger); color: var(--danger); }
+    .btn-sm-danger:hover { background: var(--danger-light); }
+
+    .pts-search {
+      border: 1px solid var(--gray-300); border-radius: 7px;
+      padding: 7px 12px; font-size: 13px; color: var(--gray-800);
+      width: 240px;
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      display: none; align-items: center; justify-content: center; z-index: 2000;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 12px; width: 90%; max-width: 480px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.18); overflow: hidden;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid var(--gray-200);
+    }
+    .modal-header h2 { font-size: 16px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gray-900); }
+    .modal-body { padding: 20px 24px; }
+    .modal-footer { padding: 14px 24px; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 10px; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 13px; font-weight: 600; color: var(--gray-900); margin-bottom: 5px; display: block; }
+    .form-control {
+      width: 100%; border: 1px solid var(--gray-300); border-radius: 6px;
+      padding: 8px 10px; font-size: 13px; color: var(--gray-800); font-family: inherit;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
+    .form-control.error { border-color: var(--danger); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-cancel-modal {
+      background: var(--gray-100); color: var(--gray-700); border: none;
+      border-radius: 6px; padding: 9px 18px; font-size: 13px; cursor: pointer;
+    }
+    .btn-confirm-modal {
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 6px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-confirm-modal:hover { background: var(--primary-text); }
+    .type-options { display: flex; gap: 12px; }
+    .type-option { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+    .extra-field { margin-top: 10px; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1f2937; color: #fff; padding: 11px 18px;
+      border-radius: 8px; font-size: 13px; z-index: 3000;
+      display: none; box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+  </style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<div class="page">
+  <div class="page-title">點數 & 折價券管理</div>
+  <div class="page-sub">設定點數累積規則與節日促銷、管理折價券發放與使用</div>
+
+  <!-- 主頁籤 -->
+  <div class="main-tabs">
+    <button class="main-tab active" onclick="switchMainTab('points')">點數管理</button>
+    <button class="main-tab" onclick="switchMainTab('coupon')">折價券管理</button>
+  </div>
+
+  <!-- ── 折價券管理 Tab ── -->
+  <div class="tab-panel" id="tab-coupon">
+    <!-- KPI 統計 -->
+    <div class="stats-grid" id="statsGrid"><!-- JS 渲染 --></div>
+
+    <!-- 工具列 -->
+    <div class="toolbar">
+      <input type="text" class="tbl-search" id="searchInput" placeholder="搜尋折價券碼、會員名稱…" oninput="renderTable()">
+      <select class="filter-select" id="filterSource" onchange="renderTable()">
+        <option value="">所有來源</option>
+        <option value="compensation">補償</option>
+        <option value="promo">促銷</option>
+        <option value="referral">推薦</option>
+      </select>
+      <select class="filter-select" id="filterStatus" onchange="renderTable()">
+        <option value="">所有狀態</option>
+        <option value="unused">未使用</option>
+        <option value="used">已使用</option>
+        <option value="expired">已過期</option>
+      </select>
+      <button class="btn-primary" onclick="openAddModal()">＋ 新增折價券</button>
+    </div>
+
+    <!-- 表格 -->
+    <div class="tbl-card">
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>折價券碼</th>
+              <th>金額</th>
+              <th>持有會員</th>
+              <th>來源</th>
+              <th>備註</th>
+              <th>有效期限</th>
+              <th>發放日期</th>
+              <th>狀態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="couponTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 點數管理 Tab ── -->
+  <div class="tab-panel active" id="tab-points">
+    <!-- 區塊一：點數規則設定 -->
+    <div class="section-card">
+      <div class="section-title">點數規則設定</div>
+      <div class="rule-grid">
+        <div class="rule-box">
+          <div class="rule-label">累積規則</div>
+          <div class="rule-inline">
+            每消費
+            <input type="number" class="rule-input" id="earnPerAmount" min="1" value="10">
+            元 得
+            <input type="number" class="rule-input" id="earnPerUnit" min="1" value="1">
+            點
+          </div>
+        </div>
+        <div class="rule-box">
+          <div class="rule-label">兌換規則</div>
+          <div class="rule-inline">
+            每
+            <input type="number" class="rule-input" id="redeemPoints" min="1" value="100">
+            點 換
+            $<input type="number" class="rule-input" id="redeemAmount" min="1" value="10">
+            折價券
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveRules()">儲存規則</button>
+    </div>
+
+    <!-- 區塊二：節日促銷設定 -->
+    <div class="section-card">
+      <div class="section-title">節日促銷設定</div>
+      <div class="points-toolbar">
+        <button class="btn-primary" onclick="openPromoModal()">＋ 新增促銷</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>促銷名稱</th><th>類型</th><th>起始日</th><th>結束日</th><th>內容</th><th>狀態</th><th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="promoTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- 區塊三：會員點數查詢 -->
+    <div class="section-card">
+      <div class="section-title">會員點數查詢</div>
+      <div style="margin-bottom:12px">
+        <input type="text" class="pts-search" id="memberSearch" placeholder="搜尋姓名或會員編號…" oninput="renderMembersTable()">
+      </div>
+      <table>
+        <thead>
+          <tr><th>會員編號</th><th>姓名</th><th>點數</th><th>訂閱方案</th></tr>
+        </thead>
+        <tbody id="memberTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 新增折價券 Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>新增折價券</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">指定會員 <span style="color:#dc2626">*</span></label>
+          <select class="form-control" id="newCpnMember">
+            <option value="">— 選擇會員 —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">折抵金額（元）<span style="color:#dc2626">*</span></label>
+          <input type="number" class="form-control" id="newCpnAmount" min="1" max="9999" placeholder="例：50">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">有效期限 <span style="color:#dc2626">*</span></label>
+          <input type="date" class="form-control" id="newCpnExpiry">
+        </div>
+        <div class="form-group">
+          <label class="form-label">來源</label>
+          <select class="form-control" id="newCpnSource">
+            <option value="promo">促銷</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">備註說明</label>
+        <input type="text" class="form-control" id="newCpnReason" placeholder="例：週年慶促銷活動">
+      </div>
+      <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;padding:10px 14px;font-size:12px;color:var(--gray-500)">
+        折價券碼將由系統自動產生（格式：COMP-XXXXX）。補償類折價券請從「客訴管理」頁面發放；推薦折價券由系統於推薦成立時自動發放。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel-modal" onclick="closeModal()">取消</button>
+      <button class="btn-confirm-modal" onclick="confirmAddCoupon()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新增促銷 Modal -->
+<div class="modal-overlay" id="promoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>新增節日促銷</h2>
+      <button class="modal-close" onclick="closePromoModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">促銷名稱 <span style="color:#dc2626">*</span></label>
+        <input type="text" class="form-control" id="promoName" placeholder="例：中秋節點數雙倍">
+      </div>
+      <div class="form-group">
+        <label class="form-label">促銷類型</label>
+        <div class="type-options">
+          <label class="type-option">
+            <input type="radio" name="promoType" value="multiplier" checked onchange="togglePromoTypeFields()">
+            點數倍數
+          </label>
+          <label class="type-option">
+            <input type="radio" name="promoType" value="direct_coupon" onchange="togglePromoTypeFields()">
+            直接發折價券
+          </label>
+        </div>
+        <div class="extra-field" id="fieldMultiplier">
+          <label class="form-label" style="margin-top:8px">倍數</label>
+          <input type="number" class="form-control" id="promoMultiplier" min="2" max="10" value="2">
+        </div>
+        <div class="extra-field" id="fieldCoupon" style="display:none">
+          <label class="form-label" style="margin-top:8px">折價券金額（元）</label>
+          <input type="number" class="form-control" id="promoCouponAmount" min="1" value="30">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">起始日 <span style="color:#dc2626">*</span></label>
+          <input type="date" class="form-control" id="promoStart">
+        </div>
+        <div class="form-group">
+          <label class="form-label">結束日 <span style="color:#dc2626">*</span></label>
+          <input type="date" class="form-control" id="promoEnd">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel-modal" onclick="closePromoModal()">取消</button>
+      <button class="btn-confirm-modal" onclick="confirmAddPromo()">新增</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   頁籤切換
+══════════════════════════════════════════════ */
+function switchMainTab(tab) {
+  document.querySelectorAll('.main-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  var idx = tab === 'points' ? 0 : 1;
+  document.querySelectorAll('.main-tab')[idx].classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'points') initPoints();
+}
+
+/* ══════════════════════════════════════════════
+   折價券管理
+══════════════════════════════════════════════ */
+var COUPON_KEY  = 'coupon_settings_v1';
+var MEMBERS_KEY = 'permissions_members_v2';
+var POINTS_KEY  = 'points_settings_v1';
+
+var coupons = [];
+var members = [];
+
+function defaultCoupons() {
+  return [
+    { id: 'cpn_001', code: 'COMP-K8X2F', amount: 50, memberId: 'mem_1', memberName: '陳大文', source: 'compensation', reason: '餐點品質問題補償', expiry: '2026-06-30', issuedAt: '2026-04-13', used: false },
+    { id: 'cpn_002', code: 'COMP-J7N3P', amount: 10, memberId: 'mem_2', memberName: '林小花', source: 'referral', reason: '推薦獎勵（被推薦）', expiry: '2026-07-15', issuedAt: '2026-04-13', used: false },
+    { id: 'cpn_003', code: 'COMP-M2QXA', amount: 10, memberId: 'mem_1', memberName: '陳大文', source: 'referral', reason: '推薦獎勵（推薦人）', expiry: '2026-07-15', issuedAt: '2026-04-13', used: false },
+    { id: 'cpn_004', code: 'COMP-PROMO', amount: 30, memberId: 'mem_3', memberName: '黃阿明', source: 'promo', reason: '清明節促銷折價券', expiry: '2026-04-20', issuedAt: '2026-04-04', used: true },
+    { id: 'cpn_005', code: 'COMP-DEMO1', amount: 100, memberId: 'mem_4', memberName: '吳美麗', source: 'compensation', reason: '外送延誤補償', expiry: '2026-03-31', issuedAt: '2026-03-15', used: false }
+  ];
+}
+
+function defaultMembersSimple() {
+  return [
+    { id: 'mem_1', name: '陳大文' },
+    { id: 'mem_2', name: '林小花' },
+    { id: 'mem_3', name: '黃阿明' },
+    { id: 'mem_4', name: '吳美麗' },
+    { id: 'mem_5', name: '張建國' }
+  ];
+}
+
+function load() {
+  try {
+    var c = sessionStorage.getItem(COUPON_KEY);
+    coupons = c ? JSON.parse(c) : defaultCoupons();
+  } catch(e) { coupons = defaultCoupons(); }
+  try {
+    var m = sessionStorage.getItem(MEMBERS_KEY);
+    var raw = m ? JSON.parse(m) : null;
+    members = raw ? raw.map(function(x) { return { id: x.id, name: x.name }; }) : defaultMembersSimple();
+  } catch(e) { members = defaultMembersSimple(); }
+}
+
+function save() {
+  sessionStorage.setItem(COUPON_KEY, JSON.stringify(coupons));
+}
+
+function getCouponStatus(c) {
+  if (c.used) return 'used';
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  if (c.expiry && new Date(c.expiry) < today) return 'expired';
+  return 'unused';
+}
+
+function renderStats() {
+  var total = coupons.length;
+  var unused = 0, used = 0, expired = 0, totalAmt = 0;
+  coupons.forEach(function(c) {
+    var s = getCouponStatus(c);
+    if (s === 'unused') { unused++; totalAmt += c.amount; }
+    else if (s === 'used') used++;
+    else expired++;
+  });
+  document.getElementById('statsGrid').innerHTML =
+    '<div class="stat-card"><div class="stat-num">' + total + '</div><div class="stat-label">已發放總張數</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--teal)">' + unused + '</div><div class="stat-label">待使用</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--gray-400)">' + used + '</div><div class="stat-label">已使用</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--primary)">$' + totalAmt + '</div><div class="stat-label">待折抵總金額</div></div>';
+}
+
+var SOURCE_MAP = { compensation: ['src-compensation','補償'], promo: ['src-promo','促銷'], referral: ['src-referral','推薦'] };
+var STATUS_MAP = { unused: ['status-unused','未使用'], used: ['status-used','已使用'], expired: ['status-expired','已過期'] };
+
+function renderTable() {
+  var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  var srcFilter = document.getElementById('filterSource').value;
+  var statusFilter = document.getElementById('filterStatus').value;
+
+  var filtered = coupons.filter(function(c) {
+    if (q && (c.code + ' ' + (c.memberName || '') + ' ' + (c.reason || '')).toLowerCase().indexOf(q) === -1) return false;
+    if (srcFilter && c.source !== srcFilter) return false;
+    if (statusFilter && getCouponStatus(c) !== statusFilter) return false;
+    return true;
+  });
+
+  var tbody = document.getElementById('couponTbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="tbl-empty">找不到符合的折價券</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(function(c) {
+    var status = getCouponStatus(c);
+    var srcInfo = SOURCE_MAP[c.source] || ['','—'];
+    var stInfo = STATUS_MAP[status] || ['','—'];
+    var isExpired = status === 'expired';
+    var voidBtn = (status === 'unused' && !isExpired)
+      ? '<button class="btn-void" onclick="voidCoupon(\'' + c.id + '\')">作廢</button>'
+      : '<span class="tbl-muted">—</span>';
+    return '<tr>' +
+      '<td class="tbl-mono">' + escHtml(c.code) + '</td>' +
+      '<td style="font-weight:700;color:var(--teal)">$' + c.amount + '</td>' +
+      '<td>' + escHtml(c.memberName || '—') + '</td>' +
+      '<td><span class="source-chip ' + srcInfo[0] + '">' + srcInfo[1] + '</span></td>' +
+      '<td class="tbl-muted" style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtml(c.reason || '—') + '</td>' +
+      '<td class="' + (isExpired ? 'tbl-muted' : '') + '">' + escHtml(c.expiry || '—') + '</td>' +
+      '<td class="tbl-muted">' + escHtml(c.issuedAt || '—') + '</td>' +
+      '<td><span class="status-chip ' + stInfo[0] + '">' + stInfo[1] + '</span></td>' +
+      '<td>' + voidBtn + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function voidCoupon(id) {
+  var c = coupons.find(function(x) { return x.id === id; });
+  if (!c) return;
+  if (!confirm('確定要作廢折價券「' + c.code + '」？此操作無法復原。')) return;
+  c.used = true;
+  save();
+  renderTable();
+  renderStats();
+  showToast('🗑️ 折價券「' + c.code + '」已作廢');
+}
+
+function openAddModal() {
+  var sel = document.getElementById('newCpnMember');
+  sel.innerHTML = '<option value="">— 選擇會員 —</option>' +
+    members.map(function(m) { return '<option value="' + m.id + '">' + escHtml(m.name) + '</option>'; }).join('');
+  var d = new Date();
+  d.setMonth(d.getMonth() + 3);
+  document.getElementById('newCpnExpiry').value = d.toISOString().slice(0,10);
+  document.getElementById('newCpnAmount').value = '';
+  document.getElementById('newCpnReason').value = '';
+  document.getElementById('newCpnSource').value = 'promo';
+  ['newCpnMember','newCpnAmount'].forEach(function(id) { document.getElementById(id).classList.remove('error'); });
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('addModal').classList.remove('open');
+}
+
+function genCouponCode() {
+  var c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return 'COMP-' + Array.from({length:5}, function() { return c[Math.floor(Math.random()*c.length)]; }).join('');
+}
+
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function confirmAddCoupon() {
+  var memEl = document.getElementById('newCpnMember');
+  var amtEl = document.getElementById('newCpnAmount');
+  var ok = true;
+  if (!memEl.value) { memEl.classList.add('error'); ok = false; } else { memEl.classList.remove('error'); }
+  if (!amtEl.value || isNaN(parseFloat(amtEl.value))) { amtEl.classList.add('error'); ok = false; } else { amtEl.classList.remove('error'); }
+  if (!ok) return;
+  var mem = members.find(function(m) { return m.id === memEl.value; });
+  var code = genCouponCode();
+  var newCpn = {
+    id: 'cpn_' + Date.now(),
+    code: code,
+    amount: parseInt(amtEl.value, 10),
+    memberId: memEl.value,
+    memberName: mem ? mem.name : '—',
+    source: document.getElementById('newCpnSource').value,
+    reason: document.getElementById('newCpnReason').value.trim(),
+    expiry: document.getElementById('newCpnExpiry').value,
+    issuedAt: todayStr(),
+    used: false
+  };
+  coupons.unshift(newCpn);
+  save();
+  closeModal();
+  renderTable();
+  renderStats();
+  showToast('✅ 折價券「' + code + '」已新增（$' + newCpn.amount + '，給 ' + newCpn.memberName + '）');
+}
+
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+/* ══════════════════════════════════════════════
+   點數管理
+══════════════════════════════════════════════ */
+var promos = [];
+var membersList = [];
+var _pointsInited = false;
+
+function defaultPointsSettings() {
+  return {
+    earnRule: { perAmount: 10, earnPerUnit: 1 },
+    redeemRule: { pointsNeeded: 100, couponAmount: 10 },
+    promos: [
+      { id: 'promo_001', name: '清明節點數雙倍', type: 'multiplier', multiplier: 2, couponAmount: 0, startDate: '2026-04-04', endDate: '2026-04-06', active: true },
+      { id: 'promo_002', name: '母親節直接發券', type: 'direct_coupon', multiplier: 1, couponAmount: 50, startDate: '2026-05-10', endDate: '2026-05-12', active: false }
+    ]
+  };
+}
+
+function defaultMembersForPoints() {
+  return [
+    { id: 'mem_1', memberNo: 'M0001', name: '陳大文', points: 350, subscriptionPlan: 'plan_premium' },
+    { id: 'mem_2', memberNo: 'M0002', name: '林小花', points: 200, subscriptionPlan: 'plan_basic' },
+    { id: 'mem_3', memberNo: 'M0003', name: '黃阿明', points: 80,  subscriptionPlan: 'plan_none' },
+    { id: 'mem_4', memberNo: 'M0004', name: '吳美麗', points: 0,   subscriptionPlan: 'plan_none' },
+    { id: 'mem_5', memberNo: 'M0005', name: '張建國', points: 0,   subscriptionPlan: 'plan_none' }
+  ];
+}
+
+function loadPointsSettings() {
+  try {
+    var s = sessionStorage.getItem(POINTS_KEY);
+    return s ? JSON.parse(s) : defaultPointsSettings();
+  } catch(e) { return defaultPointsSettings(); }
+}
+
+function savePointsSettings(data) {
+  sessionStorage.setItem(POINTS_KEY, JSON.stringify(data));
+}
+
+function loadMembersForPoints() {
+  try {
+    var s = sessionStorage.getItem(MEMBERS_KEY);
+    var raw = s ? JSON.parse(s) : null;
+    return raw ? raw.map(function(m) {
+      return { id: m.id, memberNo: m.memberNo, name: m.name, points: m.points || 0, subscriptionPlan: m.subscriptionPlan || 'plan_none' };
+    }) : defaultMembersForPoints();
+  } catch(e) { return defaultMembersForPoints(); }
+}
+
+function initPoints() {
+  if (_pointsInited) return;
+  _pointsInited = true;
+  var data = loadPointsSettings();
+  document.getElementById('earnPerAmount').value = data.earnRule.perAmount;
+  document.getElementById('earnPerUnit').value   = data.earnRule.earnPerUnit;
+  document.getElementById('redeemPoints').value  = data.redeemRule.pointsNeeded;
+  document.getElementById('redeemAmount').value  = data.redeemRule.couponAmount;
+  promos = data.promos || [];
+  membersList = loadMembersForPoints();
+  renderPromos();
+  renderMembersTable();
+}
+
+function saveRules() {
+  var data = loadPointsSettings();
+  data.earnRule.perAmount      = parseInt(document.getElementById('earnPerAmount').value, 10) || 10;
+  data.earnRule.earnPerUnit    = parseInt(document.getElementById('earnPerUnit').value, 10) || 1;
+  data.redeemRule.pointsNeeded = parseInt(document.getElementById('redeemPoints').value, 10) || 100;
+  data.redeemRule.couponAmount = parseInt(document.getElementById('redeemAmount').value, 10) || 10;
+  savePointsSettings(data);
+  showToast('✅ 點數規則已儲存');
+}
+
+var PLAN_NAMES = { plan_none: '一般方案', plan_basic: '月訂閱', plan_premium: '年訂閱' };
+
+function renderPromos() {
+  var tbody = document.getElementById('promoTbody');
+  if (!promos.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="tbl-empty">尚無促銷活動</td></tr>';
+    return;
+  }
+  tbody.innerHTML = promos.map(function(p) {
+    var typeChip = p.type === 'multiplier'
+      ? '<span class="chip chip-multiplier">點數 x' + p.multiplier + '</span>'
+      : '<span class="chip chip-direct">發券 $' + p.couponAmount + '</span>';
+    var content = p.type === 'multiplier' ? '點數 × ' + p.multiplier + ' 倍' : '每人發 $' + p.couponAmount + ' 折價券';
+    var stateChip = p.active
+      ? '<span class="chip chip-active">啟用中</span>'
+      : '<span class="chip chip-inactive">已停用</span>';
+    var toggleLabel = p.active ? '停用' : '啟用';
+    return '<tr>' +
+      '<td style="font-weight:600">' + escHtml(p.name) + '</td>' +
+      '<td>' + typeChip + '</td>' +
+      '<td class="tbl-muted">' + escHtml(p.startDate) + '</td>' +
+      '<td class="tbl-muted">' + escHtml(p.endDate) + '</td>' +
+      '<td class="tbl-muted">' + escHtml(content) + '</td>' +
+      '<td>' + stateChip + '</td>' +
+      '<td><div style="display:flex;gap:6px">' +
+        '<button class="btn-sm" onclick="togglePromo(\'' + p.id + '\')">' + toggleLabel + '</button>' +
+        '<button class="btn-sm btn-sm-danger" onclick="deletePromo(\'' + p.id + '\')">刪除</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function togglePromo(id) {
+  var p = promos.find(function(x) { return x.id === id; });
+  if (!p) return;
+  p.active = !p.active;
+  var data = loadPointsSettings();
+  data.promos = promos;
+  savePointsSettings(data);
+  renderPromos();
+  showToast(p.active ? '✅ 促銷「' + p.name + '」已啟用' : '⏸️ 促銷「' + p.name + '」已停用');
+}
+
+function deletePromo(id) {
+  var p = promos.find(function(x) { return x.id === id; });
+  if (!p) return;
+  if (!confirm('確定要刪除促銷活動「' + p.name + '」？')) return;
+  promos = promos.filter(function(x) { return x.id !== id; });
+  var data = loadPointsSettings();
+  data.promos = promos;
+  savePointsSettings(data);
+  renderPromos();
+  showToast('🗑️ 促銷已刪除');
+}
+
+function renderMembersTable() {
+  var q = (document.getElementById('memberSearch').value || '').trim().toLowerCase();
+  var filtered = q ? membersList.filter(function(m) {
+    return (m.name + ' ' + (m.memberNo || '')).toLowerCase().indexOf(q) !== -1;
+  }) : membersList;
+  var tbody = document.getElementById('memberTbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">找不到符合的會員</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(function(m) {
+    var plan = m.subscriptionPlan || 'plan_none';
+    var planName = PLAN_NAMES[plan] || '一般方案';
+    var chipStyle = plan === 'plan_premium' ? 'background:#fefce8;color:#92400e;border:1px solid #fde68a' :
+                    plan === 'plan_basic'   ? 'background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe' :
+                                              'background:#f3f4f6;color:#4b5563;border:1px solid #d1d5db';
+    return '<tr>' +
+      '<td class="tbl-muted">' + escHtml(m.memberNo || '—') + '</td>' +
+      '<td style="font-weight:600">' + escHtml(m.name) + '</td>' +
+      '<td><strong style="font-size:15px">' + (m.points || 0) + '</strong> <span class="tbl-muted">點</span></td>' +
+      '<td><span style="display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;' + chipStyle + '">' + planName + '</span></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function openPromoModal() {
+  document.getElementById('promoName').value = '';
+  document.getElementById('promoMultiplier').value = '2';
+  document.getElementById('promoCouponAmount').value = '30';
+  document.querySelector('input[name="promoType"][value="multiplier"]').checked = true;
+  togglePromoTypeFields();
+  var today = new Date();
+  document.getElementById('promoStart').value = today.toISOString().slice(0,10);
+  var end = new Date(today);
+  end.setDate(end.getDate() + 2);
+  document.getElementById('promoEnd').value = end.toISOString().slice(0,10);
+  document.getElementById('promoModal').classList.add('open');
+}
+
+function closePromoModal() {
+  document.getElementById('promoModal').classList.remove('open');
+}
+
+function togglePromoTypeFields() {
+  var type = document.querySelector('input[name="promoType"]:checked').value;
+  document.getElementById('fieldMultiplier').style.display = type === 'multiplier' ? '' : 'none';
+  document.getElementById('fieldCoupon').style.display = type === 'direct_coupon' ? '' : 'none';
+}
+
+function confirmAddPromo() {
+  var name = document.getElementById('promoName').value.trim();
+  if (!name) { document.getElementById('promoName').classList.add('error'); return; }
+  document.getElementById('promoName').classList.remove('error');
+  var type = document.querySelector('input[name="promoType"]:checked').value;
+  var newPromo = {
+    id: 'promo_' + Date.now(),
+    name: name,
+    type: type,
+    multiplier: type === 'multiplier' ? parseInt(document.getElementById('promoMultiplier').value, 10) || 2 : 1,
+    couponAmount: type === 'direct_coupon' ? parseInt(document.getElementById('promoCouponAmount').value, 10) || 30 : 0,
+    startDate: document.getElementById('promoStart').value,
+    endDate: document.getElementById('promoEnd').value,
+    active: true
+  };
+  promos.unshift(newPromo);
+  var data = loadPointsSettings();
+  data.promos = promos;
+  savePointsSettings(data);
+  closePromoModal();
+  renderPromos();
+  showToast('✅ 促銷「' + name + '」已新增');
+}
+
+document.getElementById('promoModal').addEventListener('click', function(e) {
+  if (e.target === this) closePromoModal();
+});
+
+/* ══════════════════════════════════════════════
+   工具函式
+══════════════════════════════════════════════ */
+var _toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { t.style.display = 'none'; }, 3000);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ══════════════════════════════════════════════
+   初始化
+══════════════════════════════════════════════ */
+load();
+renderStats();
+renderTable();
+initPoints();
+</script>
+</body>
+</html>
