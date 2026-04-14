@@ -559,7 +559,45 @@ var KPI_CATALOG = [
   { id: 'kpi_gross_profit',     label: '銷售毛利總計',   value: 42850, unit: '元', color: 'green' },
   { id: 'kpi_hot_store',        label: '熱門店家',       value: '好味食堂', color: 'orange', textValue: true },
   { id: 'kpi_hot_item',         label: '熱門餐點',       value: '雞腿飯',   color: 'teal',   textValue: true },
+  { id: 'kpi_sub_status',   label: '訂閱現況',    getValue: getMktSubStatus,   color: 'blue',   textValue: true },
+  { id: 'kpi_total_points', label: '會員總點數',  getValue: getMktTotalPoints, unit: '點',      color: 'purple' },
+  { id: 'kpi_coupon_stats', label: '待使用折價券', getValue: getMktCouponStats, unit: '張',      color: 'teal'  },
 ];
+
+/* ── 行銷 KPI 動態值讀取 ── */
+function getMktSubStatus() {
+  try {
+    var raw = sessionStorage.getItem('permissions_members_v2');
+    var members = raw ? JSON.parse(raw) : null;
+    if (members && members.length) {
+      var basic   = members.filter(function(m){ return m.subscriptionPlan === 'plan_basic'; }).length;
+      var premium = members.filter(function(m){ return m.subscriptionPlan === 'plan_premium'; }).length;
+      var total   = basic + premium;
+      return total + ' 人（月訂 ' + basic + '・年訂 ' + premium + '）';
+    }
+  } catch(e) {}
+  return '月訂 1・年訂 1';
+}
+function getMktTotalPoints() {
+  try {
+    var raw = sessionStorage.getItem('permissions_members_v2');
+    var members = raw ? JSON.parse(raw) : null;
+    if (members && members.length) {
+      return members.reduce(function(s, m){ return s + (m.points || 0); }, 0);
+    }
+  } catch(e) {}
+  return 550;
+}
+function getMktCouponStats() {
+  try {
+    var raw = sessionStorage.getItem('coupon_settings_v1');
+    var data = raw ? JSON.parse(raw) : null;
+    if (data && data.coupons && data.coupons.length) {
+      return data.coupons.filter(function(c){ return c.status === 'unused'; }).length;
+    }
+  } catch(e) {}
+  return 5;
+}
 
 /* ══════════════════════════════════════════════
    常用功能目錄
@@ -590,7 +628,7 @@ var ROLE_DEFAULT_KPIS = {
   'role_art':       ['kpi_new_store','kpi_pending_image','kpi_edm','kpi_unread_announce'],
   'role_ops':       ['kpi_daily_orders','kpi_gross_profit','kpi_hot_store','kpi_hot_item','kpi_complaint'],
   'role_sales':     ['kpi_store_count','kpi_unread_announce','kpi_complaint'],
-  'role_mkt':       ['kpi_unread_announce'],
+  'role_mkt':       ['kpi_unread_announce','kpi_sub_status','kpi_total_points','kpi_coupon_stats'],
   'role_hr':        ['kpi_unread_announce'],
   'role_acc':       ['kpi_unread_announce'],
   'role_driver':    ['kpi_unread_announce'],
@@ -759,16 +797,17 @@ function renderKpiGrid() {
     return;
   }
   grid.innerHTML = items.map(function(k) {
+    var val = typeof k.getValue === 'function' ? k.getValue() : k.value;
     if (k.textValue) {
       return '<div class="kpi-card" data-color="' + k.color + '">' +
         '<div class="kpi-label">' + escHtml(k.label) + '</div>' +
-        '<div class="kpi-text-value">' + escHtml(k.value) + '</div>' +
+        '<div class="kpi-text-value">' + escHtml(String(val)) + '</div>' +
       '</div>';
     }
     return '<div class="kpi-card" data-color="' + k.color + '">' +
       '<div class="kpi-label">' + escHtml(k.label) + '</div>' +
       '<div class="kpi-value-row">' +
-        '<span class="kpi-value">' + k.value + '</span>' +
+        '<span class="kpi-value">' + val + '</span>' +
         '<span class="kpi-unit">' + escHtml(k.unit) + '</span>' +
       '</div>' +
     '</div>';

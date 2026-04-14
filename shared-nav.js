@@ -80,6 +80,11 @@
             match: function (p) { return p.file === 'complaint.html' && p.mode === 'admin' && p.tab !== 'orders'; }
           },
           {
+            label: '點數 & 折價券管理',
+            url: 'coupon.html',
+            match: function (p) { return p.file === 'coupon.html'; }
+          },
+          {
             label: '帳號管理',
             url: 'permissions.html',
             match: function (p) { return p.file === 'permissions.html'; }
@@ -125,6 +130,21 @@
             label: '公告通知',
             url: 'announcement.html?view=frontend',
             match: function (p) { return p.file === 'announcement.html' && p.view === 'frontend'; }
+          },
+          {
+            label: '點餐',
+            url: 'order.html',
+            match: function (p) { return p.file === 'order.html'; }
+          },
+          {
+            label: '點數 & 折價券',
+            url: 'member-wallet.html',
+            match: function (p) { return p.file === 'member-wallet.html'; }
+          },
+          {
+            label: '訂閱方案',
+            url: 'subscription.html',
+            match: function (p) { return p.file === 'subscription.html'; }
           },
           {
             label: '我的訂單',
