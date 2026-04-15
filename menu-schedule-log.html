@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>菜單管理異動紀錄 — 內部後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --purple:      #7c3aed;
+  --purple-bg:   #f5f3ff;
+  --purple-bdr:  #ddd6fe;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 18px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1080px; margin: 0 auto; padding: 12px 20px 80px; }
+
+.page-header { margin-bottom: 20px; }
+.page-title  { font-size: 22px; font-weight: 600; }
+.page-sub    { font-size: 17px; color: var(--text-3); margin-top: 3px; }
+
+/* ── Top bar ── */
+.top-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+/* ── Site picker ── */
+.site-picker-wrap { position: relative; display: inline-block; }
+.site-trigger {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--card);
+  cursor: pointer; user-select: none; min-width: 180px;
+  transition: border-color .12s, box-shadow .12s; font-family: inherit;
+}
+.site-trigger:hover { border-color: #a8a29e; }
+.site-trigger.open  { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
+.st-label { flex: 1; font-size: 16px; font-weight: 500; color: var(--text); }
+.st-arrow { font-size: 10px; color: var(--text-3); transition: transform .15s; }
+.site-trigger.open .st-arrow { transform: rotate(180deg); }
+.site-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12); min-width: 220px; z-index: 50;
+  opacity: 0; pointer-events: none; transform: translateY(-4px);
+  transition: opacity .12s, transform .12s;
+}
+.site-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.site-search-wrap { padding: 10px 10px 8px; border-bottom: 1px solid var(--border-2); }
+.site-search-wrap input {
+  width: 100%; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 15px; color: var(--text); background: var(--bg-2);
+  outline: none; font-family: inherit;
+}
+.site-search-wrap input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
+.site-list { padding: 6px; max-height: 220px; overflow-y: auto; }
+.site-item {
+  padding: 8px 10px; border-radius: 6px; font-size: 15px; cursor: pointer;
+  color: var(--text-2); transition: background .1s;
+}
+.site-item:hover { background: var(--bg-2); color: var(--text); }
+.site-item.selected { background: var(--blue-bg); color: var(--blue-text); font-weight: 500; }
+
+.search-box {
+  padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 16px; outline: none; color: var(--text);
+  background: var(--card); font-family: inherit;
+  width: 180px;
+}
+.search-box:focus { border-color: var(--blue); box-shadow: 0 0 0 2px #dbeafe; }
+.search-box::placeholder { color: var(--text-3); }
+
+/* ── Card ── */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+.card-head {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+}
+.card-title { font-size: 17px; font-weight: 500; }
+
+/* ── Month Nav ── */
+.month-nav { display: flex; align-items: center; gap: 6px; }
+.month-nav-label { font-size: 17px; font-weight: 500; color: var(--text); min-width: 96px; text-align: center; }
+.btn-nav {
+  padding: 4px 11px; border: 1px solid var(--border); border-radius: 5px;
+  background: var(--bg); color: var(--text-2); cursor: pointer; font-size: 15px;
+}
+.btn-nav:hover:not(:disabled) { background: var(--bg-2); }
+.btn-nav:disabled { opacity: .3; cursor: default; }
+
+/* ── Summary bar ── */
+.summary-bar {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  padding: 9px 16px; border-bottom: 1px solid var(--border-2);
+  background: var(--bg-2);
+}
+.s-item { font-size: 16px; color: var(--text-3); }
+.s-item strong { font-weight: 600; }
+
+/* ── Filter pills ── */
+.filter-bar {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  padding: 11px 16px; border-bottom: 1px solid var(--border-2);
+}
+.filter-lbl { font-size: 16px; color: var(--text-3); }
+.pill {
+  padding: 4px 13px; border-radius: 100px;
+  border: 1px solid var(--border); font-size: 16px; cursor: pointer;
+  background: var(--bg); color: var(--text-2); transition: all .12s; user-select: none;
+}
+.pill:hover { border-color: #a8a29e; color: var(--text); }
+.pill.on { background: var(--text); color: #fff; border-color: var(--text); }
+
+/* ── Dot legend ── */
+.dot-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  padding: 8px 16px; border-bottom: 1px solid var(--border-2);
+}
+.dl-item { display: flex; align-items: center; gap: 5px; font-size: 14px; color: var(--text-2); }
+.lg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.lg-dot.publish   { background: #16a34a; }
+.lg-dot.republish { background: #2563eb; }
+.lg-dot.unpublish { background: #dc2626; }
+
+/* ── Timeline ── */
+.tl-group-hd {
+  padding: 7px 16px 5px;
+  font-size: 14px; font-weight: 600; letter-spacing: .06em; color: var(--text-3);
+  background: var(--bg-2); border-bottom: 1px solid var(--border-2);
+  text-transform: uppercase;
+}
+
+.tl-item {
+  display: flex; gap: 12px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border-2);
+  transition: background .1s;
+}
+.tl-item:last-child { border-bottom: none; }
+.tl-item:hover { background: var(--bg-2); }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dot.publish   { background: #16a34a; }
+.dot.republish { background: #2563eb; }
+.dot.unpublish { background: #dc2626; }
+
+.tl-content { flex: 1; min-width: 0; }
+.tl-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.tl-name { font-size: 17px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; }
+.tl-badges { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.tl-tag {
+  font-size: 14px; padding: 1px 8px; border-radius: 100px;
+  background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border);
+}
+
+.tl-scope { font-size: 16px; color: var(--text-2); margin-bottom: 5px; }
+.scope-highlight { font-weight: 500; color: var(--text); }
+
+.tl-meta {
+  font-size: 15px; color: var(--text-3);
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.meta-lbl {
+  font-size: 13px; color: var(--text-3);
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0 5px; white-space: nowrap;
+}
+
+.op-badge {
+  display: inline-block; padding: 1px 8px; border-radius: 100px;
+  font-size: 14px; font-weight: 500;
+}
+.op-badge.publish   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.op-badge.republish { background: var(--blue-bg);  color: var(--blue-text); border: 1px solid var(--blue-border); }
+.op-badge.unpublish { background: var(--red-bg);   color: var(--red); border: 1px solid var(--red-bdr); }
+
+/* 批量操作 */
+.bulk-header {
+  display: flex; gap: 12px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border-2);
+  cursor: pointer; transition: background .1s;
+  user-select: none;
+}
+.bulk-header:hover { background: var(--bg-2); }
+.bulk-header.open  { background: var(--bg-2); }
+
+.bulk-toggle {
+  flex-shrink: 0; margin-top: 4px;
+  font-size: 13px; color: var(--text-3);
+  width: 14px; text-align: center;
+  transition: transform .15s;
+}
+.bulk-header.open .bulk-toggle { transform: rotate(90deg); }
+
+.bulk-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bg-3); color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 100px; font-size: 14px; font-weight: 600;
+  width: 72px; height: 22px; white-space: nowrap;
+}
+
+.bulk-children {
+  display: none; border-bottom: 1px solid var(--border-2);
+  background: var(--bg-2);
+}
+.bulk-children.open { display: block; }
+
+.bulk-child {
+  display: flex; gap: 10px; align-items: center;
+  padding: 7px 16px 7px 46px;
+  border-bottom: 1px solid var(--border-2);
+  font-size: 15px; color: var(--text-2);
+}
+.bulk-child:last-child { border-bottom: none; }
+.bulk-child .meal-chip { font-size: 13px; padding: 0 7px; border-radius: 100px; }
+
+.warn-tag {
+  display: inline-block; font-size: 13px; padding: 0 7px; border-radius: 100px;
+  background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bdr);
+  font-weight: 500;
+}
+
+
+.meal-chip { padding: 1px 8px; border-radius: 100px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.chip-breakfast { background: #fef9c3; color: #854d0e; }
+.chip-lunch     { background: var(--orange-bg); color: var(--orange); }
+.chip-dinner    { background: var(--purple-bg); color: var(--purple); }
+.chip-afternoon { background: #f0fdfa; color: #0f766e; }
+
+.site-tag {
+  display: inline-block; font-size: 14px; padding: 1px 8px; border-radius: 100px;
+  background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border);
+  white-space: nowrap;
+}
+.tl-badges .site-tag, .child-site {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 22px; width: 80px; padding: 0;
+}
+
+.empty { padding: 40px 16px; text-align: center; color: var(--text-3); font-size: 16px; }
+
+/* ── RWD ── */
+@media (max-width: 768px) {
+  .page { padding: 12px 12px 60px; }
+  .top-bar { gap: 8px; }
+  .search-box { width: 100%; }
+  .filter-bar { gap: 6px; }
+  .tl-item, .bulk-header { padding: 10px 12px; }
+  .bulk-child { padding-left: 32px; }
+}
+</style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">菜單管理異動紀錄</div>
+    <div class="page-sub">營運部 ・ 排程發布操作稽核追溯</div>
+  </div>
+
+  <div class="top-bar">
+    <div class="site-picker-wrap" id="site-picker">
+      <div class="site-trigger" id="site-trigger" onclick="toggleSitePicker()">
+        <span class="st-label" id="st-label">全部廠區</span>
+        <span class="st-arrow">▼</span>
+      </div>
+      <div class="site-dropdown" id="site-dropdown">
+        <div class="site-search-wrap">
+          <input type="text" id="site-search" placeholder="搜尋廠區…" oninput="filterSiteList()" autocomplete="off">
+        </div>
+        <div class="site-list" id="site-list"></div>
+      </div>
+    </div>
+    <input class="search-box" id="search-input" type="text" placeholder="搜尋操作人員…" oninput="renderLog()">
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">發布操作紀錄</div>
+      <div class="month-nav">
+        <button class="btn-nav" id="btn-prev" onclick="changeMonth(-1)">← 上月</button>
+        <span class="month-nav-label" id="month-label">2026年4月</span>
+        <button class="btn-nav" id="btn-next" onclick="changeMonth(1)">下月 →</button>
+      </div>
+    </div>
+    <div class="summary-bar" id="summary-bar"></div>
+    <div class="filter-bar">
+      <span class="filter-lbl">操作類型：</span>
+      <div class="pill on"  onclick="filterOp(this,'all')">全部</div>
+      <div class="pill"     onclick="filterOp(this,'publish')">發布上架</div>
+      <div class="pill"     onclick="filterOp(this,'republish')">重新發布</div>
+      <div class="pill"     onclick="filterOp(this,'unpublish')">取消下架</div>
+    </div>
+    <div class="dot-legend">
+      <div class="dl-item"><div class="lg-dot publish"></div>首次發布（上架）</div>
+      <div class="dl-item"><div class="lg-dot republish"></div>重新發布</div>
+      <div class="dl-item"><div class="lg-dot unpublish"></div>取消發布（下架）</div>
+    </div>
+    <div id="log-body"></div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   常數 & 狀態
+═══════════════════════════════════════════════ */
+const YEAR   = 2026;
+const MONTHS = ['1月','2月','3月','4月','5月'];
+const MIN_M  = 2; // 3月
+const MAX_M  = 3; // 4月
+
+let curMonth = 3; // 4月
+let curOpType = 'all';
+let curSiteId = 'all';
+
+const SITE_LIST = [
+  { id: 'all',   name: '全部廠區' },
+  { id: 'hc-a',  name: '新竹 A 廠' },
+  { id: 'hc-b',  name: '新竹 B 廠' },
+  { id: 'tc-a',  name: '台中 A 廠' },
+];
+
+const SITE_NAMES = {
+  'hc-a': '新竹 A 廠',
+  'hc-b': '新竹 B 廠',
+  'tc-a': '台中 A 廠',
+};
+
+const MEAL_LABELS = {
+  breakfast: '早餐', lunch: '午餐', afternoon: '下午茶',
+  dinner: '晚餐', latenight: '消夜',
+};
+const MEAL_CLS = {
+  breakfast: 'chip-breakfast', lunch: 'chip-lunch',
+  afternoon: 'chip-afternoon', dinner: 'chip-dinner', latenight: 'chip-breakfast',
+};
+
+/* ═══════════════════════════════════════════════
+   模擬操作紀錄資料
+   opType: 'publish' | 'republish' | 'unpublish'
+   isBulk: true → 顯示可展開的批量操作列
+   children: [ { restName, mealType, siteId, warn? } ]
+═══════════════════════════════════════════════ */
+const logData = [
+
+  /* ── 3月 ── */
+  {
+    id: 'log_m03_001',
+    date: '2026-03-10',
+    time: '09:15',
+    opType: 'publish',
+    isBulk: true,
+    operator: '營運人員1',
+    siteId: 'hc-a',
+    desc: '批量發布新竹 A 廠 3 月全部排程',
+    bulkCount: 18,
+    children: [
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',     siteId: 'hc-a', targetDate: '2026-03-02' },
+      { restName: 'XX 早餐店',     mealType: 'breakfast', siteId: 'hc-a', targetDate: '2026-03-05' },
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',     siteId: 'hc-a', targetDate: '2026-03-10' },
+      { restName: '好味食堂',      mealType: 'lunch',     siteId: 'hc-a', targetDate: '2026-03-15' },
+      { restName: 'XX 早餐店',     mealType: 'breakfast', siteId: 'hc-a', targetDate: '2026-03-20' },
+      { restName: '阿成便當',      mealType: 'dinner',    siteId: 'hc-a', targetDate: '2026-03-25' },
+    ],
+    note: '',
+  },
+  {
+    id: 'log_m03_002',
+    date: '2026-03-20',
+    time: '10:30',
+    opType: 'publish',
+    isBulk: true,
+    operator: '營運人員2',
+    siteId: 'hc-b',
+    desc: '批量發布新竹 B 廠 3 月全部排程',
+    bulkCount: 15,
+    children: [
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',     siteId: 'hc-b', targetDate: '2026-03-03' },
+      { restName: '好味食堂',      mealType: 'lunch',     siteId: 'hc-b', targetDate: '2026-03-08' },
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',     siteId: 'hc-b', targetDate: '2026-03-12' },
+      { restName: '家鄉麵食館',    mealType: 'dinner',    siteId: 'hc-b', targetDate: '2026-03-18' },
+      { restName: '好味食堂',      mealType: 'lunch',     siteId: 'hc-b', targetDate: '2026-03-25' },
+    ],
+    note: '',
+  },
+  {
+    id: 'log_m03_003',
+    date: '2026-03-25',
+    time: '14:00',
+    opType: 'publish',
+    isBulk: false,
+    operator: '主管A',
+    siteId: 'tc-a',
+    desc: '個別發布：台中 A 廠 3/25 午餐 阿成便當',
+    restName: '阿成便當',
+    mealType: 'lunch',
+    targetDate: '2026-03-25',
+    note: '',
+  },
+
+  /* ── 4月 ── */
+  {
+    id: 'log_m04_001',
+    date: '2026-04-03',
+    time: '09:32',
+    opType: 'publish',
+    isBulk: true,
+    operator: '營運人員2',
+    siteId: 'all',
+    desc: '批量發布新竹 A 廠＋新竹 B 廠 4 月全部排程',
+    bulkCount: 42,
+    children: [
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',     siteId: 'hc-a', targetDate: '2026-04-01' },
+      { restName: 'XX 早餐店',     mealType: 'breakfast', siteId: 'hc-a', targetDate: '2026-04-03' },
+      { restName: '好味食堂',      mealType: 'lunch',     siteId: 'hc-a', targetDate: '2026-04-07' },
+      { restName: '美味快炒',      mealType: 'dinner',    siteId: 'hc-a', targetDate: '2026-04-09' },
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',     siteId: 'hc-b', targetDate: '2026-04-02' },
+      { restName: '好味食堂',      mealType: 'lunch',     siteId: 'hc-b', targetDate: '2026-04-06' },
+      { restName: '阿成便當',      mealType: 'lunch',     siteId: 'hc-a', targetDate: '2026-04-08' },
+      { restName: '阿成便當',      mealType: 'lunch',     siteId: 'hc-b', targetDate: '2026-04-08' },
+    ],
+    note: '此次批量操作包含 4/8 兒童節假日的排程，後續已由主管取消',
+  },
+  {
+    id: 'log_m04_002',
+    date: '2026-04-03',
+    time: '16:45',
+    opType: 'unpublish',
+    isBulk: false,
+    operator: '主管A',
+    siteId: 'hc-a',
+    desc: '取消發布：新竹 A 廠 4/8 午餐 阿成便當',
+    restName: '阿成便當',
+    mealType: 'lunch',
+    targetDate: '2026-04-08',
+    note: '4/8 為兒童節補假，確認廠區不開放，取消誤上架排程',
+  },
+  {
+    id: 'log_m04_003',
+    date: '2026-04-03',
+    time: '16:50',
+    opType: 'unpublish',
+    isBulk: false,
+    operator: '主管A',
+    siteId: 'hc-b',
+    desc: '取消發布：新竹 B 廠 4/8 午餐 阿成便當',
+    restName: '阿成便當',
+    mealType: 'lunch',
+    targetDate: '2026-04-08',
+    note: '同上，一併取消新竹 B 廠',
+  },
+  {
+    id: 'log_m04_004',
+    date: '2026-04-10',
+    time: '11:00',
+    opType: 'unpublish',
+    isBulk: true,
+    operator: '主管A',
+    siteId: 'hc-b',
+    desc: '批量取消發布：新竹 B 廠 4 月後半月全部排程',
+    bulkCount: 12,
+    children: [
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',  siteId: 'hc-b', targetDate: '2026-04-11' },
+      { restName: '好味食堂',      mealType: 'lunch',  siteId: 'hc-b', targetDate: '2026-04-14' },
+      { restName: '家鄉麵食館',    mealType: 'dinner', siteId: 'hc-b', targetDate: '2026-04-17' },
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',  siteId: 'hc-b', targetDate: '2026-04-21' },
+      { restName: '美味快炒',      mealType: 'lunch',  siteId: 'hc-b', targetDate: '2026-04-25' },
+    ],
+    note: '廠區施工暫停訂餐服務，4/11～4/25 全面下架',
+  },
+  {
+    id: 'log_m04_005',
+    date: '2026-04-11',
+    time: '09:00',
+    opType: 'publish',
+    isBulk: false,
+    operator: '營運人員1',
+    siteId: 'hc-a',
+    desc: '個別發布：新竹 A 廠 4/11 午餐 OO 雞飯專門店',
+    restName: 'OO 雞飯專門店',
+    mealType: 'lunch',
+    targetDate: '2026-04-11',
+    note: '',
+  },
+  {
+    id: 'log_m04_006',
+    date: '2026-04-14',
+    time: '15:20',
+    opType: 'republish',
+    isBulk: true,
+    operator: '營運人員2',
+    siteId: 'hc-b',
+    desc: '重新發布：新竹 B 廠 4 月後半月排程',
+    bulkCount: 12,
+    children: [
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',  siteId: 'hc-b', targetDate: '2026-04-11' },
+      { restName: '好味食堂',      mealType: 'lunch',  siteId: 'hc-b', targetDate: '2026-04-14' },
+      { restName: '家鄉麵食館',    mealType: 'dinner', siteId: 'hc-b', targetDate: '2026-04-17' },
+      { restName: 'OO 雞飯專門店', mealType: 'lunch',  siteId: 'hc-b', targetDate: '2026-04-21' },
+      { restName: '美味快炒',      mealType: 'lunch',  siteId: 'hc-b', targetDate: '2026-04-25' },
+    ],
+    note: '新竹 B 廠施工結束，恢復後半月訂餐服務',
+  },
+  {
+    id: 'log_m04_007',
+    date: '2026-04-17',
+    time: '10:05',
+    opType: 'publish',
+    isBulk: false,
+    operator: '營運人員1',
+    siteId: 'tc-a',
+    desc: '個別發布：台中 A 廠 4/17 晚餐 好味食堂',
+    restName: '好味食堂',
+    mealType: 'dinner',
+    targetDate: '2026-04-17',
+    note: '',
+  },
+  {
+    id: 'log_m04_008',
+    date: '2026-04-25',
+    time: '09:45',
+    opType: 'republish',
+    isBulk: false,
+    operator: '營運人員2',
+    siteId: 'hc-a',
+    desc: '重新發布：新竹 A 廠 4/25 午餐 家鄉麵食館',
+    restName: '家鄉麵食館',
+    mealType: 'lunch',
+    targetDate: '2026-04-25',
+    note: '店家品項有調整，重新發布更新版本',
+  },
+];
+
+/* ═══════════════════════════════════════════════
+   渲染邏輯
+═══════════════════════════════════════════════ */
+function getMonthRange() {
+  const y = YEAR, m = curMonth;
+  const start = `${y}-${String(m+1).padStart(2,'0')}-01`;
+  const end   = `${y}-${String(m+1).padStart(2,'0')}-${String(new Date(y,m+1,0).getDate()).padStart(2,'0')}`;
+  return { start, end };
+}
+
+function getFilteredData() {
+  const { start, end } = getMonthRange();
+  const searchQ = (document.getElementById('search-input').value || '').trim().toLowerCase();
+
+  return logData.filter(item => {
+    if (item.date < start || item.date > end) return false;
+    if (curOpType !== 'all' && item.opType !== curOpType) return false;
+    if (curSiteId !== 'all') {
+      if (item.siteId !== 'all' && item.siteId !== curSiteId) return false;
+    }
+    if (searchQ && !item.operator.toLowerCase().includes(searchQ) &&
+        !item.desc.toLowerCase().includes(searchQ)) return false;
+    return true;
+  });
+}
+
+function renderSummary(data) {
+  const cnt = { publish: 0, republish: 0, unpublish: 0 };
+  data.forEach(d => cnt[d.opType]++);
+  document.getElementById('summary-bar').innerHTML =
+    `<span class="s-item">共 <strong>${data.length}</strong> 筆</span>` +
+    (cnt.publish   ? `<span class="s-item"><strong style="color:var(--green)">${cnt.publish}</strong> 發布上架</span>` : '') +
+    (cnt.republish ? `<span class="s-item"><strong style="color:var(--blue)">${cnt.republish}</strong> 重新發布</span>` : '') +
+    (cnt.unpublish ? `<span class="s-item"><strong style="color:var(--red)">${cnt.unpublish}</strong> 取消下架</span>` : '');
+}
+
+const OP_LABELS = { publish: '首次發布', republish: '重新發布', unpublish: '取消下架' };
+
+function renderItem(item) {
+  const opBadge = `<span class="op-badge ${item.opType}">${OP_LABELS[item.opType]}</span>`;
+  const siteName = item.siteId === 'all' ? '多廠區' : (SITE_NAMES[item.siteId] || item.siteId);
+
+  if (item.isBulk) {
+    const childrenHtml = item.children.map(c => {
+
+      const mealCls  = MEAL_CLS[c.mealType] || 'chip-lunch';
+      const mealLbl  = MEAL_LABELS[c.mealType] || c.mealType;
+      const csn      = SITE_NAMES[c.siteId] || c.siteId;
+      const td = c.targetDate ? c.targetDate.slice(5).replace('-','/') : '';
+      return `<div class="bulk-child">
+        <span class="site-tag child-site">${csn}</span>
+        <span class="meal-chip ${mealCls}">${mealLbl}</span>
+        <span>${c.restName}</span>
+        ${td ? `<span style="color:var(--text-3);font-size:14px;">${td}</span>` : ''}
+      </div>`;
+    }).join('');
+
+    return `<div class="bulk-header" id="bh_${item.id}" onclick="toggleBulk('${item.id}')">
+      <span class="bulk-toggle">▶</span>
+      <div class="dot ${item.opType}"></div>
+      <div class="tl-content">
+        <div class="tl-top">
+          <span class="tl-name">${item.desc}</span>
+          <div class="tl-badges">
+            ${opBadge}
+            <span class="site-tag">${siteName}</span>
+            <span class="bulk-count">共 ${item.bulkCount} 筆</span>
+          </div>
+        </div>
+        <div class="tl-meta">
+          <span class="meta-lbl">修改日期</span><span>${item.date}&nbsp;${item.time}</span>
+          <span>・</span>
+          <span>${item.operator}</span>
+        </div>
+      </div>
+    </div>
+    <div class="bulk-children" id="bc_${item.id}">
+      <div class="bulk-child" style="padding-left:46px;font-size:14px;color:var(--text-3);padding-top:6px;padding-bottom:4px;">
+        以下為受影響的排程項目（${item.children.length} 筆展示）
+      </div>
+      ${childrenHtml}
+    </div>`;
+  } else {
+    // 個別操作（同樣使用可展開格式）
+    const mealCls  = MEAL_CLS[item.mealType] || 'chip-lunch';
+    const mealLbl  = MEAL_LABELS[item.mealType] || item.mealType;
+
+    const childHtml = `<div class="bulk-child">
+        <span class="site-tag child-site">${siteName}</span>
+        <span class="meal-chip ${mealCls}">${mealLbl}</span>
+        <span>${item.restName || ''}</span>
+      </div>`;
+
+    return `<div class="bulk-header" id="bh_${item.id}" onclick="toggleBulk('${item.id}')">
+      <span class="bulk-toggle">▶</span>
+      <div class="dot ${item.opType}"></div>
+      <div class="tl-content">
+        <div class="tl-top">
+          <span class="tl-name">${item.desc}</span>
+          <div class="tl-badges">
+            ${opBadge}
+            <span class="site-tag">${siteName}</span>
+            <span class="bulk-count">共 1 筆</span>
+          </div>
+        </div>
+        <div class="tl-meta">
+          <span class="meta-lbl">修改日期</span><span>${item.date}&nbsp;${item.time}</span>
+          <span>・</span>
+          <span class="meta-lbl">影響日期</span><span>${item.targetDate ? item.targetDate.slice(5).replace('-','/') : '—'}</span>
+          <span>・</span>
+          <span>${item.operator}</span>
+        </div>
+      </div>
+    </div>
+    <div class="bulk-children" id="bc_${item.id}">
+      ${childHtml}
+    </div>`;
+  }
+}
+
+function renderGroup(date, items) {
+  const d = new Date(date);
+  const WDS = ['日','一','二','三','四','五','六'];
+  const label = `${date.slice(0,4)}/${date.slice(5,7)}/${date.slice(8,10)}（週${WDS[d.getDay()]}）`;
+  return `<div class="tl-group-hd">${label}</div>` +
+    items.map(renderItem).join('');
+}
+
+function renderLog() {
+  const data = getFilteredData();
+  renderSummary(data);
+
+  if (!data.length) {
+    document.getElementById('log-body').innerHTML = '<div class="empty">無符合條件的操作紀錄</div>';
+    return;
+  }
+
+  // 依日期分組，倒序（最新在上）
+  const groups = {};
+  data.forEach(d => { (groups[d.date] = groups[d.date] || []).push(d); });
+
+  const sortedDates = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+  document.getElementById('log-body').innerHTML =
+    sortedDates.map(date => renderGroup(date, groups[date])).join('');
+}
+
+function toggleBulk(id) {
+  const hd = document.getElementById('bh_' + id);
+  const bc = document.getElementById('bc_' + id);
+  if (!hd || !bc) return;
+  const isOpen = hd.classList.contains('open');
+  hd.classList.toggle('open', !isOpen);
+  bc.classList.toggle('open', !isOpen);
+}
+
+function filterOp(el, type) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  curOpType = type;
+  renderLog();
+}
+
+function changeMonth(delta) {
+  curMonth = Math.max(MIN_M, Math.min(MAX_M, curMonth + delta));
+  document.getElementById('month-label').textContent = `${YEAR}年${MONTHS[curMonth]}`;
+  document.getElementById('btn-prev').disabled = curMonth <= MIN_M;
+  document.getElementById('btn-next').disabled = curMonth >= MAX_M;
+  renderLog();
+}
+
+// ── Site picker ──
+function renderSiteList(q = '') {
+  const filtered = q
+    ? SITE_LIST.filter(s => s.name.includes(q))
+    : SITE_LIST;
+  document.getElementById('site-list').innerHTML = filtered.length
+    ? filtered.map(s => `
+        <div class="site-item${s.id === curSiteId ? ' selected' : ''}" onclick="selectSite('${s.id}')">
+          ${s.name}
+        </div>`).join('')
+    : '<div style="padding:12px 10px;text-align:center;font-size:14px;color:var(--text-3)">找不到符合的廠區</div>';
+}
+
+function toggleSitePicker() {
+  const isOpen = document.getElementById('site-dropdown').classList.contains('open');
+  if (isOpen) { closeSitePicker(); return; }
+  document.getElementById('site-trigger').classList.add('open');
+  document.getElementById('site-dropdown').classList.add('open');
+  renderSiteList();
+  setTimeout(() => document.getElementById('site-search').focus(), 50);
+}
+
+function closeSitePicker() {
+  document.getElementById('site-trigger').classList.remove('open');
+  document.getElementById('site-dropdown').classList.remove('open');
+  document.getElementById('site-search').value = '';
+}
+
+function filterSiteList() {
+  renderSiteList(document.getElementById('site-search').value.trim());
+}
+
+function selectSite(id) {
+  curSiteId = id;
+  const s = SITE_LIST.find(x => x.id === id);
+  document.getElementById('st-label').textContent = s ? s.name : id;
+  closeSitePicker();
+  renderLog();
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('site-picker').contains(e.target)) closeSitePicker();
+});
+
+// 初始化月份導覽按鈕狀態
+document.getElementById('btn-prev').disabled = curMonth <= MIN_M;
+document.getElementById('btn-next').disabled = curMonth >= MAX_M;
+
+renderLog();
+</script>
+</body>
+</html>

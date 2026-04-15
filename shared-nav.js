@@ -65,9 +65,19 @@
             ]
           },
           {
-            label: '菜單排程管理',
+            label: '菜單管理',
+            group: true,
             url: 'menu-schedule.html',
-            match: function (p) { return p.file === 'menu-schedule.html'; }
+            match: function (p) {
+              return p.file === 'menu-schedule.html' ||
+                     p.file === 'menu-publish.html' ||
+                     p.file === 'menu-schedule-log.html';
+            },
+            children: [
+              { label: '菜單排程管理',     url: 'menu-schedule.html',     match: function (p) { return p.file === 'menu-schedule.html'; } },
+              { label: '菜單發布管理',     url: 'menu-publish.html',      match: function (p) { return p.file === 'menu-publish.html'; } },
+              { label: '菜單管理異動紀錄', url: 'menu-schedule-log.html', match: function (p) { return p.file === 'menu-schedule-log.html'; } }
+            ]
           },
           {
             label: '訂單管理',

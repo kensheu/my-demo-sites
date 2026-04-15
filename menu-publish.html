@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>菜單發布管理 — 內部後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --purple:      #7c3aed;
+  --purple-bg:   #f5f3ff;
+  --purple-bdr:  #ddd6fe;
+  --teal:        #0f766e;
+  --teal-bg:     #f0fdfa;
+  --teal-bdr:    #99f6e4;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 18px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1400px; margin: 0 auto; padding: 12px 20px 80px; }
+
+.page-header { margin-bottom: 14px; }
+.page-title  { font-size: 22px; font-weight: 600; }
+.page-sub    { font-size: 17px; color: var(--text-3); margin-top: 3px; }
+
+/* ── Toolbar ── */
+.toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 16px;
+}
+.month-nav { display: flex; align-items: center; gap: 6px; }
+.month-nav-label {
+  font-size: 18px; font-weight: 600; color: var(--text);
+  min-width: 110px; text-align: center;
+}
+.btn-nav {
+  padding: 5px 13px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--card); color: var(--text-2);
+  cursor: pointer; font-size: 16px;
+  transition: all .12s;
+}
+.btn-nav:hover:not(:disabled) { background: var(--bg-2); border-color: #a8a29e; }
+.btn-nav:disabled { opacity: .35; cursor: default; }
+
+.legend-pills {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-left: auto;
+}
+.legend-pill {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 15px; color: var(--text-2);
+}
+.lp-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.lp-dot.red  { background: #ef4444; }
+.lp-dot.blue { background: #3b82f6; }
+
+/* ── Calendar ── */
+.cal-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+.cal-header {
+  display: grid;
+  grid-template-columns: 42px repeat(7, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.cal-wh-spacer { background: var(--bg-2); border-right: 1px solid var(--border-2); }
+.cal-wh-cell {
+  padding: 8px 0;
+  text-align: center;
+  font-size: 15px; font-weight: 500; color: var(--text-3);
+  background: var(--bg-2);
+  border-right: 1px solid var(--border-2);
+}
+.cal-wh-cell:last-child { border-right: none; }
+.cal-wh-cell.weekend { color: var(--red); }
+
+.cal-body { }
+
+.cal-week-row {
+  display: grid;
+  grid-template-columns: 42px repeat(7, 1fr);
+  border-bottom: 1px solid var(--border-2);
+}
+.cal-week-row:last-child { border-bottom: none; }
+
+.cal-week-label {
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 8px;
+  background: var(--bg-2);
+  border-right: 1px solid var(--border-2);
+  font-size: 12px; color: var(--text-3);
+  line-height: 1.3; text-align: center;
+}
+.wk-num { letter-spacing: .04em; }
+
+.cal-cell {
+  min-height: 80px;
+  padding: 6px 8px;
+  border-right: 1px solid var(--border-2);
+  cursor: pointer;
+  transition: background .1s;
+  position: relative;
+}
+.cal-cell:last-child { border-right: none; }
+.cal-cell:hover { background: #fafaf8; }
+.cal-cell.other-month { background: var(--bg-2); cursor: default; }
+.cal-cell.other-month:hover { background: var(--bg-2); }
+.cal-cell.weekend { background: #fefefe; }
+.cal-cell.weekend:hover { background: #fafaf8; }
+
+.cal-day-num {
+  font-size: 15px; font-weight: 500; color: var(--text-2);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.cal-day-num.today {
+  background: var(--blue); color: #fff;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.cal-day-num.weekend { color: var(--red); }
+
+
+/* 發布狀態標籤（每格一個） */
+.pub-status-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  transition: opacity .12s;
+  margin-top: 2px;
+  white-space: nowrap;
+  width: 100%;
+  justify-content: center;
+  border: none;
+  font-family: inherit;
+}
+.pub-status-tag:hover { opacity: .85; }
+.pub-status-tag.has-draft {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid var(--red-bdr);
+}
+.pub-status-tag.all-done {
+  background: var(--blue-bg);
+  color: var(--blue-text);
+  border: 1px solid var(--blue-border);
+}
+
+/* ── Modal ── */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.35);
+  z-index: 100; display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  opacity: 0; pointer-events: none; transition: opacity .15s;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: auto; }
+
+.modal {
+  background: var(--card); border-radius: 12px;
+  width: 100%; max-width: 640px;
+  max-height: 80vh; display: flex; flex-direction: column;
+  transform: translateY(8px); transition: transform .15s;
+  overflow: hidden;
+}
+.modal-backdrop.open .modal { transform: translateY(0); }
+
+.modal-header {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.modal-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.modal-close {
+  width: 30px; height: 30px; border: none; background: none; cursor: pointer;
+  border-radius: 6px; font-size: 18px; color: var(--text-3);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .1s;
+}
+.modal-close:hover { background: var(--bg-3); color: var(--text); }
+
+.modal-body { overflow-y: auto; padding: 16px 20px; flex: 1; }
+
+/* 廠區區塊 */
+.site-block { margin-bottom: 16px; }
+.site-block:last-child { margin-bottom: 0; }
+
+.site-block-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.site-block-name {
+  font-size: 16px; font-weight: 600; color: var(--text);
+}
+.site-status-pill {
+  font-size: 14px; padding: 2px 10px; border-radius: 100px;
+  font-weight: 500;
+}
+.site-status-pill.ok   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.site-status-pill.warn { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-bdr); }
+.site-status-pill.empty { background: var(--bg-2); color: var(--text-3); border: 1px solid var(--border); }
+
+.entry-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px;
+  background: var(--bg-2); border-radius: 6px;
+  margin-bottom: 4px; font-size: 15px; color: var(--text-2);
+}
+.entry-row:last-child { margin-bottom: 0; }
+
+.meal-chip {
+  padding: 1px 8px; border-radius: 100px;
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap;
+}
+.chip-breakfast { background: #fef9c3; color: #854d0e; }
+.chip-lunch     { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.chip-afternoon { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-bdr); }
+.chip-dinner    { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-bdr); }
+.chip-latenight { background: #1e293b; color: #cbd5e1; }
+
+.pub-badge {
+  font-size: 13px; padding: 1px 8px; border-radius: 100px;
+  font-weight: 500; white-space: nowrap;
+}
+.pub-badge.published  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.pub-badge.draft      { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bdr); }
+.pub-badge.dirty      { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+
+.entry-rest-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.no-entries {
+  font-size: 15px; color: var(--text-3);
+  padding: 6px 10px;
+  font-style: italic;
+}
+
+/* ── RWD ── */
+@media (max-width: 768px) {
+  .page { padding: 12px 12px 60px; }
+  .toolbar { gap: 8px; }
+  .legend-pills { margin-left: 0; }
+  .cal-cell { min-height: 60px; padding: 4px 5px; }
+  .pub-status-tag { font-size: 12px; padding: 2px 5px; }
+  .cal-week-label { font-size: 10px; }
+  .modal { max-height: 90vh; }
+}
+</style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">菜單發布管理</div>
+    <div class="page-sub">營運部 ・ 跨廠區排程發布進度一覽</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="month-nav">
+      <button class="btn-nav" id="btn-prev" onclick="changeMonth(-1)">← 上月</button>
+      <span class="month-nav-label" id="month-label">2026年4月</span>
+      <button class="btn-nav" id="btn-next" onclick="changeMonth(1)">下月 →</button>
+    </div>
+    <div class="legend-pills">
+      <span class="legend-pill"><span class="lp-dot red"></span>有暫存未發布</span>
+      <span class="legend-pill"><span class="lp-dot blue"></span>全部已發布</span>
+    </div>
+  </div>
+
+  <div class="cal-wrap">
+    <div class="cal-header" id="cal-header"></div>
+    <div class="cal-body" id="cal-body"></div>
+  </div>
+
+</div>
+
+<!-- ── 詳情 Modal ── -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="handleBackdropClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">發布狀態</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   常數 & 狀態
+═══════════════════════════════════════════════ */
+const YEAR    = 2026;
+const MIN_M   = 2; // 3月（0-indexed）
+const MAX_M   = 4; // 5月
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const WD_NAMES    = ['日','一','二','三','四','五','六'];
+
+let curMonth = 3; // 4月（0-indexed）
+
+const sites = [
+  { id: 'hc-a', name: '新竹 A 廠' },
+  { id: 'hc-b', name: '新竹 B 廠' },
+  { id: 'tc-a', name: '台中 A 廠' },
+];
+
+const MEAL_TYPES = [
+  { id: 'breakfast', label: '早餐',  chipCls: 'chip-breakfast' },
+  { id: 'lunch',     label: '午餐',  chipCls: 'chip-lunch'     },
+  { id: 'afternoon', label: '下午茶', chipCls: 'chip-afternoon' },
+  { id: 'dinner',    label: '晚餐',  chipCls: 'chip-dinner'    },
+  { id: 'latenight', label: '消夜',  chipCls: 'chip-latenight' },
+];
+function mealInfo(id) { return MEAL_TYPES.find(m => m.id === id) || MEAL_TYPES[1]; }
+
+function getDateStr(y, m, d) {
+  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+
+/* ═══════════════════════════════════════════════
+   模擬排程資料
+   格式：scheduleData[siteId][dateStr] = [ entry, ... ]
+   entry.publishedAt = null（暫存）| 時間字串（已發布）
+   entry.dirtyAfterPublish = true（已修改）
+═══════════════════════════════════════════════ */
+const scheduleData = {};
+sites.forEach(s => { scheduleData[s.id] = {}; });
+
+// 餐廳清單（精簡版）
+const restaurants = [
+  { id: 'S0001', name: 'OO 雞飯專門店' },
+  { id: 'S0002', name: 'XX 早餐店'     },
+  { id: 'S0003', name: '阿成便當'      },
+  { id: 'S0004', name: '好味食堂'      },
+  { id: 'S0005', name: '家鄉麵食館'    },
+  { id: 'S0006', name: '美味快炒'      },
+];
+
+let _eid = 1000;
+function mkEntry(restaurantId, mealType, published, dirty = false) {
+  _eid++;
+  return {
+    entryId: 'e' + _eid,
+    restaurantId,
+    mealType,
+    publishedAt: published ? `4/${Math.floor(Math.random()*10)+1} 09:${String(Math.floor(Math.random()*59)).padStart(2,'0')}` : null,
+    dirtyAfterPublish: dirty,
+  };
+}
+
+// ── 3月（全部已發布）──
+for (let d = 3; d <= 31; d++) {
+  const dateStr = getDateStr(2026, 2, d); // 3月
+  const dow = new Date(2026, 2, d).getDay();
+  if (dow === 0 || dow === 6) continue; // 跳過週末
+  scheduleData['hc-a'][dateStr] = [
+    mkEntry('S0001','lunch',true),
+    mkEntry('S0002','breakfast',true),
+  ];
+  scheduleData['hc-b'][dateStr] = [
+    mkEntry('S0001','lunch',true),
+    mkEntry('S0004','lunch',true),
+  ];
+  scheduleData['tc-a'][dateStr] = [
+    mkEntry('S0003','lunch',true),
+  ];
+}
+
+// ── 4月 ──
+// 1日～3日 全廠區已發布
+for (let d = 1; d <= 3; d++) {
+  const dateStr = getDateStr(2026, 3, d);
+  const dow = new Date(2026, 3, d).getDay();
+  if (dow === 0 || dow === 6) continue;
+  scheduleData['hc-a'][dateStr] = [mkEntry('S0001','lunch',true), mkEntry('S0002','breakfast',true)];
+  scheduleData['hc-b'][dateStr] = [mkEntry('S0001','lunch',true), mkEntry('S0004','lunch',true)];
+  scheduleData['tc-a'][dateStr] = [mkEntry('S0003','lunch',true)];
+}
+
+// 4日（週六）跳過
+
+// 7日 hc-a 有暫存（已新增但未發布）
+scheduleData['hc-a']['2026-04-07'] = [
+  mkEntry('S0001','lunch',true),
+  mkEntry('S0002','breakfast',true),
+  mkEntry('S0005','lunch',false), // 暫存
+];
+scheduleData['hc-b']['2026-04-07'] = [mkEntry('S0001','lunch',true), mkEntry('S0004','lunch',true)];
+scheduleData['tc-a']['2026-04-07'] = [mkEntry('S0003','lunch',true)];
+
+// 8日（兒童節 假日）─ hc-a 有排程（誤設）但暫存
+scheduleData['hc-a']['2026-04-08'] = [mkEntry('S0003','lunch',false)]; // 暫存，誤加入
+scheduleData['hc-b']['2026-04-08'] = [];
+scheduleData['tc-a']['2026-04-08'] = [];
+
+// 9日 全已發布
+scheduleData['hc-a']['2026-04-09'] = [mkEntry('S0001','lunch',true), mkEntry('S0002','breakfast',true)];
+scheduleData['hc-b']['2026-04-09'] = [mkEntry('S0001','lunch',true), mkEntry('S0004','lunch',true)];
+scheduleData['tc-a']['2026-04-09'] = [mkEntry('S0003','lunch',true)];
+
+// 10日 tc-a 有已修改（dirty）
+scheduleData['hc-a']['2026-04-10'] = [mkEntry('S0001','lunch',true), mkEntry('S0002','breakfast',true)];
+scheduleData['hc-b']['2026-04-10'] = [mkEntry('S0001','lunch',true)];
+scheduleData['tc-a']['2026-04-10'] = [mkEntry('S0003','lunch',true, true), mkEntry('S0006','dinner',true,true)]; // dirty
+
+// 11日 週五，hc-b 有暫存
+scheduleData['hc-a']['2026-04-11'] = [mkEntry('S0001','lunch',true)];
+scheduleData['hc-b']['2026-04-11'] = [mkEntry('S0001','lunch',false), mkEntry('S0004','lunch',false)]; // 兩筆都暫存
+scheduleData['tc-a']['2026-04-11'] = [mkEntry('S0003','lunch',true)];
+
+// 14日～16日 全已發布
+for (let d = 14; d <= 16; d++) {
+  const dateStr = getDateStr(2026, 3, d);
+  scheduleData['hc-a'][dateStr] = [mkEntry('S0001','lunch',true), mkEntry('S0002','breakfast',true)];
+  scheduleData['hc-b'][dateStr] = [mkEntry('S0001','lunch',true), mkEntry('S0004','lunch',true)];
+  scheduleData['tc-a'][dateStr] = [mkEntry('S0003','lunch',true)];
+}
+
+// 17日 hc-a 兩廠同時有暫存
+scheduleData['hc-a']['2026-04-17'] = [mkEntry('S0001','lunch',true), mkEntry('S0002','breakfast',false)];
+scheduleData['hc-b']['2026-04-17'] = [mkEntry('S0001','lunch',false)]; // 暫存
+scheduleData['tc-a']['2026-04-17'] = [mkEntry('S0003','lunch',true), mkEntry('S0004','dinner',true)];
+
+// 18日 週五 全已發布
+scheduleData['hc-a']['2026-04-18'] = [mkEntry('S0001','lunch',true)];
+scheduleData['hc-b']['2026-04-18'] = [mkEntry('S0001','lunch',true)];
+scheduleData['tc-a']['2026-04-18'] = [mkEntry('S0003','lunch',true)];
+
+// 21日～23日 全已發布
+for (let d = 21; d <= 23; d++) {
+  const dateStr = getDateStr(2026, 3, d);
+  scheduleData['hc-a'][dateStr] = [mkEntry('S0001','lunch',true), mkEntry('S0002','breakfast',true)];
+  scheduleData['hc-b'][dateStr] = [mkEntry('S0001','lunch',true)];
+  scheduleData['tc-a'][dateStr] = [mkEntry('S0003','lunch',true)];
+}
+
+// 24日 tc-a 全暫存（尚未發布）
+scheduleData['hc-a']['2026-04-24'] = [mkEntry('S0001','lunch',true), mkEntry('S0002','breakfast',true)];
+scheduleData['hc-b']['2026-04-24'] = [mkEntry('S0001','lunch',true)];
+scheduleData['tc-a']['2026-04-24'] = [mkEntry('S0003','lunch',false), mkEntry('S0006','dinner',false)]; // 全暫存
+
+// 25日 全已發布
+scheduleData['hc-a']['2026-04-25'] = [mkEntry('S0001','lunch',true)];
+scheduleData['hc-b']['2026-04-25'] = [mkEntry('S0001','lunch',true)];
+scheduleData['tc-a']['2026-04-25'] = [mkEntry('S0003','lunch',true)];
+
+// 28日～30日 hc-a 有暫存
+for (let d = 28; d <= 30; d++) {
+  const dateStr = getDateStr(2026, 3, d);
+  scheduleData['hc-a'][dateStr] = [mkEntry('S0001','lunch',false), mkEntry('S0002','breakfast',false)]; // 暫存
+  scheduleData['hc-b'][dateStr] = [mkEntry('S0001','lunch',true)];
+  scheduleData['tc-a'][dateStr] = [mkEntry('S0003','lunch',true)];
+}
+
+// ── 5月（前幾天有暫存）──
+scheduleData['hc-a']['2026-05-02'] = [mkEntry('S0001','lunch',false)];
+scheduleData['hc-b']['2026-05-02'] = [mkEntry('S0001','lunch',false)];
+scheduleData['tc-a']['2026-05-02'] = [];
+scheduleData['hc-a']['2026-05-04'] = [mkEntry('S0001','lunch',false), mkEntry('S0002','breakfast',false)];
+scheduleData['hc-b']['2026-05-04'] = [mkEntry('S0001','lunch',false)];
+scheduleData['tc-a']['2026-05-04'] = [mkEntry('S0003','lunch',false)];
+
+/* ═══════════════════════════════════════════════
+   日期狀態計算
+═══════════════════════════════════════════════ */
+function getDayStats(dateStr) {
+  let totalPublished = 0, totalDraft = 0, totalDirty = 0;
+  sites.forEach(s => {
+    const entries = (scheduleData[s.id] || {})[dateStr] || [];
+    entries.forEach(e => {
+      if (!e.publishedAt) totalDraft++;
+      else if (e.dirtyAfterPublish) { totalPublished++; totalDirty++; }
+      else totalPublished++;
+    });
+  });
+  return { totalPublished, totalDraft, totalDirty };
+}
+
+function getSiteStatus(siteId, dateStr) {
+  const entries = (scheduleData[siteId] || {})[dateStr] || [];
+  let published = 0, draft = 0, dirty = 0;
+  entries.forEach(e => {
+    if (!e.publishedAt) draft++;
+    else if (e.dirtyAfterPublish) { published++; dirty++; }
+    else published++;
+  });
+  return { published, draft, dirty, total: entries.length };
+}
+
+/* ═══════════════════════════════════════════════
+   月曆渲染
+═══════════════════════════════════════════════ */
+function renderCalendar() {
+  const firstDay   = new Date(YEAR, curMonth, 1).getDay();
+  const daysInMonth = new Date(YEAR, curMonth + 1, 0).getDate();
+  const todayStr   = getDateStr(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+
+  // 標頭
+  document.getElementById('cal-header').innerHTML =
+    `<div class="cal-wh-spacer"></div>` +
+    WD_NAMES.map((wd, i) =>
+      `<div class="cal-wh-cell${i===0||i===6?' weekend':''}">${wd}</div>`
+    ).join('');
+
+  // 月份導覽標題
+  document.getElementById('month-label').textContent = `${YEAR}年${MONTH_NAMES[curMonth]}`;
+  document.getElementById('btn-prev').disabled = curMonth <= MIN_M;
+  document.getElementById('btn-next').disabled = curMonth >= MAX_M;
+
+  // 建立格子
+  let cells = [];
+  for (let i = 0; i < firstDay; i++) cells.push({ day: null });
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d });
+  while (cells.length % 7 !== 0) cells.push({ day: null });
+
+  let html = '';
+  for (let w = 0; w < cells.length / 7; w++) {
+    const weekCells = cells.slice(w * 7, w * 7 + 7);
+    html += `<div class="cal-week-row">
+      <div class="cal-week-label"><span class="wk-num">${('第'+(w+1)+'週').split('').join('<br>')}</span></div>`;
+    weekCells.forEach((cell, wi) => {
+      if (!cell.day) {
+        html += `<div class="cal-cell other-month${wi===0||wi===6?' weekend':''}"></div>`;
+        return;
+      }
+      const dateStr = getDateStr(YEAR, curMonth, cell.day);
+      const isWkend = wi === 0 || wi === 6;
+      const isToday = dateStr === todayStr;
+      const { totalPublished, totalDraft, totalDirty } = getDayStats(dateStr);
+      const hasAny = totalPublished + totalDraft > 0;
+
+      const numCls = isToday ? 'today' : (isWkend ? 'weekend' : '');
+
+      let tagHtml = '';
+      if (hasAny) {
+        const hasDraft = totalDraft > 0 || totalDirty > 0;
+        const tagCls = hasDraft ? 'has-draft' : 'all-done';
+        const draftLabel = totalDraft + totalDirty;
+        tagHtml = `<button class="pub-status-tag ${tagCls}" onclick="event.stopPropagation();openDayDetail('${dateStr}')">
+          已發布 ${totalPublished}｜暫存 ${draftLabel}
+        </button>`;
+      }
+
+      html += `<div class="cal-cell${isWkend?' weekend':''}" onclick="openDayDetail('${dateStr}')">
+        <div class="cal-day-num ${numCls}">${cell.day}</div>
+        ${tagHtml}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  document.getElementById('cal-body').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════
+   詳情 Modal
+═══════════════════════════════════════════════ */
+function openDayDetail(dateStr) {
+  const d   = new Date(dateStr);
+  const wd  = d.getDay();
+  const dateLabel = `${YEAR}年${MONTH_NAMES[d.getMonth()]}${d.getDate()}日（週${WD_NAMES[wd]}）`;
+
+  document.getElementById('modal-title').textContent = dateLabel + ' 發布狀態';
+  document.getElementById('modal-body').innerHTML = renderDayDetail(dateStr);
+  document.getElementById('modal-backdrop').classList.add('open');
+}
+
+function renderDayDetail(dateStr) {
+  let html = '';
+
+  sites.forEach(site => {
+    const { published, draft, dirty, total } = getSiteStatus(site.id, dateStr);
+    const entries = (scheduleData[site.id] || {})[dateStr] || [];
+
+    let pillCls, pillLabel;
+    if (total === 0) {
+      pillCls = 'empty'; pillLabel = '本日無排程';
+    } else if (draft === 0 && dirty === 0) {
+      pillCls = 'ok'; pillLabel = '全部已發布';
+    } else {
+      const draftCount = draft + dirty;
+      pillCls = 'warn'; pillLabel = `${draftCount} 筆暫存`;
+    }
+
+    html += `<div class="site-block">
+      <div class="site-block-hd">
+        <div class="site-block-name">${site.name}</div>
+        <span class="site-status-pill ${pillCls}">${pillLabel}</span>
+      </div>`;
+
+    if (total === 0) {
+      html += `<div class="no-entries">本日無排程</div>`;
+    } else {
+      entries.forEach(e => {
+        const rest = restaurants.find(r => r.id === e.restaurantId);
+        const mi = mealInfo(e.mealType);
+        let badgeCls, badgeLabel;
+        if (!e.publishedAt) {
+          badgeCls = 'draft'; badgeLabel = '暫存';
+        } else if (e.dirtyAfterPublish) {
+          badgeCls = 'dirty'; badgeLabel = '已修改';
+        } else {
+          badgeCls = 'published'; badgeLabel = '已發布';
+        }
+        html += `<div class="entry-row">
+          <span class="meal-chip ${mi.chipCls}">${mi.label}</span>
+          <span class="entry-rest-name">${rest ? rest.name : e.restaurantId}</span>
+          <span class="pub-badge ${badgeCls}">${badgeLabel}</span>
+        </div>`;
+      });
+    }
+
+    html += `</div>`;
+  });
+
+  return html;
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+}
+
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('modal-backdrop')) closeModal();
+}
+
+/* ═══════════════════════════════════════════════
+   月份切換
+═══════════════════════════════════════════════ */
+function changeMonth(delta) {
+  curMonth = Math.max(MIN_M, Math.min(MAX_M, curMonth + delta));
+  renderCalendar();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+renderCalendar();
+</script>
+</body>
+</html>
