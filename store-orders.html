@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>訂單明細 — 店家後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --purple:      #7c3aed;
+  --purple-bg:   #f5f3ff;
+  --purple-bdr:  #ddd6fe;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 18px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1280px; margin: 0 auto; padding: 12px 20px 80px; }
+.page-header { margin-bottom: 20px; }
+.page-title  { font-size: 22px; font-weight: 600; }
+.page-sub    { font-size: 17px; color: var(--text-3); margin-top: 3px; }
+
+/* ── 工具列 ── */
+.toolbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.month-nav { display: flex; align-items: center; gap: 6px; }
+.month-nav-label { font-size: 17px; font-weight: 500; min-width: 96px; text-align: center; }
+.btn-nav {
+  padding: 4px 11px; border: 1px solid var(--border); border-radius: 5px;
+  background: var(--bg); color: var(--text-2); cursor: pointer; font-size: 15px;
+}
+.btn-nav:hover:not(:disabled) { background: var(--bg-2); }
+.btn-nav:disabled { opacity: .3; cursor: default; }
+
+.meal-filter-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.meal-pill {
+  padding: 4px 13px; border-radius: 100px;
+  border: 1px solid var(--border); font-size: 15px; cursor: pointer;
+  background: var(--bg); color: var(--text-2); transition: all .12s; user-select: none;
+}
+.meal-pill:hover { border-color: #a8a29e; }
+.meal-pill.on { background: var(--text); color: #fff; border-color: var(--text); }
+
+/* ── 兩欄佈局 ── */
+.orders-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ── 左側日期列表 ── */
+.date-list-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+.date-list-hd {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  font-size: 15px; font-weight: 600; color: var(--text-2);
+}
+.date-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-2);
+  cursor: pointer;
+  transition: background .1s;
+}
+.date-item:last-child { border-bottom: none; }
+.date-item:hover { background: var(--bg-2); }
+.date-item.active { background: var(--blue-bg); border-left: 3px solid var(--blue); }
+.date-item-date { font-size: 16px; font-weight: 500; }
+.date-item-meta { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+.date-list-empty { padding: 28px 14px; text-align: center; color: var(--text-3); font-size: 15px; }
+
+/* ── 右側訂單明細 ── */
+.order-detail-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.order-detail-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 320px; color: var(--text-3); gap: 10px;
+}
+.order-detail-placeholder .icon { font-size: 40px; }
+.order-detail-placeholder p { font-size: 17px; }
+
+.order-date-title {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 18px; font-weight: 600;
+}
+
+/* ── 餐期區塊 ── */
+.meal-section { border-bottom: 1px solid var(--border); }
+.meal-section:last-child { border-bottom: none; }
+.meal-section-hd {
+  padding: 11px 20px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border-2);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 16px; font-weight: 500;
+}
+.meal-section-total {
+  font-size: 14px; color: var(--text-3); font-weight: 400;
+}
+
+/* ── 訂單表格 ── */
+.order-table-wrap { overflow-x: auto; }
+.order-table {
+  width: 100%; border-collapse: collapse; font-size: 15px;
+}
+.order-table th {
+  padding: 8px 16px; font-size: 14px; font-weight: 600; color: var(--text-2);
+  background: var(--bg-2); text-align: left; border-bottom: 1px solid var(--border-2);
+  white-space: nowrap;
+}
+.order-table td {
+  padding: 8px 16px; border-bottom: 1px solid var(--border-2); color: var(--text-2);
+  vertical-align: middle;
+}
+.order-table tr:last-child td { border-bottom: none; }
+
+/* ── 分店標題列 ── */
+.branch-hd-row td {
+  background: var(--bg-3); font-weight: 600; font-size: 15px;
+  color: var(--text); padding: 8px 16px; border-top: 1px solid var(--border-2);
+}
+.branch-total-tag {
+  display: inline-block; font-size: 13px; padding: 1px 9px; border-radius: 100px;
+  background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr);
+  margin-left: 8px; font-weight: 500;
+}
+.branch-zero-tag {
+  display: inline-block; font-size: 13px; padding: 1px 9px; border-radius: 100px;
+  background: var(--bg-3); color: var(--text-3); border: 1px solid var(--border);
+  margin-left: 8px; font-weight: 400;
+}
+
+/* 數量為 0 顯示橫線 */
+.qty-zero { color: var(--text-3); }
+.qty-val  { font-weight: 600; color: var(--text); }
+
+/* ── Meal chip ── */
+.meal-chip { padding: 2px 9px; border-radius: 100px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.chip-breakfast { background: #fef9c3; color: #854d0e; }
+.chip-lunch     { background: var(--orange-bg); color: var(--orange); }
+.chip-dinner    { background: var(--purple-bg); color: var(--purple); }
+.chip-afternoon { background: #f0fdfa; color: #0f766e; }
+.chip-latenight { background: var(--bg-3); color: var(--text-2); }
+
+/* ── RWD ── */
+@media (max-width: 860px) {
+  .orders-layout { grid-template-columns: 1fr; }
+  .date-list-panel { position: static; max-height: none; }
+}
+</style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">訂單明細</div>
+    <div class="page-sub">查看各廠區分店的排程訂餐數量</div>
+  </div>
+
+  <!-- 工具列 -->
+  <div class="toolbar">
+    <div class="month-nav">
+      <button class="btn-nav" id="btn-prev" onclick="changeMonth(-1)">← 上月</button>
+      <span class="month-nav-label" id="month-label">2026年4月</span>
+      <button class="btn-nav" id="btn-next" onclick="changeMonth(1)">下月 →</button>
+    </div>
+    <div class="meal-filter-wrap" id="meal-filter-wrap">
+      <!-- 由 JS 填入 -->
+    </div>
+  </div>
+
+  <div class="orders-layout">
+
+    <!-- 左側：日期列表 -->
+    <div class="date-list-panel">
+      <div class="date-list-hd">已發布排程</div>
+      <div id="date-list-body"></div>
+    </div>
+
+    <!-- 右側：訂單明細 -->
+    <div class="order-detail-panel" id="order-detail-panel">
+      <div class="order-detail-placeholder">
+        <div class="icon">📦</div>
+        <p>請從左側選擇日期查看訂單明細</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   常數
+═══════════════════════════════════════════════ */
+const YEAR  = 2026;
+const MIN_M = 2;  // 3月
+const MAX_M = 4;  // 5月
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const WD_NAMES = ['日','一','二','三','四','五','六'];
+
+const MEAL_TYPES = [
+  { id: 'all',       label: '全部',   chipCls: '' },
+  { id: 'breakfast', label: '早餐',   chipCls: 'chip-breakfast' },
+  { id: 'lunch',     label: '午餐',   chipCls: 'chip-lunch' },
+  { id: 'afternoon', label: '下午茶', chipCls: 'chip-afternoon' },
+  { id: 'dinner',    label: '晚餐',   chipCls: 'chip-dinner' },
+  { id: 'latenight', label: '消夜',   chipCls: 'chip-latenight' },
+];
+
+/* ═══════════════════════════════════════════════
+   當前店家（模擬）
+═══════════════════════════════════════════════ */
+const currentStore = {
+  id: '9990014-001',
+  name: '爭鮮gogo-台北內湖康寧店',
+};
+
+/* ═══════════════════════════════════════════════
+   訂單明細資料（已發布排程）
+   orderData[dateStr][mealType] = { totalQty, branches: [...] }
+   每個 branch = { branchCode, branchName, branchTotal, items:[{itemCode,itemName,qty}] }
+═══════════════════════════════════════════════ */
+const orderData = {
+  '2026-04-22': {
+    lunch: {
+      totalQty: 1,
+      branches: [
+        {
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 0,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 0 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 0 },
+            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0 },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 0 },
+          ]
+        },
+        {
+          branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 1,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 0 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 0 },
+            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 1 },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 0 },
+          ]
+        }
+      ]
+    }
+  },
+  '2026-04-23': {
+    lunch: {
+      totalQty: 4,
+      branches: [
+        {
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 2,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 2 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 0 },
+            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0 },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 0 },
+          ]
+        },
+        {
+          branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 2,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 0 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 1 },
+            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0 },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 1 },
+          ]
+        }
+      ]
+    },
+    dinner: {
+      totalQty: 3,
+      branches: [
+        {
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 3,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 1 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 2 },
+          ]
+        }
+      ]
+    }
+  },
+  '2026-04-29': {
+    lunch: {
+      totalQty: 0,
+      branches: [
+        {
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 0,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 0 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 0 },
+            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0 },
+          ]
+        }
+      ]
+    }
+  },
+  '2026-03-25': {
+    lunch: {
+      totalQty: 5,
+      branches: [
+        {
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 5,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 3 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 2 },
+          ]
+        }
+      ]
+    }
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   狀態
+═══════════════════════════════════════════════ */
+let curMonth     = 3;  // 4月（0-indexed）
+let activeDateStr = null;
+let mealFilter   = 'all';
+
+/* ═══════════════════════════════════════════════
+   工具
+═══════════════════════════════════════════════ */
+function getMealInfo(id) { return MEAL_TYPES.find(m => m.id === id) || { id, label: id, chipCls: '' }; }
+function getMonthDates() {
+  const y = YEAR, m = curMonth;
+  const mmStr = String(m + 1).padStart(2, '0');
+  const start = `${y}-${mmStr}-01`;
+  const endDay = new Date(y, m + 1, 0).getDate();
+  const end = `${y}-${mmStr}-${String(endDay).padStart(2, '0')}`;
+  return { start, end };
+}
+
+/* ═══════════════════════════════════════════════
+   渲染月份篩選 pills
+═══════════════════════════════════════════════ */
+function renderMealFilter() {
+  document.getElementById('meal-filter-wrap').innerHTML =
+    MEAL_TYPES.map(m =>
+      `<div class="meal-pill${m.id === mealFilter ? ' on' : ''}" onclick="selectMealFilter('${m.id}')">${m.label}</div>`
+    ).join('');
+}
+
+function selectMealFilter(id) {
+  mealFilter = id;
+  renderMealFilter();
+  renderDateList();
+  if (activeDateStr) renderOrderDetail(activeDateStr);
+}
+
+/* ═══════════════════════════════════════════════
+   左側日期列表
+═══════════════════════════════════════════════ */
+function getFilteredDates() {
+  const { start, end } = getMonthDates();
+  return Object.keys(orderData)
+    .filter(d => {
+      if (d < start || d > end) return false;
+      if (mealFilter === 'all') return true;
+      return !!orderData[d][mealFilter];
+    })
+    .sort();
+}
+
+function renderDateList() {
+  const dates = getFilteredDates();
+  const el = document.getElementById('date-list-body');
+  if (!dates.length) {
+    el.innerHTML = '<div class="date-list-empty">本月無已發布排程</div>';
+    return;
+  }
+  el.innerHTML = dates.map(d => {
+    const dt = new Date(d);
+    const mealKeys = mealFilter === 'all'
+      ? Object.keys(orderData[d])
+      : [mealFilter];
+    const totalQty = mealKeys.reduce((s, mk) => s + (orderData[d][mk]?.totalQty || 0), 0);
+    const mealChips = mealKeys.map(mk => {
+      const mi = getMealInfo(mk);
+      return `<span class="meal-chip ${mi.chipCls}">${mi.label}</span>`;
+    }).join(' ');
+    return `<div class="date-item${d === activeDateStr ? ' active' : ''}" onclick="selectDate('${d}')">
+      <div class="date-item-date">${d.slice(5).replace('-','/')}（週${WD_NAMES[dt.getDay()]}）</div>
+      <div class="date-item-meta">${mealChips}　共 ${totalQty} 份</div>
+    </div>`;
+  }).join('');
+}
+
+function selectDate(dateStr) {
+  activeDateStr = dateStr;
+  renderDateList();
+  renderOrderDetail(dateStr);
+}
+
+/* ═══════════════════════════════════════════════
+   右側訂單明細
+═══════════════════════════════════════════════ */
+function renderOrderDetail(dateStr) {
+  const dayData = orderData[dateStr];
+  if (!dayData) return;
+
+  const dt = new Date(dateStr);
+  const dateLabel = `${dateStr.slice(0,4)}年${dateStr.slice(5,7)}月${dateStr.slice(8,10)}日（週${WD_NAMES[dt.getDay()]}）`;
+
+  const mealKeys = mealFilter === 'all'
+    ? Object.keys(dayData)
+    : Object.keys(dayData).filter(mk => mk === mealFilter);
+
+  if (!mealKeys.length) {
+    document.getElementById('order-detail-panel').innerHTML = `
+      <div class="order-date-title">${dateLabel}</div>
+      <div class="order-detail-placeholder" style="min-height:200px">
+        <p>本日此餐期無排程資料</p>
+      </div>`;
+    return;
+  }
+
+  let html = `<div class="order-date-title">${dateLabel}</div>`;
+
+  const mealOrder = ['breakfast','lunch','afternoon','dinner','latenight'];
+  const sortedMeals = mealKeys.sort((a, b) => mealOrder.indexOf(a) - mealOrder.indexOf(b));
+
+  sortedMeals.forEach(mealType => {
+    const mealData = dayData[mealType];
+    if (!mealData) return;
+    const mi = getMealInfo(mealType);
+    html += `<div class="meal-section">
+      <div class="meal-section-hd">
+        <span class="meal-chip ${mi.chipCls}">${mi.label}</span>
+        <span class="meal-section-total">預定數量：${mealData.totalQty}</span>
+      </div>
+      <div class="order-table-wrap">
+        <table class="order-table">
+          <thead>
+            <tr>
+              <th>分店</th>
+              <th>餐點</th>
+              <th>數量</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+    mealData.branches.forEach(branch => {
+      const totalTag = branch.branchTotal > 0
+        ? `<span class="branch-total-tag">總數：${branch.branchTotal}</span>`
+        : `<span class="branch-zero-tag">總數：0</span>`;
+      html += `<tr class="branch-hd-row">
+        <td colspan="3">${branch.branchCode}-${branch.branchName}${totalTag}</td>
+      </tr>`;
+
+      branch.items.forEach(item => {
+        const storeCol = `${currentStore.id}-${currentStore.name}`;
+        const itemCol  = `${item.itemCode}-${item.itemName}`;
+        const qtyHtml  = item.qty > 0
+          ? `<span class="qty-val">${item.qty}</span>`
+          : `<span class="qty-zero">-</span>`;
+        html += `<tr>
+          <td style="color:var(--text-3);font-size:14px">${storeCol}</td>
+          <td>${itemCol}</td>
+          <td style="text-align:right;padding-right:24px">${qtyHtml}</td>
+        </tr>`;
+      });
+    });
+
+    html += `</tbody></table></div></div>`;
+  });
+
+  document.getElementById('order-detail-panel').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════
+   月份導覽
+═══════════════════════════════════════════════ */
+function changeMonth(delta) {
+  curMonth = Math.max(MIN_M, Math.min(MAX_M, curMonth + delta));
+  document.getElementById('month-label').textContent = `${YEAR}年${MONTH_NAMES[curMonth]}`;
+  document.getElementById('btn-prev').disabled = curMonth <= MIN_M;
+  document.getElementById('btn-next').disabled = curMonth >= MAX_M;
+  activeDateStr = null;
+  renderDateList();
+  document.getElementById('order-detail-panel').innerHTML = `
+    <div class="order-detail-placeholder">
+      <div class="icon">📦</div>
+      <p>請從左側選擇日期查看訂單明細</p>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   初始化
+═══════════════════════════════════════════════ */
+document.getElementById('btn-prev').disabled = curMonth <= MIN_M;
+document.getElementById('btn-next').disabled = curMonth >= MAX_M;
+renderMealFilter();
+renderDateList();
+</script>
+</body>
+</html>

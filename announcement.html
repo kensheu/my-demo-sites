@@ -1538,7 +1538,23 @@
 
   // ─── 店家後台公告資料 ───
   const storeAnnouncements = [
-    { id: 200, title: '新版訂單確認流程上線', category: '系統公告', icon: '🔔', time: '剛剛', read: false, text: '新版訂單確認流程已於今日上線，請各店家確認操作流程並更新相關設定。如有疑問請聯繫系統管理員。' },
+    {
+      id: 301, title: '【排程通知】4月22日 新竹A廠 午餐',
+      category: '排程通知', icon: '📋', time: '04/16 14:32', read: false,
+      text: '您的店家已被安排供應 2026-04-22（週三）新竹A廠午餐。\n\n請至訂單明細確認各分店預訂數量，並依照排程備餐。如對菜單內容有疑問，請聯繫營運部。',
+      scheduleRef: { date: '2026-04-22', siteId: 'hc-a', siteName: '新竹A廠', mealType: 'lunch', mealLabel: '午餐' }
+    },
+    {
+      id: 302, title: '【排程通知】4月23日 新竹B廠 午餐',
+      category: '排程通知', icon: '📋', time: '04/16 14:32', read: false,
+      text: '您的店家已被安排供應 2026-04-23（週四）新竹B廠午餐。\n\n請至訂單明細確認各分店預訂數量，並依照排程備餐。如對菜單內容有疑問，請聯繫營運部。',
+      scheduleRef: { date: '2026-04-23', siteId: 'hc-b', siteName: '新竹B廠', mealType: 'lunch', mealLabel: '午餐' }
+    },
+    {
+      id: 300, title: '新版訂單確認流程上線',
+      category: '系統公告', icon: '🔔', time: '04/10 09:00', read: true,
+      text: '新版訂單確認流程已於今日上線，請各店家確認操作流程並更新相關設定。如有疑問請聯繫系統管理員。'
+    },
   ];
 
   let adminFilter = 'all';
@@ -1555,8 +1571,8 @@
     const list = document.getElementById('admin-notify-list');
     let items = adminAnnouncements.filter(a => {
       if (isStoreMode) {
-        // 店家後台只顯示系統公告
-        if (a.category !== '系統公告') return false;
+        // 店家後台顯示系統公告與排程通知
+        if (a.category !== '系統公告' && a.category !== '排程通知') return false;
       }
       if (adminFilter === 'unread') return !a.read;
       if (adminFilter !== 'all' && adminFilter !== 'unread') return a.category === adminFilter;
@@ -1565,14 +1581,21 @@
     if (items.length === 0) {
       list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>目前沒有公告</p></div>`;
     } else if (isStoreMode) {
-      /* 店家後台：ann-row 樣式（同 home.html），全為系統公告不顯示標籤 */
+      /* 店家後台：ann-row 樣式，排程通知使用特殊顯示 */
       list.classList.add('store-ann-list');
-      list.innerHTML = items.map(a => `
-        <div class="ann-row${a.read ? ' read' : ''}" onclick="openNotifyPopup(${a.id})">
-          <span class="ann-text">${a.title}${!a.read ? ' <span style="display:inline-block;background:#e0f7fa;color:#00838f;font-size:10px;padding:1px 6px;border-radius:10px;vertical-align:middle">未讀</span>' : ''}</span>
+      list.innerHTML = items.map(a => {
+        const isSchedule = a.category === '排程通知';
+        const unreadBadge = !a.read
+          ? ' <span style="display:inline-block;background:#e0f7fa;color:#00838f;font-size:10px;padding:1px 6px;border-radius:10px;vertical-align:middle">未讀</span>'
+          : '';
+        const scheduleTag = isSchedule
+          ? `<span style="display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;vertical-align:middle;margin-right:4px">📋 排程通知</span>`
+          : '';
+        return `<div class="ann-row${a.read ? ' read' : ''}" onclick="openNotifyPopup(${a.id})">
+          <span class="ann-text">${scheduleTag}${a.title}${unreadBadge}</span>
           <span class="ann-date">${a.time}</span>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     } else {
       list.innerHTML = items.map(a => `
         <div class="notify-card ${a.read ? 'read' : 'unread'} ${catClass(a.category) === 'maintenance' ? 'maint' : ''}" onclick="openNotifyPopup(${a.id})" style="cursor:pointer">
@@ -1598,10 +1621,19 @@
 
   function openNotifyPopup(id) {
     const a = adminAnnouncements.find(x => x.id === id);
-    document.getElementById('notify-popup-tag').textContent = '📢 ' + (a.category || '公告');
+    document.getElementById('notify-popup-tag').textContent = a.icon + ' ' + (a.category || '公告');
     document.getElementById('notify-popup-title').textContent = a.title;
     document.getElementById('notify-popup-time').textContent = a.time + ' · 系統管理員';
-    document.getElementById('notify-popup-text').innerHTML = a.text.replace(/\n/g, '<br>');
+    let bodyHtml = a.text.replace(/\n/g, '<br>');
+    if (a.scheduleRef) {
+      const sr = a.scheduleRef;
+      bodyHtml += `<div style="margin-top:14px;padding:10px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:14px;color:#1e40af;">
+        <strong>📋 排程資訊</strong><br>
+        日期：${sr.date}　廠區：${sr.siteName}　餐期：${sr.mealLabel}<br>
+        <a href="store-orders.html?sys=store" style="color:#1d4ed8;text-decoration:underline;font-size:13px;display:inline-block;margin-top:6px">→ 查看訂單明細</a>
+      </div>`;
+    }
+    document.getElementById('notify-popup-text').innerHTML = bodyHtml;
     document.getElementById('notify-popup').classList.add('open');
     a.read = true;
     renderAdmin();

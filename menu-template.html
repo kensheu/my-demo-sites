@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>菜單模板管理 — 內部後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --purple:      #7c3aed;
+  --purple-bg:   #f5f3ff;
+  --purple-bdr:  #ddd6fe;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 18px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1280px; margin: 0 auto; padding: 12px 20px 80px; }
+.page-header { margin-bottom: 20px; }
+.page-title  { font-size: 22px; font-weight: 600; }
+.page-sub    { font-size: 17px; color: var(--text-3); margin-top: 3px; }
+
+/* ── 兩欄佈局 ── */
+.tpl-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ── 左側模板列表 ── */
+.tpl-list-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  position: sticky;
+  top: 16px;
+}
+.tpl-list-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.tpl-list-hd-title { font-size: 16px; font-weight: 600; }
+.btn-add-tpl {
+  padding: 4px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;
+  background: var(--blue); color: #fff; border: none; cursor: pointer;
+  font-family: inherit; transition: opacity .12s;
+}
+.btn-add-tpl:hover { opacity: .85; }
+
+.tpl-item {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-2);
+  cursor: pointer;
+  transition: background .1s;
+}
+.tpl-item:last-child { border-bottom: none; }
+.tpl-item:hover { background: var(--bg-2); }
+.tpl-item.active { background: var(--blue-bg); border-left: 3px solid var(--blue); }
+.tpl-item-name { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.tpl-item-meta { font-size: 13px; color: var(--text-3); display: flex; gap: 6px; flex-wrap: wrap; }
+.tpl-item-count { font-size: 13px; color: var(--text-2); }
+
+.tpl-list-empty { padding: 32px 14px; text-align: center; color: var(--text-3); font-size: 15px; }
+
+/* ── 右側編輯區 ── */
+.tpl-edit-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tpl-edit-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.tpl-edit-section:last-child { border-bottom: none; }
+.section-title {
+  font-size: 16px; font-weight: 600; margin-bottom: 14px; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.count-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border);
+  border-radius: 100px; font-size: 13px; font-weight: 600;
+  min-width: 24px; height: 20px; padding: 0 6px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+}
+.form-row { display: flex; flex-direction: column; gap: 5px; }
+.form-row.full { grid-column: 1 / -1; }
+.form-label { font-size: 14px; font-weight: 500; color: var(--text-2); }
+.form-input, .form-select {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px;
+  font-size: 15px; font-family: inherit; color: var(--text); background: var(--bg-2);
+  outline: none; transition: border-color .12s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--blue); background: var(--card); }
+input[type="number"].form-input { width: 100px; }
+
+/* ── 店家池 ── */
+.pool-add-wrap { margin-bottom: 12px; }
+.pool-search-input {
+  width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px;
+  font-size: 15px; font-family: inherit; outline: none;
+}
+.pool-search-input:focus { border-color: var(--blue); }
+.pool-add-list {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.1); max-height: 200px; overflow-y: auto;
+  margin-top: 4px;
+}
+.pool-add-item {
+  padding: 8px 12px; font-size: 15px; cursor: pointer; color: var(--text-2);
+  border-bottom: 1px solid var(--border-2); display: flex; align-items: center;
+  justify-content: space-between; gap: 8px; transition: background .1s;
+}
+.pool-add-item:last-child { border-bottom: none; }
+.pool-add-item:hover { background: var(--blue-bg); color: var(--text); }
+.pool-add-btn {
+  font-size: 13px; padding: 2px 9px; border-radius: 5px;
+  background: var(--blue-bg); color: var(--blue-text);
+  border: 1px solid var(--blue-border); cursor: pointer; white-space: nowrap;
+  font-family: inherit;
+}
+.pool-add-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+.pool-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border-2);
+  transition: background .1s;
+}
+.pool-item:last-child { border-bottom: none; }
+.pool-item:hover { background: var(--bg-2); }
+.pool-item.incompatible { opacity: .45; }
+.pool-item-info { flex: 1; min-width: 0; }
+.pool-item-name { font-size: 16px; font-weight: 500; color: var(--text); }
+.pool-item-meta { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+.pool-warn { font-size: 12px; color: var(--orange); background: var(--orange-bg);
+  border: 1px solid var(--orange-bdr); border-radius: 4px; padding: 1px 6px;
+  white-space: nowrap; flex-shrink: 0; }
+.pool-remove-btn {
+  padding: 3px 10px; border-radius: 5px; font-size: 13px;
+  background: var(--red-bg); color: var(--red); border: 1px solid var(--red-bdr);
+  cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0;
+}
+.pool-remove-btn:hover { background: var(--red); color: #fff; }
+
+.pool-empty { padding: 24px; text-align: center; color: var(--text-3); font-size: 15px; }
+
+/* ── 底部操作列 ── */
+.tpl-edit-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.btn { padding: 7px 16px; border-radius: 7px; font-size: 15px; font-family: inherit;
+  cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-2); }
+.btn:hover { background: var(--bg-3); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { opacity: .88; }
+.btn-danger-outline { color: var(--red); border-color: var(--red-bdr); background: var(--red-bg); }
+.btn-danger-outline:hover { background: var(--red); color: #fff; }
+
+/* ── Meal chip ── */
+.meal-chip { padding: 1px 8px; border-radius: 100px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.chip-breakfast { background: #fef9c3; color: #854d0e; }
+.chip-lunch     { background: var(--orange-bg); color: var(--orange); }
+.chip-dinner    { background: var(--purple-bg); color: var(--purple); }
+.chip-afternoon { background: #f0fdfa; color: #0f766e; }
+.chip-latenight { background: var(--bg-3); color: var(--text-2); }
+
+/* ── 空白提示 ── */
+.tpl-edit-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 320px; color: var(--text-3); gap: 10px;
+}
+.tpl-edit-placeholder .icon { font-size: 40px; }
+.tpl-edit-placeholder p { font-size: 17px; }
+
+/* ── Overlay Modal ── */
+.overlay-mask {
+  position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .15s;
+}
+.overlay-mask.open { opacity: 1; pointer-events: auto; }
+.overlay-modal {
+  background: var(--card); border-radius: 12px; padding: 24px;
+  width: 380px; max-width: 90vw;
+  box-shadow: 0 12px 40px rgba(0,0,0,.2);
+  transform: translateY(-8px); transition: transform .15s;
+}
+.overlay-mask.open .overlay-modal { transform: translateY(0); }
+.overlay-modal-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+.overlay-modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px);
+  background: #1c1b1a; color: #fff; padding: 10px 20px; border-radius: 8px;
+  font-size: 16px; z-index: 200; transition: transform .25s, opacity .25s; opacity: 0;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ── RWD ── */
+@media (max-width: 900px) {
+  .tpl-layout { grid-template-columns: 1fr; }
+  .tpl-list-panel { position: static; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+  <link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">菜單模板管理</div>
+    <div class="page-sub">定義常用店家組合，快速套用至排程新增店家</div>
+  </div>
+
+  <div class="tpl-layout">
+
+    <!-- 左側模板列表 -->
+    <div class="tpl-list-panel">
+      <div class="tpl-list-hd">
+        <span class="tpl-list-hd-title">模板列表</span>
+        <button class="btn-add-tpl" onclick="openAddTplModal()">＋ 新增</button>
+      </div>
+      <div id="tpl-list-body"></div>
+    </div>
+
+    <!-- 右側編輯區 -->
+    <div class="tpl-edit-panel" id="tpl-edit-panel">
+      <div class="tpl-edit-placeholder">
+        <div class="icon">📋</div>
+        <p>請從左側選擇模板進行編輯</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 新增模板 Modal -->
+<div class="overlay-mask" id="add-tpl-mask" onclick="handleMaskClick(event,'add-tpl-mask')">
+  <div class="overlay-modal">
+    <div class="overlay-modal-title">新增模板</div>
+    <div class="form-row">
+      <div class="form-label">模板名稱</div>
+      <input type="text" class="form-input" id="new-tpl-name" placeholder="例：新竹A廠 午餐" style="width:100%"
+             onkeydown="if(event.key==='Enter')confirmAddTpl()">
+    </div>
+    <div class="overlay-modal-foot">
+      <button class="btn" onclick="closeAddTplModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmAddTpl()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   常數
+═══════════════════════════════════════════════ */
+const MEAL_TYPES = [
+  { id: 'breakfast', label: '早餐',   chipCls: 'chip-breakfast' },
+  { id: 'lunch',     label: '午餐',   chipCls: 'chip-lunch' },
+  { id: 'afternoon', label: '下午茶', chipCls: 'chip-afternoon' },
+  { id: 'dinner',    label: '晚餐',   chipCls: 'chip-dinner' },
+  { id: 'latenight', label: '消夜',   chipCls: 'chip-latenight' },
+];
+const WD_NAMES = ['日','一','二','三','四','五','六'];
+
+const sites = [
+  { id: 'hc-a', name: '新竹 A 廠' },
+  { id: 'hc-b', name: '新竹 B 廠' },
+  { id: 'tc-a', name: '台中 A 廠' },
+];
+
+const restaurants = [
+  {
+    id: 'S0001', name: 'OO 雞飯專門店',
+    mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
+    closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
+  },
+  {
+    id: 'S0002', name: 'XX 早餐店',
+    mealTypes: { breakfast: true, lunch: true, afternoon: false, dinner: false, latenight: false },
+    closedWeekdays: { breakfast:[0], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-05-01'],
+  },
+  {
+    id: 'S0003', name: '阿成便當',
+    mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
+    closedWeekdays: { breakfast:[], lunch:[6,0], afternoon:[], dinner:[6,0], latenight:[] }, closedDates: [],
+  },
+  {
+    id: 'S0004', name: '好味食堂',
+    mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
+    closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
+  },
+  {
+    id: 'S0005', name: '家鄉麵食館',
+    mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
+    closedWeekdays: { breakfast:[], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-04-04'],
+  },
+];
+
+/* ═══════════════════════════════════════════════
+   模板資料
+═══════════════════════════════════════════════ */
+const templates = [
+  {
+    id: 'tpl-001',
+    name: '新竹A廠｜午餐',
+    siteId: 'hc-a',
+    mealType: 'lunch',
+    dailyRestCount: 2,
+    itemsPerRest: 3,
+    restaurantIds: ['S0001', 'S0003', 'S0004'],
+  },
+  {
+    id: 'tpl-002',
+    name: '新竹廠｜晚餐',
+    siteId: 'hc-a',
+    mealType: 'dinner',
+    dailyRestCount: 2,
+    itemsPerRest: 3,
+    restaurantIds: ['S0003', 'S0004'],
+  },
+  {
+    id: 'tpl-003',
+    name: '台中A廠｜午餐',
+    siteId: 'tc-a',
+    mealType: 'lunch',
+    dailyRestCount: 2,
+    itemsPerRest: 3,
+    restaurantIds: ['S0004', 'S0005'],
+  },
+];
+
+let activeTplId = templates[0]?.id || null;
+let tplIdCounter = 100;
+
+/* ═══════════════════════════════════════════════
+   工具函式
+═══════════════════════════════════════════════ */
+function getMealInfo(id) { return MEAL_TYPES.find(m => m.id === id) || { id, label: id, chipCls: '' }; }
+function getSiteName(id) { return (sites.find(s => s.id === id) || {}).name || id; }
+
+function isRestIncompatible(rest, mealType) {
+  return !rest.mealTypes[mealType];
+}
+
+function getClosedSummary(rest, mealType) {
+  const wds = (rest.closedWeekdays[mealType] || []);
+  const parts = [];
+  if (wds.length) parts.push('週' + wds.map(w => WD_NAMES[w]).join('週') + '公休');
+  if (rest.closedDates.length) parts.push(`特定公休 ${rest.closedDates.length} 天`);
+  return parts.join('、') || '無公休';
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ═══════════════════════════════════════════════
+   左側列表渲染
+═══════════════════════════════════════════════ */
+function renderTplList() {
+  const el = document.getElementById('tpl-list-body');
+  if (!templates.length) {
+    el.innerHTML = '<div class="tpl-list-empty">尚無模板<br>點擊「＋新增」建立</div>';
+    return;
+  }
+  el.innerHTML = templates.map(tpl => {
+    const mi = getMealInfo(tpl.mealType);
+    const siteName = getSiteName(tpl.siteId);
+    const isActive = tpl.id === activeTplId;
+    return `<div class="tpl-item${isActive ? ' active' : ''}" onclick="selectTpl('${tpl.id}')">
+      <div class="tpl-item-name">${tpl.name}</div>
+      <div class="tpl-item-meta">
+        <span>${siteName}</span>
+        <span>・</span>
+        <span class="meal-chip ${mi.chipCls}">${mi.label}</span>
+      </div>
+      <div class="tpl-item-count">店家池：${tpl.restaurantIds.length} 間</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   右側編輯區渲染
+═══════════════════════════════════════════════ */
+function renderEditPanel(tplId) {
+  const tpl = templates.find(t => t.id === tplId);
+  if (!tpl) {
+    document.getElementById('tpl-edit-panel').innerHTML = `
+      <div class="tpl-edit-placeholder">
+        <div class="icon">📋</div>
+        <p>請從左側選擇模板進行編輯</p>
+      </div>`;
+    return;
+  }
+
+  const mi = getMealInfo(tpl.mealType);
+  const siteOpts = [{ id: '', name: '通用（不限廠區）' }, ...sites]
+    .map(s => `<option value="${s.id}"${s.id === tpl.siteId ? ' selected' : ''}>${s.name}</option>`).join('');
+  const mealOpts = MEAL_TYPES
+    .map(m => `<option value="${m.id}"${m.id === tpl.mealType ? ' selected' : ''}>${m.label}</option>`).join('');
+
+  document.getElementById('tpl-edit-panel').innerHTML = `
+    <!-- 基本設定 -->
+    <div class="tpl-edit-section">
+      <div class="section-title">基本設定</div>
+      <div class="form-grid">
+        <div class="form-row full">
+          <div class="form-label">模板名稱</div>
+          <input type="text" class="form-input" id="tpl-name" value="${tpl.name}"
+                 oninput="onTplFieldChange()" style="width:100%">
+        </div>
+        <div class="form-row">
+          <div class="form-label">廠區</div>
+          <select class="form-select" id="tpl-site" onchange="onTplFieldChange()">${siteOpts}</select>
+        </div>
+        <div class="form-row">
+          <div class="form-label">餐期</div>
+          <select class="form-select" id="tpl-meal" onchange="onTplMealChange()">${mealOpts}</select>
+        </div>
+        <div class="form-row">
+          <div class="form-label">每日店家數</div>
+          <input type="number" class="form-input" id="tpl-daily-rest" value="${tpl.dailyRestCount}"
+                 min="1" max="10" oninput="onTplFieldChange()">
+        </div>
+        <div class="form-row">
+          <div class="form-label">每店家餐點數</div>
+          <input type="number" class="form-input" id="tpl-items-per-rest" value="${tpl.itemsPerRest}"
+                 min="1" max="20" oninput="onTplFieldChange()">
+        </div>
+      </div>
+    </div>
+
+    <!-- 店家池 -->
+    <div class="tpl-edit-section">
+      <div class="section-title">
+        店家池
+        <span class="count-badge" id="pool-count">${tpl.restaurantIds.length}</span>
+      </div>
+      <div class="pool-add-wrap">
+        <input type="text" class="pool-search-input" id="pool-search"
+               placeholder="搜尋並新增店家…" oninput="renderPoolAddList()" autocomplete="off">
+        <div class="pool-add-list" id="pool-add-list" style="display:none"></div>
+      </div>
+      <div id="tpl-pool-body">${renderPoolList(tpl)}</div>
+    </div>
+
+    <!-- 底部操作 -->
+    <div class="tpl-edit-foot">
+      <button class="btn btn-danger-outline" onclick="confirmDeleteTpl()">刪除此模板</button>
+      <button class="btn btn-primary" onclick="saveTpl()">儲存</button>
+    </div>
+  `;
+
+  // 點擊頁面其他地方收起搜尋結果
+  document.addEventListener('click', collapsePoolSearch);
+}
+
+function renderPoolList(tpl) {
+  if (!tpl.restaurantIds.length) {
+    return '<div class="pool-empty">尚未加入任何店家<br>在上方搜尋框輸入關鍵字以新增</div>';
+  }
+  return tpl.restaurantIds.map(rid => {
+    const rest = restaurants.find(r => r.id === rid);
+    if (!rest) return '';
+    const incompatible = isRestIncompatible(rest, tpl.mealType);
+    const closedInfo   = getClosedSummary(rest, tpl.mealType);
+    const mealLabels   = MEAL_TYPES.filter(m => rest.mealTypes[m.id]).map(m => m.label).join('、') || '—';
+    return `<div class="pool-item${incompatible ? ' incompatible' : ''}">
+      <div class="pool-item-info">
+        <div class="pool-item-name">${rest.name}</div>
+        <div class="pool-item-meta">供餐：${mealLabels}　公休：${closedInfo}</div>
+      </div>
+      ${incompatible ? `<span class="pool-warn">不供此餐期</span>` : ''}
+      <button class="pool-remove-btn" onclick="removeRestFromPool('${rid}')">移除</button>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   店家池搜尋與操作
+═══════════════════════════════════════════════ */
+function renderPoolAddList() {
+  const tpl = templates.find(t => t.id === activeTplId);
+  if (!tpl) return;
+  const kw  = document.getElementById('pool-search')?.value.toLowerCase().trim() || '';
+  const el  = document.getElementById('pool-add-list');
+  if (!el) return;
+
+  if (!kw) { el.style.display = 'none'; el.innerHTML = ''; return; }
+
+  const results = restaurants.filter(r =>
+    r.name.toLowerCase().includes(kw) &&
+    !tpl.restaurantIds.includes(r.id)
+  );
+
+  if (!results.length) {
+    el.style.display = 'block';
+    el.innerHTML = '<div class="pool-add-item" style="cursor:default;color:var(--text-3)">找不到符合的店家</div>';
+    return;
+  }
+
+  el.style.display = 'block';
+  el.innerHTML = results.map(r => {
+    const incompat = isRestIncompatible(r, tpl.mealType);
+    const warn = incompat ? `<span style="font-size:12px;color:var(--orange)">(不供此餐期)</span>` : '';
+    return `<div class="pool-add-item">
+      <span>${r.name} ${warn}</span>
+      <button class="pool-add-btn" onclick="addRestToPool('${r.id}');event.stopPropagation()">＋ 加入</button>
+    </div>`;
+  }).join('');
+}
+
+function collapsePoolSearch(e) {
+  const searchEl = document.getElementById('pool-search');
+  const listEl   = document.getElementById('pool-add-list');
+  if (!searchEl || !listEl) { document.removeEventListener('click', collapsePoolSearch); return; }
+  if (!searchEl.contains(e.target) && !listEl.contains(e.target)) {
+    listEl.style.display = 'none';
+  }
+}
+
+function addRestToPool(restId) {
+  const tpl = templates.find(t => t.id === activeTplId);
+  if (!tpl || tpl.restaurantIds.includes(restId)) return;
+  tpl.restaurantIds.push(restId);
+  refreshPool(tpl);
+  const searchEl = document.getElementById('pool-search');
+  if (searchEl) { searchEl.value = ''; }
+  const listEl = document.getElementById('pool-add-list');
+  if (listEl) { listEl.style.display = 'none'; listEl.innerHTML = ''; }
+}
+
+function removeRestFromPool(restId) {
+  const tpl = templates.find(t => t.id === activeTplId);
+  if (!tpl) return;
+  tpl.restaurantIds = tpl.restaurantIds.filter(id => id !== restId);
+  refreshPool(tpl);
+}
+
+function refreshPool(tpl) {
+  const poolBody  = document.getElementById('tpl-pool-body');
+  const poolCount = document.getElementById('pool-count');
+  if (poolBody)  poolBody.innerHTML  = renderPoolList(tpl);
+  if (poolCount) poolCount.textContent = tpl.restaurantIds.length;
+  renderTplList();
+}
+
+/* ═══════════════════════════════════════════════
+   模板欄位變更
+═══════════════════════════════════════════════ */
+function onTplFieldChange() {
+  const tpl = templates.find(t => t.id === activeTplId);
+  if (!tpl) return;
+  const nameEl        = document.getElementById('tpl-name');
+  const siteEl        = document.getElementById('tpl-site');
+  const dailyEl       = document.getElementById('tpl-daily-rest');
+  const itemsEl       = document.getElementById('tpl-items-per-rest');
+  if (nameEl)   tpl.name           = nameEl.value;
+  if (siteEl)   tpl.siteId         = siteEl.value;
+  if (dailyEl)  tpl.dailyRestCount = parseInt(dailyEl.value) || 1;
+  if (itemsEl)  tpl.itemsPerRest   = parseInt(itemsEl.value) || 1;
+  renderTplList();
+}
+
+function onTplMealChange() {
+  const tpl   = templates.find(t => t.id === activeTplId);
+  const mealEl = document.getElementById('tpl-meal');
+  if (!tpl || !mealEl) return;
+  tpl.mealType = mealEl.value;
+  onTplFieldChange();
+  // 重新渲染店家池（部分店家可能因餐期改變而顯示不相容）
+  const poolBody = document.getElementById('tpl-pool-body');
+  if (poolBody) poolBody.innerHTML = renderPoolList(tpl);
+  const poolCount = document.getElementById('pool-count');
+  if (poolCount) poolCount.textContent = tpl.restaurantIds.length;
+}
+
+/* ═══════════════════════════════════════════════
+   模板選取 / 新增 / 刪除 / 儲存
+═══════════════════════════════════════════════ */
+function selectTpl(tplId) {
+  document.removeEventListener('click', collapsePoolSearch);
+  activeTplId = tplId;
+  renderTplList();
+  renderEditPanel(tplId);
+}
+
+function openAddTplModal() {
+  document.getElementById('new-tpl-name').value = '';
+  document.getElementById('add-tpl-mask').classList.add('open');
+  setTimeout(() => document.getElementById('new-tpl-name').focus(), 80);
+}
+
+function closeAddTplModal() {
+  document.getElementById('add-tpl-mask').classList.remove('open');
+}
+
+function handleMaskClick(e, maskId) {
+  if (e.target.id === maskId) document.getElementById(maskId).classList.remove('open');
+}
+
+function confirmAddTpl() {
+  const name = document.getElementById('new-tpl-name').value.trim();
+  if (!name) { document.getElementById('new-tpl-name').focus(); return; }
+  const newTpl = {
+    id: 'tpl-' + (++tplIdCounter),
+    name,
+    siteId: '',
+    mealType: 'lunch',
+    dailyRestCount: 2,
+    itemsPerRest: 3,
+    restaurantIds: [],
+  };
+  templates.push(newTpl);
+  closeAddTplModal();
+  selectTpl(newTpl.id);
+  showToast('模板已新增');
+}
+
+function confirmDeleteTpl() {
+  const tpl = templates.find(t => t.id === activeTplId);
+  if (!tpl) return;
+  if (!confirm(`確定要刪除模板「${tpl.name}」嗎？此操作無法復原。`)) return;
+  const idx = templates.findIndex(t => t.id === activeTplId);
+  templates.splice(idx, 1);
+  activeTplId = templates[0]?.id || null;
+  renderTplList();
+  renderEditPanel(activeTplId);
+  showToast('模板已刪除');
+}
+
+function saveTpl() {
+  onTplFieldChange();
+  renderTplList();
+  showToast('已儲存');
+}
+
+/* ═══════════════════════════════════════════════
+   初始化
+═══════════════════════════════════════════════ */
+renderTplList();
+if (activeTplId) renderEditPanel(activeTplId);
+</script>
+</body>
+</html>

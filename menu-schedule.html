@@ -896,6 +896,13 @@ body {
     </div>
     <div class="modal-body">
       <div class="modal-context-bar" id="rest-picker-context"></div>
+      <div class="form-group" id="tpl-picker-wrap" style="margin-bottom:4px">
+        <div class="form-label">套用模板 <span style="font-weight:400;color:var(--text-3);font-size:13px">（選填）</span></div>
+        <select class="form-select" id="tpl-picker-sel" onchange="onTplPickerChange()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;background:var(--card);color:var(--text)">
+          <option value="">請選擇模板</option>
+        </select>
+        <div id="tpl-picker-hint" style="display:none;font-size:12px;color:var(--text-3);margin-top:4px">※ 僅顯示模板內店家池</div>
+      </div>
       <div class="form-group">
         <div class="form-label">選擇餐廳</div>
         <div class="custom-dropdown" id="rest-dropdown">
@@ -1400,6 +1407,37 @@ sites.forEach(s => { scheduleData[s.id] = {}; });
 const meetingBentoData = {};
 sites.forEach(s => { meetingBentoData[s.id] = {}; });
 
+/* ── Menu Templates ── */
+const templates = [
+  {
+    id: 'tpl-001',
+    name: '新竹A廠｜午餐',
+    siteId: 'hc-a',
+    mealType: 'lunch',
+    dailyRestCount: 2,
+    itemsPerRest: 3,
+    restaurantIds: ['S0001', 'S0003', 'S0004']
+  },
+  {
+    id: 'tpl-002',
+    name: '新竹B廠｜午餐',
+    siteId: 'hc-b',
+    mealType: 'lunch',
+    dailyRestCount: 2,
+    itemsPerRest: 3,
+    restaurantIds: ['S0002', 'S0004', 'S0005']
+  },
+  {
+    id: 'tpl-003',
+    name: '通用｜晚餐',
+    siteId: null,
+    mealType: 'dinner',
+    dailyRestCount: 1,
+    itemsPerRest: 4,
+    restaurantIds: ['S0003', 'S0005']
+  }
+];
+
 /* ══════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════ */
@@ -1414,6 +1452,7 @@ let detailDate  = null; // currently open detail panel date
 let pickerDate      = null;
 let pickerRestId    = null;
 let pickerBranchId  = null; // 新增店家時選取的分店
+let pickerTplId     = null; // 套用模板 id（null = 不套用）
 
 // item picker
 let pickerItemDate    = null;
@@ -2064,10 +2103,10 @@ function isRestClosed(rest, dateStr, mealType) {
   return { closed: false };
 }
 
-function getConflictSite(restId, dateStr) {
+function getConflictSite(restId, dateStr, mealType) {
   for (const site of sites) {
     if (site.id === curSiteId) continue;
-    const conflict = ((scheduleData[site.id] || {})[dateStr] || []).find(e => e.restaurantId === restId);
+    const conflict = ((scheduleData[site.id] || {})[dateStr] || []).find(e => e.restaurantId === restId && e.mealType === mealType);
     if (conflict) return { site, entry: conflict };
   }
   return null;
@@ -2189,12 +2228,27 @@ function openRestPicker(dateStr) {
   pickerDate    = dateStr;
   pickerRestId  = null;
   pickerBranchId = null;
+  pickerTplId   = null;
   document.getElementById('rest-trigger-text').textContent = '請選擇餐廳…';
   // 餐期由外部 mealFilter 決定，無需設值
   document.getElementById('rest-picker-err').classList.remove('show');
   document.getElementById('branch-picker-err').classList.remove('show');
   document.getElementById('branch-select-section').style.display = 'none';
   document.getElementById('item-checklist-section').style.display = 'none';
+  // 初始化模板下拉（僅顯示符合當前餐期的模板）
+  const curMealType = (mealFilter !== 'all') ? mealFilter : 'lunch';
+  const tplSel = document.getElementById('tpl-picker-sel');
+  tplSel.innerHTML = '<option value="">請選擇模板</option>';
+  templates
+    .filter(t => t.mealType === curMealType)
+    .forEach(t => {
+      const siteName = t.siteId ? (sites.find(s => s.id === t.siteId)?.name || t.siteId) : '通用';
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.name + '（' + siteName + '）';
+      tplSel.appendChild(opt);
+    });
+  document.getElementById('tpl-picker-hint').style.display = 'none';
   // 資訊列
   const site     = sites.find(s => s.id === curSiteId);
   const mealType = (mealFilter !== 'all') ? mealFilter : 'lunch';
@@ -2215,9 +2269,15 @@ function buildRestOptions(dateStr) {
   const mealType = (mealFilter !== 'all') ? mealFilter : 'lunch';
   const opts = document.getElementById('rest-options');
   opts.innerHTML = '';
-  restaurants.forEach(rest => {
+  const restList = pickerTplId
+    ? restaurants.filter(r => {
+        const tpl = templates.find(t => t.id === pickerTplId);
+        return tpl?.restaurantIds.includes(r.id);
+      })
+    : restaurants;
+  restList.forEach(rest => {
     const closedInfo = isRestClosed(rest, dateStr, mealType);
-    const conflict   = getConflictSite(rest.id, dateStr);
+    const conflict   = getConflictSite(rest.id, dateStr, mealType);
     const dupInSite  = isDupRestInSite(rest.id, dateStr, mealType);
     const noMeal     = !rest.mealTypes[mealType];
     let disabled = false, tipHtml = '';
@@ -2238,6 +2298,19 @@ function buildRestOptions(dateStr) {
     else if (conflict) el.title = `該店家當日已由 ${conflict.entry.addedBy} 安排至 ${conflict.site.name}，請改選其他餐廳`;
     opts.appendChild(el);
   });
+}
+
+function onTplPickerChange() {
+  const sel = document.getElementById('tpl-picker-sel');
+  pickerTplId = sel.value || null;
+  document.getElementById('tpl-picker-hint').style.display = pickerTplId ? '' : 'none';
+  // 重置餐廳選擇
+  pickerRestId = null;
+  pickerBranchId = null;
+  document.getElementById('rest-trigger-text').textContent = '請選擇餐廳…';
+  document.getElementById('branch-select-section').style.display = 'none';
+  document.getElementById('item-checklist-section').style.display = 'none';
+  buildRestOptions(pickerDate);
 }
 
 function onPickerMealChange() {

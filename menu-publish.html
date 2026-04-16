@@ -281,6 +281,69 @@ body {
   .cal-week-label { font-size: 10px; }
   .modal { max-height: 90vh; }
 }
+
+/* ── Modal 篩選列 ── */
+.modal-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  flex-shrink: 0;
+}
+.modal-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.modal-filter-group select {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.modal-filter-group select:focus { outline: none; border-color: var(--blue); }
+.filter-kw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.filter-kw-wrap input {
+  padding: 5px 26px 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 140px;
+  outline: none;
+}
+.filter-kw-wrap input:focus { border-color: var(--blue); }
+.filter-kw-clear {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-3);
+  padding: 2px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.filter-kw-clear:hover { color: var(--text); }
+.modal-filter-empty {
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 15px;
+}
 </style>
   <link rel="stylesheet" href="shared-nav.css">
 </head>
@@ -319,6 +382,26 @@ body {
       <div class="modal-title" id="modal-title">發布狀態</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
+    <div class="modal-filter-bar" id="modal-filter-bar">
+      <div class="modal-filter-group">
+        <select id="filter-site-sel" onchange="applyModalFilter()">
+          <option value="">全部廠區</option>
+        </select>
+        <div class="filter-kw-wrap">
+          <input type="text" id="filter-site-kw" placeholder="搜尋廠區…"
+                 oninput="applyModalFilter()" autocomplete="off">
+          <button class="filter-kw-clear" id="filter-kw-clear-btn"
+                  onclick="clearSiteKw()" style="display:none" title="清除">✕</button>
+        </div>
+      </div>
+      <div class="modal-filter-group">
+        <select id="filter-status-sel" onchange="applyModalFilter()">
+          <option value="">全部狀態</option>
+          <option value="published">已發布</option>
+          <option value="draft">暫存</option>
+        </select>
+      </div>
+    </div>
     <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
@@ -334,6 +417,12 @@ const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9�
 const WD_NAMES    = ['日','一','二','三','四','五','六'];
 
 let curMonth = 3; // 4月（0-indexed）
+
+/* ── Modal 篩選狀態 ── */
+let modalFilterSite   = '';
+let modalFilterKw     = '';
+let modalFilterStatus = '';
+let activeDetailDate  = '';
 
 const sites = [
   { id: 'hc-a', name: '新竹 A 廠' },
@@ -593,6 +682,21 @@ function renderCalendar() {
    詳情 Modal
 ═══════════════════════════════════════════════ */
 function openDayDetail(dateStr) {
+  activeDetailDate = dateStr;
+
+  // 重置篩選狀態
+  modalFilterSite   = '';
+  modalFilterKw     = '';
+  modalFilterStatus = '';
+  document.getElementById('filter-site-sel').value   = '';
+  document.getElementById('filter-site-kw').value    = '';
+  document.getElementById('filter-status-sel').value = '';
+  document.getElementById('filter-kw-clear-btn').style.display = 'none';
+
+  // 初始化廠區下拉選項
+  const siteOpts = sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  document.getElementById('filter-site-sel').innerHTML = '<option value="">全部廠區</option>' + siteOpts;
+
   const d   = new Date(dateStr);
   const wd  = d.getDay();
   const dateLabel = `${YEAR}年${MONTH_NAMES[d.getMonth()]}${d.getDate()}日（週${WD_NAMES[wd]}）`;
@@ -602,10 +706,40 @@ function openDayDetail(dateStr) {
   document.getElementById('modal-backdrop').classList.add('open');
 }
 
+function applyModalFilter() {
+  modalFilterSite   = document.getElementById('filter-site-sel').value;
+  modalFilterKw     = document.getElementById('filter-site-kw').value.toLowerCase().trim();
+  modalFilterStatus = document.getElementById('filter-status-sel').value;
+  document.getElementById('filter-kw-clear-btn').style.display = modalFilterKw ? 'inline-flex' : 'none';
+  document.getElementById('modal-body').innerHTML = renderDayDetail(activeDetailDate);
+}
+
+function clearSiteKw() {
+  document.getElementById('filter-site-kw').value = '';
+  applyModalFilter();
+}
+
 function renderDayDetail(dateStr) {
   let html = '';
 
-  sites.forEach(site => {
+  const filteredSites = sites.filter(site => {
+    if (modalFilterSite && site.id !== modalFilterSite) return false;
+    if (modalFilterKw &&
+        !site.id.toLowerCase().includes(modalFilterKw) &&
+        !site.name.toLowerCase().includes(modalFilterKw)) return false;
+    if (modalFilterStatus) {
+      const entries = (scheduleData[site.id] || {})[dateStr] || [];
+      if (modalFilterStatus === 'published' && !(entries.length > 0 && entries.every(e => e.publishedAt && !e.dirtyAfterPublish))) return false;
+      if (modalFilterStatus === 'draft'     && !entries.some(e => !e.publishedAt || e.dirtyAfterPublish)) return false;
+    }
+    return true;
+  });
+
+  if (filteredSites.length === 0) {
+    return '<div class="modal-filter-empty">無符合條件的廠區</div>';
+  }
+
+  filteredSites.forEach(site => {
     const { published, draft, dirty, total } = getSiteStatus(site.id, dateStr);
     const entries = (scheduleData[site.id] || {})[dateStr] || [];
 

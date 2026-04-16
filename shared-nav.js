@@ -71,12 +71,14 @@
             match: function (p) {
               return p.file === 'menu-schedule.html' ||
                      p.file === 'menu-publish.html' ||
-                     p.file === 'menu-schedule-log.html';
+                     p.file === 'menu-schedule-log.html' ||
+                     p.file === 'menu-template.html';
             },
             children: [
               { label: '菜單排程管理',     url: 'menu-schedule.html',     match: function (p) { return p.file === 'menu-schedule.html'; } },
               { label: '菜單發布管理',     url: 'menu-publish.html',      match: function (p) { return p.file === 'menu-publish.html'; } },
-              { label: '菜單管理異動紀錄', url: 'menu-schedule-log.html', match: function (p) { return p.file === 'menu-schedule-log.html'; } }
+              { label: '菜單管理異動紀錄', url: 'menu-schedule-log.html', match: function (p) { return p.file === 'menu-schedule-log.html'; } },
+              { label: '菜單模板管理',     url: 'menu-template.html',     match: function (p) { return p.file === 'menu-template.html'; } }
             ]
           },
           {
@@ -128,6 +130,11 @@
             label: '餐點管理',
             url: 'store-menu.html?sys=store',
             match: function (p) { return p.file === 'store-menu.html'; }
+          },
+          {
+            label: '訂單明細',
+            url: 'store-orders.html?sys=store',
+            match: function (p) { return p.file === 'store-orders.html'; }
           }
         ]
       },

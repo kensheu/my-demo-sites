@@ -274,6 +274,56 @@ body {
 
 .empty { padding: 40px 16px; text-align: center; color: var(--text-3); font-size: 16px; }
 
+/* ── 主 Tab ── */
+.main-tabs {
+  display: flex; gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+.main-tab {
+  padding: 9px 20px; font-size: 17px; font-weight: 500;
+  cursor: pointer; color: var(--text-3); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: color .12s, border-color .12s;
+  user-select: none;
+}
+.main-tab:hover { color: var(--text); }
+.main-tab.active { color: var(--blue-text); border-bottom-color: var(--blue); }
+
+/* ── 通知紀錄表格 ── */
+.notify-table-wrap { overflow-x: auto; }
+.notify-table {
+  width: 100%; border-collapse: collapse; font-size: 15px;
+}
+.notify-table th {
+  padding: 9px 12px; font-size: 14px; font-weight: 600; color: var(--text-2);
+  background: var(--bg-2); text-align: left; border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.notify-table td {
+  padding: 9px 12px; border-bottom: 1px solid var(--border-2);
+  color: var(--text-2); vertical-align: middle;
+}
+.notify-table tr:last-child td { border-bottom: none; }
+.notify-table tr:hover td { background: var(--bg-2); }
+.notify-badge {
+  display: inline-block; padding: 1px 9px; border-radius: 100px;
+  font-size: 13px; font-weight: 500; white-space: nowrap;
+}
+.notify-badge.success { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.notify-badge.failed  { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-bdr); }
+.notify-badge.pending { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+
+.notify-filter-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 11px 16px; border-bottom: 1px solid var(--border-2);
+}
+.notify-filter-bar select {
+  padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 15px; font-family: inherit; background: var(--card); color: var(--text);
+  cursor: pointer; outline: none;
+}
+.notify-filter-bar select:focus { border-color: var(--blue); }
+
 /* ── RWD ── */
 @media (max-width: 768px) {
   .page { padding: 12px 12px 60px; }
@@ -295,6 +345,14 @@ body {
     <div class="page-sub">營運部 ・ 排程發布操作稽核追溯</div>
   </div>
 
+  <!-- 主 Tab -->
+  <div class="main-tabs">
+    <div class="main-tab active" id="tab-ops" onclick="switchMainTab('ops')">操作紀錄</div>
+    <div class="main-tab" id="tab-notify" onclick="switchMainTab('notify')">通知紀錄</div>
+  </div>
+
+  <!-- 操作紀錄區塊 -->
+  <div id="section-ops">
   <div class="top-bar">
     <div class="site-picker-wrap" id="site-picker">
       <div class="site-trigger" id="site-trigger" onclick="toggleSitePicker()">
@@ -335,6 +393,64 @@ body {
     </div>
     <div id="log-body"></div>
   </div>
+
+  </div><!-- /section-ops -->
+
+  <!-- 通知紀錄區塊 -->
+  <div id="section-notify" style="display:none">
+    <div class="top-bar">
+      <div class="site-picker-wrap" id="notify-site-picker">
+        <div class="site-trigger" id="notify-site-trigger" onclick="toggleNotifySitePicker()">
+          <span class="st-label" id="notify-st-label">全部廠區</span>
+          <span class="st-arrow">▼</span>
+        </div>
+        <div class="site-dropdown" id="notify-site-dropdown">
+          <div class="site-search-wrap">
+            <input type="text" id="notify-site-search" placeholder="搜尋廠區…" oninput="filterNotifySiteList()" autocomplete="off">
+          </div>
+          <div class="site-list" id="notify-site-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">通知送達紀錄</div>
+        <div class="month-nav">
+          <button class="btn-nav" id="notify-btn-prev" onclick="changeNotifyMonth(-1)">← 上月</button>
+          <span class="month-nav-label" id="notify-month-label">2026年4月</span>
+          <button class="btn-nav" id="notify-btn-next" onclick="changeNotifyMonth(1)">下月 →</button>
+        </div>
+      </div>
+      <div class="notify-filter-bar">
+        <span class="filter-lbl">狀態：</span>
+        <select id="notify-status-sel" onchange="renderNotifyLog()">
+          <option value="">全部</option>
+          <option value="success">成功</option>
+          <option value="failed">失敗</option>
+          <option value="pending">待確認</option>
+        </select>
+      </div>
+      <div class="summary-bar" id="notify-summary-bar"></div>
+      <div class="notify-table-wrap">
+        <table class="notify-table">
+          <thead>
+            <tr>
+              <th>發送時間</th>
+              <th>店家</th>
+              <th>廠區</th>
+              <th>餐期</th>
+              <th>排程日期</th>
+              <th>觸發原因</th>
+              <th>狀態</th>
+              <th>店家查看時間</th>
+            </tr>
+          </thead>
+          <tbody id="notify-log-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /section-notify -->
 
 </div>
 
@@ -781,6 +897,8 @@ function selectSite(id) {
 
 document.addEventListener('click', e => {
   if (!document.getElementById('site-picker').contains(e.target)) closeSitePicker();
+  if (document.getElementById('notify-site-picker') &&
+      !document.getElementById('notify-site-picker').contains(e.target)) closeNotifySitePicker();
 });
 
 // 初始化月份導覽按鈕狀態
@@ -788,6 +906,204 @@ document.getElementById('btn-prev').disabled = curMonth <= MIN_M;
 document.getElementById('btn-next').disabled = curMonth >= MAX_M;
 
 renderLog();
+
+/* ═══════════════════════════════════════════════
+   主 Tab 切換
+═══════════════════════════════════════════════ */
+let activeMainTab = 'ops';
+
+function switchMainTab(tab) {
+  activeMainTab = tab;
+  document.getElementById('tab-ops').classList.toggle('active', tab === 'ops');
+  document.getElementById('tab-notify').classList.toggle('active', tab === 'notify');
+  document.getElementById('section-ops').style.display    = tab === 'ops'    ? '' : 'none';
+  document.getElementById('section-notify').style.display = tab === 'notify' ? '' : 'none';
+  if (tab === 'notify') renderNotifyLog();
+}
+
+/* ═══════════════════════════════════════════════
+   通知紀錄資料
+   status: 'success' | 'failed' | 'pending'
+   readAt: 時間字串 | null（尚未查看）
+═══════════════════════════════════════════════ */
+const notifyLogData = [
+  {
+    id: 'ntf_m04_001',
+    sentAt: '2026-04-07 14:32',
+    triggerBy: '發布排程',
+    siteId: 'hc-a', siteName: '新竹 A 廠',
+    targetDate: '2026-04-14', mealType: 'lunch',
+    restaurantName: '阿成便當',
+    status: 'success', failReason: null,
+    readAt: '2026-04-07 15:10',
+  },
+  {
+    id: 'ntf_m04_002',
+    sentAt: '2026-04-07 14:32',
+    triggerBy: '發布排程',
+    siteId: 'hc-a', siteName: '新竹 A 廠',
+    targetDate: '2026-04-14', mealType: 'lunch',
+    restaurantName: 'OO 雞飯專門店',
+    status: 'success', failReason: null,
+    readAt: '2026-04-08 09:05',
+  },
+  {
+    id: 'ntf_m04_003',
+    sentAt: '2026-04-08 09:50',
+    triggerBy: '發布排程',
+    siteId: 'hc-b', siteName: '新竹 B 廠',
+    targetDate: '2026-04-15', mealType: 'lunch',
+    restaurantName: '好味食堂',
+    status: 'failed', failReason: '店家帳號停用中',
+    readAt: null,
+  },
+  {
+    id: 'ntf_m04_004',
+    sentAt: '2026-04-08 09:50',
+    triggerBy: '發布排程',
+    siteId: 'hc-b', siteName: '新竹 B 廠',
+    targetDate: '2026-04-15', mealType: 'dinner',
+    restaurantName: 'XX 早餐店',
+    status: 'pending', failReason: null,
+    readAt: null,
+  },
+  {
+    id: 'ntf_m04_005',
+    sentAt: '2026-04-10 11:20',
+    triggerBy: '重新發布',
+    siteId: 'tc-a', siteName: '台中 A 廠',
+    targetDate: '2026-04-18', mealType: 'lunch',
+    restaurantName: '家鄉麵食館',
+    status: 'success', failReason: null,
+    readAt: '2026-04-10 14:33',
+  },
+  {
+    id: 'ntf_m04_006',
+    sentAt: '2026-04-12 16:05',
+    triggerBy: '手動補送',
+    siteId: 'hc-b', siteName: '新竹 B 廠',
+    targetDate: '2026-04-15', mealType: 'lunch',
+    restaurantName: '好味食堂',
+    status: 'success', failReason: null,
+    readAt: null,
+  },
+  {
+    id: 'ntf_m03_001',
+    sentAt: '2026-03-10 09:20',
+    triggerBy: '發布排程',
+    siteId: 'hc-a', siteName: '新竹 A 廠',
+    targetDate: '2026-03-18', mealType: 'lunch',
+    restaurantName: 'OO 雞飯專門店',
+    status: 'success', failReason: null,
+    readAt: '2026-03-10 10:44',
+  },
+];
+
+let notifyCurMonth  = 3;
+let notifyCurSiteId = 'all';
+
+function getNotifyFiltered() {
+  const y = YEAR, m = notifyCurMonth;
+  const mmStr = String(m + 1).padStart(2, '0');
+  const start = `${y}-${mmStr}-01`;
+  const endDay = new Date(y, m + 1, 0).getDate();
+  const end   = `${y}-${mmStr}-${String(endDay).padStart(2, '0')}`;
+  const statusSel = document.getElementById('notify-status-sel')?.value || '';
+
+  return notifyLogData.filter(item => {
+    const dateStr = item.sentAt.slice(0, 10);
+    if (dateStr < start || dateStr > end) return false;
+    if (notifyCurSiteId !== 'all' && item.siteId !== notifyCurSiteId) return false;
+    if (statusSel && item.status !== statusSel) return false;
+    return true;
+  });
+}
+
+const NOTIFY_STATUS_LABELS = { success: '成功', failed: '失敗', pending: '待確認' };
+
+function renderNotifyLog() {
+  const data = getNotifyFiltered();
+  const cnt = { success: 0, failed: 0, pending: 0 };
+  data.forEach(d => cnt[d.status]++);
+  document.getElementById('notify-summary-bar').innerHTML =
+    `<span class="s-item">共 <strong>${data.length}</strong> 筆</span>` +
+    (cnt.success ? `<span class="s-item"><strong style="color:var(--green)">${cnt.success}</strong> 成功</span>` : '') +
+    (cnt.pending ? `<span class="s-item"><strong style="color:var(--orange)">${cnt.pending}</strong> 待確認</span>` : '') +
+    (cnt.failed  ? `<span class="s-item"><strong style="color:var(--red)">${cnt.failed}</strong> 失敗</span>` : '');
+
+  if (!data.length) {
+    document.getElementById('notify-log-body').innerHTML =
+      `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-3)">無符合條件的通知紀錄</td></tr>`;
+    return;
+  }
+
+  document.getElementById('notify-log-body').innerHTML = data.map(item => {
+    const badgeCls = item.status;
+    const readText = item.readAt ? item.readAt : '<span style="color:var(--text-3)">—</span>';
+    const failNote = item.failReason
+      ? `<br><span style="font-size:13px;color:var(--red)">${item.failReason}</span>` : '';
+    return `<tr>
+      <td style="white-space:nowrap">${item.sentAt}</td>
+      <td>${item.restaurantName}</td>
+      <td><span class="site-tag">${item.siteName}</span></td>
+      <td><span class="meal-chip ${MEAL_CLS[item.mealType] || ''}">${MEAL_LABELS[item.mealType] || item.mealType}</span></td>
+      <td style="white-space:nowrap">${item.targetDate}</td>
+      <td>${item.triggerBy}</td>
+      <td><span class="notify-badge ${badgeCls}">${NOTIFY_STATUS_LABELS[item.status]}</span>${failNote}</td>
+      <td style="white-space:nowrap">${readText}</td>
+    </tr>`;
+  }).join('');
+}
+
+function changeNotifyMonth(delta) {
+  notifyCurMonth = Math.max(MIN_M, Math.min(MAX_M, notifyCurMonth + delta));
+  document.getElementById('notify-month-label').textContent = `${YEAR}年${MONTHS[notifyCurMonth]}`;
+  document.getElementById('notify-btn-prev').disabled = notifyCurMonth <= MIN_M;
+  document.getElementById('notify-btn-next').disabled = notifyCurMonth >= MAX_M;
+  renderNotifyLog();
+}
+
+// 通知紀錄廠區 picker
+function renderNotifySiteList(q = '') {
+  const filtered = q ? SITE_LIST.filter(s => s.name.includes(q)) : SITE_LIST;
+  document.getElementById('notify-site-list').innerHTML = filtered.length
+    ? filtered.map(s => `
+        <div class="site-item${s.id === notifyCurSiteId ? ' selected' : ''}" onclick="selectNotifySite('${s.id}')">
+          ${s.name}
+        </div>`).join('')
+    : '<div style="padding:12px 10px;text-align:center;font-size:14px;color:var(--text-3)">找不到符合的廠區</div>';
+}
+
+function toggleNotifySitePicker() {
+  const isOpen = document.getElementById('notify-site-dropdown').classList.contains('open');
+  if (isOpen) { closeNotifySitePicker(); return; }
+  document.getElementById('notify-site-trigger').classList.add('open');
+  document.getElementById('notify-site-dropdown').classList.add('open');
+  renderNotifySiteList();
+  setTimeout(() => document.getElementById('notify-site-search').focus(), 50);
+}
+
+function closeNotifySitePicker() {
+  document.getElementById('notify-site-trigger').classList.remove('open');
+  document.getElementById('notify-site-dropdown').classList.remove('open');
+  document.getElementById('notify-site-search').value = '';
+}
+
+function filterNotifySiteList() {
+  renderNotifySiteList(document.getElementById('notify-site-search').value.trim());
+}
+
+function selectNotifySite(id) {
+  notifyCurSiteId = id;
+  const s = SITE_LIST.find(x => x.id === id);
+  document.getElementById('notify-st-label').textContent = s ? s.name : id;
+  closeNotifySitePicker();
+  renderNotifyLog();
+}
+
+// 初始化通知月份導覽
+document.getElementById('notify-btn-prev').disabled = notifyCurMonth <= MIN_M;
+document.getElementById('notify-btn-next').disabled = notifyCurMonth >= MAX_M;
 </script>
 </body>
 </html>
