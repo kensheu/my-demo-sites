@@ -368,11 +368,9 @@ body {
   width: 100%; padding: 5px 8px; border: 1px solid var(--border);
   border-radius: 5px; font-size: 14px; background: var(--card);
 }
-.item-row-detail-cell .cabinet-opts { display: flex; gap: 10px; }
-.item-row-detail-cell .cabinet-opts label {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 14px; cursor: pointer; color: var(--text); margin-bottom: 0;
-}
+.cabinet-opts { display: flex; flex-direction: column; gap: 4px; }
+.cabinet-opts-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.cabinet-opts label { display: flex; align-items: center; gap: 4px; font-size: 14px; cursor: pointer; color: var(--text); margin-bottom: 0; white-space: nowrap; }
 
 .add-item-btn {
   display: flex; align-items: center; gap: 3px;
@@ -407,7 +405,7 @@ body {
 }
 .overlay.open .modal { transform: translateY(0); }
 .modal-sm { width: 400px; }
-.modal-lg { width: 680px; }
+.modal-lg { width: 820px; }
 .modal-full { width: 680px; min-height: calc(100vh - 96px); max-height: none; display: flex; flex-direction: column; }
 .modal-full .modal-body { flex: 1; overflow-y: auto; }
 .modal-head {
@@ -481,8 +479,6 @@ body {
 .item-extra-row > div { flex: 1; }
 .item-extra-label { font-size: 13px; color: var(--text-2); margin-bottom: 4px; }
 .item-extra input[type=number] { width: 100%; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
-.item-extra .cabinet-opts { display: flex; gap: 12px; padding: 6px 0; }
-.item-extra .cabinet-opts label { display: flex; align-items: center; gap: 5px; font-size: 14px; cursor: pointer; }
 .item-check-price.is-auto { color: var(--green); }
 .item-check-auto-badge {
   font-size: 11px; padding: 1px 5px; border-radius: 3px;
@@ -1643,7 +1639,8 @@ function renderDetailBody(dateStr) {
     if (!rest) return '';
     const mi     = mealInfo(entry.mealType);
     const items  = entry.items.map(it => {
-      const hotChecked  = (it.cabinet || 'hot') === 'hot';
+      const cabTemp = it.cabinetTemp || 'hot';
+      const cabSlot = it.cabinetSlot || 'none';
       const did = `${entry.entryId}-${it.itemId}`;
       const itemDef = rest.items.find(i => i.id === it.itemId);
       const costPrice = itemDef ? getCostForDate(itemDef, dateStr) : 0;
@@ -1666,8 +1663,16 @@ function renderDetailBody(dateStr) {
             <div class="item-row-detail-cell">
               <label>櫃位</label>
               <div class="cabinet-opts">
-                <label><input type="radio" name="det-cab-${did}" value="hot" ${hotChecked?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinet',this.value)"> 熱櫃</label>
-                <label><input type="radio" name="det-cab-${did}" value="cold" ${!hotChecked?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinet',this.value)"> 冷櫃</label>
+                <div class="cabinet-opts-row">
+                  <label><input type="radio" name="det-temp-${did}" value="hot"  ${cabTemp==='hot' ?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinetTemp',this.value)"> 熱櫃</label>
+                  <label><input type="radio" name="det-temp-${did}" value="cold" ${cabTemp==='cold'?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinetTemp',this.value)"> 冷櫃</label>
+                </div>
+                <div class="cabinet-opts-row">
+                  <label><input type="radio" name="det-slot-${did}" value="none" ${cabSlot==='none'?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinetSlot',this.value)"> 不指定</label>
+                  <label><input type="radio" name="det-slot-${did}" value="a"    ${cabSlot==='a'   ?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinetSlot',this.value)"> A櫃</label>
+                  <label><input type="radio" name="det-slot-${did}" value="b"    ${cabSlot==='b'   ?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinetSlot',this.value)"> B櫃</label>
+                  <label><input type="radio" name="det-slot-${did}" value="c"    ${cabSlot==='c'   ?'checked':''} onchange="saveItemField('${dateStr}','${entry.entryId}','${it.itemId}','cabinetSlot',this.value)"> C櫃</label>
+                </div>
               </div>
             </div>
           </div>
@@ -1746,7 +1751,7 @@ function checkDirty(entry) {
   const isDiff = snap.some((s, i) => {
     const c = cur[i];
     return !c || s.itemId !== c.itemId || s.price !== c.price ||
-           s.cabinet !== c.cabinet || s.onlineQty !== c.onlineQty ||
+           s.cabinetTemp !== c.cabinetTemp || s.cabinetSlot !== c.cabinetSlot || s.onlineQty !== c.onlineQty ||
            s.offlineQty !== c.offlineQty || s.storeQty !== c.storeQty;
   });
   entry.dirtyAfterPublish = isDiff;
@@ -2359,11 +2364,19 @@ function buildNewRestItemChecklist() {
             <div class="item-extra-label">終端價</div>
             <input type="number" id="endprice-${item.id}" min="0" value="${tier.price}" style="width:100%">
           </div>
-          <div>
+          <div style="flex:2">
             <div class="item-extra-label">櫃位</div>
             <div class="cabinet-opts">
-              <label><input type="radio" name="cabinet-${item.id}" value="hot" checked> 熱櫃</label>
-              <label><input type="radio" name="cabinet-${item.id}" value="cold"> 冷櫃</label>
+              <div class="cabinet-opts-row">
+                <label><input type="radio" name="cab-temp-${item.id}" value="hot"  checked> 熱櫃</label>
+                <label><input type="radio" name="cab-temp-${item.id}" value="cold"> 冷櫃</label>
+              </div>
+              <div class="cabinet-opts-row">
+                <label><input type="radio" name="cab-slot-${item.id}" value="none" checked> 不指定</label>
+                <label><input type="radio" name="cab-slot-${item.id}" value="a"> A櫃</label>
+                <label><input type="radio" name="cab-slot-${item.id}" value="b"> B櫃</label>
+                <label><input type="radio" name="cab-slot-${item.id}" value="c"> C櫃</label>
+              </div>
             </div>
           </div>
         </div>
@@ -2472,13 +2485,14 @@ function confirmAddRest() {
   const checkedInputs = [...document.querySelectorAll('#item-checklist input[type=checkbox]:checked')];
   const items = checkedInputs.map(inp => {
     const id = inp.value;
-    const cabinet    = document.querySelector(`input[name="cabinet-${id}"]:checked`)?.value || 'hot';
+    const cabinetTemp = document.querySelector(`input[name="cab-temp-${id}"]:checked`)?.value || 'hot';
+    const cabinetSlot = document.querySelector(`input[name="cab-slot-${id}"]:checked`)?.value || 'none';
     const onlineQtyEl = document.getElementById(`online-${id}`); const onlineQty = onlineQtyEl ? (Number(onlineQtyEl.value) || 30) : 30;
     const offlineQty = Number(document.getElementById(`offline-${id}`)?.value) || 0;
     const storeQty   = Number(document.getElementById(`store-${id}`)?.value)   || 0;
     const endPriceEl = document.getElementById(`endprice-${id}`);
     const price = endPriceEl && endPriceEl.value !== '' ? Number(endPriceEl.value) : Number(inp.dataset.price);
-    return { itemId: id, name: inp.dataset.name, price, isAuto: inp.dataset.auto === 'true', cabinet, onlineQty, offlineQty, storeQty };
+    return { itemId: id, name: inp.dataset.name, price, isAuto: inp.dataset.auto === 'true', cabinetTemp, cabinetSlot, onlineQty, offlineQty, storeQty };
   });
   if (!scheduleData[curSiteId][pickerDate]) scheduleData[curSiteId][pickerDate] = [];
   scheduleData[curSiteId][pickerDate].push({ entryId, restaurantId: pickerRestId, branchId: pickerBranchId || null, mealType, addedBy: CURRENT_USER, items });
@@ -2882,7 +2896,7 @@ function confirmAddItem() {
   if (!checkedInputs.length) { showToast('請至少選擇一個品項', 'error'); return; }
   checkedInputs.forEach(inp => {
     if (!entry.items.some(i => i.itemId === inp.value)) {
-      entry.items.push({ itemId: inp.value, name: inp.dataset.name, price: Number(inp.dataset.price), isAuto: inp.dataset.auto === 'true', cabinet: 'hot', onlineQty: 30, offlineQty: 0, storeQty: 0 });
+      entry.items.push({ itemId: inp.value, name: inp.dataset.name, price: Number(inp.dataset.price), isAuto: inp.dataset.auto === 'true', cabinetTemp: 'hot', cabinetSlot: 'none', onlineQty: 30, offlineQty: 0, storeQty: 0 });
     }
   });
   markDirty(pickerItemDate, pickerItemEntryId);
@@ -3538,7 +3552,7 @@ function importCSV(event) {
       }
       const itemDef = rest.items.find(item => item.name === row['品項']);
       if (itemDef && !entry.items.some(it => it.itemId === itemDef.id)) {
-        entry.items.push({ itemId: itemDef.id, name: row['品項'], price: Number(row['售價']) || getPriceForDate(itemDef, dateStr).price, isAuto: false, cabinet: 'hot', onlineQty: 30, offlineQty: 0, storeQty: 0 });
+        entry.items.push({ itemId: itemDef.id, name: row['品項'], price: Number(row['售價']) || getPriceForDate(itemDef, dateStr).price, isAuto: false, cabinetTemp: 'hot', cabinetSlot: 'none', onlineQty: 30, offlineQty: 0, storeQty: 0 });
         imported++;
       }
     }
@@ -3577,7 +3591,7 @@ function importJSON(event) {
         }
         const itemDef = rest.items.find(item => item.name === itemName);
         if (itemDef && !entry.items.some(it => it.itemId === itemDef.id)) {
-          entry.items.push({ itemId: itemDef.id, name: itemName, price: price || getPriceForDate(itemDef, dateStr).price, isAuto: false, cabinet: 'hot', onlineQty: 30, offlineQty: 0, storeQty: 0 });
+          entry.items.push({ itemId: itemDef.id, name: itemName, price: price || getPriceForDate(itemDef, dateStr).price, isAuto: false, cabinetTemp: 'hot', cabinetSlot: 'none', onlineQty: 30, offlineQty: 0, storeQty: 0 });
           imported++;
         }
       });
