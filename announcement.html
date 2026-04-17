@@ -449,6 +449,73 @@
     .schedule-fields { margin-top: 12px; display: none; }
     .schedule-fields.show { display: block; }
 
+    /* ── 顯示位置：垂直列 ── */
+    .loc-rows { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+    .loc-row { display: flex; flex-direction: column; gap: 6px; }
+    .loc-sub {
+      display: none;
+      margin-left: 22px;
+      padding: 10px 12px;
+      background: var(--gray-50);
+      border-left: 2px solid var(--primary);
+      border-radius: 0 8px 8px 0;
+    }
+    .loc-sub.show { display: block; }
+
+    /* ── 廠區多選下拉 ── */
+    .factory-select-wrap { position: relative; }
+    .factory-select-input {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+      min-height: 38px; padding: 4px 32px 4px 10px;
+      border: 1px solid var(--gray-300); border-radius: 8px;
+      background: #fff; cursor: pointer; font-size: 14px;
+      transition: border-color .2s;
+    }
+    .factory-select-input:focus-within { border-color: var(--primary); outline: none; }
+    .factory-select-input.error { border-color: var(--danger); }
+    .factory-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 12px;
+      background: var(--primary-light); color: var(--primary);
+      font-size: 12px; font-weight: 500;
+    }
+    .factory-tag .rm { cursor: pointer; opacity: .7; font-style: normal; }
+    .factory-tag .rm:hover { opacity: 1; }
+    .factory-search-input {
+      border: none; outline: none; font-size: 14px;
+      min-width: 80px; flex: 1; padding: 2px 0; background: transparent;
+    }
+    .factory-placeholder { color: var(--gray-400); font-size: 14px; pointer-events: none; }
+    .factory-arrow {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--gray-400); pointer-events: none; transition: transform .2s;
+    }
+    .factory-select-wrap.open .factory-arrow { transform: translateY(-50%) rotate(180deg); }
+    .factory-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 2000;
+      background: #fff; border: 1px solid var(--gray-200);
+      border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.12);
+      max-height: 220px; overflow-y: auto; display: none;
+    }
+    .factory-select-wrap.open .factory-dropdown { display: block; }
+    .factory-option {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px; font-size: 14px; cursor: pointer;
+      transition: background .15s;
+    }
+    .factory-option:hover { background: var(--gray-50); }
+    .factory-option.selected { color: var(--primary); font-weight: 500; }
+    .factory-option .fo-check { color: var(--primary); font-size: 13px; visibility: hidden; }
+    .factory-option.selected .fo-check { visibility: visible; }
+    .factory-no-result { padding: 12px 14px; font-size: 13px; color: var(--gray-400); }
+    .factory-all-btn {
+      padding: 8px 14px; font-size: 12px; color: var(--primary);
+      cursor: pointer; border-bottom: 1px solid var(--gray-100);
+      display: flex; gap: 8px;
+    }
+    .factory-all-btn span { opacity: .7; }
+    .factory-all-btn span:hover { opacity: 1; text-decoration: underline; }
+
     .upload-zone {
       border: 2px dashed var(--gray-300);
       border-radius: 10px;
@@ -1301,16 +1368,6 @@
           </select>
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">顯示位置 <span class="required">*</span></label>
-          <div style="margin-top:4px">
-            <div class="display-checkboxes">
-              <label class="checkbox-item"><input type="checkbox" id="loc-admin" checked /> 內部後台</label>
-              <label class="checkbox-item"><input type="checkbox" id="loc-store" /> 店家後台</label>
-              <label class="checkbox-item"><input type="checkbox" id="loc-frontend" checked /> 訂餐前台</label>
-            </div>
-          </div>
-        </div>
-        <div class="form-group" style="margin-bottom:0">
           <label class="form-label">彈出通知</label>
           <label class="schedule-toggle" style="margin-top:4px">
             <label class="toggle-switch">
@@ -1319,6 +1376,65 @@
             </label>
             發布後自動彈出通知
           </label>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">顯示位置 <span class="required">*</span></label>
+        <div class="loc-rows">
+          <!-- 內部後台 -->
+          <div class="loc-row">
+            <label class="checkbox-item"><input type="checkbox" id="loc-admin" checked /> 內部後台</label>
+          </div>
+          <!-- 店家後台 -->
+          <div class="loc-row">
+            <label class="checkbox-item">
+              <input type="checkbox" id="loc-store" onchange="onLocStoreChange(this)" /> 店家後台
+            </label>
+            <div class="loc-sub" id="loc-store-sub">
+              <div class="factory-select-wrap" id="store-select-wrap">
+                <div class="factory-select-input" id="store-select-input" onclick="toggleStoreDropdown(event)">
+                  <span class="factory-placeholder" id="store-placeholder">全部店家</span>
+                  <span class="factory-arrow">▾</span>
+                </div>
+                <div class="factory-dropdown" id="store-dropdown">
+                  <div class="factory-all-btn">
+                    <span onclick="selectAllStores()">全選</span>
+                    <span onclick="clearAllStores()">清除</span>
+                  </div>
+                  <div style="padding:6px 10px">
+                    <input type="text" class="factory-search-input" id="store-search-input"
+                      placeholder="搜尋店家..." oninput="filterStoreOptions()" onclick="event.stopPropagation()" />
+                  </div>
+                  <div id="store-option-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 訂餐前台 -->
+          <div class="loc-row">
+            <label class="checkbox-item">
+              <input type="checkbox" id="loc-frontend" checked onchange="onLocFrontendChange(this)" /> 訂餐前台
+            </label>
+            <div class="loc-sub" id="loc-frontend-sub">
+              <div class="factory-select-wrap" id="factory-select-wrap">
+                <div class="factory-select-input" id="factory-select-input" onclick="toggleFactoryDropdown(event)">
+                  <span class="factory-placeholder" id="factory-placeholder">全部廠區</span>
+                  <span class="factory-arrow">▾</span>
+                </div>
+                <div class="factory-dropdown" id="factory-dropdown">
+                  <div class="factory-all-btn">
+                    <span onclick="selectAllFactories()">全選</span>
+                    <span onclick="clearAllFactories()">清除</span>
+                  </div>
+                  <div style="padding:6px 10px">
+                    <input type="text" class="factory-search-input" id="factory-search-input"
+                      placeholder="搜尋廠區..." oninput="filterFactoryOptions()" onclick="event.stopPropagation()" />
+                  </div>
+                  <div id="factory-option-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="form-group" style="margin-top:18px">
@@ -1428,6 +1544,186 @@
 </div>
 
 <script>
+  // ─── 顯示位置展開控制 ───
+  function onLocStoreChange(el) {
+    document.getElementById('loc-store-sub').classList.toggle('show', el.checked);
+    if (!el.checked) { clearAllStores(); closeStoreDropdown(); }
+  }
+  function onLocFrontendChange(el) {
+    document.getElementById('loc-frontend-sub').classList.toggle('show', el.checked);
+    if (!el.checked) { clearAllFactories(); closeFactoryDropdown(); }
+  }
+
+  // ─── 店家資料 ───
+  const STORES = [
+    '大樹便當', '幸福廚房', '好味道餐廳', '春風小館', '日月潭飲食',
+    '山海樓', '福滿庭', '金牛角便當', '美滿廚房', '豐盛食堂',
+    '家鄉味廚坊', '五穀齋', '天天好食', '吃好玩', '老饕坊',
+  ];
+  let selectedStores = [];
+
+  function initStoreOptions() { renderStoreOptions(''); }
+
+  function renderStoreOptions(keyword) {
+    const list = document.getElementById('store-option-list');
+    const filtered = STORES.filter(s => s.includes(keyword));
+    if (!filtered.length) {
+      list.innerHTML = '<div class="factory-no-result">查無符合店家</div>';
+      return;
+    }
+    list.innerHTML = filtered.map(s => {
+      const sel = selectedStores.includes(s);
+      return `<div class="factory-option${sel ? ' selected' : ''}" onclick="toggleStore('${s}')">
+        <span class="fo-check">✓</span>${s}
+      </div>`;
+    }).join('');
+  }
+
+  function filterStoreOptions() {
+    renderStoreOptions(document.getElementById('store-search-input').value.trim());
+  }
+
+  function toggleStore(name) {
+    const idx = selectedStores.indexOf(name);
+    if (idx === -1) selectedStores.push(name);
+    else selectedStores.splice(idx, 1);
+    updateStoreInputDisplay();
+    renderStoreOptions(document.getElementById('store-search-input').value.trim());
+  }
+
+  function selectAllStores() {
+    selectedStores = [...STORES];
+    updateStoreInputDisplay();
+    renderStoreOptions(document.getElementById('store-search-input').value.trim());
+  }
+
+  function clearAllStores() {
+    selectedStores = [];
+    updateStoreInputDisplay();
+    renderStoreOptions(document.getElementById('store-search-input').value.trim());
+  }
+
+  function updateStoreInputDisplay() {
+    const wrap = document.getElementById('store-select-input');
+    const placeholder = document.getElementById('store-placeholder');
+    wrap.querySelectorAll('.factory-tag').forEach(t => t.remove());
+    if (!selectedStores.length) {
+      placeholder.style.display = '';
+    } else {
+      placeholder.style.display = 'none';
+      const arrow = wrap.querySelector('.factory-arrow');
+      selectedStores.forEach(s => {
+        const tag = document.createElement('span');
+        tag.className = 'factory-tag';
+        tag.innerHTML = `${s}<em class="rm" onclick="event.stopPropagation();toggleStore('${s}')">✕</em>`;
+        wrap.insertBefore(tag, arrow);
+      });
+    }
+  }
+
+  function toggleStoreDropdown(e) {
+    e.stopPropagation();
+    const wrap = document.getElementById('store-select-wrap');
+    const isOpen = wrap.classList.toggle('open');
+    if (isOpen) {
+      closeFactoryDropdown();
+      document.getElementById('store-search-input').value = '';
+      renderStoreOptions('');
+      document.getElementById('store-search-input').focus();
+    }
+  }
+
+  function closeStoreDropdown() {
+    document.getElementById('store-select-wrap').classList.remove('open');
+  }
+
+  // ─── 廠區資料 ───
+  const FACTORIES = [
+    '台北廠', '新北廠', '桃園廠', '新竹廠', '苗栗廠',
+    '台中廠', '彰化廠', '南投廠', '雲林廠', '嘉義廠',
+    '台南廠', '高雄廠', '屏東廠', '花蓮廠', '台東廠',
+  ];
+  let selectedFactories = []; // [] = 全部廠區
+
+  function initFactoryOptions() {
+    renderFactoryOptions('');
+  }
+
+  function renderFactoryOptions(keyword) {
+    const list = document.getElementById('factory-option-list');
+    const filtered = FACTORIES.filter(f => f.includes(keyword));
+    if (!filtered.length) {
+      list.innerHTML = '<div class="factory-no-result">查無符合廠區</div>';
+      return;
+    }
+    list.innerHTML = filtered.map(f => {
+      const sel = selectedFactories.includes(f);
+      return `<div class="factory-option${sel ? ' selected' : ''}" onclick="toggleFactory('${f}')">
+        <span class="fo-check">✓</span>${f}
+      </div>`;
+    }).join('');
+  }
+
+  function filterFactoryOptions() {
+    const kw = document.getElementById('factory-search-input').value.trim();
+    renderFactoryOptions(kw);
+  }
+
+  function toggleFactory(name) {
+    const idx = selectedFactories.indexOf(name);
+    if (idx === -1) selectedFactories.push(name);
+    else selectedFactories.splice(idx, 1);
+    updateFactoryInputDisplay();
+    renderFactoryOptions(document.getElementById('factory-search-input').value.trim());
+  }
+
+  function selectAllFactories() {
+    selectedFactories = [...FACTORIES];
+    updateFactoryInputDisplay();
+    renderFactoryOptions(document.getElementById('factory-search-input').value.trim());
+  }
+
+  function clearAllFactories() {
+    selectedFactories = [];
+    updateFactoryInputDisplay();
+    renderFactoryOptions(document.getElementById('factory-search-input').value.trim());
+  }
+
+  function updateFactoryInputDisplay() {
+    const wrap = document.getElementById('factory-select-input');
+    const placeholder = document.getElementById('factory-placeholder');
+    // 移除舊 tag
+    wrap.querySelectorAll('.factory-tag').forEach(t => t.remove());
+    if (!selectedFactories.length) {
+      placeholder.style.display = '';
+    } else {
+      placeholder.style.display = 'none';
+      const arrow = wrap.querySelector('.factory-arrow');
+      selectedFactories.forEach(f => {
+        const tag = document.createElement('span');
+        tag.className = 'factory-tag';
+        tag.innerHTML = `${f}<em class="rm" onclick="event.stopPropagation();toggleFactory('${f}')">✕</em>`;
+        wrap.insertBefore(tag, arrow);
+      });
+    }
+  }
+
+  function toggleFactoryDropdown(e) {
+    e.stopPropagation();
+    const wrap = document.getElementById('factory-select-wrap');
+    const isOpen = wrap.classList.toggle('open');
+    if (isOpen) {
+      closeStoreDropdown();
+      document.getElementById('factory-search-input').value = '';
+      renderFactoryOptions('');
+      document.getElementById('factory-search-input').focus();
+    }
+  }
+
+  function closeFactoryDropdown() {
+    document.getElementById('factory-select-wrap').classList.remove('open');
+  }
+
   // ─── 分類資料（動態管理） ───
   let annCats = ['系統公告', '活動資訊', '其他'];
 
@@ -2028,9 +2324,21 @@
       document.getElementById('modal-input-category').value = a.category; // 現在直接是中文分類名
       document.getElementById('modal-input-content').value = a.desc || '';
       document.getElementById('loc-admin').checked = (a.locations || []).includes('admin');
-      document.getElementById('loc-store').checked = (a.locations || []).includes('store');
-      document.getElementById('loc-frontend').checked = (a.locations || []).includes('fe');
+      const storeChecked = (a.locations || []).includes('store');
+      const feChecked = (a.locations || []).includes('fe');
+      document.getElementById('loc-store').checked = storeChecked;
+      document.getElementById('loc-frontend').checked = feChecked;
+      document.getElementById('loc-store-sub').classList.toggle('show', storeChecked);
+      document.getElementById('loc-frontend-sub').classList.toggle('show', feChecked);
       document.getElementById('popup-toggle').checked = a.popup || false;
+      // 店家
+      selectedStores = a.stores ? [...a.stores] : [];
+      updateStoreInputDisplay();
+      initStoreOptions();
+      // 廠區
+      selectedFactories = a.factories ? [...a.factories] : [];
+      updateFactoryInputDisplay();
+      initFactoryOptions();
       // 排程
       const hasSchedule = a.schedule && a.schedule !== '立即發布';
       document.getElementById('schedule-toggle').checked = hasSchedule;
@@ -2044,7 +2352,17 @@
       document.getElementById('loc-admin').checked = true;
       document.getElementById('loc-store').checked = false;
       document.getElementById('loc-frontend').checked = true;
+      document.getElementById('loc-store-sub').classList.remove('show');
+      document.getElementById('loc-frontend-sub').classList.add('show');
       document.getElementById('popup-toggle').checked = false;
+      // 店家
+      selectedStores = [];
+      updateStoreInputDisplay();
+      initStoreOptions();
+      // 廠區
+      selectedFactories = [];
+      updateFactoryInputDisplay();
+      initFactoryOptions();
       document.getElementById('schedule-toggle').checked = false;
       toggleSchedule(document.getElementById('schedule-toggle'));
       document.getElementById('modal-input-schedule').value = '';
@@ -2081,6 +2399,8 @@
     if (document.getElementById('loc-store').checked) locs.push('store');
     if (document.getElementById('loc-frontend').checked) locs.push('fe');
     const popupOn = document.getElementById('popup-toggle').checked;
+    const storesVal = selectedStores.length ? [...selectedStores] : null;       // null = 全部店家
+    const factoriesVal = selectedFactories.length ? [...selectedFactories] : null; // null = 全部廠區
 
     const scheduleOn = document.getElementById('schedule-toggle').checked;
     const scheduleVal = document.getElementById('modal-input-schedule').value;
@@ -2105,6 +2425,8 @@
           desc: descStr,
           category: catValue,
           locations: locs,
+          stores: storesVal,
+          factories: factoriesVal,
           popup: popupOn,
           schedule: scheduleStr,
           status: finalStatus,
@@ -2119,6 +2441,8 @@
         desc: descStr,
         category: catValue,
         locations: locs,
+        stores: storesVal,
+        factories: factoriesVal,
         popup: popupOn,
         schedule: scheduleStr,
         readRate: null,
@@ -2172,7 +2496,18 @@
     if (document.getElementById('modal-input-category').options.length > 0)
       document.getElementById('modal-input-category').selectedIndex = 0;
     document.getElementById('loc-admin').checked = true;
+    document.getElementById('loc-store').checked = false;
     document.getElementById('loc-frontend').checked = true;
+    document.getElementById('loc-store-sub').classList.remove('show');
+    document.getElementById('loc-frontend-sub').classList.add('show');
+    selectedStores = [];
+    updateStoreInputDisplay();
+    closeStoreDropdown();
+    document.getElementById('store-search-input').value = '';
+    selectedFactories = [];
+    updateFactoryInputDisplay();
+    closeFactoryDropdown();
+    document.getElementById('factory-search-input').value = '';
     document.getElementById('schedule-toggle').checked = false;
     document.getElementById('schedule-fields').classList.remove('show');
     document.getElementById('modal-input-schedule').value = '';
@@ -2187,6 +2522,8 @@
   // 點空白關閉 Modal
   document.getElementById('admin-modal').addEventListener('click', function(e) {
     if (e.target === this) closeAdminModal();
+    if (!e.target.closest('#factory-select-wrap')) closeFactoryDropdown();
+    if (!e.target.closest('#store-select-wrap')) closeStoreDropdown();
   });
   document.getElementById('fe-popup').addEventListener('click', function(e) {
     if (e.target === this) popupAck();
