@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>供餐設定 — 店家後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --primary:     #4f46e5;
+  --primary-bg:  #eef2ff;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --yellow-bg:   #fefce8;
+  --yellow-bdr:  #fde68a;
+  --yellow-text: #92400e;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.page { max-width: 860px; margin: 0 auto; padding: 24px 20px 48px; }
+
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--text); }
+.page-sub { font-size: 14px; color: var(--text-3); margin-top: 4px; }
+
+/* 提示橫幅 */
+.info-bar {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 16px; border-radius: 8px;
+  font-size: 13px; margin-bottom: 12px;
+}
+.info-bar.notify { background: var(--blue-bg); border: 1px solid var(--blue-border); color: var(--blue-text); }
+.info-bar.warn   { background: var(--yellow-bg); border: 1px solid var(--yellow-bdr); color: var(--yellow-text); }
+.info-bar-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* 區塊卡片 */
+.settings-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.settings-card-title {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  margin-bottom: 4px;
+}
+.settings-card-desc {
+  font-size: 12px; color: var(--text-3); margin-bottom: 16px;
+}
+.settings-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+/* 餐期列 */
+.meal-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 14px; border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 8px;
+  transition: background 0.1s;
+}
+.meal-row.disabled { opacity: 0.45; }
+.meal-row-left { display: flex; align-items: center; gap: 10px; min-width: 110px; }
+.meal-toggle-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; font-weight: 500; }
+
+/* toggle switch */
+.toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; background: #d1d5db;
+  border-radius: 20px; cursor: pointer; transition: background 0.2s;
+}
+.toggle-slider:before {
+  content: ''; position: absolute; width: 14px; height: 14px;
+  left: 3px; top: 3px; background: #fff; border-radius: 50%;
+  transition: transform 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(16px); }
+
+/* 星期按鈕組 */
+.wd-group { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.wd-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--card);
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center;
+}
+.wd-btn.on { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+.wd-btn.conflict {
+  border-color: #f59e0b; background: #fffbeb; color: #92400e;
+  cursor: not-allowed;
+}
+.wd-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+/* 衝突提示 */
+.conflict-badge {
+  display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px;
+  background: #fffbeb; color: #92400e; border: 1px solid #f59e0b; margin-left: 6px;
+}
+
+/* 特定公休日 */
+.special-dates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.special-date-chip {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 10px; background: var(--orange-bg); border: 1px solid var(--orange-bdr);
+  border-radius: 100px; font-size: 13px; color: var(--orange);
+}
+.special-date-chip button {
+  background: none; border: none; color: var(--orange); cursor: pointer; font-size: 14px; line-height: 1;
+  padding: 0 0 0 2px;
+}
+.special-date-chip.conflict-date {
+  background: #fffbeb; border-color: #f59e0b; color: #92400e;
+  cursor: not-allowed; pointer-events: none;
+}
+
+.add-date-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.add-date-row input[type=date] {
+  flex: 1; max-width: 200px; padding: 6px 10px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 14px; color: var(--text); background: var(--card);
+}
+
+/* 按鈕 */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text); transition: background 0.1s; }
+.btn:hover { background: var(--bg-2); }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-primary:hover { background: #4338ca; border-color: #4338ca; }
+.btn-sm { padding: 5px 12px; font-size: 13px; }
+
+/* 底部操作列 */
+.footer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+/* Toast */
+.toast-wrap {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.toast {
+  padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 500;
+  background: #1c1b1a; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+<link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">供餐設定</div>
+    <div class="page-sub">設定供餐時段與公休日期，變更將通知營運部確認</div>
+  </div>
+
+  <div class="info-bar notify">
+    <span class="info-bar-icon">ℹ️</span>
+    <span>修改完成後，系統將自動通知營運部確認。設定生效前可能需要 1 個工作天審核。</span>
+  </div>
+
+  <div class="info-bar warn">
+    <span class="info-bar-icon">⚠️</span>
+    <span>若您設定的供餐時段或公休日期已被內部後台排入菜單，系統將提示並<strong>限制操作</strong>，如需調整請直接聯繫營運部。</span>
+  </div>
+
+  <!-- 供餐時段設定 -->
+  <div class="settings-card">
+    <div class="settings-card-title">供餐時段與固定公休</div>
+    <div class="settings-card-desc">開啟的餐期表示本店可供應，右側圓形按鈕可設定該餐期的固定公休星期（紅色＝公休）</div>
+    <div id="meal-settings-list"></div>
+  </div>
+
+  <!-- 特定公休日期 -->
+  <div class="settings-card">
+    <div class="settings-card-title">特定公休日期</div>
+    <div class="settings-card-desc">不定期公休日，設定後排程時該日將顯示為不可選。橘黃色標示的日期已被排入菜單，無法直接刪除。</div>
+    <div class="add-date-row">
+      <input type="date" id="special-date-input" />
+      <button class="btn btn-sm" onclick="addSpecialDate()">＋ 新增</button>
+    </div>
+    <div class="special-dates" id="special-dates-list"></div>
+  </div>
+
+  <div class="footer-actions">
+    <button class="btn" onclick="resetSettings()">重設</button>
+    <button class="btn btn-primary" onclick="saveSettings()">儲存並通知營運</button>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+/* ── 模擬當前店家資料 ── */
+const storeData = {
+  id: '9990014-001',
+  name: '爭鮮gogo-台北內湖康寧店',
+  mealTypes: {
+    breakfast: false,
+    lunch:     true,
+    afternoon: false,
+    dinner:    false,
+    latenight: false,
+  },
+  // 固定公休：各餐期對應公休星期（0=日 … 6=六）
+  closedWeekdays: {
+    breakfast: [],
+    lunch:     [0, 6],   // 週日、週六公休
+    afternoon: [],
+    dinner:    [],
+    latenight: [],
+  },
+  // 特定公休日期
+  closedDates: ['2026-05-01', '2026-06-12'],
+};
+
+/* 已被排入菜單（衝突）的示意資料 */
+const conflictWeekdays = { lunch: [0] };   // 午餐的週日已有排程
+const conflictDates = ['2026-05-01'];       // 此日已排入菜單
+
+const MEAL_TYPES = [
+  { id: 'breakfast', label: '早餐' },
+  { id: 'lunch',     label: '午餐' },
+  { id: 'afternoon', label: '下午茶' },
+  { id: 'dinner',    label: '晚餐' },
+  { id: 'latenight', label: '消夜' },
+];
+const WD_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+
+/* 深拷貝初始值供 Reset 用 */
+let settings = JSON.parse(JSON.stringify({
+  mealTypes: storeData.mealTypes,
+  closedWeekdays: storeData.closedWeekdays,
+  closedDates: storeData.closedDates,
+}));
+
+/* ── 渲染供餐時段列表 ── */
+function renderMealSettings() {
+  const container = document.getElementById('meal-settings-list');
+  container.innerHTML = MEAL_TYPES.map(m => {
+    const isOn = settings.mealTypes[m.id];
+    const conflicts = conflictWeekdays[m.id] || [];
+    const wdBtns = WD_NAMES.map((wd, i) => {
+      const isRed = (settings.closedWeekdays[m.id] || []).includes(i);
+      const isConflict = conflicts.includes(i) && isRed;
+      let cls = 'wd-btn' + (isRed ? ' on' : '') + (isConflict ? ' conflict' : '');
+      const title = isConflict ? '此星期已排入菜單，無法設定公休' : (isRed ? '公休（點擊取消）' : '點擊設為公休');
+      return `<button class="${cls}" ${!isOn ? 'disabled' : ''} title="${title}"
+        onclick="toggleWeekday('${m.id}', ${i}, ${isConflict})">${wd}</button>`;
+    }).join('');
+    return `<div class="meal-row${!isOn ? ' disabled' : ''}">
+      <div class="meal-row-left">
+        <label class="meal-toggle-label">
+          <label class="toggle-switch">
+            <input type="checkbox" ${isOn ? 'checked' : ''} onchange="toggleMeal('${m.id}', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          ${m.label}
+        </label>
+      </div>
+      <div class="wd-group">${wdBtns}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── 渲染特定公休日 ── */
+function renderSpecialDates() {
+  const list = document.getElementById('special-dates-list');
+  if (!settings.closedDates.length) { list.innerHTML = '<span style="font-size:13px;color:var(--text-3)">尚無設定</span>'; return; }
+  list.innerHTML = settings.closedDates.map(d => {
+    const isConflict = conflictDates.includes(d);
+    if (isConflict) {
+      return `<div class="special-date-chip conflict-date" title="此日期已排入菜單，如需刪除請聯繫營運部">
+        ${d} ⚠
+      </div>`;
+    }
+    return `<div class="special-date-chip">
+      ${d}
+      <button onclick="removeSpecialDate('${d}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+/* ── 操作函數 ── */
+function toggleMeal(mealId, checked) {
+  settings.mealTypes[mealId] = checked;
+  renderMealSettings();
+}
+
+function toggleWeekday(mealId, wd, isConflict) {
+  if (isConflict) {
+    showToast('⚠ 此星期已被排入菜單，無法直接設為公休，請聯繫營運部調整。', '#c2410c');
+    return;
+  }
+  const arr = settings.closedWeekdays[mealId] || [];
+  const idx = arr.indexOf(wd);
+  if (idx >= 0) arr.splice(idx, 1);
+  else arr.push(wd);
+  settings.closedWeekdays[mealId] = arr;
+  renderMealSettings();
+}
+
+function addSpecialDate() {
+  const input = document.getElementById('special-date-input');
+  const val = input.value;
+  if (!val) return;
+  if (conflictDates.includes(val)) {
+    showToast('⚠ 此日期已排入菜單，無法設為公休，請聯繫營運部。', '#c2410c');
+    return;
+  }
+  if (settings.closedDates.includes(val)) {
+    showToast('此日期已設定。', '#57534e');
+    return;
+  }
+  settings.closedDates = [...settings.closedDates, val].sort();
+  input.value = '';
+  renderSpecialDates();
+}
+
+function removeSpecialDate(d) {
+  settings.closedDates = settings.closedDates.filter(x => x !== d);
+  renderSpecialDates();
+}
+
+function resetSettings() {
+  settings = JSON.parse(JSON.stringify({
+    mealTypes: storeData.mealTypes,
+    closedWeekdays: storeData.closedWeekdays,
+    closedDates: storeData.closedDates,
+  }));
+  renderMealSettings();
+  renderSpecialDates();
+  showToast('已重設為上次儲存的設定。');
+}
+
+function saveSettings() {
+  showToast('✅ 已送出通知，等待營運部確認。', '#15803d');
+}
+
+/* ── Toast ── */
+function showToast(msg, color) {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  if (color) el.style.background = color;
+  wrap.appendChild(el);
+  requestAnimationFrame(() => { el.classList.add('show'); });
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+
+/* ── 初始化 ── */
+renderMealSettings();
+renderSpecialDates();
+</script>
+</body>
+</html>

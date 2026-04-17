@@ -486,6 +486,8 @@ body {
   font-weight: 500;
 }
 .item-checklist-empty { padding: 14px; font-size: 14px; color: var(--text-3); text-align: center; }
+.item-check-sales { font-size: 11px; color: var(--text-3); margin-left: 6px; white-space: nowrap; }
+.sort-active { background: #eff6ff !important; color: #1e40af !important; border-color: #bfdbfe !important; }
 
 /* ─── Custom dropdown ─── */
 .custom-dropdown { position: relative; }
@@ -934,6 +936,10 @@ body {
           <button class="btn btn-sm" onclick="toggleAllItems()" id="toggle-all-btn">全選</button>
         </div>
         <input type="text" id="item-checklist-search" placeholder="搜尋品項…" oninput="filterItemChecklist()" style="width:100%;box-sizing:border-box;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:6px;outline:none">
+        <div style="display:flex;align-items:center;gap:8px;margin:4px 0 6px">
+          <button class="btn btn-sm" id="item-sort-btn" onclick="toggleItemSort()">依銷量排序</button>
+          <span id="item-sort-hint" style="font-size:12px;color:var(--text-3);display:none">銷量高→低</span>
+        </div>
         <div class="item-checklist" id="item-checklist"></div>
       </div>
 
@@ -1080,6 +1086,17 @@ body {
       <!-- 右欄：設定區 -->
       <div style="flex:1;overflow-y:auto;padding:20px 24px">
         <div id="mgr-rest-form" style="display:none">
+
+          <!-- 供餐模式 -->
+          <div style="margin-bottom:20px">
+            <div style="font-size:15px;font-weight:600;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">供餐模式</div>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+              <input type="checkbox" id="mgr-multisite-toggle" style="width:15px;height:15px;accent-color:var(--blue)"
+                onchange="saveMgrMultiSite(this.checked)">
+              <span style="font-size:14px;font-weight:500">可多廠區同時供餐</span>
+              <span style="font-size:12px;color:var(--text-3)">開啟後，此餐廳可同時被排入多個廠區的同一餐期</span>
+            </label>
+          </div>
 
           <!-- 供餐時段 + 各餐期公休 -->
           <div style="margin-bottom:24px">
@@ -1339,10 +1356,10 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I001', name: '雞腿便當', en: 'Chicken Leg Bento', priceTiers: [{ cost: 78, price: 100, effectiveFrom: null }, { cost: 85, price: 110, effectiveFrom: '2026-05-01' }] },
-      { id: 'I002', name: '排骨便當', en: 'Pork Rib Bento',    priceTiers: [{ cost: 72, price: 95, effectiveFrom: null }] },
-      { id: 'I003', name: '控肉飯',   en: 'Braised Pork Rice', priceTiers: [{ cost: 65, price: 85, effectiveFrom: null }] },
-      { id: 'I004', name: '滷肉飯',   en: 'Minced Pork Rice',  priceTiers: [{ cost: 55, price: 75, effectiveFrom: null }, { cost: 60, price: 80, effectiveFrom: '2026-05-01' }] },
+      { id: 'I001', name: '雞腿便當', en: 'Chicken Leg Bento', salesCount: 382, priceTiers: [{ cost: 78, price: 100, effectiveFrom: null }, { cost: 85, price: 110, effectiveFrom: '2026-05-01' }] },
+      { id: 'I002', name: '排骨便當', en: 'Pork Rib Bento',    salesCount: 271, priceTiers: [{ cost: 72, price: 95, effectiveFrom: null }] },
+      { id: 'I003', name: '控肉飯',   en: 'Braised Pork Rice', salesCount: 95,  priceTiers: [{ cost: 65, price: 85, effectiveFrom: null }] },
+      { id: 'I004', name: '滷肉飯',   en: 'Minced Pork Rice',  salesCount: 448, priceTiers: [{ cost: 55, price: 75, effectiveFrom: null }, { cost: 60, price: 80, effectiveFrom: '2026-05-01' }] },
     ]
   },
   {
@@ -1351,22 +1368,23 @@ const restaurants = [
     closedWeekdays: { breakfast:[0], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-05-01'],
     mealTypes: { breakfast: true, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I010', name: '奶油厚片',     en: 'Butter Toast',          priceTiers: [{ cost: 28, price: 40, effectiveFrom: null }] },
-      { id: 'I011', name: '原味蛋餅',     en: 'Plain Egg Crepe',        priceTiers: [{ cost: 22, price: 35, effectiveFrom: null }] },
-      { id: 'I012', name: '總匯蛋餅',     en: 'Club Egg Crepe',         priceTiers: [{ cost: 38, price: 55, effectiveFrom: null }] },
-      { id: 'I013', name: '火腿蛋餅',     en: 'Ham Egg Crepe',          priceTiers: [{ cost: 35, price: 50, effectiveFrom: null }] },
-      { id: 'I014', name: '起司雙層蛋餅', en: 'Double Cheese Egg Crepe',priceTiers: [{ cost: 42, price: 60, effectiveFrom: null }] },
+      { id: 'I010', name: '奶油厚片',     en: 'Butter Toast',           salesCount: 210, priceTiers: [{ cost: 28, price: 40, effectiveFrom: null }] },
+      { id: 'I011', name: '原味蛋餅',     en: 'Plain Egg Crepe',        salesCount: 534, priceTiers: [{ cost: 22, price: 35, effectiveFrom: null }] },
+      { id: 'I012', name: '總匯蛋餅',     en: 'Club Egg Crepe',         salesCount: 189, priceTiers: [{ cost: 38, price: 55, effectiveFrom: null }] },
+      { id: 'I013', name: '火腿蛋餅',     en: 'Ham Egg Crepe',          salesCount: 302, priceTiers: [{ cost: 35, price: 50, effectiveFrom: null }] },
+      { id: 'I014', name: '起司雙層蛋餅', en: 'Double Cheese Egg Crepe',salesCount: 87,  priceTiers: [{ cost: 42, price: 60, effectiveFrom: null }] },
     ]
   },
   {
     id: 'S0003', name: '阿成便當',
+    multiSite: true,
     branches: [{ id: 'S0003-B1', name: '光復路店' }, { id: 'S0003-B2', name: '中正路店' }, { id: 'S0003-B3', name: '東大路店' }],
     closedWeekdays: { breakfast:[], lunch:[6,0], afternoon:[], dinner:[6,0], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
-      { id: 'I020', name: '三層肉便當', en: 'Pork Belly Bento',     priceTiers: [{ cost: 68, price: 90, effectiveFrom: null }] },
-      { id: 'I021', name: '雞肉飯',     en: 'Chicken Rice',         priceTiers: [{ cost: 50, price: 70, effectiveFrom: null }] },
-      { id: 'I022', name: '素食便當',   en: 'Vegetarian Bento',     priceTiers: [{ cost: 58, price: 80, effectiveFrom: null }] },
+      { id: 'I020', name: '三層肉便當', en: 'Pork Belly Bento',     salesCount: 415, priceTiers: [{ cost: 68, price: 90, effectiveFrom: null }] },
+      { id: 'I021', name: '雞肉飯',     en: 'Chicken Rice',         salesCount: 623, priceTiers: [{ cost: 50, price: 70, effectiveFrom: null }] },
+      { id: 'I022', name: '素食便當',   en: 'Vegetarian Bento',     salesCount: 142, priceTiers: [{ cost: 58, price: 80, effectiveFrom: null }] },
     ]
   },
   {
@@ -1375,9 +1393,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
-      { id: 'I030', name: '紅燒牛腩飯', en: 'Braised Beef Brisket Rice', priceTiers: [{ cost: 95, price: 130, effectiveFrom: null }] },
-      { id: 'I031', name: '咖哩雞飯',   en: 'Curry Chicken Rice',        priceTiers: [{ cost: 80, price: 110, effectiveFrom: null }] },
-      { id: 'I032', name: '麻婆豆腐飯', en: 'Mapo Tofu Rice',            priceTiers: [{ cost: 72, price: 100, effectiveFrom: null }] },
+      { id: 'I030', name: '紅燒牛腩飯', en: 'Braised Beef Brisket Rice', salesCount: 198, priceTiers: [{ cost: 95, price: 130, effectiveFrom: null }] },
+      { id: 'I031', name: '咖哩雞飯',   en: 'Curry Chicken Rice',        salesCount: 357, priceTiers: [{ cost: 80, price: 110, effectiveFrom: null }] },
+      { id: 'I032', name: '麻婆豆腐飯', en: 'Mapo Tofu Rice',            salesCount: 276, priceTiers: [{ cost: 72, price: 100, effectiveFrom: null }] },
     ]
   },
   {
@@ -1386,9 +1404,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-04-04'],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I040', name: '陽春麵', en: 'Plain Noodle Soup',    priceTiers: [{ cost: 38, price: 55, effectiveFrom: null }] },
-      { id: 'I041', name: '牛肉麵', en: 'Beef Noodle Soup',     priceTiers: [{ cost: 88, price: 120, effectiveFrom: null }] },
-      { id: 'I042', name: '刀削麵', en: 'Knife-Cut Noodle Soup',priceTiers: [{ cost: 62, price: 85, effectiveFrom: null }] },
+      { id: 'I040', name: '陽春麵', en: 'Plain Noodle Soup',    salesCount: 441, priceTiers: [{ cost: 38, price: 55, effectiveFrom: null }] },
+      { id: 'I041', name: '牛肉麵', en: 'Beef Noodle Soup',     salesCount: 284, priceTiers: [{ cost: 88, price: 120, effectiveFrom: null }] },
+      { id: 'I042', name: '刀削麵', en: 'Knife-Cut Noodle Soup',salesCount: 193, priceTiers: [{ cost: 62, price: 85, effectiveFrom: null }] },
     ]
   },
 ];
@@ -2109,10 +2127,11 @@ function isRestClosed(rest, dateStr, mealType) {
 }
 
 function getConflictSite(restId, dateStr, mealType) {
+  const rest = restaurants.find(r => r.id === restId);
   for (const site of sites) {
     if (site.id === curSiteId) continue;
     const conflict = ((scheduleData[site.id] || {})[dateStr] || []).find(e => e.restaurantId === restId && e.mealType === mealType);
-    if (conflict) return { site, entry: conflict };
+    if (conflict) return { site, entry: conflict, isSoft: !!(rest && rest.multiSite) };
   }
   return null;
 }
@@ -2293,14 +2312,19 @@ function buildRestOptions(dateStr) {
     } else if (dupInSite) {
       disabled = true; tipHtml = `<span class="conflict-tip" style="color:var(--orange)">本廠已排此餐廳</span>`;
     } else if (conflict) {
-      disabled = true; tipHtml = `<span class="conflict-tip" style="color:var(--red)">已由${conflict.entry.addedBy}排至${conflict.site.name}</span>`;
+      if (conflict.isSoft) {
+        tipHtml = `<span class="conflict-tip" style="color:var(--orange)">已同時排至${conflict.site.name}</span>`;
+      } else {
+        disabled = true; tipHtml = `<span class="conflict-tip" style="color:var(--red)">已由${conflict.entry.addedBy}排至${conflict.site.name}</span>`;
+      }
     }
     const el = document.createElement('div');
     el.className = 'dropdown-option' + (disabled ? ' disabled' : '');
     el.dataset.id = rest.id; el.dataset.name = rest.name;
     el.innerHTML = `<span>${rest.name}</span>${tipHtml}`;
     if (!disabled) el.onclick = () => selectRestOption(rest.id, rest.name);
-    else if (conflict) el.title = `該店家當日已由 ${conflict.entry.addedBy} 安排至 ${conflict.site.name}，請改選其他餐廳`;
+    if (conflict && !conflict.isSoft) el.title = `該店家當日已由 ${conflict.entry.addedBy} 安排至 ${conflict.site.name}，請改選其他餐廳`;
+    else if (conflict && conflict.isSoft) el.title = `此餐廳支援多廠區供餐，當日已同時排至 ${conflict.site.name}`;
     opts.appendChild(el);
   });
 }
@@ -2329,8 +2353,15 @@ function selectRestOption(id, name) {
   closeRestDrop();
   document.getElementById('rest-picker-err').classList.remove('show');
   buildBranchSelect(id);
+  itemSortMode = 'default';
+  const sortBtn = document.getElementById('item-sort-btn');
+  const sortHint = document.getElementById('item-sort-hint');
+  if (sortBtn) { sortBtn.textContent = '依銷量排序'; sortBtn.classList.remove('sort-active'); }
+  if (sortHint) sortHint.style.display = 'none';
   buildNewRestItemChecklist();
 }
+
+let itemSortMode = 'default'; // 'default' | 'sales'
 
 function buildNewRestItemChecklist() {
   if (!pickerRestId) return;
@@ -2339,22 +2370,29 @@ function buildNewRestItemChecklist() {
     document.getElementById('item-checklist-section').style.display = 'none';
     return;
   }
+  // 保留已勾選狀態
+  const checkedIds = new Set(
+    [...document.querySelectorAll('#item-checklist input[type=checkbox]:checked')].map(i => i.value)
+  );
+  // 依排序模式排列
+  let sortedItems = [...rest.items];
+  if (itemSortMode === 'sales') sortedItems.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
   document.getElementById('item-checklist-section').style.display = 'block';
   document.getElementById('item-checklist-search').value = '';
   const list = document.getElementById('item-checklist');
-  list.innerHTML = rest.items.map(item => {
+  list.innerHTML = sortedItems.map(item => {
     const tier   = getPriceForDate(item, pickerDate);
     const cost   = getCostForDate(item, pickerDate);
     const isAuto = !!tier.effectiveFrom;
     const eid    = 'iex-' + item.id;
     return `<div>
       <label class="item-check-row" onclick="toggleItemExtra('${eid}', this); updateNewRestItemCount()">
-        <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" data-auto="${isAuto}" onclick="event.stopPropagation(); document.getElementById('${eid}').classList.toggle('show', this.checked); updateNewRestItemCount()">
-        <span class="item-check-name">${item.name}</span>
+        <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" data-auto="${isAuto}" ${checkedIds.has(item.id) ? 'checked' : ''} onclick="event.stopPropagation(); document.getElementById('${eid}').classList.toggle('show', this.checked); updateNewRestItemCount()">
+        <span class="item-check-name">${item.name}</span><span class="item-check-sales">銷量 ${item.salesCount ?? '-'}</span>
         <span class="item-check-cost">成本 $${cost}</span>
         <span class="item-check-price${isAuto?' is-auto':''}">$${tier.price}${isAuto?` <span class="item-check-auto-badge">自動帶入</span>`:''}</span>
       </label>
-      <div class="item-extra" id="${eid}">
+      <div class="item-extra${checkedIds.has(item.id) ? ' show' : ''}" id="${eid}">
         <div class="item-extra-row">
           <div>
             <div class="item-extra-label">成本價</div>
@@ -2405,6 +2443,17 @@ function updateNewRestItemCount() {
   const checked = [...inputs].filter(i => i.checked).length;
   document.getElementById('item-check-count').textContent = checked ? `已選 ${checked} / ${inputs.length}` : `共 ${inputs.length} 項`;
   document.getElementById('toggle-all-btn').textContent = (checked === inputs.length) ? '取消全選' : '全選';
+}
+
+function toggleItemSort() {
+  itemSortMode = itemSortMode === 'default' ? 'sales' : 'default';
+  const btn = document.getElementById('item-sort-btn');
+  const hint = document.getElementById('item-sort-hint');
+  const isActive = itemSortMode === 'sales';
+  btn.textContent = isActive ? '恢復原順序' : '依銷量排序';
+  btn.classList.toggle('sort-active', isActive);
+  hint.style.display = isActive ? '' : 'none';
+  buildNewRestItemChecklist();
 }
 
 function filterItemChecklist() {
@@ -3080,8 +3129,15 @@ function loadMgrRest() {
   document.getElementById('mgr-rest-empty').style.display = 'none';
   const rest = restaurants.find(r => r.id === restId);
   if (!rest) return;
+  document.getElementById('mgr-multisite-toggle').checked = !!(rest.multiSite);
   renderSpecialDates(restId);
   renderMgrMealChecks(restId);
+}
+
+function saveMgrMultiSite(checked) {
+  const rest = restaurants.find(r => r.id === mgrSelectedRestId);
+  if (!rest) return;
+  rest.multiSite = checked;
 }
 
 function renderMgrMealChecks(restId) {

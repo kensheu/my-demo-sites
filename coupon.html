@@ -244,63 +244,17 @@
 
 <div class="page">
   <div class="page-title">點數 & 折價券管理</div>
-  <div class="page-sub">設定點數累積規則與節日促銷、管理折價券發放與使用</div>
+  <div class="page-sub">設定累積與兌換規則、管理節日促銷與折價券、查詢會員點數</div>
 
   <!-- 主頁籤 -->
   <div class="main-tabs">
-    <button class="main-tab active" onclick="switchMainTab('points')">點數管理</button>
-    <button class="main-tab" onclick="switchMainTab('coupon')">折價券管理</button>
+    <button class="main-tab active" onclick="switchMainTab('rules')">規則設定</button>
+    <button class="main-tab" onclick="switchMainTab('promo')">促銷設定</button>
+    <button class="main-tab" onclick="switchMainTab('data')">資料管理</button>
   </div>
 
-  <!-- ── 折價券管理 Tab ── -->
-  <div class="tab-panel" id="tab-coupon">
-    <!-- KPI 統計 -->
-    <div class="stats-grid" id="statsGrid"><!-- JS 渲染 --></div>
-
-    <!-- 工具列 -->
-    <div class="toolbar">
-      <input type="text" class="tbl-search" id="searchInput" placeholder="搜尋折價券碼、會員名稱…" oninput="renderTable()">
-      <select class="filter-select" id="filterSource" onchange="renderTable()">
-        <option value="">所有來源</option>
-        <option value="compensation">補償</option>
-        <option value="promo">促銷</option>
-        <option value="referral">推薦</option>
-      </select>
-      <select class="filter-select" id="filterStatus" onchange="renderTable()">
-        <option value="">所有狀態</option>
-        <option value="unused">未使用</option>
-        <option value="used">已使用</option>
-        <option value="expired">已過期</option>
-      </select>
-      <button class="btn-primary" onclick="openAddModal()">＋ 新增折價券</button>
-    </div>
-
-    <!-- 表格 -->
-    <div class="tbl-card">
-      <div class="tbl-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>折價券碼</th>
-              <th>金額</th>
-              <th>持有會員</th>
-              <th>來源</th>
-              <th>備註</th>
-              <th>有效期限</th>
-              <th>發放日期</th>
-              <th>狀態</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="couponTbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 點數管理 Tab ── -->
-  <div class="tab-panel active" id="tab-points">
-    <!-- 區塊一：點數規則設定 -->
+  <!-- ── 規則設定 Tab ── -->
+  <div class="tab-panel active" id="tab-rules">
     <div class="section-card">
       <div class="section-title">點數規則設定</div>
       <div class="rule-grid">
@@ -327,12 +281,14 @@
       </div>
       <button class="btn-primary" onclick="saveRules()">儲存規則</button>
     </div>
+  </div>
 
-    <!-- 區塊二：節日促銷設定 -->
+  <!-- ── 促銷設定 Tab ── -->
+  <div class="tab-panel" id="tab-promo">
     <div class="section-card">
-      <div class="section-title">節日促銷設定</div>
-      <div class="points-toolbar">
-        <button class="btn-primary" onclick="openPromoModal()">＋ 新增促銷</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--gray-200)">
+        <div class="section-title" style="margin:0;padding:0;border:none">促銷與折價券發放</div>
+        <button class="btn-primary" onclick="openAddModal()">＋ 新增促銷</button>
       </div>
       <table>
         <thead>
@@ -342,77 +298,78 @@
         </thead>
         <tbody id="promoTbody"></tbody>
       </table>
+      <div style="margin-top:12px;font-size:12px;color:var(--gray-400)">補償類折價券請從「客訴管理」頁面發放；推薦折價券由系統自動發放。</div>
     </div>
+  </div>
 
-    <!-- 區塊三：會員點數查詢 -->
+  <!-- ── 資料管理 Tab ── -->
+  <div class="tab-panel" id="tab-data">
+    <!-- KPI 統計 -->
+    <div id="statsGrid"><!-- JS 渲染 --></div>
+
+    <!-- 整合查詢 -->
     <div class="section-card">
-      <div class="section-title">會員點數查詢</div>
-      <div style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--gray-200)">
+        <div class="section-title" style="margin:0;padding:0;border:none">會員查詢</div>
         <input type="text" class="pts-search" id="memberSearch" placeholder="搜尋姓名或會員編號…" oninput="renderMembersTable()">
       </div>
       <table>
         <thead>
-          <tr><th>會員編號</th><th>姓名</th><th>點數</th><th>訂閱方案</th></tr>
+          <tr><th>會員編號</th><th>姓名</th><th>點數</th><th>訂閱方案</th><th>持有折價券</th><th>待折抵金額</th></tr>
         </thead>
         <tbody id="memberTbody"></tbody>
       </table>
     </div>
-  </div>
-</div>
 
-<!-- 新增折價券 Modal -->
-<div class="modal-overlay" id="addModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>新增折價券</h2>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">指定會員 <span style="color:#dc2626">*</span></label>
-          <select class="form-control" id="newCpnMember">
-            <option value="">— 選擇會員 —</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">折抵金額（元）<span style="color:#dc2626">*</span></label>
-          <input type="number" class="form-control" id="newCpnAmount" min="1" max="9999" placeholder="例：50">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">有效期限 <span style="color:#dc2626">*</span></label>
-          <input type="date" class="form-control" id="newCpnExpiry">
-        </div>
-        <div class="form-group">
-          <label class="form-label">來源</label>
-          <select class="form-control" id="newCpnSource">
+    <!-- 折價券列表 -->
+    <div class="section-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--gray-200)">
+        <div class="section-title" style="margin:0;padding:0;border:none">折價券列表</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" class="tbl-search" id="searchInput" placeholder="搜尋折價券碼、會員名稱…" oninput="renderTable()" style="min-width:180px">
+          <select class="filter-select" id="filterSource" onchange="renderTable()">
+            <option value="">所有來源</option>
+            <option value="compensation">補償</option>
             <option value="promo">促銷</option>
+            <option value="referral">推薦</option>
+          </select>
+          <select class="filter-select" id="filterStatus" onchange="renderTable()">
+            <option value="">所有狀態</option>
+            <option value="unused">未使用</option>
+            <option value="used">已使用</option>
+            <option value="expired">已過期</option>
           </select>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">備註說明</label>
-        <input type="text" class="form-control" id="newCpnReason" placeholder="例：週年慶促銷活動">
+      <!-- 表格 -->
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>折價券碼</th>
+              <th>金額</th>
+              <th>持有會員</th>
+              <th>來源</th>
+              <th>備註</th>
+              <th>有效期限</th>
+              <th>發放日期</th>
+              <th>狀態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="couponTbody"></tbody>
+        </table>
       </div>
-      <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;padding:10px 14px;font-size:12px;color:var(--gray-500)">
-        折價券碼將由系統自動產生（格式：COMP-XXXXX）。補償類折價券請從「客訴管理」頁面發放；推薦折價券由系統於推薦成立時自動發放。
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel-modal" onclick="closeModal()">取消</button>
-      <button class="btn-confirm-modal" onclick="confirmAddCoupon()">新增</button>
     </div>
   </div>
 </div>
 
-<!-- 新增促銷 Modal -->
-<div class="modal-overlay" id="promoModal">
-  <div class="modal">
+<!-- 新增（折價券 / 促銷）合併 Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal" style="max-width:520px">
     <div class="modal-header">
-      <h2>新增節日促銷</h2>
-      <button class="modal-close" onclick="closePromoModal()">✕</button>
+      <h2>新增促銷活動</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -450,10 +407,20 @@
           <input type="date" class="form-control" id="promoEnd">
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">有效期限（折價券）</label>
+          <input type="date" class="form-control" id="newCpnExpiry">
+        </div>
+        <div class="form-group">
+          <label class="form-label">備註說明</label>
+          <textarea class="form-control" id="newCpnReason" placeholder="例：週年慶促銷活動" rows="3" style="resize:vertical"></textarea>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel-modal" onclick="closePromoModal()">取消</button>
-      <button class="btn-confirm-modal" onclick="confirmAddPromo()">新增</button>
+      <button class="btn-cancel-modal" onclick="closeModal()">取消</button>
+      <button class="btn-confirm-modal" id="addModalConfirmBtn" onclick="confirmAdd()">新增</button>
     </div>
   </div>
 </div>
@@ -467,10 +434,12 @@
 function switchMainTab(tab) {
   document.querySelectorAll('.main-tab').forEach(function(t) { t.classList.remove('active'); });
   document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-  var idx = tab === 'points' ? 0 : 1;
-  document.querySelectorAll('.main-tab')[idx].classList.add('active');
+  var tabs = ['rules', 'promo', 'data'];
+  var idx = tabs.indexOf(tab);
+  if (idx >= 0) document.querySelectorAll('.main-tab')[idx].classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'points') initPoints();
+  if (tab === 'data') { renderStats(); renderTable(); renderMembersTable(); }
+  if (tab === 'promo') renderPromos();
 }
 
 /* ══════════════════════════════════════════════
@@ -536,11 +505,27 @@ function renderStats() {
     else if (s === 'used') used++;
     else expired++;
   });
+  var data = loadPointsSettings();
+  var redeemThreshold = data.redeemRule.pointsNeeded || 100;
+  var totalPoints = membersList.reduce(function(s, m) { return s + (m.points || 0); }, 0);
+  var membersWithPoints = membersList.filter(function(m) { return (m.points || 0) > 0; }).length;
+  var redeemableCount = membersList.filter(function(m) { return (m.points || 0) >= redeemThreshold; }).length;
+  var redeemHistory = 8; // demo 靜態：累計已兌換次數
   document.getElementById('statsGrid').innerHTML =
-    '<div class="stat-card"><div class="stat-num">' + total + '</div><div class="stat-label">已發放總張數</div></div>' +
-    '<div class="stat-card"><div class="stat-num" style="color:var(--teal)">' + unused + '</div><div class="stat-label">待使用</div></div>' +
-    '<div class="stat-card"><div class="stat-num" style="color:var(--gray-400)">' + used + '</div><div class="stat-label">已使用</div></div>' +
-    '<div class="stat-card"><div class="stat-num" style="color:var(--primary)">$' + totalAmt + '</div><div class="stat-label">待折抵總金額</div></div>';
+    '<div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:8px;letter-spacing:.04em">點數</div>' +
+    '<div class="stats-grid" style="margin-bottom:20px">' +
+      '<div class="stat-card"><div class="stat-num">' + totalPoints + '</div><div class="stat-label">全會員總點數</div></div>' +
+      '<div class="stat-card"><div class="stat-num" style="color:var(--primary)">' + membersWithPoints + '</div><div class="stat-label">持有點數人數</div></div>' +
+      '<div class="stat-card"><div class="stat-num" style="color:var(--success)">' + redeemableCount + '</div><div class="stat-label">可兌換折價券人數</div></div>' +
+      '<div class="stat-card"><div class="stat-num" style="color:var(--gray-400)">' + redeemHistory + '</div><div class="stat-label">累計兌換次數</div></div>' +
+    '</div>' +
+    '<div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:8px;letter-spacing:.04em">折價券</div>' +
+    '<div class="stats-grid" style="margin-bottom:20px">' +
+      '<div class="stat-card"><div class="stat-num">' + total + '</div><div class="stat-label">已發放總張數</div></div>' +
+      '<div class="stat-card"><div class="stat-num" style="color:var(--teal)">' + unused + '</div><div class="stat-label">待使用</div></div>' +
+      '<div class="stat-card"><div class="stat-num" style="color:var(--gray-400)">' + used + '</div><div class="stat-label">已使用</div></div>' +
+      '<div class="stat-card"><div class="stat-num" style="color:var(--warning)">$' + totalAmt + '</div><div class="stat-label">待折抵總金額</div></div>' +
+    '</div>';
 }
 
 var SOURCE_MAP = { compensation: ['src-compensation','補償'], promo: ['src-promo','促銷'], referral: ['src-referral','推薦'] };
@@ -597,16 +582,21 @@ function voidCoupon(id) {
 }
 
 function openAddModal() {
-  var sel = document.getElementById('newCpnMember');
-  sel.innerHTML = '<option value="">— 選擇會員 —</option>' +
-    members.map(function(m) { return '<option value="' + m.id + '">' + escHtml(m.name) + '</option>'; }).join('');
-  var d = new Date();
-  d.setMonth(d.getMonth() + 3);
-  document.getElementById('newCpnExpiry').value = d.toISOString().slice(0,10);
-  document.getElementById('newCpnAmount').value = '';
+  document.getElementById('promoName').value = '';
+  document.getElementById('promoName').classList.remove('error');
+  document.getElementById('promoMultiplier').value = '2';
+  document.getElementById('promoCouponAmount').value = '30';
+  document.querySelector('input[name="promoType"][value="multiplier"]').checked = true;
+  togglePromoTypeFields();
+  var today = new Date();
+  document.getElementById('promoStart').value = today.toISOString().slice(0,10);
+  var end = new Date(today);
+  end.setDate(end.getDate() + 2);
+  document.getElementById('promoEnd').value = end.toISOString().slice(0,10);
+  var expiry = new Date(today);
+  expiry.setMonth(expiry.getMonth() + 3);
+  document.getElementById('newCpnExpiry').value = expiry.toISOString().slice(0,10);
   document.getElementById('newCpnReason').value = '';
-  document.getElementById('newCpnSource').value = 'promo';
-  ['newCpnMember','newCpnAmount'].forEach(function(id) { document.getElementById(id).classList.remove('error'); });
   document.getElementById('addModal').classList.add('open');
 }
 
@@ -614,43 +604,28 @@ function closeModal() {
   document.getElementById('addModal').classList.remove('open');
 }
 
-function genCouponCode() {
-  var c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return 'COMP-' + Array.from({length:5}, function() { return c[Math.floor(Math.random()*c.length)]; }).join('');
-}
-
-function todayStr() {
-  var d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-}
-
-function confirmAddCoupon() {
-  var memEl = document.getElementById('newCpnMember');
-  var amtEl = document.getElementById('newCpnAmount');
-  var ok = true;
-  if (!memEl.value) { memEl.classList.add('error'); ok = false; } else { memEl.classList.remove('error'); }
-  if (!amtEl.value || isNaN(parseFloat(amtEl.value))) { amtEl.classList.add('error'); ok = false; } else { amtEl.classList.remove('error'); }
-  if (!ok) return;
-  var mem = members.find(function(m) { return m.id === memEl.value; });
-  var code = genCouponCode();
-  var newCpn = {
-    id: 'cpn_' + Date.now(),
-    code: code,
-    amount: parseInt(amtEl.value, 10),
-    memberId: memEl.value,
-    memberName: mem ? mem.name : '—',
-    source: document.getElementById('newCpnSource').value,
-    reason: document.getElementById('newCpnReason').value.trim(),
-    expiry: document.getElementById('newCpnExpiry').value,
-    issuedAt: todayStr(),
-    used: false
+function confirmAdd() {
+  var name = document.getElementById('promoName').value.trim();
+  if (!name) { document.getElementById('promoName').classList.add('error'); return; }
+  document.getElementById('promoName').classList.remove('error');
+  var type = document.querySelector('input[name="promoType"]:checked').value;
+  var newPromo = {
+    id: 'promo_' + Date.now(), name: name, type: type,
+    multiplier: type === 'multiplier' ? parseInt(document.getElementById('promoMultiplier').value, 10) || 2 : 1,
+    couponAmount: type === 'direct_coupon' ? parseInt(document.getElementById('promoCouponAmount').value, 10) || 30 : 0,
+    startDate: document.getElementById('promoStart').value,
+    endDate: document.getElementById('promoEnd').value,
+    couponExpiry: document.getElementById('newCpnExpiry').value,
+    note: document.getElementById('newCpnReason').value.trim(),
+    active: true
   };
-  coupons.unshift(newCpn);
-  save();
+  promos.unshift(newPromo);
+  var data = loadPointsSettings();
+  data.promos = promos;
+  savePointsSettings(data);
   closeModal();
-  renderTable();
-  renderStats();
-  showToast('✅ 折價券「' + code + '」已新增（$' + newCpn.amount + '，給 ' + newCpn.memberName + '）');
+  renderPromos();
+  showToast('✅ 促銷「' + name + '」已新增');
 }
 
 document.getElementById('addModal').addEventListener('click', function(e) {
@@ -792,7 +767,7 @@ function renderMembersTable() {
   }) : membersList;
   var tbody = document.getElementById('memberTbody');
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">找不到符合的會員</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="tbl-empty">找不到符合的會員</td></tr>';
     return;
   }
   tbody.innerHTML = filtered.map(function(m) {
@@ -801,31 +776,23 @@ function renderMembersTable() {
     var chipStyle = plan === 'plan_premium' ? 'background:#fefce8;color:#92400e;border:1px solid #fde68a' :
                     plan === 'plan_basic'   ? 'background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe' :
                                               'background:#f3f4f6;color:#4b5563;border:1px solid #d1d5db';
+    var memberCoupons = coupons.filter(function(c) { return c.memberId === m.id && getCouponStatus(c) === 'unused'; });
+    var couponAmt = memberCoupons.reduce(function(s, c) { return s + c.amount; }, 0);
+    var couponCell = memberCoupons.length
+      ? memberCoupons.length + ' 張'
+      : '<span class="tbl-muted">—</span>';
+    var amtCell = couponAmt > 0
+      ? '<strong style="color:var(--teal)">$' + couponAmt + '</strong>'
+      : '<span class="tbl-muted">—</span>';
     return '<tr>' +
       '<td class="tbl-muted">' + escHtml(m.memberNo || '—') + '</td>' +
       '<td style="font-weight:600">' + escHtml(m.name) + '</td>' +
       '<td><strong style="font-size:15px">' + (m.points || 0) + '</strong> <span class="tbl-muted">點</span></td>' +
       '<td><span style="display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;' + chipStyle + '">' + planName + '</span></td>' +
+      '<td>' + couponCell + '</td>' +
+      '<td>' + amtCell + '</td>' +
     '</tr>';
   }).join('');
-}
-
-function openPromoModal() {
-  document.getElementById('promoName').value = '';
-  document.getElementById('promoMultiplier').value = '2';
-  document.getElementById('promoCouponAmount').value = '30';
-  document.querySelector('input[name="promoType"][value="multiplier"]').checked = true;
-  togglePromoTypeFields();
-  var today = new Date();
-  document.getElementById('promoStart').value = today.toISOString().slice(0,10);
-  var end = new Date(today);
-  end.setDate(end.getDate() + 2);
-  document.getElementById('promoEnd').value = end.toISOString().slice(0,10);
-  document.getElementById('promoModal').classList.add('open');
-}
-
-function closePromoModal() {
-  document.getElementById('promoModal').classList.remove('open');
 }
 
 function togglePromoTypeFields() {
@@ -833,34 +800,6 @@ function togglePromoTypeFields() {
   document.getElementById('fieldMultiplier').style.display = type === 'multiplier' ? '' : 'none';
   document.getElementById('fieldCoupon').style.display = type === 'direct_coupon' ? '' : 'none';
 }
-
-function confirmAddPromo() {
-  var name = document.getElementById('promoName').value.trim();
-  if (!name) { document.getElementById('promoName').classList.add('error'); return; }
-  document.getElementById('promoName').classList.remove('error');
-  var type = document.querySelector('input[name="promoType"]:checked').value;
-  var newPromo = {
-    id: 'promo_' + Date.now(),
-    name: name,
-    type: type,
-    multiplier: type === 'multiplier' ? parseInt(document.getElementById('promoMultiplier').value, 10) || 2 : 1,
-    couponAmount: type === 'direct_coupon' ? parseInt(document.getElementById('promoCouponAmount').value, 10) || 30 : 0,
-    startDate: document.getElementById('promoStart').value,
-    endDate: document.getElementById('promoEnd').value,
-    active: true
-  };
-  promos.unshift(newPromo);
-  var data = loadPointsSettings();
-  data.promos = promos;
-  savePointsSettings(data);
-  closePromoModal();
-  renderPromos();
-  showToast('✅ 促銷「' + name + '」已新增');
-}
-
-document.getElementById('promoModal').addEventListener('click', function(e) {
-  if (e.target === this) closePromoModal();
-});
 
 /* ══════════════════════════════════════════════
    工具函式
@@ -881,8 +820,6 @@ function escHtml(str) {
    初始化
 ══════════════════════════════════════════════ */
 load();
-renderStats();
-renderTable();
 initPoints();
 </script>
 </body>

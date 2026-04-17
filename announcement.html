@@ -283,6 +283,48 @@
       overflow: hidden;
     }
 
+    /* 整合型排程更新通知 — 列表 badge */
+    .update-time-badge { display:inline-block; font-size:11px; padding:1px 7px; border-radius:10px; background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; vertical-align:middle; margin-right:4px; }
+    .batch-month-badge { display:inline-block; font-size:11px; padding:1px 6px; border-radius:10px; background:#f5f3ff; color:#7c3aed; border:1px solid #ddd6fe; vertical-align:middle; margin-right:4px; }
+
+    /* 店家後台公告通知列表頂部：醒目更新提示橫幅 */
+    .schedule-update-alert-bar { display:flex; align-items:center; gap:8px; padding:10px 14px; margin-bottom:10px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; font-size:13px; color:#c2410c; font-weight:500; }
+    .btn-inline-link { margin-left:auto; padding:3px 10px; font-size:12px; font-weight:500; background:#fff; border:1px solid #fed7aa; border-radius:6px; color:#c2410c; cursor:pointer; white-space:nowrap; }
+    .btn-inline-link:hover { background:#fff7ed; }
+
+    /* 店家後台通知列表 — 兩行式（badges + 標題各一行，防裁切） */
+    .ann-text-wrap { flex: 1; min-width: 0; }
+    .ann-badges-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 3px; align-items: center; }
+    .ann-title-row { font-size: 14px; color: var(--gray-800); }
+    .ann-row.read .ann-title-row { color: var(--gray-400); }
+
+    /* 排程修改通知 badge */
+    .modify-tag { display:inline-block; font-size:11px; padding:1px 7px; border-radius:10px; background:#fef2f2; color:#dc2626; border:1px solid #fecaca; vertical-align:middle; }
+    .schedule-change-row { font-size:12px; color:#c2410c; background:#fff7ed; padding:4px 10px 4px 28px; border-top:1px dashed #fed7aa; }
+
+    /* 排程總覽表（詳情 popup 內） */
+    .schedule-overview { margin-top:4px; border:1px solid #bfdbfe; border-radius:8px; overflow:hidden; font-size:14px; }
+    .schedule-overview-site { background:#eff6ff; padding:8px 14px; font-weight:600; color:#1e40af; border-bottom:1px solid #bfdbfe; }
+    .schedule-overview-day { padding:10px 14px; border-bottom:1px solid #e0e7ff; }
+    .schedule-overview-day:last-child { border-bottom:none; }
+    .schedule-day-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; font-weight:500; }
+    .schedule-day-pickup { font-size:12px; color:#78716c; margin-left:auto; }
+    .schedule-item-row { display:flex; align-items:center; padding:3px 0; font-size:13px; color:#57534e; }
+    .schedule-item-qty { margin-left:auto; color:#78716c; }
+    .schedule-overview-summary { padding:8px 14px; background:#f8fafc; border-top:1px solid #e2e8f0; font-size:13px; color:#64748b; }
+
+    /* 逾時未取通知 */
+    .overdue-banner { border-color: #fecaca !important; }
+    .overdue-item { display:flex; gap:12px; padding:12px 16px; border-bottom:1px solid var(--gray-100); align-items:flex-start; }
+    .overdue-item:last-child { border-bottom:none; }
+    .overdue-icon-wrap { font-size:22px; flex-shrink:0; margin-top:2px; }
+    .oi-body { flex:1; min-width:0; }
+    .oi-title { font-size:14px; font-weight:600; color:var(--gray-800); }
+    .oi-sub { font-size:12px; color:var(--gray-400); margin-top:2px; }
+    .oi-msg { font-size:13px; color:#c2410c; margin-top:5px; }
+    .overdue-status-assisted { display:inline-block; font-size:11px; padding:1px 8px; border-radius:10px; background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; white-space:nowrap; flex-shrink:0; }
+    .overdue-status-contact { display:inline-block; font-size:11px; padding:1px 8px; border-radius:10px; background:#fef2f2; color:#dc2626; border:1px solid #fecaca; white-space:nowrap; flex-shrink:0; }
+
     .status-dot {
       display: inline-flex;
       align-items: center;
@@ -664,8 +706,11 @@
       border-radius: 16px;
       width: 100%;
       max-width: 520px;
+      max-height: 85vh;
       box-shadow: 0 24px 64px rgba(0,0,0,.22);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
       transform: scale(.96);
       transition: transform .2s;
     }
@@ -692,7 +737,7 @@
       flex-shrink: 0;
     }
     .close-white:hover { background: rgba(255,255,255,.35); }
-    .popup-body { padding: 22px 24px; }
+    .popup-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
     .popup-img {
       width: 100%;
       height: 160px;
@@ -1137,6 +1182,9 @@
         <div class="tabs" id="admin-notify-tabs">
           <button class="tab-btn active" onclick="switchAdminTab(this,'all')">全部</button>
           <button class="tab-btn" onclick="switchAdminTab(this,'unread')">未讀</button>
+          <button class="tab-btn store-only-tab" onclick="switchAdminTab(this,'系統公告')" style="display:none">系統公告</button>
+          <button class="tab-btn store-only-tab" onclick="switchAdminTab(this,'排程通知')" style="display:none">排程通知</button>
+          <button class="tab-btn store-only-tab" onclick="switchAdminTab(this,'排程修改通知')" style="display:none">排程修改通知</button>
         </div>
         <div class="announce-notifications" id="admin-notify-list"></div>
       </div>
@@ -1313,6 +1361,18 @@
           <a class="view-all-link" onclick="openAnnModal(event,'pickup')">查看全部</a>
         </div>
         <div id="pickup-list"><!-- 由 JS 渲染 --></div>
+      </div>
+
+      <!-- 逾時未取通知區塊 -->
+      <div class="pickup-banner overdue-banner" id="overdue-section" style="display:none">
+        <div class="banner-header">
+          <div class="banner-title" style="display:flex;align-items:center;gap:8px">
+            ⏰ 逾時未取通知
+            <span class="auto-tag">系統自動發送</span>
+            <span id="overdue-badge" class="badge" style="position:static;background:#dc2626;border:none;display:none"></span>
+          </div>
+        </div>
+        <div id="overdue-list"><!-- 由 JS 渲染 --></div>
       </div>
 
     </div>
@@ -1835,16 +1895,78 @@
   // ─── 店家後台公告資料 ───
   const storeAnnouncements = [
     {
+      id: 304,
+      title: '【排程修改通知】四月份排程更新',
+      category: '排程修改通知', icon: '⚠️',
+      time: '04/17 09:00', read: false,
+      text: '您的四月份菜單排程已修改更新，本次異動涉及新竹A廠 4/22 午餐（移除品項：扇貝茶碗蒸貢丸味噌）、新竹B廠 4/23 午餐（數量調整）。請確認最新排程內容。',
+      scheduleRef: {
+        type: 'batch',
+        month: '2026-04',
+        updatedAt: '04/17 09:00',
+        isUpdate: true,
+        isModify: true,
+        schedule: [
+          {
+            siteId: 'hc-a', siteName: '新竹A廠',
+            days: [
+              {
+                date: '2026-04-22', mealType: 'lunch', mealLabel: '午餐', pickupTime: '11:30–12:00',
+                items: [
+                  { itemCode: '9990014002', itemName: '迷你秋刀魚丼', qty: 30 },
+                  { itemCode: '9990014011', itemName: '親子全熟食', qty: 25 },
+                  { itemCode: '9990014099', itemName: '日式炸雞便當', qty: 20 },
+                ],
+                changes: [
+                  { type: 'removed', itemName: '扇貝茶碗蒸貢丸味噌', note: '已移除' }
+                ]
+              }
+            ]
+          },
+          {
+            siteId: 'hc-b', siteName: '新竹B廠',
+            days: [
+              {
+                date: '2026-04-23', mealType: 'lunch', mealLabel: '午餐', pickupTime: '12:00–12:30',
+                items: [
+                  { itemCode: '9990014002', itemName: '迷你秋刀魚丼', qty: 40 },
+                  { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯', qty: 20 },
+                ],
+                changes: [
+                  { type: 'qty', itemName: '迷你秋刀魚丼', from: 35, to: 40, note: '數量調整' }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       id: 301, title: '【排程通知】4月22日 新竹A廠 午餐',
       category: '排程通知', icon: '📋', time: '04/16 14:32', read: false,
       text: '您的店家已被安排供應 2026-04-22（週三）新竹A廠午餐。\n\n請至訂單明細確認各分店預訂數量，並依照排程備餐。如對菜單內容有疑問，請聯繫營運部。',
-      scheduleRef: { date: '2026-04-22', siteId: 'hc-a', siteName: '新竹A廠', mealType: 'lunch', mealLabel: '午餐' }
+      scheduleRef: {
+        date: '2026-04-22', siteId: 'hc-a', siteName: '新竹A廠', mealType: 'lunch', mealLabel: '午餐',
+        pickupTime: '11:30–12:00',
+        items: [
+          { itemCode: '9990014002', itemName: '迷你秋刀魚丼', qty: 30 },
+          { itemCode: '9990014011', itemName: '親子全熟食', qty: 25 },
+          { itemCode: '9990014099', itemName: '日式炸雞便當', qty: 20 },
+        ]
+      }
     },
     {
       id: 302, title: '【排程通知】4月23日 新竹B廠 午餐',
       category: '排程通知', icon: '📋', time: '04/16 14:32', read: false,
       text: '您的店家已被安排供應 2026-04-23（週四）新竹B廠午餐。\n\n請至訂單明細確認各分店預訂數量，並依照排程備餐。如對菜單內容有疑問，請聯繫營運部。',
-      scheduleRef: { date: '2026-04-23', siteId: 'hc-b', siteName: '新竹B廠', mealType: 'lunch', mealLabel: '午餐' }
+      scheduleRef: {
+        date: '2026-04-23', siteId: 'hc-b', siteName: '新竹B廠', mealType: 'lunch', mealLabel: '午餐',
+        pickupTime: '12:00–12:30',
+        items: [
+          { itemCode: '9990014002', itemName: '迷你秋刀魚丼', qty: 40 },
+          { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯', qty: 20 },
+        ]
+      }
     },
     {
       id: 300, title: '新版訂單確認流程上線',
@@ -1867,8 +1989,8 @@
     const list = document.getElementById('admin-notify-list');
     let items = adminAnnouncements.filter(a => {
       if (isStoreMode) {
-        // 店家後台顯示系統公告與排程通知
-        if (a.category !== '系統公告' && a.category !== '排程通知') return false;
+        // 店家後台顯示系統公告、排程通知、排程修改通知
+        if (a.category !== '系統公告' && a.category !== '排程通知' && a.category !== '排程修改通知') return false;
       }
       if (adminFilter === 'unread') return !a.read;
       if (adminFilter !== 'all' && adminFilter !== 'unread') return a.category === adminFilter;
@@ -1879,19 +2001,42 @@
     } else if (isStoreMode) {
       /* 店家後台：ann-row 樣式，排程通知使用特殊顯示 */
       list.classList.add('store-ann-list');
-      list.innerHTML = items.map(a => {
+      let alertBarHtml = '';
+      if (isStoreMode) {
+        const latestUpdate = items.find(a => a.scheduleRef?.type === 'batch' && a.scheduleRef.isUpdate && !a.read);
+        if (latestUpdate) {
+          alertBarHtml = `<div class="schedule-update-alert-bar">
+            <span>⚠</span>
+            <span>菜單排程已更新（${latestUpdate.scheduleRef.updatedAt}），請查看最新通知確認排程內容</span>
+            <button onclick="openNotifyPopup(${latestUpdate.id})" class="btn-inline-link">查看</button>
+          </div>`;
+        }
+      }
+      const listHtml = items.map(a => {
         const isSchedule = a.category === '排程通知';
+        const isModify = a.category === '排程修改通知';
         const unreadBadge = !a.read
-          ? ' <span style="display:inline-block;background:#e0f7fa;color:#00838f;font-size:10px;padding:1px 6px;border-radius:10px;vertical-align:middle">未讀</span>'
+          ? `<span style="display:inline-block;background:#e0f7fa;color:#00838f;font-size:10px;padding:1px 6px;border-radius:10px;">未讀</span>`
           : '';
-        const scheduleTag = isSchedule
-          ? `<span style="display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;vertical-align:middle;margin-right:4px">📋 排程通知</span>`
-          : '';
+        let scheduleTag = '';
+        if (isSchedule) {
+          scheduleTag = `<span style="display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;">📋 排程通知</span>`;
+        } else if (isModify) {
+          scheduleTag = `<span class="modify-tag">⚠ 排程修改通知</span>`;
+        }
+        const isBatch = a.scheduleRef?.type === 'batch';
+        const updateBadge = (isBatch && a.scheduleRef.isUpdate)
+          ? `<span class="update-time-badge">更新時間 ${a.scheduleRef.updatedAt}</span>` : '';
+        const badgesHtml = [scheduleTag, updateBadge, unreadBadge].filter(Boolean).join('');
         return `<div class="ann-row${a.read ? ' read' : ''}" onclick="openNotifyPopup(${a.id})">
-          <span class="ann-text">${scheduleTag}${a.title}${unreadBadge}</span>
+          <div class="ann-text-wrap">
+            ${badgesHtml ? `<div class="ann-badges-row">${badgesHtml}</div>` : ''}
+            <div class="ann-title-row">${a.title}</div>
+          </div>
           <span class="ann-date">${a.time}</span>
         </div>`;
       }).join('');
+      list.innerHTML = alertBarHtml + listHtml;
     } else {
       list.innerHTML = items.map(a => `
         <div class="notify-card ${a.read ? 'read' : 'unread'} ${catClass(a.category) === 'maintenance' ? 'maint' : ''}" onclick="openNotifyPopup(${a.id})" style="cursor:pointer">
@@ -1921,18 +2066,81 @@
     document.getElementById('notify-popup-title').textContent = a.title;
     document.getElementById('notify-popup-time').textContent = a.time + ' · 系統管理員';
     let bodyHtml = a.text.replace(/\n/g, '<br>');
-    if (a.scheduleRef) {
+    if (a.scheduleRef?.type === 'batch') {
+      bodyHtml += buildBatchScheduleHtml(a.scheduleRef);
+    } else if (a.scheduleRef) {
       const sr = a.scheduleRef;
-      bodyHtml += `<div style="margin-top:14px;padding:10px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:14px;color:#1e40af;">
-        <strong>📋 排程資訊</strong><br>
-        日期：${sr.date}　廠區：${sr.siteName}　餐期：${sr.mealLabel}<br>
-        <a href="store-orders.html?sys=store" style="color:#1d4ed8;text-decoration:underline;font-size:13px;display:inline-block;margin-top:6px">→ 查看訂單明細</a>
-      </div>`;
+      const WD = ['日','一','二','三','四','五','六'];
+      const dt = new Date(sr.date);
+      const dateLabel = `${sr.date.slice(5,7)}/${sr.date.slice(8,10)}（週${WD[dt.getDay()]}）`;
+      let itemsHtml = '';
+      if (sr.items && sr.items.length) {
+        itemsHtml = sr.items.map(item =>
+          `<div class="schedule-item-row"><span>・${item.itemName}</span><span class="schedule-item-qty">${item.qty} 份</span></div>`
+        ).join('');
+        const totalQty = sr.items.reduce((s, i) => s + i.qty, 0);
+        itemsHtml += `<div class="schedule-overview-summary">合計 ${totalQty} 份</div>`;
+      }
+      bodyHtml += `<div class="schedule-overview" style="margin-top:14px">
+        <div class="schedule-overview-site">🏭 ${sr.siteName}</div>
+        <div class="schedule-overview-day">
+          <div class="schedule-day-header">
+            <strong>${dateLabel}</strong>
+            <span style="display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0">${sr.mealLabel}</span>
+            ${sr.pickupTime ? `<span class="schedule-day-pickup">取餐：${sr.pickupTime}</span>` : ''}
+          </div>
+          ${itemsHtml}
+        </div>
+      </div>
+      <a href="store-orders.html?sys=store" style="display:inline-block;margin-top:12px;color:#1d4ed8;font-size:14px;text-decoration:underline">→ 查看訂單明細</a>`;
     }
     document.getElementById('notify-popup-text').innerHTML = bodyHtml;
     document.getElementById('notify-popup').classList.add('open');
     a.read = true;
     renderAdmin();
+  }
+
+  function buildBatchScheduleHtml(sr) {
+    const WD = ['日','一','二','三','四','五','六'];
+    let itemCount = 0;
+    let totalQty = 0;
+    let html = '<div class="schedule-overview">';
+
+    sr.schedule.forEach(site => {
+      html += `<div class="schedule-overview-site">🏭 ${site.siteName}</div>`;
+      site.days.forEach(day => {
+        const dt = new Date(day.date);
+        const dateLabel = `${day.date.slice(5,7)}/${day.date.slice(8,10)}（週${WD[dt.getDay()]}）`;
+        html += `<div class="schedule-overview-day">
+          <div class="schedule-day-header">
+            <strong>${dateLabel}</strong>
+            <span style="display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0">${day.mealLabel}</span>
+            <span class="schedule-day-pickup">取餐：${day.pickupTime}</span>
+          </div>`;
+        day.items.forEach(item => {
+          itemCount++;
+          totalQty += item.qty;
+          html += `<div class="schedule-item-row">
+            <span>・${item.itemName}</span>
+            <span class="schedule-item-qty">${item.qty} 份</span>
+          </div>`;
+        });
+        if (day.changes && day.changes.length) {
+          day.changes.forEach(change => {
+            const desc = change.type === 'removed'
+              ? `移除品項：${change.itemName}`
+              : `${change.itemName} 數量調整 ${change.from} → ${change.to}`;
+            html += `<div class="schedule-change-row">📝 異動：${desc}</div>`;
+          });
+        }
+        html += `</div>`;
+      });
+    });
+
+    html += `<div class="schedule-overview-summary">共 ${itemCount} 筆品項・合計 ${totalQty} 份</div>`;
+    html += `</div>`;
+    html += `<a href="store-orders.html?sys=store" style="display:inline-block;margin-top:12px;color:#1d4ed8;font-size:14px;text-decoration:underline">→ 查看訂單明細</a>`;
+    return html;
   }
 
   function adminMarkRead(id) {
@@ -2020,6 +2228,7 @@
     `).join('');
     updateFEBadge();
     renderPickup();
+    renderOverdue();
   }
 
   // ─── 動態填充分類下拉 & Tabs ───
@@ -2042,10 +2251,8 @@
   function populateCatTabs() {
     // 後台通知頁 tabs
     const adminTabs = document.getElementById('admin-notify-tabs');
-    if (adminTabs) {
-      // 保留「全部」和「未讀」，動態加分類 tabs
-      const fixed = adminTabs.querySelectorAll('button');
-      // 移除舊的分類 tabs（保留前兩顆）
+    if (adminTabs && !isStoreMode) {
+      // 保留「全部」和「未讀」，動態加分類 tabs（店家後台使用靜態固定 tab，不走這段）
       adminTabs.querySelectorAll('button.cat-tab').forEach(b => b.remove());
       annCats.forEach(cat => {
         const btn = document.createElement('button');
@@ -2072,7 +2279,8 @@
   function updateFEBadge() {
     const annUnread = feAnnouncements.filter(a => !a.read).length;
     const pickupUnread = pickupNotifications.filter(p => !p.read && p.status === 'ready').length;
-    const bellCount = annUnread + pickupUnread;
+    const overdueUnread = pickupNotifications.filter(p => !p.read && p.status === 'overdue').length;
+    const bellCount = annUnread + pickupUnread + overdueUnread;
     const badge = document.getElementById('fe-badge');
     badge.textContent = bellCount;
     badge.style.display = bellCount > 0 ? 'flex' : 'none';
@@ -2144,6 +2352,8 @@
     { id: 0, order: '#20240324-001', restaurant: '美味便當店', item: '雞腿便當 x1', time: '11:45', read: false, status: 'ready' },
     { id: 1, order: '#20240324-002', restaurant: '素食廚房', item: '素食套餐 x2', time: '12:10', read: true, status: 'picked' },
     { id: 2, order: '#20240323-089', restaurant: '好吃麵館', item: '牛肉麵 x1', time: '昨天 12:30', read: true, status: 'picked' },
+    { id: 3, order: '#20260417-015', restaurant: '爭鮮gogo', item: '迷你秋刀魚丼 x1', time: '13:30', read: false, status: 'overdue', location: '龍潭廠', overdueType: 'assisted', message: '取餐時間已截止，我們將會協助將餐點處理掉。' },
+    { id: 4, order: '#20260417-022', restaurant: '美味便當店', item: '雞腿便當 x1', time: '13:30', read: false, status: 'overdue', location: '新竹A廠', overdueType: 'contact', message: '取餐時間已截止，若仍需取餐，請聯絡客服。' },
   ];
 
   function renderPickupItem(p, showConfirmBtn = false) {
@@ -2174,6 +2384,34 @@
     renderPickupModal();
     renderNotifDropdown();
     updateFEBadge();
+  }
+
+  function renderOverdue() {
+    const overdueItems = pickupNotifications.filter(p => p.status === 'overdue');
+    const section = document.getElementById('overdue-section');
+    const list = document.getElementById('overdue-list');
+    const badge = document.getElementById('overdue-badge');
+    if (!overdueItems.length) {
+      if (section) section.style.display = 'none';
+      return;
+    }
+    if (section) section.style.display = '';
+    const unreadCount = overdueItems.filter(p => !p.read).length;
+    if (badge) { badge.textContent = unreadCount; badge.style.display = unreadCount > 0 ? 'flex' : 'none'; }
+    list.innerHTML = overdueItems.map(p => {
+      const statusBadge = p.overdueType === 'assisted'
+        ? `<span class="overdue-status-assisted">系統協助處理</span>`
+        : `<span class="overdue-status-contact">需聯繫客服</span>`;
+      return `<div class="overdue-item">
+        <div class="overdue-icon-wrap">⏰</div>
+        <div class="oi-body">
+          <div class="oi-title">逾時未取：${p.restaurant}</div>
+          <div class="oi-sub">${p.location}　訂單 ${p.order}　${p.item}　${p.time}</div>
+          <div class="oi-msg">${p.message}</div>
+        </div>
+        ${statusBadge}
+      </div>`;
+    }).join('');
   }
 
   function renderPickup() {
@@ -2792,7 +3030,6 @@
 
   // 初始化：預設顯示公告通知頁，並自動彈出未讀公告
   populateCatSelects();
-  populateCatTabs();
   switchAdminPage('notify');
   initLocSwitch();
   initFeMemberSim();
@@ -2808,7 +3045,10 @@
       adminAnnouncements = storeAnnouncements;
       var subtitle = document.querySelector('#admin-page-notify .page-subtitle');
       if (subtitle) subtitle.textContent = '系統發布給店家後台的公告';
+      // 顯示店家專屬分類 tab
+      document.querySelectorAll('.store-only-tab').forEach(function(el) { el.style.display = ''; });
     }
+    populateCatTabs();
     if (_view) switchView(_view);
     if (_page) switchAdminPage(_page);
     // 已移除自動彈出公告

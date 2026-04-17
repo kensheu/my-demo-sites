@@ -188,6 +188,14 @@ body {
 .chip-afternoon { background: #f0fdfa; color: #0f766e; }
 .chip-latenight { background: var(--bg-3); color: var(--text-2); }
 
+/* ── 菜單版本提示條 ── */
+.menu-version-bar { display:flex; align-items:center; gap:8px; padding:8px 14px; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; font-size:13px; color:#c2410c; margin-bottom:12px; }
+.date-mod-tag { display:inline-block; font-size:11px; padding:0 6px; margin-left:6px; border-radius:10px; background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
+.item-modified-badge { display:inline-block; font-size:11px; padding:0 5px; border-radius:8px; background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; margin-left:6px; vertical-align:middle; }
+.item-original-qty { font-size:12px; color:#b91c1c; text-decoration:line-through; margin-right:4px; }
+tr.item-modified { background:#fff7ed; }
+.item-note-cell { font-size:12px; color:#78716c; padding-top:0 !important; border-top:none !important; }
+
 /* ── RWD ── */
 @media (max-width: 860px) {
   .orders-layout { grid-template-columns: 1fr; }
@@ -271,24 +279,26 @@ const currentStore = {
 const orderData = {
   '2026-04-22': {
     lunch: {
-      totalQty: 1,
+      totalQty: 75,
+      menuVersion: 2,
+      menuUpdatedAt: '04/17 09:00',
       branches: [
         {
-          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 0,
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 45,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 0 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 0 },
-            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0 },
-            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 0 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 18 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 15 },
+            { itemCode: '9990014099', itemName: '日式炸雞便當',          qty: 12 },
           ]
         },
         {
-          branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 1,
+          branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 30,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 0 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 0 },
-            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 1 },
-            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 0 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 12 },
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 10 },
+            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0,
+              modified: { field: 'removed', originalQty: 8, note: '菜單更新（04/17 09:00）' } },
+            { itemCode: '9990014099', itemName: '日式炸雞便當',          qty: 8 },
           ]
         }
       ]
@@ -296,24 +306,23 @@ const orderData = {
   },
   '2026-04-23': {
     lunch: {
-      totalQty: 4,
+      totalQty: 60,
+      menuVersion: 2,
+      menuUpdatedAt: '04/17 09:00',
       branches: [
         {
-          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 2,
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 35,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 2 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 0 },
-            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0 },
-            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 0 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 25,
+              modified: { field: 'qty', originalQty: 20, note: '菜單更新（04/17 09:00）' } },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 10 },
           ]
         },
         {
-          branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 2,
+          branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 25,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 0 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 1 },
-            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0 },
-            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 1 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 15 },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 10 },
           ]
         }
       ]
@@ -333,14 +342,18 @@ const orderData = {
   },
   '2026-04-29': {
     lunch: {
-      totalQty: 0,
+      totalQty: 55,
       branches: [
         {
-          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 0,
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 30,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 0 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 0 },
-            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 30 },
+          ]
+        },
+        {
+          branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 25,
+          items: [
+            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 25 },
           ]
         }
       ]
@@ -426,13 +439,15 @@ function renderDateList() {
       ? Object.keys(orderData[d])
       : [mealFilter];
     const totalQty = mealKeys.reduce((s, mk) => s + (orderData[d][mk]?.totalQty || 0), 0);
+    const hasModification = mealKeys.some(mk => (orderData[d][mk]?.menuVersion || 1) > 1);
+    const modTag = hasModification ? `<span class="date-mod-tag">有修正</span>` : '';
     const mealChips = mealKeys.map(mk => {
       const mi = getMealInfo(mk);
       return `<span class="meal-chip ${mi.chipCls}">${mi.label}</span>`;
     }).join(' ');
     return `<div class="date-item${d === activeDateStr ? ' active' : ''}" onclick="selectDate('${d}')">
       <div class="date-item-date">${d.slice(5).replace('-','/')}（週${WD_NAMES[dt.getDay()]}）</div>
-      <div class="date-item-meta">${mealChips}　共 ${totalQty} 份</div>
+      <div class="date-item-meta">${mealChips}　共 ${totalQty} 份${modTag}</div>
     </div>`;
   }).join('');
 }
@@ -475,10 +490,21 @@ function renderOrderDetail(dateStr) {
     const mealData = dayData[mealType];
     if (!mealData) return;
     const mi = getMealInfo(mealType);
+
+    let versionBarHtml = '';
+    if (mealData.menuVersion && mealData.menuVersion > 1) {
+      versionBarHtml = `<div class="menu-version-bar">
+        <span>⚠ 此排程菜單已於 ${mealData.menuUpdatedAt} 更新，如有疑問請聯繫營運部</span>
+      </div>`;
+    }
+
     html += `<div class="meal-section">
       <div class="meal-section-hd">
         <span class="meal-chip ${mi.chipCls}">${mi.label}</span>
         <span class="meal-section-total">預定數量：${mealData.totalQty}</span>
+      </div>
+      <div class="order-table-wrap" style="padding:12px 20px 0">
+        ${versionBarHtml}
       </div>
       <div class="order-table-wrap">
         <table class="order-table">
@@ -502,14 +528,32 @@ function renderOrderDetail(dateStr) {
       branch.items.forEach(item => {
         const storeCol = `${currentStore.id}-${currentStore.name}`;
         const itemCol  = `${item.itemCode}-${item.itemName}`;
-        const qtyHtml  = item.qty > 0
-          ? `<span class="qty-val">${item.qty}</span>`
-          : `<span class="qty-zero">-</span>`;
-        html += `<tr>
+        const hasModified = !!item.modified;
+        const trClass = hasModified ? ' class="item-modified"' : '';
+        const modBadge = hasModified ? `<span class="item-modified-badge">已修改</span>` : '';
+
+        let qtyHtml;
+        if (hasModified) {
+          if (item.modified.field === 'removed') {
+            qtyHtml = `<span class="item-original-qty">${item.modified.originalQty}</span><span style="color:#b91c1c">已移除</span>`;
+          } else {
+            qtyHtml = `<span class="item-original-qty">${item.modified.originalQty}</span>${item.qty > 0 ? `<span class="qty-val">${item.qty}</span>` : '-'}`;
+          }
+        } else {
+          qtyHtml = item.qty > 0
+            ? `<span class="qty-val">${item.qty}</span>`
+            : `<span class="qty-zero">-</span>`;
+        }
+
+        html += `<tr${trClass}>
           <td style="color:var(--text-3);font-size:14px">${storeCol}</td>
-          <td>${itemCol}</td>
+          <td>${itemCol}${modBadge}</td>
           <td style="text-align:right;padding-right:24px">${qtyHtml}</td>
         </tr>`;
+
+        if (hasModified) {
+          html += `<tr><td colspan="3" class="item-note-cell">${item.modified.note}</td></tr>`;
+        }
       });
     });
 

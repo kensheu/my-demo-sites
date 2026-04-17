@@ -135,6 +135,11 @@
             label: '訂單明細',
             url: 'store-orders.html?sys=store',
             match: function (p) { return p.file === 'store-orders.html'; }
+          },
+          {
+            label: '供餐設定',
+            url: 'store-schedule-settings.html?sys=store',
+            match: function (p) { return p.file === 'store-schedule-settings.html'; }
           }
         ]
       },
