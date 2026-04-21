@@ -479,7 +479,7 @@
   <!-- 常用功能區塊 -->
   <div class="section-card">
     <div class="section-head">
-      <span class="section-title">常用功能</span>
+      <span class="section-title">常用功能 <span style="font-size:11px;font-weight:400;color:var(--gray-400);letter-spacing:0;">＊可於右上「自訂版面」設定</span></span>
     </div>
     <div class="link-grid" id="linkGrid"></div>
   </div>
@@ -528,7 +528,7 @@
       <button class="modal-close" onclick="closeCustomModal()">✕</button>
     </div>
     <div class="modal-body">
-      <p class="modal-sub">勾選要在首頁顯示的快捷連結：</p>
+      <p class="modal-sub">勾選要在首頁顯示的快捷連結（清單中只會顯示有權限的功能）：</p>
       <div class="cb-grid" id="customCbGrid"></div>
     </div>
     <div class="modal-footer">
@@ -543,41 +543,40 @@
    KPI 目錄
 ══════════════════════════════════════════════ */
 var KPI_CATALOG = [
+  /* 共用 */
+  { id: 'kpi_unread_announce', label: '未讀公告',       value: 2,  unit: '件', color: 'yellow' },
+  /* 營運 */
+  { id: 'kpi_complaint',       label: '待處理客訴',     value: 1,  unit: '件', color: 'danger' },
+  { id: 'kpi_daily_orders',    label: '今日訂單量總計', value: 186, unit: '筆', color: 'blue'  },
+  { id: 'kpi_gross_profit',    label: '銷售毛利總計',   value: 42850, unit: '元', color: 'green' },
+  { id: 'kpi_hot_store',       label: '熱門店家',       value: '好味食堂', color: 'orange', textValue: true },
+  { id: 'kpi_hot_item',        label: '熱門餐點',       value: '雞腿飯',   color: 'teal',   textValue: true },
+  /* 採購 */
   { id: 'kpi_pending_review',  label: '待審核異動',     value: 7,  unit: '件', color: 'red'    },
   { id: 'kpi_week_effective',  label: '本週即將生效',   value: 3,  unit: '件', color: 'orange' },
   { id: 'kpi_month_changed',   label: '本月有異動餐廳', value: 12, unit: '家', color: 'blue'   },
   { id: 'kpi_month_new',       label: '本月新增品項',   value: 23, unit: '項', color: 'green'  },
+  /* 行銷 */
+  { id: 'kpi_total_points', label: '會員總點數',  getValue: getMktTotalPoints, unit: '點', color: 'purple' },
+  { id: 'kpi_coupon_stats', label: '待使用折價券', getValue: getMktCouponStats, unit: '張', color: 'teal'  },
+  { id: 'kpi_sub_count',    label: '訂閱人數',     getValue: getMktSubCount,    unit: '人', color: 'blue'  },
+  /* 美編 */
   { id: 'kpi_new_store',       label: '新店家',         value: 6,  unit: '家', color: 'teal'   },
   { id: 'kpi_pending_image',   label: '待審圖片',       value: 6,  unit: '件', color: 'purple' },
   { id: 'kpi_edm',             label: '可製作 EDM',     value: 4,  unit: '份', color: 'indigo' },
-  { id: 'kpi_unread_announce', label: '未讀公告',       value: 2,  unit: '則', color: 'yellow' },
-  { id: 'kpi_complaint',       label: '待處理客訴',     value: 1,  unit: '件', color: 'danger' },
-  { id: 'kpi_store_count',       label: '負責店家數',   value: 18, unit: '家', color: 'blue'   },
-  { id: 'kpi_issue_notify',      label: '問題單通知',  value: 8,  unit: '則', color: 'orange' },
-  { id: 'kpi_ecr_notify',        label: 'ECR 通知',    value: 3,  unit: '則', color: 'purple' },
-  { id: 'kpi_daily_orders',     label: '今日訂單量總計', value: 186, unit: '筆', color: 'blue'  },
-  { id: 'kpi_gross_profit',     label: '銷售毛利總計',   value: 42850, unit: '元', color: 'green' },
-  { id: 'kpi_hot_store',        label: '熱門店家',       value: '好味食堂', color: 'orange', textValue: true },
-  { id: 'kpi_hot_item',         label: '熱門餐點',       value: '雞腿飯',   color: 'teal',   textValue: true },
-  { id: 'kpi_sub_status',   label: '訂閱現況',    getValue: getMktSubStatus,   color: 'blue',   textValue: true },
-  { id: 'kpi_total_points', label: '會員總點數',  getValue: getMktTotalPoints, unit: '點',      color: 'purple' },
-  { id: 'kpi_coupon_stats', label: '待使用折價券', getValue: getMktCouponStats, unit: '張',      color: 'teal'  },
+  /* 業務 */
+  { id: 'kpi_pending_renewal_store',   label: '待定店家(續約)',   value: 3,  unit: '件', color: 'orange' },
+  { id: 'kpi_pending_renewal_client',  label: '待定客戶(續約)',   value: 2,  unit: '件', color: 'red'    },
+  { id: 'kpi_store_revenue',           label: '店家營業額(月)',    value: 380000, unit: '元', color: 'green'  },
+  { id: 'kpi_client_revenue',          label: '客戶營業額(月)',    value: 520000, unit: '元', color: 'teal'   },
+  { id: 'kpi_pending_project',         label: '待定新專案',        value: 4,  unit: '件', color: 'purple' },
+  { id: 'kpi_other_pending',           label: '其他待處理',        value: 5,  unit: '件', color: 'yellow' },
+  /* IT */
+  { id: 'kpi_issue_notify',    label: '問題單通知',  value: 8,  unit: '則', color: 'orange' },
+  { id: 'kpi_ecr_notify',      label: 'ECR 通知',    value: 3,  unit: '則', color: 'purple' },
 ];
 
 /* ── 行銷 KPI 動態值讀取 ── */
-function getMktSubStatus() {
-  try {
-    var raw = sessionStorage.getItem('permissions_members_v2');
-    var members = raw ? JSON.parse(raw) : null;
-    if (members && members.length) {
-      var basic   = members.filter(function(m){ return m.subscriptionPlan === 'plan_basic'; }).length;
-      var premium = members.filter(function(m){ return m.subscriptionPlan === 'plan_premium'; }).length;
-      var total   = basic + premium;
-      return total + ' 人（月訂 ' + basic + '・年訂 ' + premium + '）';
-    }
-  } catch(e) {}
-  return '月訂 1・年訂 1';
-}
 function getMktTotalPoints() {
   try {
     var raw = sessionStorage.getItem('permissions_members_v2');
@@ -597,6 +596,16 @@ function getMktCouponStats() {
     }
   } catch(e) {}
   return 5;
+}
+function getMktSubCount() {
+  try {
+    var raw = sessionStorage.getItem('permissions_members_v2');
+    var members = raw ? JSON.parse(raw) : null;
+    if (members && members.length) {
+      return members.filter(function(m){ return m.subscriptionPlan === 'plan_basic' || m.subscriptionPlan === 'plan_premium'; }).length;
+    }
+  } catch(e) {}
+  return 2;
 }
 
 /* ══════════════════════════════════════════════
@@ -624,15 +633,15 @@ var ALL_LINK_IDS = LINK_CATALOG.map(function(l) { return l.id; });
 
 var ROLE_DEFAULT_KPIS = {
   'role_admin':     ALL_KPI_IDS,
-  'role_pur':       ['kpi_pending_review','kpi_week_effective','kpi_month_changed','kpi_month_new'],
-  'role_art':       ['kpi_new_store','kpi_pending_image','kpi_edm','kpi_unread_announce'],
-  'role_ops':       ['kpi_daily_orders','kpi_gross_profit','kpi_hot_store','kpi_hot_item','kpi_complaint'],
-  'role_sales':     ['kpi_store_count','kpi_unread_announce','kpi_complaint'],
-  'role_mkt':       ['kpi_unread_announce','kpi_sub_status','kpi_total_points','kpi_coupon_stats'],
+  'role_ops':       ['kpi_unread_announce','kpi_complaint','kpi_daily_orders','kpi_gross_profit','kpi_hot_store','kpi_hot_item'],
+  'role_pur':       ['kpi_unread_announce','kpi_pending_review','kpi_week_effective','kpi_month_changed','kpi_month_new'],
+  'role_mkt':       ['kpi_unread_announce','kpi_total_points','kpi_coupon_stats','kpi_sub_count'],
+  'role_art':       ['kpi_unread_announce','kpi_new_store','kpi_pending_image','kpi_edm'],
+  'role_sales':     ['kpi_unread_announce','kpi_complaint','kpi_pending_renewal_store','kpi_pending_renewal_client','kpi_store_revenue','kpi_client_revenue','kpi_pending_project','kpi_other_pending'],
+  'role_it':        ['kpi_unread_announce','kpi_issue_notify','kpi_ecr_notify'],
   'role_hr':        ['kpi_unread_announce'],
   'role_acc':       ['kpi_unread_announce'],
   'role_driver':    ['kpi_unread_announce'],
-  'role_it':        ['kpi_issue_notify','kpi_ecr_notify','kpi_unread_announce']
 };
 
 var ROLE_DEFAULT_LINKS = {
