@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>各廠菜單 — 內部後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --cyan:        rgb(0, 190, 214);
+  --cyan-bg:     rgba(0, 190, 214, 0.08);
+  --cyan-border: rgba(0, 190, 214, 0.3);
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --teal:        #1d4ed8;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 20px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1280px; margin: 0 auto; padding: 12px 20px 80px; }
+.page-title { font-size: 26px; font-weight: 600; margin-bottom: 20px; }
+
+/* ── 工具列 ── */
+.toolbar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.toolbar-left  { display: flex; align-items: center; gap: 10px; }
+.toolbar-right { margin-left: auto; }
+.filter-label  { font-size: 17px; color: var(--text-2); white-space: nowrap; }
+
+/* ── 可搜尋下拉（通用） ── */
+.ss-wrap { position: relative; display: inline-block; }
+.ss-trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--card); font-size: 17px; font-family: inherit;
+  cursor: pointer; color: var(--text); white-space: nowrap; min-width: 180px;
+}
+.ss-trigger:focus { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.ss-arrow { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+.ss-panel {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0;
+  min-width: 220px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.1); z-index: 300; overflow: hidden;
+}
+.ss-panel.open { display: block; }
+.ss-search-wrap { padding: 8px; border-bottom: 1px solid var(--border-2); }
+.ss-search {
+  width: 100%; padding: 6px 10px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 16px; font-family: inherit;
+}
+.ss-search:focus { outline: 2px solid var(--cyan); outline-offset: 0; border-color: transparent; }
+.ss-list { max-height: 220px; overflow-y: auto; }
+.ss-option { padding: 8px 12px; font-size: 16px; cursor: pointer; color: var(--text); }
+.ss-option:hover { background: var(--cyan-bg); }
+.ss-option.selected { color: var(--cyan); font-weight: 600; }
+.ss-option.hidden { display: none; }
+
+/* 表單用的 ss-trigger（全寬） */
+.ss-trigger-full { min-width: 100%; width: 100%; }
+
+/* ── 分頁 ── */
+.pagination { display: flex; align-items: center; gap: 4px; margin-bottom: 14px; }
+.page-btn {
+  min-width: 36px; height: 36px; padding: 0 10px;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--card);
+  font-size: 16px; font-family: inherit; cursor: pointer; color: var(--text-2);
+  transition: background .12s, color .12s;
+}
+.page-btn:hover { background: var(--bg-3); }
+.page-btn.active { background: var(--cyan); color: #fff; border-color: var(--cyan); }
+.page-btn.nav { color: var(--text-3); }
+
+/* ── 列表表格 ── */
+.table-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+.table-wrap table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+thead th {
+  background: var(--bg-2); padding: 10px 14px; text-align: left;
+  font-size: 16px; font-weight: 600; color: var(--text-2); border: 1px solid var(--border);
+}
+tbody td {
+  padding: 10px 14px; font-size: 17px; border: 1px solid var(--border);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+tbody tr:nth-child(odd)  { background: var(--bg-2); }
+tbody tr:nth-child(even) { background: var(--card); }
+tbody tr:hover           { background: var(--bg-3); }
+.col-site   { width: 160px; }
+.col-title  { width: 300px; }
+.col-date   { width: 130px; color: var(--text-2); }
+.col-action { width: 130px; white-space: nowrap; }
+
+/* ── 按鈕 ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px; font-weight: 500; font-family: inherit;
+  cursor: pointer; border: none; transition: opacity .12s; white-space: nowrap;
+}
+.btn:hover { opacity: .85; }
+.btn-primary    { background: var(--cyan); color: #fff; padding: 10px 22px; font-size: 17px; }
+.btn-secondary  { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); padding: 8px 16px; font-size: 16px; }
+.btn-edit       { background: var(--cyan); color: #fff; padding: 7px 16px; font-size: 16px; }
+.btn-teal       { background: var(--teal); color: #fff; padding: 6px 12px; font-size: 15px; }
+.btn-danger     { background: var(--red);  color: #fff; padding: 6px 12px; font-size: 15px; }
+.btn-save-row   { background: var(--cyan); color: #fff; padding: 6px 12px; font-size: 15px; }
+.btn-cancel-row { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); padding: 6px 12px; font-size: 15px; }
+.btn-danger-md  { background: var(--red);  color: #fff; padding: 8px 20px; font-size: 16px; }
+.action-btns    { display: flex; gap: 6px; }
+
+/* ── 表單頁 ── */
+.form-page { display: none; }
+.form-page.active { display: block; }
+.form-title { font-size: 26px; font-weight: 600; margin-bottom: 24px; }
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.form-field { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.form-field:last-child { margin-bottom: 0; }
+.form-label { font-size: 17px; font-weight: 600; white-space: nowrap; width: 110px; flex-shrink: 0; }
+.form-field .form-input,
+.form-field .ss-wrap { flex: 1; }
+.form-input, .form-select {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 17px; font-family: inherit;
+  color: var(--text); background: var(--card); transition: border-color .12s;
+}
+.form-input:focus  { outline: none; border-color: var(--cyan); }
+.form-input[readonly] { background: var(--bg-3); color: var(--text-3); cursor: default; }
+.form-foot { display: flex; gap: 10px; padding-top: 4px; }
+
+/* ── 子表格 ── */
+.section-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+.sub-table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.sub-table-wrap table { font-size: 16px; table-layout: fixed; width: 100%; border-collapse: collapse; }
+.sub-table-wrap thead th { font-size: 15px; padding: 8px 12px; border: 1px solid var(--border); }
+.sub-table-wrap tbody td { padding: 8px 12px; border: 1px solid var(--border); font-size: 16px; overflow: visible; white-space: normal; }
+.sub-table-wrap tbody tr:nth-child(odd)  { background: var(--bg-2); }
+.sub-table-wrap tbody tr:nth-child(even) { background: var(--card); }
+.sub-table-wrap tbody tr:hover           { background: var(--cyan-bg); }
+.sub-col-order { width: 60px; }
+.sub-col-tag   { width: 110px; }
+.sub-col-file  { }
+.sub-col-date  { width: 120px; }
+.sub-col-act   { width: 220px; white-space: nowrap; }
+.add-row-btn {
+  display: block; width: 100%; padding: 9px 0; text-align: center;
+  font-size: 16px; color: var(--cyan); background: var(--cyan-bg);
+  border: none; border-top: 1px solid var(--border); cursor: pointer;
+  font-family: inherit; font-weight: 500; transition: background .12s;
+}
+.add-row-btn:hover { background: var(--cyan-border); }
+.sub-input {
+  width: 100%; padding: 4px 8px; border: 1px solid var(--border);
+  border-radius: 4px; font-size: 16px; font-family: inherit; background: var(--card);
+}
+.sub-input:focus { outline: 2px solid var(--cyan); outline-offset: 0; border-color: transparent; }
+.sub-input[readonly] { background: var(--bg-3); color: var(--text-3); cursor: default; }
+.cell-text { font-size: 16px; }
+.cell-readonly { font-size: 16px; color: var(--text); word-break: break-all; }
+
+/* ── Modal 通用 ── */
+.modal-mask {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  z-index: 500; align-items: center; justify-content: center;
+}
+.modal-mask.open { display: flex; }
+.modal-box {
+  background: var(--card); border-radius: 12px; padding: 28px 32px;
+  max-width: 480px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.modal-body  { font-size: 17px; color: var(--text-2); margin-bottom: 24px; line-height: 1.6; }
+.modal-foot  { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ── 選擇圖片 Modal ── */
+.img-modal-box {
+  background: var(--card); border-radius: 12px; padding: 28px 32px;
+  max-width: 560px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}
+.img-drop-zone {
+  border: 2px dashed var(--border); border-radius: 10px; padding: 40px 20px;
+  text-align: center; cursor: pointer; transition: border-color .15s, background .15s;
+  background: var(--bg-2); margin-bottom: 16px;
+}
+.img-drop-zone:hover, .img-drop-zone.drag-over { border-color: var(--cyan); background: var(--cyan-bg); }
+.img-drop-icon { font-size: 36px; color: var(--text-3); margin-bottom: 8px; }
+.img-drop-text { font-size: 16px; color: var(--text-3); }
+.img-drop-text strong { color: var(--cyan); }
+.img-preview-wrap { display: none; text-align: center; margin-bottom: 16px; }
+.img-preview-wrap.show { display: block; }
+.img-preview-wrap img { max-width: 100%; max-height: 240px; border-radius: 8px; border: 1px solid var(--border); object-fit: contain; }
+.img-preview-name { font-size: 15px; color: var(--text-3); margin-top: 6px; }
+.img-drop-input { display: none; }
+
+/* ── 響應式 ── */
+@media (max-width: 600px) {
+  .toolbar { flex-direction: column; align-items: flex-start; }
+  .toolbar-right { margin-left: 0; }
+}
+</style>
+<link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<!-- ══════════════════════════════════════
+     列表頁
+══════════════════════════════════════ -->
+<div class="page" id="view-list">
+  <div class="page-title">各廠菜單</div>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="filter-label">據點</span>
+      <div class="ss-wrap" id="filter-ss-wrap">
+        <button type="button" class="ss-trigger" onclick="toggleSS('filter')">
+          <span id="filter-ss-display">全部</span>
+          <span class="ss-arrow">▼</span>
+        </button>
+        <div class="ss-panel" id="filter-ss-panel">
+          <div class="ss-search-wrap">
+            <input type="text" class="ss-search" id="filter-ss-search" placeholder="搜尋據點…" oninput="filterSSOpts('filter')">
+          </div>
+          <div class="ss-list" id="filter-ss-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px;">
+    <div class="pagination" id="pagination" style="margin-bottom:0;"></div>
+    <button class="btn btn-primary" onclick="showForm('create')">新增據點菜單</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-site">據點</th>
+          <th class="col-title">顯示標題</th>
+          <th class="col-date">最後更新日</th>
+          <th class="col-action">操作</th>
+        </tr>
+      </thead>
+      <tbody id="list-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     新增 / 編輯頁（共用）
+══════════════════════════════════════ -->
+<div class="page form-page" id="view-form">
+  <div class="form-title" id="form-title">新增據點菜單</div>
+
+  <div class="form-card">
+    <!-- 據點（僅新增時顯示） -->
+    <div class="form-field" id="field-site">
+      <label class="form-label">據點</label>
+      <div class="ss-wrap" id="form-ss-wrap" style="flex:1">
+        <button type="button" class="ss-trigger ss-trigger-full" onclick="toggleSS('form')">
+          <span id="form-ss-display">請選擇</span>
+          <span class="ss-arrow">▼</span>
+        </button>
+        <div class="ss-panel" id="form-ss-panel">
+          <div class="ss-search-wrap">
+            <input type="text" class="ss-search" id="form-ss-search" placeholder="搜尋據點…" oninput="filterSSOpts('form')">
+          </div>
+          <div class="ss-list" id="form-ss-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">顯示標題</label>
+      <input type="text" class="form-input" id="form-display-title" placeholder="世界先進Fab1_04-20_04-24">
+    </div>
+    <div class="form-field">
+      <label class="form-label">發布起始日</label>
+      <input type="date" class="form-input" id="form-publish-date">
+    </div>
+    <div class="form-field">
+      <label class="form-label">最後更新日</label>
+      <input type="text" class="form-input" id="form-updated-date" readonly>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="section-title">菜單檔案</div>
+    <div class="sub-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="sub-col-order">順序</th>
+            <th class="sub-col-tag">圖片標題</th>
+            <th class="sub-col-file">檔名</th>
+            <th class="sub-col-date">最後更新日</th>
+            <th class="sub-col-act">操作</th>
+          </tr>
+        </thead>
+        <tbody id="form-files-body"></tbody>
+      </table>
+      <button class="add-row-btn" onclick="addFileRow()">+ 新增一列</button>
+    </div>
+  </div>
+
+  <div class="form-foot">
+    <button class="btn btn-primary" onclick="saveForm()">儲存</button>
+    <button class="btn btn-secondary" onclick="showList()">取消</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     刪除二次確認 Modal
+══════════════════════════════════════ -->
+<div class="modal-mask" id="delete-mask" onclick="handleMaskClick(event,'delete-mask')">
+  <div class="modal-box">
+    <div class="modal-title">確認刪除</div>
+    <div class="modal-body" id="delete-msg">確定要刪除這筆資料？此操作無法復原。</div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('delete-mask')">取消</button>
+      <button class="btn btn-danger-md" onclick="confirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     選擇圖片 Modal
+══════════════════════════════════════ -->
+<div class="modal-mask" id="img-mask" onclick="handleMaskClick(event,'img-mask')">
+  <div class="img-modal-box">
+    <div class="modal-title">選擇圖片</div>
+    <div class="img-drop-zone" id="img-drop-zone"
+         onclick="document.getElementById('img-file-input').click()"
+         ondragover="onImgDragOver(event)" ondragleave="onImgDragLeave(event)" ondrop="onImgDrop(event)">
+      <div class="img-drop-icon">🖼</div>
+      <div class="img-drop-text">點擊選擇圖片，或將圖片拖曳至此<br><strong>支援 JPG / PNG / GIF / WEBP</strong></div>
+    </div>
+    <input type="file" class="img-drop-input" id="img-file-input" accept="image/*" onchange="onImgFileChange(event)">
+    <div class="img-preview-wrap" id="img-preview-wrap">
+      <img id="img-preview" src="" alt="預覽">
+      <div class="img-preview-name" id="img-preview-name"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('img-mask')">取消</button>
+      <button class="btn btn-primary" onclick="confirmImage()">確認</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+var SITES = ['世界先進 Fab1','世界先進 Fab2','世界先進 Fab3','世界先進 Fab5',
+             '聯發科 AB棟','聯發科 S棟','聯發科 CP-C','聯發科 TP-RX','鴻海','鴻晶'];
+
+var records = [
+  { id:  1, site:'世界先進 Fab1', displayTitle:'世界先進一廠 fab1_04-06_04-12', publishDate:'2024-11-30', updatedDate:'2026-04-08',
+    files:[
+      {order:1,tag:'早餐',filename:'世界先進一廠 fab1_早餐_04-06_04-10.png',updatedDate:'2026-04-08'},
+      {order:2,tag:'午餐',filename:'世界先進一廠 fab1_午餐_04-06_04-10.png',updatedDate:'2026-04-08'},
+      {order:3,tag:'晚餐',filename:'世界先進一廠 fab1_晚餐_04-06_04-10.png',updatedDate:'2026-04-08'},
+      {order:4,tag:'宵夜',filename:'世界先進一廠 fab1_宵夜_04-01_04-30.png',updatedDate:'2026-03-31'}
+    ]},
+  { id:  2, site:'世界先進 Fab2', displayTitle:'世界先進一廠 fab2_04-06_04-12', publishDate:'2024-11-30', updatedDate:'2026-04-08',
+    files:[
+      {order:1,tag:'早餐',filename:'世界先進一廠 fab2_早餐_04-06_04-10.png',updatedDate:'2026-04-08'},
+      {order:2,tag:'午餐',filename:'世界先進一廠 fab2_午餐_04-06_04-10.png',updatedDate:'2026-04-08'}
+    ]},
+  { id:  3, site:'世界先進 Fab3', displayTitle:'世界先進一廠 fab3_04-06_04-12', publishDate:'2024-11-30', updatedDate:'2026-04-08', files:[] },
+  { id:  4, site:'世界先進 Fab5', displayTitle:'世界先進一廠 fab5_04-06_04-12', publishDate:'2024-11-30', updatedDate:'2026-04-08', files:[] },
+  { id:  5, site:'聯發科 AB棟',  displayTitle:'聯發科總部_04-06_04-10',        publishDate:'2024-12-01', updatedDate:'2026-04-08', files:[] },
+  { id:  6, site:'聯發科 S棟',   displayTitle:'聯發科S棟_04-06_04-10',         publishDate:'2024-12-01', updatedDate:'2026-04-08', files:[] },
+  { id:  7, site:'聯發科 CP-C',  displayTitle:'聯發科昌益_04-06_04-10',        publishDate:'2024-12-01', updatedDate:'2026-04-08', files:[] },
+  { id:  8, site:'聯發科 TP-RX', displayTitle:'聯發科台普瑞光_04-06_04-10',    publishDate:'2024-12-01', updatedDate:'2026-04-08', files:[] },
+  { id:  9, site:'鴻海',         displayTitle:'高軟園區_04-06_04-10',          publishDate:'2025-01-01', updatedDate:'2026-04-08', files:[] },
+  { id: 10, site:'鴻晶',         displayTitle:'高軟園區_04-06_04-10',          publishDate:'2025-01-01', updatedDate:'2026-04-08', files:[] },
+  { id: 11, site:'世界先進 Fab1', displayTitle:'世界先進一廠 fab1_04-13_04-19', publishDate:'2024-11-30', updatedDate:'2026-04-15', files:[] },
+  { id: 12, site:'世界先進 Fab2', displayTitle:'世界先進一廠 fab2_04-13_04-19', publishDate:'2024-11-30', updatedDate:'2026-04-15', files:[] },
+  { id: 13, site:'世界先進 Fab3', displayTitle:'世界先進一廠 fab3_04-13_04-19', publishDate:'2024-11-30', updatedDate:'2026-04-15', files:[] },
+  { id: 14, site:'世界先進 Fab5', displayTitle:'世界先進一廠 fab5_04-13_04-19', publishDate:'2024-11-30', updatedDate:'2026-04-15', files:[] },
+  { id: 15, site:'聯發科 AB棟',  displayTitle:'聯發科總部_04-13_04-17',        publishDate:'2024-12-01', updatedDate:'2026-04-15', files:[] },
+  { id: 16, site:'聯發科 S棟',   displayTitle:'聯發科S棟_04-13_04-17',         publishDate:'2024-12-01', updatedDate:'2026-04-15', files:[] },
+  { id: 17, site:'聯發科 CP-C',  displayTitle:'聯發科昌益_04-13_04-17',        publishDate:'2024-12-01', updatedDate:'2026-04-15', files:[] },
+  { id: 18, site:'聯發科 TP-RX', displayTitle:'聯發科台普瑞光_04-13_04-17',    publishDate:'2024-12-01', updatedDate:'2026-04-15', files:[] },
+  { id: 19, site:'鴻海',         displayTitle:'高軟園區_04-13_04-17',          publishDate:'2025-01-01', updatedDate:'2026-04-15', files:[] },
+  { id: 20, site:'鴻晶',         displayTitle:'高軟園區_04-13_04-17',          publishDate:'2025-01-01', updatedDate:'2026-04-15', files:[] },
+  { id: 21, site:'世界先進 Fab1', displayTitle:'世界先進一廠 fab1_04-20_04-26', publishDate:'2024-11-30', updatedDate:'2026-04-22', files:[] },
+  { id: 22, site:'世界先進 Fab2', displayTitle:'世界先進一廠 fab2_04-20_04-26', publishDate:'2024-11-30', updatedDate:'2026-04-22', files:[] },
+  { id: 23, site:'世界先進 Fab3', displayTitle:'世界先進一廠 fab3_04-20_04-26', publishDate:'2024-11-30', updatedDate:'2026-04-22', files:[] },
+  { id: 24, site:'世界先進 Fab5', displayTitle:'世界先進一廠 fab5_04-20_04-26', publishDate:'2024-11-30', updatedDate:'2026-04-22', files:[] },
+  { id: 25, site:'聯發科 AB棟',  displayTitle:'聯發科總部_04-20_04-24',        publishDate:'2024-12-01', updatedDate:'2026-04-22', files:[] },
+  { id: 26, site:'聯發科 S棟',   displayTitle:'聯發科S棟_04-20_04-24',         publishDate:'2024-12-01', updatedDate:'2026-04-22', files:[] },
+  { id: 27, site:'聯發科 CP-C',  displayTitle:'聯發科昌益_04-20_04-24',        publishDate:'2024-12-01', updatedDate:'2026-04-22', files:[] },
+  { id: 28, site:'聯發科 TP-RX', displayTitle:'聯發科台普瑞光_04-20_04-24',    publishDate:'2024-12-01', updatedDate:'2026-04-22', files:[] },
+  { id: 29, site:'鴻海',         displayTitle:'高軟園區_04-20_04-24',          publishDate:'2025-01-01', updatedDate:'2026-04-22', files:[] },
+  { id: 30, site:'鴻晶',         displayTitle:'高軟園區_04-20_04-24',          publishDate:'2025-01-01', updatedDate:'2026-04-22', files:[] },
+];
+
+var nextId    = 31;
+var currentPage = 1;
+var pageSize    = 10;
+var filterSite  = '';
+var formMode    = 'create';  // 'create' | 'edit'
+var editingId   = null;
+var deletingId  = null;
+var imgTargetTr = null;       // 目前觸發「選擇圖片」的 tr
+var imgSelectedFile = null;   // 選定的 File 物件
+
+/* ══════════════════════════════════════
+   工具
+══════════════════════════════════════ */
+function today() { return new Date().toISOString().slice(0, 10); }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function filteredRecords() {
+  return filterSite ? records.filter(function(r){ return r.site === filterSite; }) : records;
+}
+
+/* ══════════════════════════════════════
+   可搜尋下拉（通用，依 ns 區分）
+   ns: 'filter' | 'form'
+══════════════════════════════════════ */
+var ssSelected = { filter: '', form: '' };
+
+function initSS(ns, includeAll) {
+  var list = document.getElementById(ns + '-ss-list');
+  list.innerHTML = '';
+  if (includeAll) {
+    var a = document.createElement('div');
+    a.className = 'ss-option' + (ssSelected[ns] === '' ? ' selected' : '');
+    a.dataset.value = '';
+    a.textContent = '全部';
+    a.onclick = function(){ selectSSOpt(ns, '', '全部'); };
+    list.appendChild(a);
+  }
+  SITES.forEach(function(s) {
+    var opt = document.createElement('div');
+    opt.className = 'ss-option' + (ssSelected[ns] === s ? ' selected' : '');
+    opt.dataset.value = s;
+    opt.textContent = s;
+    opt.onclick = function(){ selectSSOpt(ns, s, s); };
+    list.appendChild(opt);
+  });
+}
+
+function toggleSS(ns) {
+  var panel = document.getElementById(ns + '-ss-panel');
+  var isOpen = panel.classList.contains('open');
+  closeAllSS();
+  if (!isOpen) {
+    panel.classList.add('open');
+    var search = document.getElementById(ns + '-ss-search');
+    search.value = '';
+    filterSSOpts(ns);
+    setTimeout(function(){ search.focus(); }, 50);
+  }
+}
+
+function closeAllSS() {
+  document.querySelectorAll('.ss-panel').forEach(function(p){ p.classList.remove('open'); });
+}
+
+function selectSSOpt(ns, value, label) {
+  ssSelected[ns] = value;
+  document.getElementById(ns + '-ss-display').textContent = label || (ns === 'filter' ? '全部' : '請選擇');
+  document.querySelectorAll('#' + ns + '-ss-list .ss-option').forEach(function(o){
+    o.classList.toggle('selected', o.dataset.value === value);
+  });
+  closeAllSS();
+  if (ns === 'filter') {
+    filterSite = value;
+    currentPage = 1;
+    renderList();
+  }
+}
+
+function filterSSOpts(ns) {
+  var kw = document.getElementById(ns + '-ss-search').value.toLowerCase();
+  document.querySelectorAll('#' + ns + '-ss-list .ss-option').forEach(function(o){
+    o.classList.toggle('hidden', kw !== '' && !o.textContent.toLowerCase().includes(kw));
+  });
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ss-wrap')) closeAllSS();
+});
+
+/* ══════════════════════════════════════
+   Modal
+══════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function handleMaskClick(e, id) { if (e.target.id === id) closeModal(id); }
+
+/* ══════════════════════════════════════
+   View 切換
+══════════════════════════════════════ */
+function showList() {
+  document.getElementById('view-list').style.display = '';
+  document.getElementById('view-form').classList.remove('active');
+  renderList();
+}
+
+function showForm(mode, id) {
+  formMode  = mode;
+  editingId = id || null;
+  document.getElementById('view-list').style.display = 'none';
+  document.getElementById('view-form').classList.add('active');
+
+  var isCreate = (mode === 'create');
+  document.getElementById('form-title').textContent = isCreate ? '新增據點菜單' : records.find(function(r){ return r.id === id; }).site;
+  document.getElementById('field-site').style.display = isCreate ? '' : 'none';
+
+  if (isCreate) {
+    ssSelected.form = '';
+    initSS('form', false);
+    document.getElementById('form-ss-display').textContent = '請選擇';
+    document.getElementById('form-display-title').value = '';
+    document.getElementById('form-publish-date').value  = '2024-11-30';
+    document.getElementById('form-updated-date').value  = today();
+    document.getElementById('form-files-body').innerHTML = '';
+  } else {
+    var rec = records.find(function(r){ return r.id === id; });
+    document.getElementById('form-display-title').value = rec.displayTitle;
+    document.getElementById('form-publish-date').value  = rec.publishDate;
+    document.getElementById('form-updated-date').value  = rec.updatedDate;
+    renderFormFiles(rec.files);
+  }
+}
+
+/* ══════════════════════════════════════
+   列表
+══════════════════════════════════════ */
+function renderList() {
+  var data       = filteredRecords();
+  var totalPages = Math.max(1, Math.ceil(data.length / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  var start    = (currentPage - 1) * pageSize;
+  var pageData = data.slice(start, start + pageSize);
+
+  var tbody = document.getElementById('list-tbody');
+  if (!pageData.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-3);padding:24px;border:1px solid var(--border);">無資料</td></tr>';
+  } else {
+    tbody.innerHTML = pageData.map(function(rec) {
+      return '<tr>' +
+        '<td class="col-site">'  + esc(rec.site) + '</td>' +
+        '<td class="col-title">' + esc(rec.displayTitle) + '</td>' +
+        '<td class="col-date">'  + esc(rec.updatedDate) + '</td>' +
+        '<td class="col-action"><div class="action-btns">' +
+          '<button class="btn btn-edit" onclick="showForm(\'edit\',' + rec.id + ')">編輯</button>' +
+          '<button class="btn btn-danger" onclick="askDelete(' + rec.id + ',\'' + esc(rec.site) + '\')">刪除</button>' +
+        '</div></td></tr>';
+    }).join('');
+  }
+  renderPagination(totalPages);
+}
+
+function renderPagination(total) {
+  var atFirst = currentPage === 1;
+  var atLast  = currentPage === total;
+  var dF = atFirst ? ' style="opacity:.2;pointer-events:none;"' : '';
+  var dL = atLast  ? ' style="opacity:.2;pointer-events:none;"' : '';
+  var html = '';
+  html += '<button class="page-btn nav"' + dF + ' onclick="goPage(1)">&#171;</button>';
+  html += '<button class="page-btn nav"' + dF + ' onclick="goPage(' + (currentPage - 1) + ')">&#8249;</button>';
+  var s = Math.max(1, currentPage - 2), e = Math.min(total, currentPage + 2);
+  if (s > 1) html += '<span style="padding:0 4px;color:var(--text-3)">…</span>';
+  for (var i = s; i <= e; i++)
+    html += '<button class="page-btn' + (i === currentPage ? ' active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+  if (e < total) html += '<span style="padding:0 4px;color:var(--text-3)">…</span>';
+  html += '<button class="page-btn nav"' + dL + ' onclick="goPage(' + (currentPage + 1) + ')">&#8250;</button>';
+  html += '<button class="page-btn nav"' + dL + ' onclick="goPage(' + total + ')">&#187;</button>';
+  document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(n) { currentPage = n; renderList(); }
+
+/* ══════════════════════════════════════
+   刪除
+══════════════════════════════════════ */
+function askDelete(id, site) {
+  deletingId = id;
+  document.getElementById('delete-msg').textContent = '確定要刪除「' + site + '」的菜單資料？此操作無法復原。';
+  openModal('delete-mask');
+}
+function confirmDelete() {
+  if (deletingRowBtn) {
+    deletingRowBtn.closest('tr').remove();
+    deletingRowBtn = null;
+  } else {
+    records = records.filter(function(r){ return r.id !== deletingId; });
+    deletingId = null;
+    renderList();
+  }
+  closeModal('delete-mask');
+}
+
+/* ══════════════════════════════════════
+   子表格
+══════════════════════════════════════ */
+function renderFormFiles(files) {
+  var tbody = document.getElementById('form-files-body');
+  tbody.innerHTML = files.map(function(f) {
+    return '<tr' +
+      ' data-order="'   + esc(String(f.order))    + '"' +
+      ' data-tag="'     + esc(f.tag)               + '"' +
+      ' data-filename="'+ esc(f.filename)           + '"' +
+      ' data-date="'    + esc(f.updatedDate)        + '">' +
+      readRowHtml(f.order, f.tag, f.filename, f.updatedDate) + '</tr>';
+  }).join('');
+}
+
+function readRowHtml(order, tag, filename, date) {
+  return '<td class="sub-col-order"><span class="cell-text">' + esc(String(order)) + '</span></td>' +
+    '<td class="sub-col-tag"><span class="cell-text">'    + esc(tag) + '</span></td>' +
+    '<td class="sub-col-file"><span class="cell-readonly">' + esc(filename || '未選擇圖片') + '</span></td>' +
+    '<td class="sub-col-date"><span class="cell-text">'  + esc(date) + '</span></td>' +
+    '<td class="sub-col-act"><div class="action-btns">' +
+      '<button class="btn btn-edit" style="font-size:13px;padding:4px 10px" onclick="enterEditRow(this)">編輯</button>' +
+      '<button class="btn btn-teal" onclick="openImgModal(this)">選擇圖片</button>' +
+      '<button class="btn btn-danger" onclick="askDeleteRow(this)">刪除</button>' +
+    '</div></td>';
+}
+
+function editRowHtml(order, tag, filename, date, isNew) {
+  return '<td class="sub-col-order"><input class="sub-input" type="number" value="' + esc(String(order)) + '" min="1" style="width:50px"></td>' +
+    '<td class="sub-col-tag"><input class="sub-input" value="' + esc(tag) + '" placeholder="早餐"></td>' +
+    '<td class="sub-col-file"><input class="sub-input" value="' + esc(filename) + '" readonly placeholder="未選擇圖片"></td>' +
+    '<td class="sub-col-date"><span class="cell-text">' + esc(date) + '</span></td>' +
+    '<td class="sub-col-act"><div class="action-btns">' +
+      '<button class="btn btn-save-row" onclick="saveFileRow(this,' + (isNew?'true':'false') + ')">儲存</button>' +
+      '<button class="btn btn-teal" onclick="openImgModal(this)">選擇圖片</button>' +
+      '<button class="btn btn-cancel-row" onclick="cancelFileRow(this,' + (isNew?'true':'false') + ')">取消</button>' +
+    '</div></td>';
+}
+
+function addFileRow() {
+  var tbody = document.getElementById('form-files-body');
+  var order = tbody.rows.length + 1;
+  var tr = document.createElement('tr');
+  tr.dataset.order    = String(order);
+  tr.dataset.tag      = '';
+  tr.dataset.filename = '';
+  tr.dataset.date     = today();
+  tr.dataset.isnew    = 'true';
+  tr.innerHTML = editRowHtml(order, '', '', today(), true);
+  tbody.appendChild(tr);
+}
+
+function enterEditRow(btn) {
+  var tr = btn.closest('tr');
+  tr.innerHTML = editRowHtml(tr.dataset.order||'1', tr.dataset.tag||'', tr.dataset.filename||'', tr.dataset.date||today(), false);
+}
+
+function saveFileRow(btn, isNew) {
+  var tr  = btn.closest('tr');
+  var ins = tr.querySelectorAll('.sub-input');
+  var order    = ins[0] ? ins[0].value.trim() : tr.dataset.order;
+  var tag      = ins[1] ? ins[1].value.trim() : '';
+  var filename = ins[2] ? ins[2].value.trim() : '';
+  var date     = today();
+  tr.dataset.order    = order;
+  tr.dataset.tag      = tag;
+  tr.dataset.filename = filename;
+  tr.dataset.date     = date;
+  delete tr.dataset.isnew;
+  tr.innerHTML = readRowHtml(order, tag, filename, date);
+  var updEl = document.getElementById('form-updated-date');
+  if (updEl) updEl.value = date;
+}
+
+function cancelFileRow(btn, isNew) {
+  var tr = btn.closest('tr');
+  if (isNew) { tr.remove(); }
+  else { tr.innerHTML = readRowHtml(tr.dataset.order||'1', tr.dataset.tag||'', tr.dataset.filename||'', tr.dataset.date||today()); }
+}
+
+var deletingRowBtn = null;
+function askDeleteRow(btn) {
+  deletingRowBtn = btn;
+  document.getElementById('delete-msg').textContent = '確定要刪除這一列菜單檔案？此操作無法復原。';
+  openModal('delete-mask');
+}
+function removeFileRow(btn) { btn.closest('tr').remove(); }
+
+function collectFiles() {
+  var rows   = document.getElementById('form-files-body').rows;
+  var result = [];
+  for (var i = 0; i < rows.length; i++) {
+    var tr  = rows[i];
+    var ins = tr.querySelectorAll('.sub-input');
+    if (ins.length) {
+      result.push({ order: parseInt(ins[0].value)||i+1, tag: ins[1].value, filename: ins[2].value, updatedDate: today() });
+    } else {
+      result.push({ order: parseInt(tr.dataset.order)||i+1, tag: tr.dataset.tag||'', filename: tr.dataset.filename||'', updatedDate: tr.dataset.date||today() });
+    }
+  }
+  return result;
+}
+
+/* ══════════════════════════════════════
+   選擇圖片 Modal
+══════════════════════════════════════ */
+function openImgModal(btn) {
+  imgTargetTr       = btn.closest('tr');
+  imgSelectedFile   = null;
+  document.getElementById('img-file-input').value = '';
+  document.getElementById('img-preview-wrap').classList.remove('show');
+  document.getElementById('img-preview').src = '';
+  document.getElementById('img-preview-name').textContent = '';
+  document.getElementById('img-drop-zone').classList.remove('drag-over');
+  openModal('img-mask');
+}
+
+function onImgFileChange(e) {
+  var file = e.target.files[0];
+  if (file) previewImage(file);
+}
+
+function onImgDragOver(e) {
+  e.preventDefault();
+  document.getElementById('img-drop-zone').classList.add('drag-over');
+}
+
+function onImgDragLeave() {
+  document.getElementById('img-drop-zone').classList.remove('drag-over');
+}
+
+function onImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('img-drop-zone').classList.remove('drag-over');
+  var file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) previewImage(file);
+}
+
+function previewImage(file) {
+  imgSelectedFile = file;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('img-preview').src = ev.target.result;
+    document.getElementById('img-preview-name').textContent = file.name;
+    document.getElementById('img-preview-wrap').classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+function confirmImage() {
+  if (!imgSelectedFile || !imgTargetTr) { closeModal('img-mask'); return; }
+  var filename = imgSelectedFile.name;
+  // 寫回 tr 的 dataset 與顯示
+  imgTargetTr.dataset.filename = filename;
+  // 更新列內的檔名顯示（唯讀或編輯中皆處理）
+  var readonlySpan = imgTargetTr.querySelector('.sub-col-file .cell-readonly');
+  var editInput    = imgTargetTr.querySelector('.sub-col-file .sub-input');
+  if (readonlySpan) readonlySpan.textContent = filename;
+  if (editInput)    editInput.value           = filename;
+  closeModal('img-mask');
+  imgTargetTr = null;
+}
+
+/* ══════════════════════════════════════
+   主儲存
+══════════════════════════════════════ */
+function saveForm() {
+  var files = collectFiles();
+  var now = today();
+  document.getElementById('form-updated-date').value = now;
+  if (formMode === 'create') {
+    var site = ssSelected.form;
+    if (!site) { alert('請選擇據點'); return; }
+    records.unshift({
+      id: nextId++, site: site,
+      displayTitle: document.getElementById('form-display-title').value,
+      publishDate:  document.getElementById('form-publish-date').value,
+      updatedDate:  now, files: files
+    });
+  } else {
+    var rec = records.find(function(r){ return r.id === editingId; });
+    if (!rec) return;
+    rec.displayTitle = document.getElementById('form-display-title').value;
+    rec.publishDate  = document.getElementById('form-publish-date').value;
+    rec.updatedDate  = now;
+    rec.files = files;
+  }
+  showList();
+}
+
+/* ══════════════════════════════════════
+   初始化
+══════════════════════════════════════ */
+initSS('filter', true);
+initSS('form', false);
+document.getElementById('form-updated-date').value = today();
+renderList();
+</script>
+</body>
+</html>
