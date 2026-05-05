@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>廠域QA — 內部後台</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --cyan:        rgb(0, 190, 214);
+  --cyan-bg:     rgba(0, 190, 214, 0.08);
+  --cyan-border: rgba(0, 190, 214, 0.3);
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --teal:        #1d4ed8;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 20px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1280px; margin: 0 auto; padding: 12px 20px 80px; }
+.page-title { font-size: 26px; font-weight: 600; margin-bottom: 20px; }
+
+/* ── 工具列 ── */
+.toolbar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.toolbar-left  { display: flex; align-items: center; gap: 10px; }
+.toolbar-right { margin-left: auto; }
+.filter-label  { font-size: 17px; color: var(--text-2); white-space: nowrap; }
+
+/* ── 可搜尋下拉（通用） ── */
+.ss-wrap { position: relative; display: inline-block; }
+.ss-trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--card); font-size: 17px; font-family: inherit;
+  cursor: pointer; color: var(--text); white-space: nowrap; min-width: 180px;
+}
+.ss-trigger:focus { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.ss-arrow { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+.ss-panel {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0;
+  min-width: 220px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.1); z-index: 300; overflow: hidden;
+}
+.ss-panel.open { display: block; }
+.ss-search-wrap { padding: 8px; border-bottom: 1px solid var(--border-2); }
+.ss-search {
+  width: 100%; padding: 6px 10px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 16px; font-family: inherit;
+}
+.ss-search:focus { outline: 2px solid var(--cyan); outline-offset: 0; border-color: transparent; }
+.ss-list { max-height: 220px; overflow-y: auto; }
+.ss-option { padding: 8px 12px; font-size: 16px; cursor: pointer; color: var(--text); }
+.ss-option:hover { background: var(--cyan-bg); }
+.ss-option.selected { color: var(--cyan); font-weight: 600; }
+.ss-option.hidden { display: none; }
+
+/* 表單用的 ss-trigger（全寬） */
+.ss-trigger-full { min-width: 100%; width: 100%; }
+
+/* ── 分頁 ── */
+.pagination { display: flex; align-items: center; gap: 4px; margin-bottom: 14px; }
+.page-btn {
+  min-width: 36px; height: 36px; padding: 0 10px;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--card);
+  font-size: 16px; font-family: inherit; cursor: pointer; color: var(--text-2);
+  transition: background .12s, color .12s;
+}
+.page-btn:hover { background: var(--bg-3); }
+.page-btn.active { background: var(--cyan); color: #fff; border-color: var(--cyan); }
+.page-btn.nav { color: var(--text-3); }
+
+/* ── 列表表格 ── */
+.table-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+.table-wrap table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+thead th {
+  background: var(--bg-2); padding: 10px 14px; text-align: left;
+  font-size: 16px; font-weight: 600; color: var(--text-2); border: 1px solid var(--border);
+}
+tbody td {
+  padding: 10px 14px; font-size: 17px; border: 1px solid var(--border);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+tbody tr:nth-child(odd)  { background: var(--bg-2); }
+tbody tr:nth-child(even) { background: var(--card); }
+tbody tr:hover           { background: var(--bg-3); }
+.col-site   { width: 160px; }
+.col-file   { width: 250px; }
+.col-date   { width: 130px; color: var(--text-2); }
+.col-action { width: 180px; white-space: nowrap; }
+.no-img     { color: var(--red); }
+
+/* ── 按鈕 ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px; font-weight: 500; font-family: inherit;
+  cursor: pointer; border: none; transition: opacity .12s; white-space: nowrap;
+}
+.btn:hover { opacity: .85; }
+.btn-primary    { background: var(--cyan); color: #fff; padding: 10px 22px; font-size: 17px; }
+.btn-secondary  { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); padding: 8px 16px; font-size: 16px; }
+.btn-teal       { background: var(--teal); color: #fff; padding: 6px 12px; font-size: 15px; }
+.btn-danger     { background: var(--red);  color: #fff; padding: 6px 12px; font-size: 15px; }
+.btn-danger-md  { background: var(--red);  color: #fff; padding: 8px 20px; font-size: 16px; }
+.action-btns    { display: flex; gap: 6px; }
+
+/* ── 表單頁 ── */
+.form-page { display: none; }
+.form-page.active { display: block; }
+.form-title { font-size: 26px; font-weight: 600; margin-bottom: 24px; }
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.form-field { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+.form-field:last-child { margin-bottom: 0; }
+.form-label { font-size: 17px; font-weight: 600; white-space: nowrap; width: 110px; flex-shrink: 0; padding-top: 4px; }
+.form-field .form-input,
+.form-field .ss-wrap { flex: 1; }
+.form-input, .form-select {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 17px; font-family: inherit;
+  color: var(--text); background: var(--card); transition: border-color .12s;
+}
+.form-input:focus  { outline: none; border-color: var(--cyan); }
+.form-input[readonly] { background: var(--bg-3); color: var(--text-3); cursor: default; }
+
+/* ── 儲存/取消 sticky ── */
+.form-foot {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  padding: 12px 0 4px;
+  border-top: 1px solid var(--border);
+  z-index: 10;
+  margin-top: 4px;
+  display: flex;
+  gap: 10px;
+}
+
+/* ── 圖片預覽（表單頁） ── */
+.form-img-area { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.form-img-preview {
+  width: 100%; border-radius: 8px;
+  border: 1px solid var(--border); object-fit: contain; display: none;
+}
+.form-img-preview.show { display: block; }
+.form-img-name { font-size: 17px; color: var(--text); }
+
+/* ── 檔名連結 ── */
+.filename-link {
+  color: var(--text); cursor: pointer; text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.filename-link:hover { opacity: .75; }
+
+/* ── Modal 通用 ── */
+.modal-mask {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  z-index: 500; align-items: center; justify-content: center;
+}
+.modal-mask.open { display: flex; }
+.modal-box {
+  background: var(--card); border-radius: 12px; padding: 28px 32px;
+  max-width: 480px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}
+
+/* ── 圖片檢視 Modal ── */
+.img-view-box {
+  background: var(--card); border-radius: 12px; padding: 24px;
+  width: 90%; max-width: 860px; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  max-height: 90vh; overflow-y: auto;
+}
+.img-view-title {
+  font-size: 17px; font-weight: 600; color: var(--text-2);
+  margin-bottom: 16px; word-break: break-all;
+}
+.img-view-placeholder {
+  width: 100%; aspect-ratio: 4/3; background: var(--bg-3);
+  border-radius: 8px; border: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; color: var(--text-3);
+}
+.img-view-placeholder-icon { font-size: 56px; }
+.img-view-placeholder-text { font-size: 16px; }
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.modal-body  { font-size: 17px; color: var(--text-2); margin-bottom: 24px; line-height: 1.6; }
+.modal-foot  { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ── 響應式 ── */
+@media (max-width: 600px) {
+  .toolbar { flex-direction: column; align-items: flex-start; }
+  .toolbar-right { margin-left: 0; }
+}
+</style>
+<link rel="stylesheet" href="shared-nav.css">
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<!-- ══════════════════════════════════════
+     列表頁
+══════════════════════════════════════ -->
+<div class="page" id="view-list">
+  <div class="page-title">廠域QA</div>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="filter-label">據點</span>
+      <div class="ss-wrap" id="filter-ss-wrap">
+        <button type="button" class="ss-trigger" onclick="toggleSS('filter')">
+          <span id="filter-ss-display">全部</span>
+          <span class="ss-arrow">▼</span>
+        </button>
+        <div class="ss-panel" id="filter-ss-panel">
+          <div class="ss-search-wrap">
+            <input type="text" class="ss-search" id="filter-ss-search" placeholder="搜尋據點…" oninput="filterSSOpts('filter')">
+          </div>
+          <div class="ss-list" id="filter-ss-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px;">
+    <div class="pagination" id="pagination" style="margin-bottom:0;"></div>
+    <button class="btn btn-primary" onclick="showForm()">新增據點QA</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-site">據點</th>
+          <th class="col-file">檔名</th>
+          <th class="col-date">最後更新日</th>
+          <th class="col-action">操作</th>
+        </tr>
+      </thead>
+      <tbody id="list-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     新增頁
+══════════════════════════════════════ -->
+<div class="page form-page" id="view-form">
+  <div class="form-title">新增廠域QA</div>
+
+  <div class="form-card">
+    <div class="form-field">
+      <label class="form-label">據點</label>
+      <div class="ss-wrap" id="form-ss-wrap" style="flex:1">
+        <button type="button" class="ss-trigger ss-trigger-full" onclick="toggleSS('form')">
+          <span id="form-ss-display">請選擇</span>
+          <span class="ss-arrow">▼</span>
+        </button>
+        <div class="ss-panel" id="form-ss-panel">
+          <div class="ss-search-wrap">
+            <input type="text" class="ss-search" id="form-ss-search" placeholder="搜尋據點…" oninput="filterSSOpts('form')">
+          </div>
+          <div class="ss-list" id="form-ss-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">最後更新日</label>
+      <input type="text" class="form-input" id="form-updated-date" readonly>
+    </div>
+    <div class="form-field">
+      <label class="form-label">菜單檔案</label>
+      <div class="form-img-area">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button type="button" class="btn btn-teal" onclick="document.getElementById('form-file-input').click()">選擇圖片</button>
+          <input type="file" id="form-file-input" accept="image/*" style="display:none" onchange="onFormFileChange(event)">
+          <span id="form-img-name" class="form-img-name"></span>
+        </div>
+        <img id="form-img-preview" class="form-img-preview" src="" alt="預覽">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-foot">
+    <button class="btn btn-primary" onclick="saveForm()">儲存</button>
+    <button class="btn btn-secondary" onclick="showList()">取消</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     刪除二次確認 Modal
+══════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+     圖片檢視 Modal
+══════════════════════════════════════ -->
+<div class="modal-mask" id="img-view-mask" onclick="handleMaskClick(event,'img-view-mask')">
+  <div class="img-view-box">
+    <div class="img-view-title" id="img-view-title"></div>
+    <div id="img-view-content"></div>
+    <div style="margin-top:16px; text-align:right;">
+      <button class="btn btn-secondary" onclick="closeModal('img-view-mask')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="delete-mask" onclick="handleMaskClick(event,'delete-mask')">
+  <div class="modal-box">
+    <div class="modal-title">確認刪除</div>
+    <div class="modal-body" id="delete-msg">確定要刪除這筆資料？此操作無法復原。</div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('delete-mask')">取消</button>
+      <button class="btn btn-danger-md" onclick="confirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   資料
+══════════════════════════════════════ */
+var SITES = ['世界先進 Fab1','世界先進 Fab2','世界先進 Fab3','世界先進 Fab5',
+             '聯發科 AB棟','聯發科 S棟','聯發科 CP-C','聯發科 TP-RX','鴻海','鴻晶'];
+
+var records = [
+  { id:  1, site: '世界先進 Fab1', filename: '世界先進一廠 fab1_QA.png',  updatedDate: '2026-04-08' },
+  { id:  2, site: '世界先進 Fab2', filename: '世界先進一廠 fab2_QA.png',  updatedDate: '2026-04-08' },
+  { id:  3, site: '世界先進 Fab3', filename: null,                         updatedDate: '2026-04-08' },
+  { id:  4, site: '世界先進 Fab5', filename: '世界先進一廠 fab5_QA.png',  updatedDate: '2026-04-08' },
+  { id:  5, site: '聯發科 AB棟',  filename: '聯發科總部_QA.png',          updatedDate: '2026-04-08' },
+  { id:  6, site: '聯發科 S棟',   filename: '聯發科S棟_QA.png',           updatedDate: '2026-04-08' },
+  { id:  7, site: '聯發科 CP-C',  filename: '聯發科昌益_QA.png',          updatedDate: '2026-04-08' },
+  { id:  8, site: '聯發科 TP-RX', filename: '聯發科台普瑞光_QA.png',      updatedDate: '2026-04-08' },
+  { id:  9, site: '鴻海',         filename: '高軟園區_QA.png',            updatedDate: '2026-04-08' },
+  { id: 10, site: '鴻晶',         filename: '高軟園區_QA.png',            updatedDate: '2026-04-08' },
+];
+
+var nextId      = 11;
+var currentPage = 1;
+var pageSize    = 10;
+var filterSite  = '';
+var deletingId  = null;
+var formFileSelected = null;  // 新增頁選定的 File 物件
+
+/* ══════════════════════════════════════
+   工具
+══════════════════════════════════════ */
+function today() { return new Date().toISOString().slice(0, 10); }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function filteredRecords() {
+  return filterSite ? records.filter(function(r){ return r.site === filterSite; }) : records;
+}
+
+/* ══════════════════════════════════════
+   可搜尋下拉（通用，依 ns 區分）
+   ns: 'filter' | 'form'
+══════════════════════════════════════ */
+var ssSelected = { filter: '', form: '' };
+
+function initSS(ns, includeAll) {
+  var list = document.getElementById(ns + '-ss-list');
+  list.innerHTML = '';
+  if (includeAll) {
+    var a = document.createElement('div');
+    a.className = 'ss-option' + (ssSelected[ns] === '' ? ' selected' : '');
+    a.dataset.value = '';
+    a.textContent = '全部';
+    a.onclick = function(){ selectSSOpt(ns, '', '全部'); };
+    list.appendChild(a);
+  }
+  SITES.forEach(function(s) {
+    var opt = document.createElement('div');
+    opt.className = 'ss-option' + (ssSelected[ns] === s ? ' selected' : '');
+    opt.dataset.value = s;
+    opt.textContent = s;
+    opt.onclick = function(){ selectSSOpt(ns, s, s); };
+    list.appendChild(opt);
+  });
+}
+
+function toggleSS(ns) {
+  var panel = document.getElementById(ns + '-ss-panel');
+  var isOpen = panel.classList.contains('open');
+  closeAllSS();
+  if (!isOpen) {
+    panel.classList.add('open');
+    var search = document.getElementById(ns + '-ss-search');
+    search.value = '';
+    filterSSOpts(ns);
+    setTimeout(function(){ search.focus(); }, 50);
+  }
+}
+
+function closeAllSS() {
+  document.querySelectorAll('.ss-panel').forEach(function(p){ p.classList.remove('open'); });
+}
+
+function selectSSOpt(ns, value, label) {
+  ssSelected[ns] = value;
+  document.getElementById(ns + '-ss-display').textContent = label || (ns === 'filter' ? '全部' : '請選擇');
+  document.querySelectorAll('#' + ns + '-ss-list .ss-option').forEach(function(o){
+    o.classList.toggle('selected', o.dataset.value === value);
+  });
+  closeAllSS();
+  if (ns === 'filter') {
+    filterSite = value;
+    currentPage = 1;
+    renderList();
+  }
+}
+
+function filterSSOpts(ns) {
+  var kw = document.getElementById(ns + '-ss-search').value.toLowerCase();
+  document.querySelectorAll('#' + ns + '-ss-list .ss-option').forEach(function(o){
+    o.classList.toggle('hidden', kw !== '' && !o.textContent.toLowerCase().includes(kw));
+  });
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ss-wrap')) closeAllSS();
+});
+
+/* ══════════════════════════════════════
+   Modal
+══════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function handleMaskClick(e, id) { if (e.target.id === id) closeModal(id); }
+
+/* ══════════════════════════════════════
+   View 切換
+══════════════════════════════════════ */
+function showList() {
+  document.getElementById('view-list').style.display = '';
+  document.getElementById('view-form').classList.remove('active');
+  renderList();
+}
+
+function showForm() {
+  ssSelected.form = '';
+  formFileSelected = null;
+  initSS('form', false);
+  document.getElementById('form-ss-display').textContent = '請選擇';
+  document.getElementById('form-updated-date').value = today();
+  document.getElementById('form-file-input').value = '';
+  document.getElementById('form-img-preview').src = '';
+  document.getElementById('form-img-preview').classList.remove('show');
+  document.getElementById('form-img-name').textContent = '';
+  document.getElementById('view-list').style.display = 'none';
+  document.getElementById('view-form').classList.add('active');
+}
+
+/* ══════════════════════════════════════
+   列表
+══════════════════════════════════════ */
+function renderList() {
+  var data       = filteredRecords();
+  var totalPages = Math.max(1, Math.ceil(data.length / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  var start    = (currentPage - 1) * pageSize;
+  var pageData = data.slice(start, start + pageSize);
+
+  var tbody = document.getElementById('list-tbody');
+  if (!pageData.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-3);padding:24px;border:1px solid var(--border);">無資料</td></tr>';
+  } else {
+    tbody.innerHTML = pageData.map(function(rec) {
+      var fileCell = rec.filename
+        ? '<span class="filename-link" onclick="openImgView(\'' + esc(rec.filename) + '\',' + rec.id + ')">' + esc(rec.filename) + '</span>'
+        : '<span class="no-img">無圖片</span>';
+      return '<tr>' +
+        '<td class="col-site">' + esc(rec.site) + '</td>' +
+        '<td class="col-file">' + fileCell + '</td>' +
+        '<td class="col-date">' + esc(rec.updatedDate) + '</td>' +
+        '<td class="col-action"><div class="action-btns">' +
+          '<input type="file" id="file-input-' + rec.id + '" style="display:none" accept="image/*" onchange="onListFileChange(event,' + rec.id + ')">' +
+          '<button class="btn btn-teal" onclick="document.getElementById(\'file-input-' + rec.id + '\').click()">選擇圖片</button>' +
+          '<button class="btn btn-danger" onclick="askDelete(' + rec.id + ',\'' + esc(rec.site) + '\')">刪除</button>' +
+        '</div></td></tr>';
+    }).join('');
+  }
+  renderPagination(totalPages);
+}
+
+function renderPagination(total) {
+  var atFirst = currentPage === 1;
+  var atLast  = currentPage === total;
+  var dF = atFirst ? ' style="opacity:.2;pointer-events:none;"' : '';
+  var dL = atLast  ? ' style="opacity:.2;pointer-events:none;"' : '';
+  var html = '';
+  html += '<button class="page-btn nav"' + dF + ' onclick="goPage(1)">&#171;</button>';
+  html += '<button class="page-btn nav"' + dF + ' onclick="goPage(' + (currentPage - 1) + ')">&#8249;</button>';
+  var s = Math.max(1, currentPage - 2), e = Math.min(total, currentPage + 2);
+  if (s > 1) html += '<span style="padding:0 4px;color:var(--text-3)">…</span>';
+  for (var i = s; i <= e; i++)
+    html += '<button class="page-btn' + (i === currentPage ? ' active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+  if (e < total) html += '<span style="padding:0 4px;color:var(--text-3)">…</span>';
+  html += '<button class="page-btn nav"' + dL + ' onclick="goPage(' + (currentPage + 1) + ')">&#8250;</button>';
+  html += '<button class="page-btn nav"' + dL + ' onclick="goPage(' + total + ')">&#187;</button>';
+  document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(n) { currentPage = n; renderList(); }
+
+/* ══════════════════════════════════════
+   圖片檢視
+══════════════════════════════════════ */
+function openImgView(filename, id) {
+  document.getElementById('img-view-title').textContent = filename;
+  var rec = records.find(function(r){ return r.id === id; });
+  var imgDataUrl = rec && rec._imgDataUrl ? rec._imgDataUrl : null;
+  var content = imgDataUrl
+    ? '<img src="' + imgDataUrl + '" style="width:100%;border-radius:8px;border:1px solid var(--border);">'
+    : '<div class="img-view-placeholder">' +
+        '<div class="img-view-placeholder-icon">🖼</div>' +
+        '<div class="img-view-placeholder-text">' + esc(filename) + '</div>' +
+      '</div>';
+  document.getElementById('img-view-content').innerHTML = content;
+  openModal('img-view-mask');
+}
+
+/* ══════════════════════════════════════
+   列表「選擇圖片」直接更新
+══════════════════════════════════════ */
+function onListFileChange(e, id) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var rec = records.find(function(r){ return r.id === id; });
+  if (rec) {
+    rec.filename    = file.name;
+    rec.updatedDate = today();
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      rec._imgDataUrl = ev.target.result;
+      renderList();
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+/* ══════════════════════════════════════
+   刪除
+══════════════════════════════════════ */
+function askDelete(id, site) {
+  deletingId = id;
+  document.getElementById('delete-msg').textContent = '確定要刪除「' + site + '」的QA資料？此操作無法復原。';
+  openModal('delete-mask');
+}
+function confirmDelete() {
+  records = records.filter(function(r){ return r.id !== deletingId; });
+  deletingId = null;
+  renderList();
+  closeModal('delete-mask');
+}
+
+/* ══════════════════════════════════════
+   新增頁「選擇圖片」預覽
+══════════════════════════════════════ */
+function onFormFileChange(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  formFileSelected = file;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = document.getElementById('form-img-preview');
+    img.src = ev.target.result;
+    img.classList.add('show');
+    document.getElementById('form-img-name').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ══════════════════════════════════════
+   主儲存
+══════════════════════════════════════ */
+function saveForm() {
+  var site = ssSelected.form;
+  if (!site) { alert('請選擇據點'); return; }
+  var filename = formFileSelected ? formFileSelected.name : null;
+  var newRec = {
+    id: nextId++,
+    site: site,
+    filename: filename,
+    updatedDate: today(),
+    _imgDataUrl: formFileSelected ? document.getElementById('form-img-preview').src : null
+  };
+  records.unshift(newRec);
+  showList();
+}
+
+/* ══════════════════════════════════════
+   初始化
+══════════════════════════════════════ */
+initSS('filter', true);
+initSS('form', false);
+document.getElementById('form-updated-date').value = today();
+renderList();
+</script>
+</body>
+</html>
