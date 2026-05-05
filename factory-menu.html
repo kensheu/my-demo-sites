@@ -211,6 +211,32 @@ tbody tr:hover           { background: var(--bg-3); }
 .img-preview-name { font-size: 15px; color: var(--text-3); margin-top: 6px; }
 .img-drop-input { display: none; }
 
+/* ── 檔名連結 ── */
+.filename-link {
+  color: var(--text); cursor: pointer; text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.filename-link:hover { opacity: .75; }
+
+/* ── 圖片檢視 Modal ── */
+.img-view-box {
+  background: var(--card); border-radius: 12px; padding: 24px;
+  width: 90%; max-width: 860px; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  max-height: 90vh; overflow-y: auto;
+}
+.img-view-title {
+  font-size: 17px; font-weight: 600; color: var(--text-2);
+  margin-bottom: 16px; word-break: break-all;
+}
+.img-view-placeholder {
+  width: 100%; aspect-ratio: 4/3; background: var(--bg-3);
+  border-radius: 8px; border: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; color: var(--text-3);
+}
+.img-view-placeholder-icon { font-size: 56px; }
+.img-view-placeholder-text { font-size: 16px; }
+
 /* ── 響應式 ── */
 @media (max-width: 600px) {
   .toolbar { flex-direction: column; align-items: flex-start; }
@@ -364,6 +390,23 @@ tbody tr:hover           { background: var(--bg-3); }
 </div>
 
 <!-- ══════════════════════════════════════
+     圖片檢視 Modal
+══════════════════════════════════════ -->
+<div class="modal-mask" id="img-view-mask" onclick="handleMaskClick(event,'img-view-mask')">
+  <div class="img-view-box">
+    <div class="img-view-title" id="img-view-title"></div>
+    <img id="img-view-real" src="" alt="預覽" style="display:none;width:100%;border-radius:8px;border:1px solid var(--border);object-fit:contain;">
+    <div class="img-view-placeholder" id="img-view-placeholder">
+      <div class="img-view-placeholder-icon">🖼</div>
+      <div class="img-view-placeholder-text">尚未上傳圖片</div>
+    </div>
+    <div class="modal-foot" style="margin-top:20px;">
+      <button class="btn btn-secondary" onclick="closeModal('img-view-mask')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
      選擇圖片 Modal
 ══════════════════════════════════════ -->
 <div class="modal-mask" id="img-mask" onclick="handleMaskClick(event,'img-mask')">
@@ -446,6 +489,7 @@ var editingId   = null;
 var deletingId  = null;
 var imgTargetTr = null;       // 目前觸發「選擇圖片」的 tr
 var imgSelectedFile = null;   // 選定的 File 物件
+var imgUrlMap = new Map();    // tr -> imgurl (base64)
 
 /* ══════════════════════════════════════
    工具
@@ -525,6 +569,11 @@ function filterSSOpts(ns) {
 
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.ss-wrap')) closeAllSS();
+  var link = e.target.closest('#form-files-body .filename-link');
+  if (link) {
+    var tr = link.closest('tr');
+    viewImg(link.textContent, tr ? (imgUrlMap.get(tr) || '') : '');
+  }
 });
 
 /* ══════════════════════════════════════
@@ -643,20 +692,26 @@ function confirmDelete() {
 ══════════════════════════════════════ */
 function renderFormFiles(files) {
   var tbody = document.getElementById('form-files-body');
-  tbody.innerHTML = files.map(function(f) {
-    return '<tr' +
-      ' data-order="'   + esc(String(f.order))    + '"' +
-      ' data-tag="'     + esc(f.tag)               + '"' +
-      ' data-filename="'+ esc(f.filename)           + '"' +
-      ' data-date="'    + esc(f.updatedDate)        + '">' +
-      readRowHtml(f.order, f.tag, f.filename, f.updatedDate) + '</tr>';
-  }).join('');
+  tbody.innerHTML = '';
+  files.forEach(function(f) {
+    var tr = document.createElement('tr');
+    tr.dataset.order    = String(f.order);
+    tr.dataset.tag      = f.tag;
+    tr.dataset.filename = f.filename;
+    tr.dataset.date     = f.updatedDate;
+    tr.innerHTML = readRowHtml(f.order, f.tag, f.filename, f.updatedDate);
+    if (f.imgurl) imgUrlMap.set(tr, f.imgurl);
+    tbody.appendChild(tr);
+  });
 }
 
 function readRowHtml(order, tag, filename, date) {
+  var fileCell = filename
+    ? '<span class="cell-readonly filename-link">' + esc(filename) + '</span>'
+    : '<span class="cell-readonly">未選擇圖片</span>';
   return '<td class="sub-col-order"><span class="cell-text">' + esc(String(order)) + '</span></td>' +
     '<td class="sub-col-tag"><span class="cell-text">'    + esc(tag) + '</span></td>' +
-    '<td class="sub-col-file"><span class="cell-readonly">' + esc(filename || '未選擇圖片') + '</span></td>' +
+    '<td class="sub-col-file">' + fileCell + '</td>' +
     '<td class="sub-col-date"><span class="cell-text">'  + esc(date) + '</span></td>' +
     '<td class="sub-col-act"><div class="action-btns">' +
       '<button class="btn btn-edit" style="font-size:13px;padding:4px 10px" onclick="enterEditRow(this)">編輯</button>' +
@@ -693,6 +748,7 @@ function addFileRow() {
 function enterEditRow(btn) {
   var tr = btn.closest('tr');
   tr.innerHTML = editRowHtml(tr.dataset.order||'1', tr.dataset.tag||'', tr.dataset.filename||'', tr.dataset.date||today(), false);
+  tr.dataset.imgurl = tr.dataset.imgurl || '';
 }
 
 function saveFileRow(btn, isNew) {
@@ -702,6 +758,7 @@ function saveFileRow(btn, isNew) {
   var tag      = ins[1] ? ins[1].value.trim() : '';
   var filename = ins[2] ? ins[2].value.trim() : '';
   var date     = today();
+  var imgurl   = tr.dataset.imgurl || '';
   tr.dataset.order    = order;
   tr.dataset.tag      = tag;
   tr.dataset.filename = filename;
@@ -733,9 +790,9 @@ function collectFiles() {
     var tr  = rows[i];
     var ins = tr.querySelectorAll('.sub-input');
     if (ins.length) {
-      result.push({ order: parseInt(ins[0].value)||i+1, tag: ins[1].value, filename: ins[2].value, updatedDate: today() });
+      result.push({ order: parseInt(ins[0].value)||i+1, tag: ins[1].value, filename: ins[2].value, updatedDate: today(), imgurl: imgUrlMap.get(tr)||'' });
     } else {
-      result.push({ order: parseInt(tr.dataset.order)||i+1, tag: tr.dataset.tag||'', filename: tr.dataset.filename||'', updatedDate: tr.dataset.date||today() });
+      result.push({ order: parseInt(tr.dataset.order)||i+1, tag: tr.dataset.tag||'', filename: tr.dataset.filename||'', updatedDate: tr.dataset.date||today(), imgurl: imgUrlMap.get(tr)||'' });
     }
   }
   return result;
@@ -745,19 +802,23 @@ function collectFiles() {
    選擇圖片 Modal
 ══════════════════════════════════════ */
 function openImgModal(btn) {
-  imgTargetTr       = btn.closest('tr');
-  imgSelectedFile   = null;
-  document.getElementById('img-file-input').value = '';
-  document.getElementById('img-preview-wrap').classList.remove('show');
-  document.getElementById('img-preview').src = '';
-  document.getElementById('img-preview-name').textContent = '';
-  document.getElementById('img-drop-zone').classList.remove('drag-over');
-  openModal('img-mask');
+  imgTargetTr = btn.closest('tr');
+  imgSelectedFile = null;
+  var inp = document.getElementById('img-file-input');
+  inp.value = '';
+  inp.click();
 }
 
 function onImgFileChange(e) {
   var file = e.target.files[0];
-  if (file) previewImage(file);
+  if (!file) return;
+  imgSelectedFile = file;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('img-preview').src = ev.target.result;
+    confirmImage();
+  };
+  reader.readAsDataURL(file);
 }
 
 function onImgDragOver(e) {
@@ -790,13 +851,13 @@ function previewImage(file) {
 function confirmImage() {
   if (!imgSelectedFile || !imgTargetTr) { closeModal('img-mask'); return; }
   var filename = imgSelectedFile.name;
-  // 寫回 tr 的 dataset 與顯示
+  var imgUrl   = document.getElementById('img-preview').src;
   imgTargetTr.dataset.filename = filename;
-  // 更新列內的檔名顯示（唯讀或編輯中皆處理）
+  imgUrlMap.set(imgTargetTr, imgUrl);
   var readonlySpan = imgTargetTr.querySelector('.sub-col-file .cell-readonly');
   var editInput    = imgTargetTr.querySelector('.sub-col-file .sub-input');
   if (readonlySpan) readonlySpan.textContent = filename;
-  if (editInput)    editInput.value           = filename;
+  if (editInput)    editInput.value = filename;
   closeModal('img-mask');
   imgTargetTr = null;
 }
@@ -826,6 +887,25 @@ function saveForm() {
     rec.files = files;
   }
   showList();
+}
+
+/* ══════════════════════════════════════
+   圖片檢視
+══════════════════════════════════════ */
+function viewImg(title, url) {
+  document.getElementById('img-view-title').textContent = title;
+  var real = document.getElementById('img-view-real');
+  var placeholder = document.getElementById('img-view-placeholder');
+  if (url) {
+    real.src = url;
+    real.style.display = '';
+    placeholder.style.display = 'none';
+  } else {
+    real.src = '';
+    real.style.display = 'none';
+    placeholder.style.display = '';
+  }
+  openModal('img-view-mask');
 }
 
 /* ══════════════════════════════════════
