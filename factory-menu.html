@@ -216,6 +216,28 @@ tbody tr:hover           { background: var(--bg-3); }
   .toolbar { flex-direction: column; align-items: flex-start; }
   .toolbar-right { margin-left: 0; }
 }
+
+@media (max-width: 768px) {
+  /* 表格：允許水平捲動 */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-wrap table { min-width: 560px; }
+
+  /* 分頁列 + 新增按鈕：改為縱向排列 */
+  #view-list > div[style*="justify-content:space-between"] {
+    flex-direction: column; align-items: flex-start;
+  }
+
+  /* 表單：label 移至上方，input 佔滿寬度 */
+  .form-card { padding: 16px; }
+  .form-field { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .form-label { width: auto; }
+  .form-field .form-input,
+  .form-field .ss-wrap { width: 100%; }
+
+  /* 子表格：允許水平捲動 */
+  .sub-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .sub-table-wrap table { min-width: 620px; }
+}
 </style>
 <link rel="stylesheet" href="shared-nav.css">
 </head>
