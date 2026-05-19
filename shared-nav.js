@@ -77,7 +77,8 @@
                      p.file === 'factory-qa.html';
             },
             children: [
-              { label: '菜單排程管理',     url: 'menu-schedule.html',     match: function (p) { return p.file === 'menu-schedule.html'; } },
+              { label: '菜單排程管理',     url: 'menu-schedule.html',         match: function (p) { return p.file === 'menu-schedule.html'; } },
+              { label: '菜單排程管理（特殊訂餐版）', url: 'menu-schedule-special.html', match: function (p) { return p.file === 'menu-schedule-special.html'; } },
               { label: '菜單發布管理',     url: 'menu-publish.html',      match: function (p) { return p.file === 'menu-publish.html'; } },
               { label: '菜單管理異動紀錄', url: 'menu-schedule-log.html', match: function (p) { return p.file === 'menu-schedule-log.html'; } },
               { label: '菜單模板管理',     url: 'menu-template.html',     match: function (p) { return p.file === 'menu-template.html'; } },
