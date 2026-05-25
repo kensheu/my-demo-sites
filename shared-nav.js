@@ -74,7 +74,8 @@
                      p.file === 'menu-schedule-log.html' ||
                      p.file === 'menu-template.html' ||
                      p.file === 'factory-menu.html' ||
-                     p.file === 'factory-qa.html';
+                     p.file === 'factory-qa.html' ||
+                     p.file === 'menu-pricing.html';
             },
             children: [
               { label: '菜單排程管理',     url: 'menu-schedule.html',         match: function (p) { return p.file === 'menu-schedule.html'; } },
@@ -83,7 +84,8 @@
               { label: '菜單管理異動紀錄', url: 'menu-schedule-log.html', match: function (p) { return p.file === 'menu-schedule-log.html'; } },
               { label: '菜單模板管理',     url: 'menu-template.html',     match: function (p) { return p.file === 'menu-template.html'; } },
               { label: '各廠菜單',         url: 'factory-menu.html',      match: function (p) { return p.file === 'factory-menu.html'; } },
-              { label: '廠域QA',           url: 'factory-qa.html',        match: function (p) { return p.file === 'factory-qa.html'; } }
+              { label: '廠域QA',           url: 'factory-qa.html',        match: function (p) { return p.file === 'factory-qa.html'; } },
+              { label: '供餐價格設定',     url: 'menu-pricing.html',      match: function (p) { return p.file === 'menu-pricing.html'; } }
             ]
           },
           {
@@ -368,6 +370,23 @@
     '</ul>'
   );
 
+  var FEATURE_MENU_PRICING = (
+    '<h2 class="gn-fp-h2">供餐價格設定</h2>' +
+    '<ul class="gn-fp-list">' +
+      '<li>依序三步驟完成定價設定：選擇套用據點 → 選擇餐廳分店 → 設定定價模式</li>' +
+      '<li><strong>Step 1 — 選擇套用據點</strong>：先選公司（多選下拉，支援搜尋），再選廠區/據點（依公司聯動篩選）；取消公司時自動清除其下已選據點</li>' +
+      '<li><strong>Step 2 — 選擇餐廳與分店</strong>：區域 → 餐廳 → 分店三層聯動下拉，各層支援搜尋、多選、全選；無分店者顯示「主店」；取消上層時自動清除下層已選項目</li>' +
+      '<li><strong>Step 3 — 定價模式</strong>（二擇一）：' +
+        '<ul>' +
+          '<li>模式 A（加價販售）：可勾選保障金額（最低終端價）；加價方式二擇一（互斥）：固定加價或單品加價；以店內價為基準</li>' +
+          '<li>模式 B（折價販售）：設定日期區間與折扣%數（1-99），以店內價為基準；即時顯示折後價示例</li>' +
+        '</ul>' +
+      '</li>' +
+      '<li>送出後規則顯示於頁面下方列表：含據點 badge、模式 badge、餐廳分店、詳情、變動人員與時間、啟用 toggle（預設停用）、刪除（附確認）</li>' +
+      '<li>列表篩選：公司 / 據點下拉 + 定價模式按鈕組 + 啟用狀態按鈕組</li>' +
+    '</ul>'
+  );
+
   var FEATURE_STORE_MENU = (
     '<h2 class="gn-fp-h2">店家後台 — 餐點管理</h2>' +
     '<ul class="gn-fp-list">' +
@@ -397,6 +416,7 @@
     if (file === 'complaint.html') return FEATURE_COMPLAINT;
     if (file === 'permissions.html') return FEATURE_PERMISSIONS;
     if (file === 'issue-and-ecr.html') return FEATURE_ISSUE_ECR;
+    if (file === 'menu-pricing.html') return FEATURE_MENU_PRICING;
     if (file === 'store-menu.html') return FEATURE_STORE_MENU;
     return null;
   }
