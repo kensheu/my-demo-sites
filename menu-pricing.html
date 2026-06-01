@@ -38,7 +38,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
                "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-  font-size: 20px;
+  font-size: 22px;
   color: var(--text);
   background: var(--bg);
   min-height: 100vh;
@@ -46,18 +46,18 @@ body {
 
 .page { max-width: 1100px; margin: 0 auto; padding: 12px 32px 80px; }
 .page-header { margin-bottom: 20px; }
-.page-title  { font-size: 24px; font-weight: 600; }
-.page-sub    { font-size: 18px; color: var(--text-3); margin-top: 3px; }
+.page-title  { font-size: 28px; font-weight: 600; }
+.page-sub    { font-size: 20px; color: var(--text-3); margin-top: 3px; }
 
 /* ── 按鈕 ── */
 .btn {
-  padding: 6px 14px; border-radius: 6px; font-size: 16px; font-weight: 500;
+  padding: 6px 14px; border-radius: 6px; font-size: 18px; font-weight: 500;
   cursor: pointer; border: 1px solid var(--border); background: var(--card);
   color: var(--text-2); font-family: inherit; transition: all .12s;
 }
 .btn:hover { background: var(--bg-3); }
 .btn-sm {
-  padding: 3px 10px; font-size: 14px; border-radius: 5px;
+  padding: 3px 10px; font-size: 16px; border-radius: 5px;
   cursor: pointer; border: 1px solid var(--border); background: var(--card);
   color: var(--text-2); font-family: inherit; transition: all .12s; white-space: nowrap;
 }
@@ -85,14 +85,14 @@ body {
 .step-badge {
   width: 26px; height: 26px; border-radius: 50%;
   background: var(--blue); color: #fff;
-  font-size: 14px; font-weight: 700;
+  font-size: 16px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.step-card-title { font-size: 17px; font-weight: 600; color: var(--text); }
+.step-card-title { font-size: 19px; font-weight: 600; color: var(--text); }
 .step-card-summary {
   margin-left: auto;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--blue-text);
   background: var(--blue-bg);
   border: 1px solid var(--blue-border);
@@ -114,7 +114,7 @@ body {
   gap: 14px;
 }
 .filter-col { display: flex; flex-direction: column; gap: 5px; }
-.filter-label { font-size: 15px; font-weight: 500; color: var(--text-2); }
+.filter-label { font-size: 17px; font-weight: 500; color: var(--text-2); }
 
 /* ── 自訂多選下拉 ── */
 .ms-wrap { position: relative; }
@@ -124,13 +124,13 @@ body {
   padding: 7px 10px;
   border: 1px solid var(--border); border-radius: 7px;
   background: var(--bg-2); cursor: pointer;
-  font-size: 16px; font-family: inherit; color: var(--text);
-  transition: border-color .12s; user-select: none; min-height: 36px;
+  font-size: 18px; font-family: inherit; color: var(--text);
+  transition: border-color .12s; user-select: none; min-height: 38px;
 }
 .ms-trigger:hover, .ms-wrap.open .ms-trigger { border-color: var(--blue); background: var(--card); }
 .ms-trigger-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ms-trigger-text.placeholder { color: var(--text-3); }
-.ms-arrow { font-size: 11px; color: var(--text-3); flex-shrink: 0; transition: transform .15s; }
+.ms-arrow { font-size: 13px; color: var(--text-3); flex-shrink: 0; transition: transform .15s; }
 .ms-wrap.open .ms-arrow { transform: rotate(180deg); }
 
 .ms-panel {
@@ -149,7 +149,7 @@ body {
 .ms-search {
   width: 100%; padding: 5px 8px;
   border: 1px solid var(--border); border-radius: 5px;
-  font-size: 14px; font-family: inherit; color: var(--text);
+  font-size: 16px; font-family: inherit; color: var(--text);
   background: var(--bg-2); outline: none;
 }
 .ms-search:focus { border-color: var(--blue); background: var(--card); }
@@ -159,7 +159,7 @@ body {
   border-bottom: 1px solid var(--border-2);
 }
 .ms-action-btn {
-  flex: 1; padding: 6px 0; font-size: 14px; font-family: inherit;
+  flex: 1; padding: 6px 0; font-size: 16px; font-family: inherit;
   background: none; border: none; cursor: pointer; color: var(--blue-text);
   transition: background .1s;
 }
@@ -169,7 +169,7 @@ body {
 .ms-list { max-height: 200px; overflow-y: auto; }
 .ms-option {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 12px; font-size: 15px; color: var(--text-2);
+  padding: 8px 12px; font-size: 17px; color: var(--text-2);
   cursor: pointer; transition: background .1s; border-bottom: 1px solid var(--border-2);
 }
 .ms-option:last-child { border-bottom: none; }
@@ -179,22 +179,22 @@ body {
   width: 15px; height: 15px; flex-shrink: 0;
   border: 1.5px solid var(--border); border-radius: 3px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 10px; color: transparent;
+  font-size: 12px; color: transparent;
   background: var(--card);
 }
 .ms-option.selected .ms-option-check {
   background: var(--blue); border-color: var(--blue); color: #fff;
 }
 .ms-option-group-label {
-  font-size: 12px; font-weight: 600; color: var(--text-3);
+  font-size: 14px; font-weight: 600; color: var(--text-3);
   letter-spacing: .04em; text-transform: uppercase;
 }
-.ms-option-sub { color: var(--text-3); font-size: 13px; }
-.ms-empty { padding: 10px 12px; font-size: 15px; color: var(--text-3); font-style: italic; }
+.ms-option-sub { color: var(--text-3); font-size: 15px; }
+.ms-empty { padding: 10px 12px; font-size: 17px; color: var(--text-3); font-style: italic; }
 
 /* ── Empty hint ── */
 .empty-hint {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-3);
   font-style: italic;
   padding: 6px 0;
@@ -241,17 +241,17 @@ body {
   gap: 14px 20px;
 }
 .form-row { display: flex; flex-direction: column; gap: 5px; }
-.form-label { font-size: 15px; font-weight: 500; color: var(--text-2); }
+.form-label { font-size: 17px; font-weight: 500; color: var(--text-2); }
 .form-input {
-  padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px;
-  font-size: 16px; font-family: inherit; color: var(--text); background: var(--bg-2);
+  padding: 8px 11px; border: 1px solid var(--border); border-radius: 7px;
+  font-size: 18px; font-family: inherit; color: var(--text); background: var(--bg-2);
   outline: none; transition: border-color .12s; width: 100%;
 }
 .form-input:focus { border-color: var(--blue); background: var(--card); }
-.form-hint { font-size: 14px; color: var(--text-3); margin-top: 2px; }
+.form-hint { font-size: 15px; color: var(--text-3); margin-top: 2px; }
 .required { color: var(--red); }
 .optional-tag {
-  font-size: 12px; color: var(--text-3); font-weight: 400;
+  font-size: 14px; color: var(--text-3); font-weight: 400;
   padding: 1px 6px; border: 1px solid var(--border); border-radius: 4px;
   margin-left: 4px;
 }
@@ -264,7 +264,7 @@ body {
 }
 .input-with-unit .form-input { flex: 1; }
 .input-unit {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text-2);
   white-space: nowrap;
   flex-shrink: 0;
@@ -276,7 +276,7 @@ body {
   background: var(--green-bg);
   border: 1px solid var(--green-bdr);
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--green);
   margin-top: 10px;
 }
@@ -295,7 +295,7 @@ body {
 .markup-col:first-child { padding-left: 0; }
 .markup-col:last-child  { border-right: none; }
 .markup-section-title {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 10px;
@@ -308,7 +308,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-2);
   cursor: pointer;
   padding: 3px 0;
@@ -316,7 +316,7 @@ body {
 }
 .checkbox-option-row input[type="checkbox"],
 .checkbox-option-row input[type="radio"] {
-  width: 16px; height: 16px;
+  width: 18px; height: 18px;
   accent-color: var(--blue);
   cursor: pointer; flex-shrink: 0;
 }
@@ -326,13 +326,13 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-2);
   cursor: pointer;
   padding: 3px 0;
 }
 .radio-row input[type="radio"] {
-  width: 16px; height: 16px;
+  width: 18px; height: 18px;
   accent-color: var(--blue);
   cursor: pointer; flex-shrink: 0; margin-top: 2px;
 }
@@ -356,7 +356,7 @@ body {
 }
 .per-item-name {
   flex: 1;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
   min-width: 0;
   overflow: hidden;
@@ -364,14 +364,14 @@ body {
   white-space: nowrap;
 }
 .per-item-price {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-3);
   white-space: nowrap;
 }
 .per-item-input {
   padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
-  font-size: 14px; font-family: inherit; color: var(--text); background: var(--bg-2);
-  outline: none; transition: border-color .12s; width: 80px; text-align: right;
+  font-size: 16px; font-family: inherit; color: var(--text); background: var(--bg-2);
+  outline: none; transition: border-color .12s; width: 90px; text-align: right;
 }
 .per-item-input:focus { border-color: var(--blue); background: var(--card); }
 
@@ -388,46 +388,58 @@ body {
   display: flex; align-items: center; gap: 10px;
   margin-bottom: 12px; margin-top: 4px;
 }
-.rules-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.rules-title { font-size: 20px; font-weight: 600; color: var(--text); }
 .rules-count {
-  font-size: 13px; color: var(--text-3);
+  font-size: 15px; color: var(--text-3);
   background: var(--bg-3); border: 1px solid var(--border);
   border-radius: 100px; padding: 1px 10px;
+}
+/* ── 規則列表表格佈局 ── */
+.rule-table-head,
+.rule-card {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px 120px 130px;
+  align-items: center;
+  gap: 0;
+  padding: 0 4px;
+}
+.rule-table-head {
+  padding: 5px 4px 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.rule-th {
+  font-size: 13px; color: var(--text-3); font-weight: 500;
+  padding: 0 10px;
 }
 .rule-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 16px;
-  margin-bottom: 8px;
-  display: flex; align-items: center; gap: 14px;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  min-height: 44px;
 }
-.rule-card-head { display: none; }
-.rule-site-badges { display: flex; flex-wrap: wrap; gap: 5px; flex-shrink: 0; }
+.rule-cell {
+  padding: 8px 10px;
+  min-width: 0; overflow: hidden;
+}
+.rule-site-badges { display: flex; flex-wrap: wrap; gap: 4px; }
 .rule-site-badge {
   font-size: 13px; font-weight: 500;
   background: var(--blue-bg); color: var(--blue-text);
   border: 1px solid var(--blue-border);
-  border-radius: 6px; padding: 2px 9px; white-space: nowrap;
+  border-radius: 5px; padding: 1px 7px; white-space: nowrap;
 }
-.rule-meta { font-size: 12px; color: var(--text-3); white-space: nowrap; flex-shrink: 0; }
-.rule-mode-badge {
-  display: inline-block; font-size: 13px; font-weight: 600;
-  padding: 2px 10px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+.rule-summary-mode {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.rule-mode-discount {
-  background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr);
+.rule-meta-cell {
+  font-size: 13px; color: var(--text-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.rule-mode-markup {
-  background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-bdr);
-}
-.rule-card-body {
-  display: flex; flex: 1; gap: 20px; min-width: 0;
-}
-.rule-field { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.rule-field-label { font-size: 11px; color: var(--text-3); }
-.rule-field-value { font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rule-card-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.rule-cell.rule-status { display: flex; align-items: center; }
+.rule-card-actions { display: flex; align-items: center; gap: 6px; justify-content: flex-end; padding-right: 10px; }
 .rules-filter-bar {
   display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
   margin-bottom: 14px;
@@ -435,7 +447,7 @@ body {
 .rules-filter-bar .ms-wrap { min-width: 200px; }
 .filter-btn-group { display: flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
 .filter-btn {
-  padding: 5px 14px; font-size: 14px; font-family: inherit;
+  padding: 5px 14px; font-size: 16px; font-family: inherit;
   background: var(--card); color: var(--text-2);
   border: none; border-right: 1px solid var(--border);
   cursor: pointer; transition: background .12s, color .12s;
@@ -444,15 +456,32 @@ body {
 .filter-btn:last-child { border-right: none; }
 .filter-btn:hover { background: var(--bg-2); }
 .filter-btn.active { background: var(--blue); color: #fff; }
-.rules-filter-empty { color: var(--text-3); font-size: 14px; padding: 20px 0; text-align: center; }
+.rules-filter-empty { color: var(--text-3); font-size: 16px; padding: 20px 0; text-align: center; }
 .btn-del {
-  padding: 4px 12px; font-size: 14px; border-radius: 5px;
+  padding: 4px 12px; font-size: 16px; border-radius: 5px;
   background: none; border: 1px solid var(--red-bdr); color: var(--red);
   cursor: pointer; font-family: inherit; transition: all .12s;
 }
 .btn-del:hover { background: var(--red-bg); }
+.btn-edit {
+  padding: 4px 12px; font-size: 16px; border-radius: 5px;
+  background: none; border: 1px solid var(--blue-border); color: var(--blue-text);
+  cursor: pointer; font-family: inherit; transition: all .12s;
+}
+.btn-edit:hover { background: var(--blue-bg); }
+.editing-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; margin-bottom: 14px;
+  background: var(--orange-bg); border: 1px solid var(--orange-bdr);
+  border-radius: 8px; font-size: 15px; color: var(--orange);
+}
+.editing-bar-text { flex: 1; font-weight: 500; }
+.editing-bar-cancel { padding: 3px 10px; font-size: 14px; border-radius: 5px;
+  border: 1px solid var(--orange-bdr); background: none; color: var(--orange);
+  cursor: pointer; font-family: inherit; }
+.editing-bar-cancel:hover { background: var(--orange-bg); filter: brightness(.95); }
 .rule-toggle-wrap {
-  display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2);
+  display: flex; align-items: center; gap: 8px; font-size: 16px; color: var(--text-2);
 }
 .toggle-switch {
   position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0;
@@ -469,7 +498,7 @@ body {
   background: #fff; transition: transform .2s; pointer-events: none;
 }
 .toggle-switch input:checked + .toggle-track .toggle-knob { transform: translateX(18px); }
-.toggle-label-text { font-size: 14px; }
+.toggle-label-text { font-size: 16px; }
 
 /* ── Toast ── */
 .toast {
@@ -478,7 +507,7 @@ body {
   transform: translateX(-50%) translateY(20px);
   background: #1c1b1a; color: #fff;
   padding: 10px 22px; border-radius: 8px;
-  font-size: 16px; font-weight: 500;
+  font-size: 18px; font-weight: 500;
   pointer-events: none; opacity: 0;
   transition: opacity .2s, transform .2s;
   z-index: 9999; white-space: nowrap;
@@ -495,7 +524,64 @@ body {
   .filter-row-2 { grid-template-columns: 1fr; }
   .step-card-summary { display: none; }
   .per-item-row { flex-wrap: wrap; }
+  .sub-step-desc { display: none; }
+  .sub-step-header { padding: 9px 12px; gap: 8px; }
+  .sub-step-body { padding: 12px 12px; }
 }
+
+/* ── 子步驟容器 ── */
+.sub-steps-container { display:flex; flex-direction:column; gap:0; }
+.sub-steps-connector { width:2px; height:14px; background:var(--border); margin-left:19px; flex-shrink:0; }
+
+/* ── 子步驟卡片 ── */
+.sub-step-card { border:1.5px solid var(--border); border-radius:8px; background:var(--card); overflow:hidden; }
+.sub-step-card.is-enabled { border-color:var(--blue-border); }
+.sub-step-header { display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--bg-2); }
+.sub-step-card.is-enabled .sub-step-header { background:var(--blue-bg); }
+
+/* ── 子步驟 badge ── */
+.sub-step-badge { width:30px; height:30px; border-radius:50%; background:var(--blue); color:#fff; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.sub-step-badge--optional { background:var(--bg-3); color:var(--text-3); border:1.5px solid var(--border); }
+.sub-step-card.is-enabled .sub-step-badge--optional { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+/* ── 子步驟文字 ── */
+.sub-step-title { font-size:17px; font-weight:600; color:var(--text); }
+.sub-step-desc  { font-size:15px; color:var(--text-3); }
+.sub-step-toggle-wrap { display:flex; align-items:center; gap:6px; }
+.sub-step-toggle-text { font-size:15px; color:var(--text-3); white-space:nowrap; }
+.sub-step-card.is-enabled .sub-step-toggle-text { color:var(--blue-text); font-weight:500; }
+
+/* ── 子步驟 body / readonly ── */
+.sub-step-body { padding:14px 16px; }
+.sub-step-readonly { padding:10px 16px; font-size:16px; color:var(--text-2); background:var(--bg-2); border-top:1px solid var(--border); }
+.sub-step-readonly .ro-row { display:flex; gap:8px; margin-bottom:4px; }
+.sub-step-readonly .ro-label { color:var(--text-3); min-width:80px; }
+
+/* ── S3 鎖定提示 ── */
+.sub-step-locked-hint { padding:10px 16px; font-size:15px; color:var(--text-3); border-top:1px dashed var(--border); display:flex; align-items:center; gap:6px; }
+.sub-step-locked-hint::before { content:"🔒"; font-size:14px; }
+
+/* ── 折扣防呆警示 ── */
+.discount-warning { margin-top:8px; padding:8px 12px; border-radius:6px; font-size:15px; background:var(--orange-bg); border:1px solid var(--orange-bdr); color:var(--orange); }
+
+/* ── 餐廳分組列表 ── */
+.rest-group { border:1px solid var(--border-2); border-radius:8px; overflow:hidden; margin-bottom:8px; }
+.rest-group:last-child { margin-bottom:0; }
+.rest-group-header {
+  display:flex; align-items:center; gap:10px; padding:9px 14px;
+  background:var(--bg-2); cursor:pointer; user-select:none;
+  border-bottom:1px solid var(--border-2);
+}
+.rest-group-header:hover { background:var(--bg-3); }
+.rest-group-name { font-size:17px; font-weight:600; color:var(--text); flex:1; }
+.rest-group-arrow { font-size:12px; color:var(--text-3); transition:transform .15s; }
+.rest-group.open .rest-group-arrow { transform:rotate(180deg); }
+.rest-group-input-wrap { display:flex; align-items:center; gap:8px; }
+.rest-group-body { display:none; padding:10px 14px; }
+.rest-group.open .rest-group-body { display:block; }
+.rest-group-fixed-row { display:flex; align-items:center; gap:10px; padding:4px 0; }
+.rest-group-fixed-label { font-size:16px; color:var(--text-2); flex:1; }
+
 </style>
 <link rel="stylesheet" href="shared-nav.css">
 </head>
@@ -644,108 +730,139 @@ body {
       <div class="step-card-title">設定定價模式</div>
     </div>
     <div class="step-card-body">
+      <div class="sub-steps-container">
 
-      <!-- 模式切換 -->
-      <div class="mode-toggle-row">
-        <label class="mode-radio-label">
-          <input type="radio" name="pricing-mode" value="markup" onchange="onModeChange()" checked>
-          <div class="mode-radio-card">
-            <div class="mode-radio-icon">＋</div>
-            <div class="mode-radio-title">模式 A：加價販售</div>
-            <div class="mode-radio-desc">在店內價基礎上加價販售</div>
+        <!-- S1：保障金額（必填，A 部門設定） -->
+        <div class="sub-step-card" id="sub-step-1">
+          <div class="sub-step-header">
+            <div class="sub-step-badge">S1</div>
+            <div class="sub-step-title">設定保障金額 <span class="required">*</span></div>
+            <div class="sub-step-desc">終端售價的最低下限</div>
           </div>
-        </label>
-        <label class="mode-radio-label">
-          <input type="radio" name="pricing-mode" value="discount" onchange="onModeChange()">
-          <div class="mode-radio-card">
-            <div class="mode-radio-icon">％</div>
-            <div class="mode-radio-title">模式 B：打折販售</div>
-            <div class="mode-radio-desc">以店內價打折計算終端價</div>
-          </div>
-        </label>
-      </div>
-
-      <!-- 模式 A 表單 -->
-      <div id="mode-discount-form" class="mode-form" style="display:none">
-        <div class="form-grid-2">
-          <div class="form-row">
-            <label class="form-label">起始日期 <span class="required">*</span></label>
-            <input type="date" id="discount-start" class="form-input" oninput="onDiscountChange()">
-          </div>
-          <div class="form-row">
-            <label class="form-label">結束日期 <span class="required">*</span></label>
-            <input type="date" id="discount-end" class="form-input" oninput="onDiscountChange()">
-          </div>
-          <div class="form-row">
-            <label class="form-label">折扣%數 <span class="required">*</span></label>
-            <div class="input-with-unit">
-              <input type="number" id="discount-pct" class="form-input" min="1" max="99"
-                     placeholder="例：85" oninput="onDiscountChange()">
-              <span class="input-unit">折</span>
+          <div class="sub-step-body" id="sub-step-1-body">
+            <div class="form-row">
+              <div class="input-with-unit">
+                <input type="number" id="guarantee-amount" class="form-input"
+                       min="0" placeholder="輸入最低終端價" style="max-width:220px"
+                       oninput="onGuaranteeChange()">
+                <span class="input-unit">元</span>
+              </div>
+              <div class="form-hint">終端價低於此值時，系統自動採用保障金額</div>
             </div>
-            <div class="form-hint">折後價 ＝ 店內價 × 輸入值 ÷ 100　例：輸入 85 → 店內價 × 85%</div>
           </div>
+          <div class="sub-step-readonly" id="sub-step-1-readonly" style="display:none"></div>
         </div>
-        <div class="discount-preview" id="discount-preview" style="display:none"></div>
-      </div>
 
-      <!-- 模式 B 表單 -->
-      <div id="mode-markup-form" class="mode-form">
+        <div class="sub-steps-connector"></div>
 
-        <!-- 加價選項 -->
-        <div class="markup-section">
-          <div class="markup-options-row">
-            <!-- 左：保障金額 -->
-            <div class="markup-col">
-              <label class="checkbox-option-row">
-                <input type="checkbox" id="guarantee-check" onchange="onGuaranteeToggle()">
-                設定保障金額（最低終端價）
+        <!-- S2：加價販售（可選，A 部門設定） -->
+        <div class="sub-step-card" id="sub-step-2">
+          <div class="sub-step-header">
+            <div class="sub-step-badge sub-step-badge--optional" id="sub-step-2-badge">S2</div>
+            <div class="sub-step-title">加價販售</div>
+            <div class="sub-step-desc">可選：在店內價基礎上加價</div>
+            <div class="sub-step-toggle-wrap" style="margin-left:auto">
+              <label class="toggle-switch">
+                <input type="checkbox" id="markup-enabled" onchange="onMarkupEnabledChange()">
+                <div class="toggle-track"><div class="toggle-knob"></div></div>
               </label>
-              <div id="guarantee-input-wrap" class="sub-option-wrap" style="display:none">
-                <div class="input-with-unit">
-                  <input type="number" id="guarantee-amount" class="form-input"
-                         min="0" placeholder="輸入最低終端價" style="max-width:180px">
-                  <span class="input-unit">元</span>
-                </div>
-                <div class="form-hint" style="margin-top:4px">終端價低於此值時自動採用保障金額；以店內價為基準判斷</div>
-              </div>
+              <span class="sub-step-toggle-text" id="markup-toggle-text">未啟用</span>
             </div>
-            <!-- 右：加價方式 -->
-            <div class="markup-col">
-              <label class="checkbox-option-row">
-                <input type="checkbox" id="markup-type-fixed" onchange="onMarkupTypeChange('fixed')">
-                固定加價：所有品項統一加相同金額
+          </div>
+          <div class="sub-step-body" id="markup-body" style="display:none">
+            <div class="radio-stack">
+              <label class="radio-row">
+                <input type="radio" name="markup-type" value="fixed" onchange="onMarkupTypeChange()">
+                <span>固定加價：各餐廳分別設定統一加價金額</span>
               </label>
-              <div id="fixed-markup-wrap" class="sub-option-wrap" style="display:none">
-                <div class="input-with-unit">
-                  <input type="number" id="fixed-markup-amount" class="form-input"
-                         min="0" placeholder="輸入加價金額" style="max-width:180px">
-                  <span class="input-unit">元</span>
-                </div>
-                <div class="form-hint" style="margin-top:4px">以店內價為基準，終端價 ＝ 店內價 ＋ 加價金額</div>
+              <div class="sub-option-wrap" id="fixed-markup-wrap" style="display:none">
+                <div class="form-hint" style="margin-bottom:8px">終端價 ＝ 店內價 ＋ 加價金額；可選擇性填寫，未填的餐廳不套用加價</div>
+                <div id="fixed-markup-rest-list"></div>
+                <div class="empty-hint" id="fixed-markup-empty" style="display:none">請先在 Step 2 選擇餐廳</div>
               </div>
 
-              <label class="checkbox-option-row" style="margin-top:8px">
-                <input type="checkbox" id="markup-type-per-item" onchange="onMarkupTypeChange('per-item')">
-                單品加價：每個品項獨立設定加價金額
+              <label class="radio-row" style="margin-top:6px">
+                <input type="radio" name="markup-type" value="per-item" onchange="onMarkupTypeChange()">
+                <span>單品加價：每個品項獨立設定加價金額</span>
               </label>
-              <div id="per-item-markup-wrap" class="sub-option-wrap" style="display:none">
-                <div class="per-item-list" id="per-item-list"></div>
+              <div class="sub-option-wrap" id="per-item-markup-wrap" style="display:none">
+                <div id="per-item-list"></div>
                 <div class="empty-hint" id="per-item-empty" style="display:none">請先在 Step 2 選擇餐廳</div>
               </div>
             </div>
           </div>
+          <div class="sub-step-readonly" id="sub-step-2-readonly" style="display:none"></div>
+        </div>
+
+        <div class="sub-steps-connector"></div>
+
+        <!-- S3：打折販售（可選） -->
+        <div class="sub-step-card" id="sub-step-3">
+          <div class="sub-step-header">
+            <div class="sub-step-badge sub-step-badge--optional" id="sub-step-3-badge">S3</div>
+            <div class="sub-step-title">打折販售</div>
+            <div class="sub-step-desc">可選：以加價後終端價打折</div>
+            <div class="sub-step-toggle-wrap" style="margin-left:auto">
+              <label class="toggle-switch">
+                <input type="checkbox" id="discount-enabled" onchange="onDiscountEnabledChange()">
+                <div class="toggle-track"><div class="toggle-knob"></div></div>
+              </label>
+              <span class="sub-step-toggle-text" id="discount-toggle-text">未啟用</span>
+            </div>
+          </div>
+          <div class="sub-step-body" id="discount-body" style="display:none">
+            <!-- 日期區間 -->
+            <div class="form-grid-2" style="margin-bottom:14px">
+              <div class="form-row">
+                <label class="form-label">起始日期 <span class="required">*</span></label>
+                <input type="date" id="discount-start" class="form-input" oninput="onDiscountChange()">
+              </div>
+              <div class="form-row">
+                <label class="form-label">結束日期 <span class="required">*</span></label>
+                <input type="date" id="discount-end" class="form-input" oninput="onDiscountChange()">
+              </div>
+            </div>
+            <!-- 折扣方式 -->
+            <div class="radio-stack">
+              <label class="radio-row">
+                <input type="radio" name="discount-type" value="fixed" onchange="onDiscountTypeChange()">
+                <span>全品項打折：各餐廳分別設定統一折扣%數</span>
+              </label>
+              <div class="sub-option-wrap" id="fixed-discount-wrap" style="display:none">
+                <div class="form-hint" style="margin-bottom:8px">折後終端價 ＝ 加價後終端價 × 折扣% ÷ 100；可選擇性填寫，未填的餐廳不套用折扣</div>
+                <div id="fixed-discount-rest-list"></div>
+                <div class="empty-hint" id="fixed-discount-empty" style="display:none">請先在 Step 2 選擇餐廳</div>
+                <div class="discount-preview" id="discount-preview" style="display:none;margin-top:8px"></div>
+                <div class="discount-warning" id="discount-warning" style="display:none;margin-top:8px"></div>
+              </div>
+
+              <label class="radio-row" style="margin-top:6px">
+                <input type="radio" name="discount-type" value="per-item" onchange="onDiscountTypeChange()">
+                <span>單品打折：每個品項獨立設定折扣%數</span>
+              </label>
+              <div class="sub-option-wrap" id="per-item-discount-wrap" style="display:none">
+                <div id="per-item-discount-list"></div>
+                <div class="empty-hint" id="per-item-discount-empty" style="display:none">請先在 Step 2 選擇餐廳</div>
+                <div class="discount-warning" id="discount-warning-per" style="display:none;margin-top:8px"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
-
     </div>
+  </div>
+
+  <!-- 編輯中提示列 -->
+  <div class="editing-bar" id="editing-bar" style="display:none">
+    <span class="editing-bar-text">編輯模式：修改完成後按「確認更新」儲存，或取消以放棄變更</span>
+    <button class="editing-bar-cancel" onclick="cancelEdit()">取消編輯</button>
   </div>
 
   <!-- 送出列 -->
   <div class="submit-bar">
     <button class="btn" onclick="resetForm()">清除重填</button>
-    <button class="btn btn-primary" onclick="submitPricing()">確認送出</button>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitPricing()">確認送出</button>
   </div>
 
   <!-- 規則列表 -->
@@ -792,8 +909,8 @@ body {
       <!-- 篩選：定價模式 -->
       <div class="filter-btn-group">
         <button class="filter-btn active" onclick="setFilterMode('',this)">所有模式</button>
-        <button class="filter-btn" onclick="setFilterMode('markup',this)">加價販售</button>
-        <button class="filter-btn" onclick="setFilterMode('discount',this)">折價販售</button>
+        <button class="filter-btn" onclick="setFilterMode('markup',this)">純加價</button>
+        <button class="filter-btn" onclick="setFilterMode('mixed',this)">加價＋折扣</button>
       </div>
       <!-- 篩選：啟用狀態 -->
       <div class="filter-btn-group">
@@ -801,6 +918,13 @@ body {
         <button class="filter-btn" onclick="setFilterEnabled('1',this)">啟用中</button>
         <button class="filter-btn" onclick="setFilterEnabled('0',this)">已停用</button>
       </div>
+    </div>
+    <div class="rule-table-head">
+      <div class="rule-th">套用據點</div>
+      <div class="rule-th">定價摘要</div>
+      <div class="rule-th">最後變更</div>
+      <div class="rule-th">狀態</div>
+      <div class="rule-th" style="text-align:right;padding-right:10px">操作</div>
     </div>
     <div id="rules-list"></div>
   </div>
@@ -816,34 +940,34 @@ const REGIONS = ['台北', '新竹', '台南', '高雄'];
 const restaurants = [
   { id:'R001', name:'東方廚房', region:'台北',
     branches:[{id:'R001-B1',name:'中山店'},{id:'R001-B2',name:'信義店'}],
-    items:[{id:'R001-I1',name:'招牌燒肉飯',price:110},{id:'R001-I2',name:'雞腿便當',price:100},{id:'R001-I3',name:'排骨便當',price:95}] },
+    items:[{id:'R001-I1',name:'招牌燒肉飯',price:130},{id:'R001-I2',name:'雞腿便當',price:120},{id:'R001-I3',name:'排骨便當',price:110}] },
   { id:'R002', name:'台北早點', region:'台北',
     branches:[{id:'R002-B1',name:'南港店'}],
-    items:[{id:'R002-I1',name:'蛋餅',price:45},{id:'R002-I2',name:'漢堡',price:60},{id:'R002-I3',name:'饅頭夾蛋',price:40},{id:'R002-I4',name:'豆漿',price:25}] },
+    items:[{id:'R002-I1',name:'總匯三明治',price:115},{id:'R002-I2',name:'漢堡排餐',price:125},{id:'R002-I3',name:'蛋餅套餐',price:105},{id:'R002-I4',name:'豆漿套餐',price:100}] },
   { id:'R003', name:'老饕麵館', region:'台北',
     branches:[],
-    items:[{id:'R003-I1',name:'牛肉麵',price:130},{id:'R003-I2',name:'乾麵',price:80},{id:'R003-I3',name:'餛飩湯',price:70}] },
+    items:[{id:'R003-I1',name:'紅燒牛肉麵',price:160},{id:'R003-I2',name:'雞腿麵',price:140},{id:'R003-I3',name:'餛飩麵',price:120}] },
   { id:'R004', name:'OO 雞飯專門店', region:'新竹',
     branches:[{id:'R004-B1',name:'新竹店'},{id:'R004-B2',name:'竹北店'}],
-    items:[{id:'R004-I1',name:'雞腿便當',price:100},{id:'R004-I2',name:'半雞便當',price:90},{id:'R004-I3',name:'雞絲飯',price:75}] },
+    items:[{id:'R004-I1',name:'雞腿便當',price:130},{id:'R004-I2',name:'半雞便當',price:155},{id:'R004-I3',name:'雞絲飯',price:105}] },
   { id:'R005', name:'XX 早餐店', region:'新竹',
     branches:[{id:'R005-B1',name:'竹科店'}],
-    items:[{id:'R005-I1',name:'培根蛋吐司',price:55},{id:'R005-I2',name:'薯餅蛋餅',price:50},{id:'R005-I3',name:'鐵板麵',price:65},{id:'R005-I4',name:'奶茶',price:30}] },
+    items:[{id:'R005-I1',name:'豬排蛋餅套餐',price:110},{id:'R005-I2',name:'總匯早餐盤',price:135},{id:'R005-I3',name:'燻雞帕里尼',price:120},{id:'R005-I4',name:'拿鐵套餐',price:100}] },
   { id:'R006', name:'阿成便當', region:'新竹',
     branches:[],
-    items:[{id:'R006-I1',name:'控肉便當',price:85},{id:'R006-I2',name:'素食便當',price:75},{id:'R006-I3',name:'三寶便當',price:95}] },
+    items:[{id:'R006-I1',name:'控肉便當',price:115},{id:'R006-I2',name:'素食便當',price:105},{id:'R006-I3',name:'三寶便當',price:125}] },
   { id:'R007', name:'府城米食', region:'台南',
     branches:[{id:'R007-B1',name:'中西區店'},{id:'R007-B2',name:'東區店'}],
-    items:[{id:'R007-I1',name:'滷肉飯',price:40},{id:'R007-I2',name:'虱目魚湯',price:65},{id:'R007-I3',name:'碗粿',price:35}] },
+    items:[{id:'R007-I1',name:'滷肉飯套餐',price:110},{id:'R007-I2',name:'虱目魚湯套餐',price:130},{id:'R007-I3',name:'碗粿雙拼',price:105}] },
   { id:'R008', name:'南都小吃', region:'台南',
     branches:[],
-    items:[{id:'R008-I1',name:'擔仔麵',price:60},{id:'R008-I2',name:'肉燥飯',price:35},{id:'R008-I3',name:'炒米粉',price:55},{id:'R008-I4',name:'貢丸湯',price:40}] },
+    items:[{id:'R008-I1',name:'擔仔麵套餐',price:120},{id:'R008-I2',name:'肉燥飯套餐',price:100},{id:'R008-I3',name:'炒米粉套餐',price:110},{id:'R008-I4',name:'綜合小吃拼盤',price:145}] },
   { id:'R009', name:'港都海鮮', region:'高雄',
     branches:[{id:'R009-B1',name:'鼓山店'}],
-    items:[{id:'R009-I1',name:'海鮮炒飯',price:120},{id:'R009-I2',name:'蝦仁炒蛋',price:90},{id:'R009-I3',name:'魚排便當',price:100}] },
+    items:[{id:'R009-I1',name:'海鮮炒飯',price:150},{id:'R009-I2',name:'蝦仁炒蛋套餐',price:130},{id:'R009-I3',name:'魚排便當',price:120}] },
   { id:'R010', name:'左營麵食', region:'高雄',
     branches:[],
-    items:[{id:'R010-I1',name:'乾麵',price:55},{id:'R010-I2',name:'湯麵',price:60},{id:'R010-I3',name:'炸醬麵',price:65},{id:'R010-I4',name:'小菜',price:25}] },
+    items:[{id:'R010-I1',name:'牛腩乾麵',price:130},{id:'R010-I2',name:'麻辣湯麵',price:120},{id:'R010-I3',name:'炸醬麵套餐',price:115},{id:'R010-I4',name:'小菜拼盤',price:100}] },
 ];
 
 const COMPANIES = [
@@ -1214,35 +1338,107 @@ function toggleSite(id) {
 
 /* ── 品項列表輔助 ── */
 function maybeRefreshPerItem() {
-  if (document.getElementById('markup-type-per-item') && document.getElementById('markup-type-per-item').checked) renderPerItemList();
+  var selM = document.querySelector('input[name="markup-type"]:checked');
+  if (selM) {
+    if (selM.value === 'fixed')    renderFixedMarkupRestList();
+    if (selM.value === 'per-item') renderPerItemMarkupList();
+  }
+  var selD = document.querySelector('input[name="discount-type"]:checked');
+  if (selD) {
+    if (selD.value === 'fixed')    renderFixedDiscountRestList();
+    if (selD.value === 'per-item') renderPerItemDiscountList();
+  }
 }
 
-function renderPerItemList() {
-  var listEl = document.getElementById('per-item-list');
-  var emptyEl = document.getElementById('per-item-empty');
-  var items = [];
-  restaurants.filter(function(r) { return state.selectedRestaurants.has(r.id); })
-    .forEach(function(r) {
-      r.items.forEach(function(item) {
-        if (!items.find(function(i) { return i.id === item.id; })) {
-          items.push(item);
-        }
-      });
-    });
+function getSelectedRestaurants() {
+  return restaurants.filter(function(r) { return state.selectedRestaurants.has(r.id); });
+}
 
-  if (items.length === 0) {
+/* 回傳已選的分店清單，每筆 { rest, branchKey, label, safeKey }
+   safeKey 用於 DOM id（把 : 換成 __ ） */
+function getSelectedBranches() {
+  var result = [];
+  getSelectedRestaurants().forEach(function(r) {
+    getBranchKeys(r).forEach(function(k) {
+      if (state.selectedBranches.has(k)) {
+        result.push({
+          rest:     r,
+          branchKey: k,
+          label:    getBranchLabel(r, k),
+          safeKey:  k.replace(/:/g, '__'),
+        });
+      }
+    });
+  });
+  return result;
+}
+
+/* 由 safeKey 反查 branchKey */
+function safeKeyToBranchKey(safeKey) { return safeKey.replace(/__/g, ':'); }
+
+/* 建立餐廳 accordion header HTML */
+function restGroupHeaderHtml(r, extraHtml) {
+  return '<div class="rest-group-header" onclick="toggleRestGroup(this)">'
+    + '<div class="rest-group-name">' + r.name + '</div>'
+    + (extraHtml || '')
+    + '<span class="rest-group-arrow">▼</span>'
+    + '</div>';
+}
+
+function toggleRestGroup(header) {
+  header.closest('.rest-group').classList.toggle('open');
+}
+
+/* S2 固定加價：每個已選分店一個輸入框 */
+function renderFixedMarkupRestList() {
+  var listEl  = document.getElementById('fixed-markup-rest-list');
+  var emptyEl = document.getElementById('fixed-markup-empty');
+  var branches = getSelectedBranches();
+  if (branches.length === 0) {
     listEl.innerHTML = '';
     emptyEl.style.display = '';
     return;
   }
   emptyEl.style.display = 'none';
-  listEl.innerHTML = items.map(function(item) {
-    return '<div class="per-item-row">'
-      + '<span class="per-item-name">' + item.name + '</span>'
-      + '<span class="per-item-price">店內價 $' + item.price + '</span>'
+  listEl.innerHTML = branches.map(function(b) {
+    var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+    return '<div class="rest-group-fixed-row">'
+      + '<span class="rest-group-fixed-label">' + displayName + '</span>'
+      + '<div class="input-with-unit">'
       + '<input type="number" class="per-item-input" min="0" placeholder="0"'
-      + ' id="markup-item-' + item.id + '">'
+      + ' id="markup-fixed-branch-' + b.safeKey + '" oninput="updateDiscountPreview()">'
       + '<span class="input-unit">元</span>'
+      + '</div></div>';
+  }).join('');
+}
+
+/* S2 單品加價：每個已選分店一個 accordion */
+function renderPerItemMarkupList() {
+  var listEl  = document.getElementById('per-item-list');
+  var emptyEl = document.getElementById('per-item-empty');
+  var branches = getSelectedBranches();
+  if (branches.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  listEl.innerHTML = branches.map(function(b) {
+    var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+    var itemsHtml = b.rest.items.map(function(item) {
+      return '<div class="per-item-row">'
+        + '<span class="per-item-name">' + item.name + '</span>'
+        + '<span class="per-item-price">店內價 $' + item.price + '</span>'
+        + '<input type="number" class="per-item-input" min="0" placeholder="0"'
+        + ' id="markup-item-' + b.safeKey + '|' + item.id + '" oninput="updateDiscountPreview()">'
+        + '<span class="input-unit">元</span>'
+        + '</div>';
+    }).join('');
+    var headerHtml = '<div class="rest-group-header" onclick="toggleRestGroup(this)">'
+      + '<div class="rest-group-name">' + displayName + '</div>'
+      + '<span class="rest-group-arrow">▼</span></div>';
+    return '<div class="rest-group open">' + headerHtml
+      + '<div class="rest-group-body per-item-list">' + itemsHtml + '</div>'
       + '</div>';
   }).join('');
 }
@@ -1277,53 +1473,219 @@ function updateStep2Summary() {
 }
 
 /* ── 互動：定價模式 ── */
-function onModeChange() {
-  var val = document.querySelector('input[name="pricing-mode"]:checked').value;
-  document.getElementById('mode-discount-form').style.display = (val === 'discount') ? '' : 'none';
-  document.getElementById('mode-markup-form').style.display   = (val === 'markup')   ? '' : 'none';
-  if (val === 'markup') {
-    if (document.getElementById('markup-type-per-item').checked) renderPerItemList();
+function onMarkupEnabledChange() {
+  var enabled = document.getElementById('markup-enabled').checked;
+  document.getElementById('markup-body').style.display = enabled ? '' : 'none';
+  document.getElementById('sub-step-2').classList.toggle('is-enabled', enabled);
+  document.getElementById('markup-toggle-text').textContent = enabled ? '已啟用' : '未啟用';
+  if (!enabled) {
+    document.querySelectorAll('input[name="markup-type"]').forEach(function(r) { r.checked = false; });
+    document.getElementById('fixed-markup-wrap').style.display    = 'none';
+    document.getElementById('per-item-markup-wrap').style.display = 'none';
   }
+  updateDiscountPreview();
 }
 
-function onMarkupTypeChange(changed) {
-  var fixedEl   = document.getElementById('markup-type-fixed');
-  var perItemEl = document.getElementById('markup-type-per-item');
-  // 互斥：勾選其中一個時自動取消另一個
-  if (changed === 'fixed'    && fixedEl.checked)   perItemEl.checked = false;
-  if (changed === 'per-item' && perItemEl.checked)  fixedEl.checked   = false;
-  document.getElementById('fixed-markup-wrap').style.display    = fixedEl.checked   ? '' : 'none';
-  document.getElementById('per-item-markup-wrap').style.display = perItemEl.checked ? '' : 'none';
-  if (perItemEl.checked) renderPerItemList();
+function onDiscountEnabledChange() {
+  var enabled = document.getElementById('discount-enabled').checked;
+  document.getElementById('discount-body').style.display = enabled ? '' : 'none';
+  document.getElementById('sub-step-3').classList.toggle('is-enabled', enabled);
+  document.getElementById('discount-toggle-text').textContent = enabled ? '已啟用' : '未啟用';
+  if (!enabled) {
+    document.querySelectorAll('input[name="discount-type"]').forEach(function(r) { r.checked = false; });
+    document.getElementById('fixed-discount-wrap').style.display    = 'none';
+    document.getElementById('per-item-discount-wrap').style.display = 'none';
+    document.getElementById('discount-preview').style.display = 'none';
+    document.getElementById('discount-warning').style.display = 'none';
+  }
+  updateDiscountPreview();
 }
 
-function onGuaranteeToggle() {
-  var checked = document.getElementById('guarantee-check').checked;
-  document.getElementById('guarantee-input-wrap').style.display = checked ? '' : 'none';
+function onDiscountTypeChange() {
+  var sel = document.querySelector('input[name="discount-type"]:checked');
+  var val = sel ? sel.value : '';
+  document.getElementById('fixed-discount-wrap').style.display    = val === 'fixed'    ? '' : 'none';
+  document.getElementById('per-item-discount-wrap').style.display = val === 'per-item' ? '' : 'none';
+  if (val === 'fixed')    renderFixedDiscountRestList();
+  if (val === 'per-item') renderPerItemDiscountList();
+  updateDiscountPreview();
 }
 
-/* ── 折後價即時預覽 ── */
-function onDiscountChange() {
-  var pct = parseInt(document.getElementById('discount-pct').value, 10);
-  var preview = document.getElementById('discount-preview');
-  if (isNaN(pct) || pct < 1 || pct > 99) {
-    preview.style.display = 'none';
+function onMarkupTypeChange() {
+  var sel = document.querySelector('input[name="markup-type"]:checked');
+  var val = sel ? sel.value : '';
+  document.getElementById('fixed-markup-wrap').style.display    = val === 'fixed'    ? '' : 'none';
+  document.getElementById('per-item-markup-wrap').style.display = val === 'per-item' ? '' : 'none';
+  if (val === 'fixed')    renderFixedMarkupRestList();
+  if (val === 'per-item') renderPerItemMarkupList();
+  updateDiscountPreview();
+}
+
+function onGuaranteeChange() {
+  updateDiscountPreview();
+}
+
+/* S3 全品項打折：每個已選分店一個折扣%輸入 */
+function renderFixedDiscountRestList() {
+  var listEl  = document.getElementById('fixed-discount-rest-list');
+  var emptyEl = document.getElementById('fixed-discount-empty');
+  var branches = getSelectedBranches();
+  if (branches.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = '';
     return;
   }
-  var item = getFirstSelectedItem();
-  var text;
-  if (item) {
-    var result = Math.round(item.price * pct / 100);
-    text = '示例：$' + item.price + ' × ' + pct + '% = $' + result + '（' + item.name + '）';
-  } else {
-    text = '計算公式：店內價 × ' + pct + ' ÷ 100';
+  emptyEl.style.display = 'none';
+  listEl.innerHTML = branches.map(function(b) {
+    var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+    return '<div class="rest-group-fixed-row">'
+      + '<span class="rest-group-fixed-label">' + displayName + '</span>'
+      + '<div class="input-with-unit">'
+      + '<input type="number" class="per-item-input" min="1" max="99" placeholder="折%"'
+      + ' id="discount-fixed-branch-' + b.safeKey + '" oninput="updateDiscountPreview()">'
+      + '<span class="input-unit">折</span>'
+      + '</div></div>';
+  }).join('');
+}
+
+/* S3 單品打折：每個已選分店一個 accordion */
+function renderPerItemDiscountList() {
+  var listEl  = document.getElementById('per-item-discount-list');
+  var emptyEl = document.getElementById('per-item-discount-empty');
+  var branches = getSelectedBranches();
+  if (branches.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = '';
+    return;
   }
-  preview.textContent = text;
-  preview.style.display = '';
+  emptyEl.style.display = 'none';
+  listEl.innerHTML = branches.map(function(b) {
+    var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+    var itemsHtml = b.rest.items.map(function(item) {
+      return '<div class="per-item-row">'
+        + '<span class="per-item-name">' + item.name + '</span>'
+        + '<span class="per-item-price">店內價 $' + item.price + '</span>'
+        + '<input type="number" class="per-item-input per-item-discount-input" min="1" max="99" placeholder="折%"'
+        + ' id="discount-item-' + b.safeKey + '|' + item.id + '" oninput="updateDiscountPreview()">'
+        + '<span class="input-unit">折</span>'
+        + '</div>';
+    }).join('');
+    var headerHtml = '<div class="rest-group-header" onclick="toggleRestGroup(this)">'
+      + '<div class="rest-group-name">' + displayName + '</div>'
+      + '<span class="rest-group-arrow">▼</span></div>';
+    return '<div class="rest-group open">' + headerHtml
+      + '<div class="rest-group-body per-item-list">' + itemsHtml + '</div>'
+      + '</div>';
+  }).join('');
+  updateDiscountPreview();
+}
+
+/* ── 折後價即時預覽（含防呆） ── */
+function onDiscountChange() {
+  updateDiscountPreview();
+}
+
+function getMarkupedPrice(item, safeKey) {
+  var markupEnabled = document.getElementById('markup-enabled').checked;
+  var selRadio      = document.querySelector('input[name="markup-type"]:checked');
+  var markupType    = selRadio ? selRadio.value : '';
+  var price = item.price;
+  if (markupEnabled && safeKey) {
+    if (markupType === 'fixed') {
+      var inp = document.getElementById('markup-fixed-branch-' + safeKey);
+      price += inp ? (parseFloat(inp.value) || 0) : 0;
+    } else if (markupType === 'per-item') {
+      var inp2 = document.getElementById('markup-item-' + safeKey + '|' + item.id);
+      price   += inp2 ? (parseFloat(inp2.value) || 0) : 0;
+    }
+  }
+  return price;
+}
+
+function updateDiscountPreview() {
+  var preview  = document.getElementById('discount-preview');
+  var warning  = document.getElementById('discount-warning');
+  var warningP = document.getElementById('discount-warning-per');
+
+  var discountEnabled = document.getElementById('discount-enabled').checked;
+  if (!discountEnabled) {
+    if (preview)  preview.style.display  = 'none';
+    if (warning)  warning.style.display  = 'none';
+    if (warningP) warningP.style.display = 'none';
+    return;
+  }
+
+  var discountType = (document.querySelector('input[name="discount-type"]:checked') || {}).value || '';
+  var guaranteeAmt = parseFloat(document.getElementById('guarantee-amount').value) || 0;
+  var selBranches  = getSelectedBranches();
+
+  /* ── 全品項打折：每個分店分別預覽與警示 ── */
+  if (discountType === 'fixed') {
+    if (selBranches.length === 0) {
+      if (preview) preview.style.display = 'none';
+      if (warning) warning.style.display = 'none';
+      return;
+    }
+    var previewLines = [];
+    var warnLines    = [];
+    selBranches.forEach(function(b) {
+      var inp = document.getElementById('discount-fixed-branch-' + b.safeKey);
+      if (!inp || inp.value === '') return;
+      var pct = parseInt(inp.value, 10);
+      if (isNaN(pct) || pct < 1 || pct > 99) return;
+      var firstItem = b.rest.items[0];
+      if (!firstItem) return;
+      var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+      var mp   = getMarkupedPrice(firstItem, b.safeKey);
+      var disc = Math.round(mp * pct / 100);
+      previewLines.push(displayName + '：加價後終端價 $' + mp + ' × ' + pct + '% = $' + disc + '（' + firstItem.name + ' 示例）');
+      if (guaranteeAmt > 0 && disc < guaranteeAmt) {
+        warnLines.push(displayName + '：折後價 $' + disc + ' 低於保障金額 $' + guaranteeAmt + '，將自動採用 $' + guaranteeAmt);
+      }
+    });
+    if (preview) {
+      preview.innerHTML = previewLines.join('<br>');
+      preview.style.display = previewLines.length > 0 ? '' : 'none';
+    }
+    if (warning) {
+      warning.innerHTML = warnLines.join('<br>');
+      warning.style.display = warnLines.length > 0 ? '' : 'none';
+    }
+    return;
+  }
+
+  /* ── 單品打折：逐列更新警示 ── */
+  if (discountType === 'per-item' && warningP) {
+    var warnMsgs = [];
+    document.querySelectorAll('.per-item-discount-input').forEach(function(inp) {
+      // id 格式：discount-item-{safeKey}|{itemId}
+      var raw = inp.id.replace('discount-item-', '');
+      var sep = raw.indexOf('|');
+      if (sep === -1) return;
+      var safeKey   = raw.slice(0, sep);
+      var itemId    = raw.slice(sep + 1);
+      var branchKey = safeKeyToBranchKey(safeKey);
+      var foundBranch = selBranches.find(function(b) { return b.branchKey === branchKey; });
+      if (!foundBranch) return;
+      var foundItem = foundBranch.rest.items.find(function(it) { return it.id === itemId; });
+      if (!foundItem) return;
+      var pctVal = parseInt(inp.value, 10);
+      if (isNaN(pctVal) || pctVal < 1 || pctVal > 99) return;
+      var mp   = getMarkupedPrice(foundItem, safeKey);
+      var disc = Math.round(mp * pctVal / 100);
+      if (guaranteeAmt > 0 && disc < guaranteeAmt) {
+        var displayName = foundBranch.label === '主店' ? foundBranch.rest.name : foundBranch.rest.name + '・' + foundBranch.label;
+        warnMsgs.push(displayName + '・' + foundItem.name + '：折後價 $' + disc + ' 低於保障金額 $' + guaranteeAmt + '，將自動採用 $' + guaranteeAmt);
+      }
+    });
+    warningP.innerHTML = warnMsgs.join('<br>');
+    warningP.style.display = warnMsgs.length > 0 ? '' : 'none';
+  }
 }
 
 /* ── 規則資料 ── */
 var savedRules = [];
+var editingRuleId = null;  // 正在編輯的規則 id；null = 新增模式
 var CURRENT_USER = '王小明（營運部）';  // 實際串接時替換為登入者資訊
 
 /* 列表篩選狀態 */
@@ -1334,8 +1696,7 @@ var filterState = {
   enabled:   '',
 };
 
-function buildRuleData() {
-  var mode = document.querySelector('input[name="pricing-mode"]:checked').value;
+function collectSitesBranches() {
   var sites = SITES.filter(function(s) { return state.selectedSites.has(s.id); });
   var branches = [];
   restaurants.filter(function(r) { return state.selectedRestaurants.has(r.id); })
@@ -1346,41 +1707,95 @@ function buildRuleData() {
         }
       });
     });
+  return { sites: sites, branches: branches };
+}
+
+function buildRuleData() {
+  var sb = collectSitesBranches();
+  var markupEnabled  = document.getElementById('markup-enabled').checked;
+  var discountEnabled = document.getElementById('discount-enabled').checked;
+  var selMarkup  = document.querySelector('input[name="markup-type"]:checked');
+  var selDiscount = document.querySelector('input[name="discount-type"]:checked');
+  var markupType   = selMarkup   ? selMarkup.value   : '';
+  var discountType = selDiscount ? selDiscount.value : '';
+
+  var mode = markupEnabled
+    ? (discountEnabled ? 'mixed' : 'markup')
+    : (discountEnabled ? 'discount' : 'markup');
 
   var rule = {
-    id: Date.now(),
-    enabled: false,
-    createdAt: new Date().toLocaleString('zh-TW', {hour12: false}),
-    operator: CURRENT_USER,
-    sites: sites,
-    branches: branches,
-    mode: mode,
+    id:              Date.now(),
+    enabled:         false,
+    createdAt:       new Date().toLocaleString('zh-TW', {hour12: false}),
+    operator:        CURRENT_USER,
+    sites:           sb.sites,
+    branches:        sb.branches,
+    mode:            mode,
+    guaranteeAmount: parseFloat(document.getElementById('guarantee-amount').value) || 0,
+    markupEnabled:   markupEnabled,
+    markupType:      markupType,
+    discountEnabled: discountEnabled,
+    discountType:    discountType,
   };
 
-  if (mode === 'discount') {
+  var ruleBranches = getSelectedBranches();
+
+  if (markupEnabled && markupType === 'fixed') {
+    rule.markupByBranch = {};
+    ruleBranches.forEach(function(b) {
+      var inp = document.getElementById('markup-fixed-branch-' + b.safeKey);
+      if (!inp || inp.value === '') return;
+      var amt = parseFloat(inp.value);
+      if (!isNaN(amt) && amt >= 0) {
+        var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+        rule.markupByBranch[b.safeKey] = { displayName: displayName, amount: amt };
+      }
+    });
+  }
+  if (markupEnabled && markupType === 'per-item') {
+    rule.markupPerItemsByBranch = {};
+    ruleBranches.forEach(function(b) {
+      var items = [];
+      b.rest.items.forEach(function(item) {
+        var inp = document.getElementById('markup-item-' + b.safeKey + '|' + item.id);
+        var amt = inp && inp.value !== '' ? parseFloat(inp.value) : null;
+        if (amt !== null && amt >= 0) items.push({ name: item.name, markup: amt });
+      });
+      if (items.length > 0) {
+        var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+        rule.markupPerItemsByBranch[b.safeKey] = { displayName: displayName, items: items };
+      }
+    });
+  }
+
+  if (discountEnabled) {
     rule.discountStart = document.getElementById('discount-start').value;
     rule.discountEnd   = document.getElementById('discount-end').value;
-    rule.discountPct   = parseInt(document.getElementById('discount-pct').value, 10);
-  } else {
-    var fixedChecked   = document.getElementById('markup-type-fixed').checked;
-    var perItemChecked = document.getElementById('markup-type-per-item').checked;
-    rule.markupFixed   = fixedChecked;
-    rule.markupPerItem = perItemChecked;
-    var guaranteed = document.getElementById('guarantee-check').checked;
-    rule.guaranteeAmount = guaranteed ? (parseFloat(document.getElementById('guarantee-amount').value) || null) : null;
-    if (fixedChecked) {
-      rule.fixedMarkup = parseFloat(document.getElementById('fixed-markup-amount').value) || 0;
-    }
-    if (perItemChecked) {
-      var perItems = [];
-      document.querySelectorAll('#per-item-list .per-item-row').forEach(function(row) {
-        var input = row.querySelector('.per-item-input');
-        var name  = row.querySelector('.per-item-name').textContent;
-        var price = row.querySelector('.per-item-price').textContent;
-        var amt   = input.value !== '' ? parseFloat(input.value) : null;
-        if (amt !== null) perItems.push({ name: name, price: price, markup: amt });
+    if (discountType === 'fixed') {
+      rule.discountByBranch = {};
+      ruleBranches.forEach(function(b) {
+        var inp = document.getElementById('discount-fixed-branch-' + b.safeKey);
+        var pct = inp ? parseInt(inp.value, 10) : NaN;
+        if (!isNaN(pct) && pct >= 1 && pct <= 99) {
+          var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+          rule.discountByBranch[b.safeKey] = { displayName: displayName, pct: pct };
+        }
       });
-      rule.perItems = perItems;
+    }
+    if (discountType === 'per-item') {
+      rule.discountPerItemsByBranch = {};
+      ruleBranches.forEach(function(b) {
+        var items = [];
+        b.rest.items.forEach(function(item) {
+          var inp = document.getElementById('discount-item-' + b.safeKey + '|' + item.id);
+          var pct = inp && inp.value !== '' ? parseInt(inp.value, 10) : NaN;
+          if (!isNaN(pct) && pct >= 1 && pct <= 99) items.push({ name: item.name, pct: pct });
+        });
+        if (items.length > 0) {
+          var displayName = b.label === '主店' ? b.rest.name : b.rest.name + '・' + b.label;
+          rule.discountPerItemsByBranch[b.safeKey] = { displayName: displayName, items: items };
+        }
+      });
     }
   }
   return rule;
@@ -1444,45 +1859,36 @@ function renderRuleCard(rule) {
     return '<span class="rule-site-badge">' + s.name + '</span>';
   }).join('');
 
-  var branchText = rule.branches.map(function(b) {
-    return b.restName + (b.branchLabel !== '主店' ? '・' + b.branchLabel : '');
-  }).join('、');
-
-  var modeBadge, modeDetail;
-  if (rule.mode === 'discount') {
-    modeBadge = '<span class="rule-mode-badge rule-mode-discount">打折販售</span>';
-    modeDetail = '<div class="rule-field"><div class="rule-field-label">折扣</div>'
-      + '<div class="rule-field-value">' + rule.discountPct + '%</div></div>'
-      + '<div class="rule-field"><div class="rule-field-label">生效期間</div>'
-      + '<div class="rule-field-value">' + rule.discountStart + ' ～ ' + rule.discountEnd + '</div></div>';
+  // 加價方式精簡摘要
+  var modeText;
+  if (!rule.markupEnabled) {
+    modeText = '保障 $' + (rule.guaranteeAmount || 0);
   } else {
-    modeBadge = '<span class="rule-mode-badge rule-mode-markup">加價販售</span>';
-    var markupParts = [];
-    if (rule.markupFixed)   markupParts.push('固定加價 +$' + rule.fixedMarkup);
-    if (rule.markupPerItem) markupParts.push('單品加價（' + (rule.perItems || []).length + ' 項）');
-    var markupDesc = markupParts.join('、') || '—';
-    var guaranteeDesc = rule.guaranteeAmount != null ? '$' + rule.guaranteeAmount : '不設保障';
-    modeDetail = '<div class="rule-field"><div class="rule-field-label">加價方式</div>'
-      + '<div class="rule-field-value">' + markupDesc + '</div></div>'
-      + '<div class="rule-field"><div class="rule-field-label">保障金額</div>'
-      + '<div class="rule-field-value">' + guaranteeDesc + '</div></div>';
+    var markupShort = rule.markupType === 'per-item' ? '單品加價' : '固定加價';
+    var markupCount = rule.markupType === 'fixed'
+      ? Object.keys(rule.markupByBranch || {}).length
+      : Object.keys(rule.markupPerItemsByBranch || {}).length;
+    modeText = '保障 $' + (rule.guaranteeAmount || 0) + '・' + markupShort + '（' + markupCount + ' 個分店）';
+    if (rule.discountEnabled) {
+      var discShort = rule.discountType === 'per-item' ? '單品折扣' : '全品項折扣';
+      var discCount = rule.discountType === 'fixed'
+        ? Object.keys(rule.discountByBranch || {}).length
+        : Object.keys(rule.discountPerItemsByBranch || {}).length;
+      modeText += '・' + discShort + '（' + discCount + ' 個分店）';
+    }
   }
 
   return '<div class="rule-card" id="rule-' + rule.id + '">'
-    + '<div class="rule-site-badges">' + siteBadges + '</div>'
-    + modeBadge
-    + '<div class="rule-card-body">'
-    + '<div class="rule-field"><div class="rule-field-label">餐廳 / 分店</div>'
-    + '<div class="rule-field-value">' + (branchText || '—') + '</div></div>'
-    + modeDetail
-    + '</div>'
-    + '<span class="rule-meta">' + rule.operator + '・' + rule.createdAt + '</span>'
-    + '<div class="rule-card-actions">'
-    + '<div class="rule-toggle-wrap">'
+    + '<div class="rule-cell"><div class="rule-site-badges">' + siteBadges + '</div></div>'
+    + '<div class="rule-cell"><div class="rule-summary-mode" title="' + modeText + '">' + modeText + '</div></div>'
+    + '<div class="rule-cell rule-meta-cell">' + rule.operator + '<br>' + rule.createdAt + '</div>'
+    + '<div class="rule-cell rule-status">'
     + '<label class="toggle-switch"><input type="checkbox"' + (rule.enabled ? ' checked' : '') + ' onchange="toggleRuleEnabled(' + rule.id + ',this.checked)">'
     + '<div class="toggle-track"><div class="toggle-knob"></div></div></label>'
-    + '<span class="toggle-label-text">' + (rule.enabled ? '啟用中' : '已停用') + '</span>'
+    + '<span class="toggle-label-text" style="font-size:13px;margin-left:6px">' + (rule.enabled ? '啟用中' : '已停用') + '</span>'
     + '</div>'
+    + '<div class="rule-card-actions">'
+    + '<button class="btn-edit" onclick="editRule(' + rule.id + ')">編輯</button>'
     + '<button class="btn-del" onclick="deleteRule(' + rule.id + ')">刪除</button>'
     + '</div>'
     + '</div>';
@@ -1564,30 +1970,84 @@ function validateForm() {
   if (state.selectedSites.size === 0)    return '請至少選擇一個套用據點';
   if (state.selectedBranches.size === 0) return '請至少選擇一個分店';
 
-  var mode = document.querySelector('input[name="pricing-mode"]:checked').value;
-  if (mode === 'discount') {
+  var guaranteeAmt = document.getElementById('guarantee-amount').value;
+  if (guaranteeAmt === '' || parseFloat(guaranteeAmt) < 0) return '請輸入有效的保障金額（最低終端價，≥ 0 元）';
+
+  var markupEnabled = document.getElementById('markup-enabled').checked;
+  if (markupEnabled) {
+    var selMarkup = document.querySelector('input[name="markup-type"]:checked');
+    if (!selMarkup) return '請選擇加價方式（固定加價 或 單品加價）';
+    var markupBranches = getSelectedBranches();
+    if (markupBranches.length === 0) return '請先在 Step 2 選擇餐廳';
+    if (selMarkup.value === 'fixed') {
+      var anyMarkupFilled = markupBranches.some(function(b) {
+        var inp = document.getElementById('markup-fixed-branch-' + b.safeKey);
+        return inp && inp.value !== '' && parseFloat(inp.value) >= 0;
+      });
+      if (!anyMarkupFilled) return '請至少為一個分店設定加價金額（≥ 0）';
+      var invalidMarkup = markupBranches.some(function(b) {
+        var inp = document.getElementById('markup-fixed-branch-' + b.safeKey);
+        if (!inp || inp.value === '') return false;
+        return parseFloat(inp.value) < 0;
+      });
+      if (invalidMarkup) return '加價金額不得為負數';
+    }
+    if (selMarkup.value === 'per-item') {
+      var markupInputs = document.querySelectorAll('#per-item-list .per-item-input');
+      if (markupInputs.length === 0) return '請先在 Step 2 選擇餐廳以設定單品加價';
+      var hasMarkup = Array.from(markupInputs).some(function(i) { return i.value !== '' && parseFloat(i.value) >= 0; });
+      if (!hasMarkup) return '請至少設定一個品項的加價金額';
+    }
+  }
+
+  var discountEnabled = document.getElementById('discount-enabled').checked;
+  if (discountEnabled) {
     var start = document.getElementById('discount-start').value;
     var end   = document.getElementById('discount-end').value;
-    var pct   = parseInt(document.getElementById('discount-pct').value, 10);
-    if (!start) return '請選擇起始日期';
-    if (!end)   return '請選擇結束日期';
+    if (!start) return '請選擇打折起始日期';
+    if (!end)   return '請選擇打折結束日期';
     if (start > end) return '結束日期不得早於起始日期';
-    if (isNaN(pct) || pct < 1 || pct > 99) return '折扣%數須介於 1～99';
-  } else {
-    var fixedCk   = document.getElementById('markup-type-fixed').checked;
-    var perItemCk = document.getElementById('markup-type-per-item').checked;
-    if (fixedCk) {
-      var amt = document.getElementById('fixed-markup-amount').value;
-      if (amt === '' || parseFloat(amt) < 0) return '請輸入有效的固定加價金額（≥ 0）';
+
+    var selDiscount = document.querySelector('input[name="discount-type"]:checked');
+    if (!selDiscount) return '請選擇折扣方式（全品項打折 或 單品打折）';
+    var discBranches = getSelectedBranches();
+    if (discBranches.length === 0) return '請先在 Step 2 選擇餐廳';
+    if (selDiscount.value === 'fixed') {
+      var anyDiscFilled = discBranches.some(function(b) {
+        var inp = document.getElementById('discount-fixed-branch-' + b.safeKey);
+        var v = inp ? parseInt(inp.value, 10) : NaN;
+        return !isNaN(v) && v >= 1 && v <= 99;
+      });
+      if (!anyDiscFilled) return '請至少為一個分店設定折扣%數（1～99）';
+      var invalidDisc = discBranches.some(function(b) {
+        var inp = document.getElementById('discount-fixed-branch-' + b.safeKey);
+        if (!inp || inp.value === '') return false;
+        var v = parseInt(inp.value, 10);
+        return isNaN(v) || v < 1 || v > 99;
+      });
+      if (invalidDisc) return '折扣%數須介於 1～99';
     }
-    if (perItemCk) {
-      var inputs = document.querySelectorAll('#per-item-list .per-item-input');
-      if (inputs.length === 0) return '請先在 Step 2 選擇餐廳以設定單品加價';
-      var hasAny = Array.from(inputs).some(function(i) { return i.value !== '' && parseFloat(i.value) >= 0; });
-      if (!hasAny) return '請至少設定一個品項的加價金額';
+    if (selDiscount.value === 'per-item') {
+      var discInputs = document.querySelectorAll('#per-item-discount-list .per-item-discount-input');
+      if (discInputs.length === 0) return '請先在 Step 2 選擇餐廳以設定單品折扣';
+      var hasDiscount = Array.from(discInputs).some(function(i) {
+        var v = parseInt(i.value, 10);
+        return !isNaN(v) && v >= 1 && v <= 99;
+      });
+      if (!hasDiscount) return '請至少設定一個品項的折扣%數（1～99）';
     }
   }
   return null;
+}
+
+/* 判斷兩條規則的據點與餐廳分店是否完全相同 */
+function isSameTarget(ruleA, ruleB) {
+  var sitesA = ruleA.sites.map(function(s) { return s.id; }).sort().join(',');
+  var sitesB = ruleB.sites.map(function(s) { return s.id; }).sort().join(',');
+  if (sitesA !== sitesB) return false;
+  var branchA = ruleA.branches.map(function(b) { return b.restName + '|' + b.branchLabel; }).sort().join(',');
+  var branchB = ruleB.branches.map(function(b) { return b.restName + '|' + b.branchLabel; }).sort().join(',');
+  return branchA === branchB;
 }
 
 /* ── 送出 ── */
@@ -1595,16 +2055,185 @@ function submitPricing() {
   var err = validateForm();
   if (err) { showToast(err, 'error'); return; }
   var rule = buildRuleData();
-  savedRules.push(rule);
+
+  // 編輯模式：直接替換原規則（不走重複偵測）
+  if (editingRuleId !== null) {
+    var oldRule = savedRules.find(function(r) { return r.id === editingRuleId; });
+    rule.id      = editingRuleId;
+    rule.enabled = oldRule ? oldRule.enabled : false;
+    savedRules = savedRules.map(function(r) { return r.id === editingRuleId ? rule : r; });
+    editingRuleId = null;
+    document.getElementById('editing-bar').style.display = 'none';
+    document.getElementById('submit-btn').textContent = '確認送出';
+    showToast('已更新規則');
+  } else {
+    // 新增模式：若已有相同據點＋餐廳分店的規則，自動覆蓋
+    var dupIdx = savedRules.findIndex(function(r) { return isSameTarget(r, rule); });
+    if (dupIdx !== -1) {
+      rule.id      = savedRules[dupIdx].id;
+      rule.enabled = savedRules[dupIdx].enabled;
+      savedRules[dupIdx] = rule;
+      showToast('已更新規則（相同據點與餐廳）');
+    } else {
+      savedRules.push(rule);
+      showToast('已儲存設定');
+    }
+  }
+
   renderRulesList();
-  showToast('已儲存設定');
   setTimeout(function() {
     document.getElementById('rules-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 300);
 }
 
-/* ── 清除重填 ── */
+/* ── 編輯規則 ── */
+function editRule(id) {
+  var rule = savedRules.find(function(r) { return r.id === id; });
+  if (!rule) return;
+
+  // 重置表單再回填，避免殘留狀態
+  resetFormState();
+
+  // Step 1：恢復公司 & 據點選取
+  rule.sites.forEach(function(s) {
+    state.selectedSites.add(s.id);
+    var siteData = SITES.find(function(x) { return x.id === s.id; });
+    if (siteData) state.selectedCompanies.add(siteData.company);
+  });
+  renderCompanyDropdown();
+  renderSiteDropdown();
+  updateStep1Summary();
+
+  // Step 2：恢復區域 & 餐廳 & 分店選取（以 restName + branchLabel 比對）
+  rule.branches.forEach(function(b) {
+    var rest = restaurants.find(function(r) { return r.name === b.restName; });
+    if (!rest) return;
+    state.selectedRegions.add(rest.region);
+    state.selectedRestaurants.add(rest.id);
+    getBranchKeys(rest).forEach(function(k) {
+      if (getBranchLabel(rest, k) === b.branchLabel) state.selectedBranches.add(k);
+    });
+  });
+  renderRegionDropdown();
+  renderRestDropdown();
+  renderBranchDropdown();
+  updateStep2Summary();
+
+  // S1：保障金額
+  document.getElementById('guarantee-amount').value = rule.guaranteeAmount || '';
+
+  // S2：加價
+  if (rule.markupEnabled) {
+    document.getElementById('markup-enabled').checked = true;
+    document.getElementById('markup-body').style.display = '';
+    document.getElementById('sub-step-2').classList.add('is-enabled');
+    document.getElementById('markup-toggle-text').textContent = '已啟用';
+
+    var markupTypeVal = rule.markupType || '';
+    if (markupTypeVal) {
+      document.querySelector('input[name="markup-type"][value="' + markupTypeVal + '"]').checked = true;
+      if (markupTypeVal === 'fixed') {
+        document.getElementById('fixed-markup-wrap').style.display = '';
+        renderFixedMarkupRestList();
+        if (rule.markupByBranch) {
+          Object.entries(rule.markupByBranch).forEach(function(entry) {
+            var inp = document.getElementById('markup-fixed-branch-' + entry[0]);
+            if (inp) inp.value = entry[1].amount;
+          });
+        }
+      } else if (markupTypeVal === 'per-item') {
+        document.getElementById('per-item-markup-wrap').style.display = '';
+        renderPerItemMarkupList();
+        if (rule.markupPerItemsByBranch) {
+          Object.entries(rule.markupPerItemsByBranch).forEach(function(entry) {
+            var safeKey = entry[0];
+            var branchKey = safeKeyToBranchKey(safeKey);
+            var foundBranch = getSelectedBranches().find(function(b) { return b.branchKey === branchKey; });
+            if (!foundBranch) return;
+            entry[1].items.forEach(function(item) {
+              var foundItem = foundBranch.rest.items.find(function(it) { return it.name === item.name; });
+              if (foundItem) {
+                var inp = document.getElementById('markup-item-' + safeKey + '|' + foundItem.id);
+                if (inp) inp.value = item.markup;
+              }
+            });
+          });
+        }
+      }
+    }
+  }
+
+  // S3：折扣
+  if (rule.discountEnabled) {
+    document.getElementById('discount-enabled').checked = true;
+    document.getElementById('discount-body').style.display = '';
+    document.getElementById('sub-step-3').classList.add('is-enabled');
+    document.getElementById('discount-toggle-text').textContent = '已啟用';
+    document.getElementById('discount-start').value = rule.discountStart || '';
+    document.getElementById('discount-end').value   = rule.discountEnd   || '';
+
+    var discTypeVal = rule.discountType || '';
+    if (discTypeVal) {
+      document.querySelector('input[name="discount-type"][value="' + discTypeVal + '"]').checked = true;
+      if (discTypeVal === 'fixed') {
+        document.getElementById('fixed-discount-wrap').style.display = '';
+        renderFixedDiscountRestList();
+        if (rule.discountByBranch) {
+          Object.entries(rule.discountByBranch).forEach(function(entry) {
+            var inp = document.getElementById('discount-fixed-branch-' + entry[0]);
+            if (inp) inp.value = entry[1].pct;
+          });
+        }
+      } else if (discTypeVal === 'per-item') {
+        document.getElementById('per-item-discount-wrap').style.display = '';
+        renderPerItemDiscountList();
+        if (rule.discountPerItemsByBranch) {
+          Object.entries(rule.discountPerItemsByBranch).forEach(function(entry) {
+            var safeKey = entry[0];
+            var branchKey = safeKeyToBranchKey(safeKey);
+            var foundBranch = getSelectedBranches().find(function(b) { return b.branchKey === branchKey; });
+            if (!foundBranch) return;
+            entry[1].items.forEach(function(item) {
+              var foundItem = foundBranch.rest.items.find(function(it) { return it.name === item.name; });
+              if (foundItem) {
+                var inp = document.getElementById('discount-item-' + safeKey + '|' + foundItem.id);
+                if (inp) inp.value = item.pct;
+              }
+            });
+          });
+        }
+      }
+    }
+  }
+
+  updateDiscountPreview();
+
+  // 進入編輯模式
+  editingRuleId = id;
+  document.getElementById('editing-bar').style.display = '';
+  document.getElementById('submit-btn').textContent = '確認更新';
+
+  // 捲到表單頂部
+  document.querySelector('.page-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── 取消編輯 ── */
+function cancelEdit() {
+  editingRuleId = null;
+  document.getElementById('editing-bar').style.display = 'none';
+  document.getElementById('submit-btn').textContent = '確認送出';
+  resetFormState();
+}
+
+/* ── 清除重填（含編輯狀態） ── */
 function resetForm() {
+  editingRuleId = null;
+  document.getElementById('editing-bar').style.display = 'none';
+  document.getElementById('submit-btn').textContent = '確認送出';
+  resetFormState();
+}
+
+function resetFormState() {
   state.selectedCompanies.clear();
   state.selectedRegions.clear();
   state.selectedRestaurants.clear();
@@ -1618,21 +2247,32 @@ function resetForm() {
   updateStep1Summary();
   updateStep2Summary();
 
-  document.getElementById('discount-start').value  = '';
-  document.getElementById('discount-end').value    = '';
-  document.getElementById('discount-pct').value    = '';
+  document.getElementById('guarantee-amount').value = '';
+
+  document.getElementById('markup-enabled').checked = false;
+  document.querySelectorAll('input[name="markup-type"]').forEach(function(r) { r.checked = false; });
+  document.getElementById('fixed-markup-rest-list').innerHTML = '';
+  document.getElementById('per-item-list').innerHTML          = '';
+  document.getElementById('fixed-markup-wrap').style.display    = 'none';
+  document.getElementById('per-item-markup-wrap').style.display = 'none';
+  document.getElementById('markup-body').style.display          = 'none';
+  document.getElementById('sub-step-2').classList.remove('is-enabled');
+  document.getElementById('markup-toggle-text').textContent     = '未啟用';
+
+  document.getElementById('discount-enabled').checked  = false;
+  document.getElementById('discount-start').value      = '';
+  document.getElementById('discount-end').value        = '';
+  document.querySelectorAll('input[name="discount-type"]').forEach(function(r) { r.checked = false; });
+  document.getElementById('fixed-discount-rest-list').innerHTML = '';
+  document.getElementById('per-item-discount-list').innerHTML   = '';
+  document.getElementById('fixed-discount-wrap').style.display    = 'none';
+  document.getElementById('per-item-discount-wrap').style.display = 'none';
   document.getElementById('discount-preview').style.display = 'none';
-
-  document.getElementById('fixed-markup-amount').value = '';
-  document.getElementById('guarantee-check').checked   = false;
-  document.getElementById('guarantee-amount').value    = '';
-  document.getElementById('guarantee-input-wrap').style.display = 'none';
-
-  document.querySelector('input[name="pricing-mode"][value="markup"]').checked = true;
-  document.getElementById('markup-type-fixed').checked    = false;
-  document.getElementById('markup-type-per-item').checked = false;
-  onModeChange();
-  onMarkupTypeChange();
+  document.getElementById('discount-warning').style.display = 'none';
+  document.getElementById('discount-warning-per').style.display = 'none';
+  document.getElementById('discount-body').style.display    = 'none';
+  document.getElementById('sub-step-3').classList.remove('is-enabled');
+  document.getElementById('discount-toggle-text').textContent = '未啟用';
 }
 
 /* ── Toast ── */
@@ -1656,6 +2296,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('step1-summary').style.display = 'none';
   document.getElementById('step2-summary').style.display = 'none';
   document.getElementById('per-item-empty').style.display = 'none';
+  document.getElementById('per-item-discount-empty').style.display = 'none';
   // panel 內點擊不冒泡，避免觸發外部關閉邏輯
   document.querySelectorAll('.ms-panel').forEach(function(panel) {
     panel.addEventListener('click', function(e) { e.stopPropagation(); });
