@@ -4191,16 +4191,22 @@ init();
   };
 
   function buildEntryTooltip(entryId, dateStr) {
-    const dayData = (scheduleData[curSiteId] || {})[dateStr] || [];
-    const entry = dayData.find(e => e.entryId === entryId);
+    let entry = null;
+    let foundSiteId = null;
+    for (const sid of selectedSiteIds) {
+      const found = ((scheduleData[sid] || {})[dateStr] || []).find(e => e.entryId === entryId);
+      if (found) { entry = found; foundSiteId = sid; break; }
+    }
     if (!entry) return null;
     const rest = restaurants.find(r => r.id === entry.restaurantId);
     if (!rest) return null;
     const mi = mealInfo(entry.mealType);
     const dot = MEAL_DOT_COLOR[entry.mealType] || '#94a3b8';
+    const siteName = selectedSiteIds.length > 1 ? `<div class="tt-rest" style="color:var(--text-3);font-size:11px">${sites.find(s => s.id === foundSiteId)?.name || ''}</div>` : '';
     const items = entry.items.map(it => `<div class="tt-item"><span>• ${it.name}</span><span class="tt-price">$${it.price}</span></div>`).join('');
     return `<div class="tt-meal"><span class="tt-dot" style="background:${dot}"></span>${mi.label}</div>
 <div class="tt-rest">${rest.name}</div>
+${siteName}
 <hr class="tt-divider">
 ${items}`;
   }
