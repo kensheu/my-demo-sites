@@ -835,20 +835,19 @@ body {
     <button class="btn" onclick="openCopySiteModal()">⇉ 複製整月排程</button>
     <div style="position:relative" id="export-wrap">
       <button class="btn" onclick="toggleExportMenu()">↓ 匯出 <span style="font-size:11px">▾</span></button>
-      <div id="export-menu" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
-        <div class="export-opt" onclick="handleExportCSV()">CSV 格式</div>
-        <div class="export-opt" onclick="handleExportJSON()">JSON 格式</div>
+      <div id="export-menu" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:160px;overflow:hidden">
+        <div class="export-opt" onclick="exportByType('system')">系統訂餐</div>
+        <div class="export-opt" onclick="exportByType('internal')">內部訂餐</div>
+        <div class="export-opt" onclick="exportByType('meeting')">會議餐</div>
       </div>
     </div>
     <div style="position:relative" id="import-wrap">
       <button class="btn" onclick="toggleImportMenu()">↑ 匯入 <span style="font-size:11px">▾</span></button>
       <div id="import-menu" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
         <div class="export-opt" onclick="triggerImportCSV()">CSV 格式</div>
-        <div class="export-opt" onclick="triggerImportJSON()">JSON 格式</div>
       </div>
     </div>
     <input type="file" id="import-csv-input" accept=".csv" style="display:none" onchange="importCSV(event)">
-    <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSON(event)">
   </div>
 
   <!-- Calendar -->
@@ -3696,35 +3695,49 @@ function toggleExportMenu() {
   m.style.display = m.style.display === 'none' ? 'block' : 'none';
 }
 
-function handleExportCSV() {
-  if (planTypeFilter === 'surcharge') { openExportMeetingModal(); return; }
-  exportCSV();
-}
-
-function handleExportJSON() {
-  if (planTypeFilter === 'surcharge') { openExportMeetingModal(); return; }
-  exportJSON();
-}
-
-function exportCSV() {
+function exportByType(type) {
   document.getElementById('export-menu').style.display = 'none';
   const WD_SHORT = ['日','一','二','三','四','五','六'];
   const days = new Date(curYear, curMonth+1, 0).getDate();
   let rows = [];
-  let filename = '';
 
-  if (planTypeFilter === 'guarantee') {
-    rows.push(['日期','星期','時段','據點','分店','餐點名稱','數量','售價','餐點編號','分店編號']);
+  if (type === 'meeting') {
+    // 會議餐：特殊訂餐餐期的 meetingBento
+    rows.push(['日期','星期','時段','據點','人員','餐廳','餐點名稱','數量','售價']);
     selectedSiteIds.forEach(siteId => {
       const site = sites.find(s => s.id === siteId);
+      const bentoData = meetingBentoData[siteId] || {};
+      for (let d = 1; d <= days; d++) {
+        const dateStr = getDateStr(curYear, curMonth, d);
+        const wd = new Date(curYear, curMonth, d).getDay();
+        const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
+        const mbList = (bentoData[dateStr] || []).filter(mb => mb.mealType === 'special');
+        mbList.forEach(mb => {
+          const rest = restaurants.find(r => r.id === mb.restaurantId);
+          const mi = mealInfo(mb.mealType);
+          if (!mb.items.length) {
+            rows.push([dateLabel, WD_SHORT[wd], mi.label, site.name, mb.personLabel, rest ? rest.name : '', '', '', '']);
+          } else {
+            mb.items.forEach(it => {
+              rows.push([dateLabel, WD_SHORT[wd], mi.label, site.name, mb.personLabel, rest ? rest.name : '', it.name, it.qty||'', it.price]);
+            });
+          }
+        });
+      }
+    });
+
+  } else if (type === 'internal') {
+    // 內部訂餐：特殊訂餐餐期的店家排程（mealType === 'special'）
+    rows.push(['日期','星期','時段','據點','分店','餐點名稱','數量','售價','餐點編號','分店編號']);
+    selectedSiteIds.forEach(siteId => {
       const siteData = scheduleData[siteId] || {};
       for (let d = 1; d <= days; d++) {
         const dateStr = getDateStr(curYear, curMonth, d);
         const wd = new Date(curYear, curMonth, d).getDay();
         const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
-        const entries = (siteData[dateStr] || []).filter(e => (e.planType || 'store') === 'guarantee');
+        const entries = (siteData[dateStr] || []).filter(e => e.mealType === 'special');
         entries.forEach(entry => {
-          const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
+          const pickupTime = MEAL_PICKUP_TIMES['special'] || '';
           const rest = restaurants.find(r => r.id === entry.restaurantId);
           const branch = rest && rest.branches ? rest.branches.find(b => b.id === entry.branchId) : null;
           if (!entry.items.length) {
@@ -3738,9 +3751,9 @@ function exportCSV() {
         });
       }
     });
-    filename = '保障金額_' + curYear + '年' + MONTH_NAMES[curMonth] + '.csv';
 
   } else {
+    // 系統訂餐：一般餐期（非 special）的店家排程
     rows.push(['日期','星期','時段','據點','分店','餐點名稱','訂購總數量']);
     selectedSiteIds.forEach(siteId => {
       const site = sites.find(s => s.id === siteId);
@@ -3749,7 +3762,7 @@ function exportCSV() {
         const dateStr = getDateStr(curYear, curMonth, d);
         const wd = new Date(curYear, curMonth, d).getDay();
         const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
-        const entries = (siteData[dateStr] || []).filter(e => (e.planType || 'store') === 'store');
+        const entries = (siteData[dateStr] || []).filter(e => e.mealType !== 'special');
         entries.forEach(entry => {
           const mi = mealInfo(entry.mealType);
           const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
@@ -3768,9 +3781,9 @@ function exportCSV() {
         });
       }
     });
-    filename = '店內價_' + curYear + '年' + MONTH_NAMES[curMonth] + '.csv';
   }
 
+  const typeLabels = { system: '系統訂餐', internal: '內部訂餐', meeting: '會議餐' };
   if (rows.length <= 1) { showToast('本月無排程資料', 'error'); return; }
   const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\r\n');
   const bom = '﻿';
@@ -3778,94 +3791,10 @@ function exportCSV() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
-  a.download = filename;
+  a.download = (typeLabels[type] || type) + '_' + curYear + '年' + MONTH_NAMES[curMonth] + '.csv';
   a.click();
   URL.revokeObjectURL(url);
   showToast('CSV 已匯出', 'success');
-}
-function exportJSON() {
-  document.getElementById('export-menu').style.display = 'none';
-  const WD_FULL = ['日','一','二','三','四','五','六'];
-  const days = new Date(curYear, curMonth+1, 0).getDate();
-  let allRows = [];
-  let filename = '';
-
-  if (planTypeFilter === 'guarantee') {
-    selectedSiteIds.forEach(siteId => {
-      const site = sites.find(s => s.id === siteId);
-      const siteData = scheduleData[siteId] || {};
-      for (let d = 1; d <= days; d++) {
-        const dateStr = getDateStr(curYear, curMonth, d);
-        const wd = new Date(curYear, curMonth, d).getDay();
-        const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
-        const entries = (siteData[dateStr] || []).filter(e => (e.planType || 'store') === 'guarantee');
-        entries.forEach(entry => {
-          const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
-          const rest = restaurants.find(r => r.id === entry.restaurantId);
-          const branch = rest && rest.branches ? rest.branches.find(b => b.id === entry.branchId) : null;
-          entry.items.forEach(it => {
-            const qty = (it.onlineQty||0) + (it.offlineQty||0) + (it.storeQty||0);
-            allRows.push({
-              日期: dateLabel,
-              星期: WD_FULL[wd],
-              時段: pickupTime,
-              據點: siteId,
-              分店: rest ? rest.name : '',
-              餐點名稱: it.name,
-              數量: qty,
-              售價: it.price,
-              餐點編號: it.itemId || '',
-              分店編號: branch ? branch.id : ''
-            });
-          });
-        });
-      }
-    });
-    filename = '保障金額_' + curYear + '年' + MONTH_NAMES[curMonth] + '.json';
-
-  } else {
-    selectedSiteIds.forEach(siteId => {
-      const site = sites.find(s => s.id === siteId);
-      const siteData = scheduleData[siteId] || {};
-      for (let d = 1; d <= days; d++) {
-        const dateStr = getDateStr(curYear, curMonth, d);
-        const wd = new Date(curYear, curMonth, d).getDay();
-        const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
-        const entries = (siteData[dateStr] || []).filter(e => (e.planType || 'store') === 'store');
-        entries.forEach(entry => {
-          const mi = mealInfo(entry.mealType);
-          const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
-          const timeLabel = mi.label + '(早上' + pickupTime + '取餐)';
-          const rest = restaurants.find(r => r.id === entry.restaurantId);
-          const branchName = getBranchName(rest, entry.branchId);
-          const branchLabel = (rest ? rest.name : '') + '-' + branchName;
-          entry.items.forEach(it => {
-            const qty = (it.onlineQty||0) + (it.offlineQty||0);
-            allRows.push({
-              日期: dateLabel,
-              星期: WD_FULL[wd],
-              時段: timeLabel,
-              據點: site.name,
-              分店: branchLabel,
-              餐點名稱: it.name,
-              訂購總數量: qty
-            });
-          });
-        });
-      }
-    });
-    filename = '店內價_' + curYear + '年' + MONTH_NAMES[curMonth] + '.json';
-  }
-
-  if (!allRows.length) { showToast('本月無排程資料', 'error'); return; }
-  const blob = new Blob([JSON.stringify(allRows, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('JSON 已匯出（共 ' + allRows.length + ' 筆）', 'success');
 }
 
 
