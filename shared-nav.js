@@ -641,19 +641,8 @@
   };
 
   /* ── 初始化 ──────────────────────────────── */
-  /* 提前同步注入 body 樣式，防止頁面載入時閃爍位移 */
-  (function () {
-    var _info = getPageInfo();
-    var _active = detectActive(_info);
-    var _hasSidebar = _active.system.id === 'internal' || _active.system.id === 'frontend' || _active.system.id === 'store';
-    injectBodyStyle(_hasSidebar);
-  })();
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectNav);
-  } else {
-    injectNav();
-  }
+  /* script 放在 <body> 開頭，body 已存在，直接同步注入，不等 DOMContentLoaded */
+  injectNav();
 
 })();
 
