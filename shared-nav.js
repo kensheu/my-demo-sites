@@ -70,6 +70,7 @@
             url: 'menu-schedule.html',
             match: function (p) {
               return p.file === 'menu-schedule.html' ||
+                     p.file === 'menu-schedule-v2.html' ||
                      p.file === 'menu-publish.html' ||
                      p.file === 'menu-schedule-log.html' ||
                      p.file === 'menu-template.html' ||
