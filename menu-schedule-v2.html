@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>菜單排程管理（特殊訂餐版）— 內部後台</title>
+<title>菜單排程管理 V2— 內部後台</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -321,6 +321,10 @@ body {
 .pub-badge.unpublished { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
 .pub-badge.published   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 .pub-badge.dirty       { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.sent-badge { font-size:13px;font-weight:500;padding:3px 10px;border-radius:100px;white-space:nowrap; }
+.sent-badge.not-sent { background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1; }
+.sent-badge.sent     { background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bdr); }
+.entry-chip-site { font-size:10px;opacity:.7;margin-top:1px; }
 .pub-btn {
   font-size: 13px; padding: 4px 12px; border-radius: 6px; cursor: pointer;
   border: 1px solid; white-space: nowrap; font-weight: 500;
@@ -758,8 +762,8 @@ body {
 
   <!-- Header -->
   <div class="page-header">
-    <div class="page-title">菜單排程管理（特殊訂餐版）</div>
-    <div class="page-sub">安排各廠區月度供餐排程，系統自動套用防呆規則</div>
+    <div class="page-title">菜單排程管理 V2</div>
+    <div class="page-sub">安排各廠區月度供餐排程，支援多廠複選、定價策略篩選與分階段發佈流程</div>
   </div>
 
   <!-- Machine Actions -->
@@ -768,6 +772,8 @@ body {
     <button class="btn" onclick="showToast('功能開發中', 'info')">傳送訂單資料至販賣機</button>
     <button class="btn" onclick="showToast('功能開發中', 'info')">傳送巡捕資料至販賣機</button>
     <button class="btn" onclick="showToast('功能開發中', 'info')">重整餐點圖片</button>
+    <button class="btn" id="send-to-store-btn" style="border-color:var(--teal);color:var(--teal)" onclick="openSendToStore()">📤 傳送給店家</button>
+    <button class="btn-primary btn" onclick="openPublish()">▶ 發佈訂餐</button>
   </div>
 
   <!-- Toolbar -->
@@ -813,29 +819,36 @@ body {
       </select>
     </div>
 
-    <div class="toolbar-right">
-      <button class="btn" onclick="openCopySiteModal()">⇉ 複製整月排程</button>
-      <button class="btn" style="border-color:var(--purple);color:var(--purple)" onclick="openBpa()">批次調整價格</button>
-      <div style="position:relative" id="export-wrap">
-        <button class="btn" onclick="toggleExportMenu()">↓ 匯出 <span style="font-size:11px">▾</span></button>
-        <div id="export-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
-          <div class="export-opt" onclick="exportCSV()">CSV 格式</div>
-          <div class="export-opt" onclick="exportJSON()">JSON 格式</div>
-          <div style="height:1px;background:var(--border);margin:2px 0"></div>
-          <div class="export-opt" style="color:#c2185b" onclick="openExportMeetingModal()">會議餐匯出</div>
-        </div>
-      </div>
-      <div style="position:relative" id="import-wrap">
-        <button class="btn" onclick="toggleImportMenu()">↑ 匯入 <span style="font-size:11px">▾</span></button>
-        <div id="import-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
-          <div class="export-opt" onclick="triggerImportCSV()">CSV 格式</div>
-          <div class="export-opt" onclick="triggerImportJSON()">JSON 格式</div>
-        </div>
-      </div>
-      <input type="file" id="import-csv-input" accept=".csv" style="display:none" onchange="importCSV(event)">
-      <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSON(event)">
-      <button class="btn-primary btn" onclick="openPublish()">▶ 發佈訂餐</button>
+    <div class="meal-select-wrap">
+      <label for="plan-type-sel">定價策略：</label>
+      <select class="meal-select" id="plan-type-sel" onchange="onPlanTypeChange()">
+        <optgroup label="終端價 =">
+          <option value="store">店內價</option>
+          <option value="guarantee">保障金額</option>
+          <option value="surcharge">統一加價</option>
+        </optgroup>
+      </select>
     </div>
+
+    <div class="toolbar-sep"></div>
+
+    <button class="btn" onclick="openCopySiteModal()">⇉ 複製整月排程</button>
+    <div style="position:relative" id="export-wrap">
+      <button class="btn" onclick="toggleExportMenu()">↓ 匯出 <span style="font-size:11px">▾</span></button>
+      <div id="export-menu" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
+        <div class="export-opt" onclick="handleExportCSV()">CSV 格式</div>
+        <div class="export-opt" onclick="handleExportJSON()">JSON 格式</div>
+      </div>
+    </div>
+    <div style="position:relative" id="import-wrap">
+      <button class="btn" onclick="toggleImportMenu()">↑ 匯入 <span style="font-size:11px">▾</span></button>
+      <div id="import-menu" style="display:none;position:absolute;left:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:130px;overflow:hidden">
+        <div class="export-opt" onclick="triggerImportCSV()">CSV 格式</div>
+        <div class="export-opt" onclick="triggerImportJSON()">JSON 格式</div>
+      </div>
+    </div>
+    <input type="file" id="import-csv-input" accept=".csv" style="display:none" onchange="importCSV(event)">
+    <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSON(event)">
   </div>
 
   <!-- Calendar -->
@@ -1131,6 +1144,93 @@ body {
   </div>
 </div>
 
+<!-- Modal: 傳送訂單給店家 -->
+<div class="overlay" id="send-to-store-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">📤 傳送訂單給店家</div>
+      <button class="modal-close" onclick="closeModal('send-to-store-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--blue-text);margin-bottom:18px">
+        📤 傳送後，店家端將收到菜單確認請求。請等待店家確認後，再執行「發佈訂餐」。
+      </div>
+      <div class="pub-section">
+        <div class="pub-section-label">月份</div>
+        <select class="form-select" id="send-month-sel" onchange="updateSendSummary()"></select>
+      </div>
+      <div class="pub-section">
+        <div class="pub-section-label">廠區（可複選）</div>
+        <div class="check-group" id="send-sites"></div>
+      </div>
+      <div class="pub-section">
+        <div class="pub-section-label">餐期（可複選）</div>
+        <div class="check-group" id="send-meals"></div>
+      </div>
+      <div class="pub-summary" id="send-summary"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('send-to-store-modal')">取消</button>
+      <button class="btn" style="background:var(--teal);color:#fff;border-color:var(--teal)" onclick="doSendToStore()">📤 確認傳送</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 傳送二次確認 -->
+<div class="overlay" id="send-to-store-confirm-modal">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title">確認傳送？</div>
+      <button class="modal-close" onclick="closeModal('send-to-store-confirm-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="send-confirm-summary" style="font-size:15px;line-height:1.8;color:var(--text-2)"></div>
+      <div style="margin-top:14px;padding:12px 14px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:8px;font-size:14px;color:var(--blue-text)">
+        📤 傳送後，店家端將收到菜單確認請求。請等待店家確認後再執行發佈。
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('send-to-store-confirm-modal')">返回修改</button>
+      <button class="btn" style="background:var(--teal);color:#fff;border-color:var(--teal)" onclick="executeSendToStore()">📤 確定傳送</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 菜單總表匯出 -->
+<div class="overlay" id="export-summary-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">菜單總表匯出（給營運）</div>
+      <button class="modal-close" onclick="closeModal('export-summary-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pub-section">
+        <div class="pub-section-label">月份</div>
+        <select class="form-select" id="summary-month-sel"></select>
+      </div>
+      <div class="pub-section">
+        <div class="pub-section-label">廠區（可複選）</div>
+        <div class="check-group" id="summary-sites"></div>
+      </div>
+      <div class="pub-section">
+        <div class="pub-section-label">餐期（可複選）</div>
+        <div class="check-group" id="summary-meals"></div>
+      </div>
+      <div class="pub-section">
+        <div class="pub-section-label">定價策略（可複選）</div>
+        <div class="check-group" id="summary-plans"></div>
+      </div>
+      <div class="pub-summary" style="font-size:13px;color:var(--text-3)">
+        匯出欄位：日期 / 星期 / 時段（含取餐時間）/ 據點 / 餐廳 / 分店 / 餐點名稱 / 訂購數量
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('export-summary-modal')">取消</button>
+      <button class="btn btn-primary" onclick="doExportSummaryCSV()">↓ 下載 CSV</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: 發佈訂餐 -->
 <div class="overlay" id="publish-modal">
   <div class="modal">
@@ -1139,6 +1239,9 @@ body {
       <button class="modal-close" onclick="closeModal('publish-modal')">✕</button>
     </div>
     <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--orange-bg);border:1px solid var(--orange-bdr);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--orange);margin-bottom:18px">
+        ⚠ 請確認已先傳送給店家確認，再進行發佈。
+      </div>
       <div class="pub-section">
         <div class="pub-section-label">月份</div>
         <select class="form-select" id="pub-month-sel" onchange="updatePubSummary()"></select>
@@ -1340,6 +1443,31 @@ const MEAL_TYPES = [
 ];
 function mealInfo(id) { return MEAL_TYPES.find(m => m.id === id) || MEAL_TYPES[1]; }
 
+const PLAN_TYPES = [
+  { id: 'store',     label: '店內價'   },
+  { id: 'guarantee', label: '保障金額' },
+  { id: 'surcharge', label: '統一加價' },
+];
+
+// 定價策略 DEMO 參數（實際值將由供餐價格設定頁管理）
+const PRICING_GUARANTEE_FLOOR  = 100; // 保障金額：終端價最低門檻
+const PRICING_SURCHARGE_AMOUNT = 10;  // 統一加價：成本 + 此金額
+
+function calcEndPrice(tier) {
+  if (planTypeFilter === 'guarantee') {
+    return Math.max(tier.price, PRICING_GUARANTEE_FLOOR);
+  }
+  if (planTypeFilter === 'surcharge') {
+    return (tier.cost || 0) + PRICING_SURCHARGE_AMOUNT;
+  }
+  return tier.price;
+}
+
+const MEAL_PICKUP_TIMES = {
+  breakfast: '07:30', lunch: '11:30', afternoon: '15:00',
+  dinner: '17:30', latenight: '21:00', special: '12:00',
+};
+
 const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 const WD_NAMES    = ['日','一','二','三','四','五','六'];
 const CURRENT_USER = '王小明';
@@ -1348,9 +1476,9 @@ const CURRENT_USER = '王小明';
    DATA
 ══════════════════════════════════════════════════ */
 const sites = [
-  { id: 'hc-a', name: '新竹 A 廠', region: '新竹' },
-  { id: 'hc-b', name: '新竹 B 廠', region: '新竹' },
-  { id: 'tc-a', name: '台中 A 廠', region: '台中' },
+  { id: 'hc-a', name: '新竹 A 廠', region: '新竹', pricingStrategy: 'store'     },
+  { id: 'hc-b', name: '新竹 B 廠', region: '新竹', pricingStrategy: 'guarantee' },
+  { id: 'tc-a', name: '台中 A 廠', region: '台中', pricingStrategy: 'surcharge' },
 ];
 
 const restaurants = [
@@ -1360,10 +1488,10 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I001', name: '雞腿便當', en: 'Chicken Leg Bento', salesCount: 382, priceTiers: [{ cost: 78, price: 100, effectiveFrom: null }, { cost: 85, price: 110, effectiveFrom: '2026-05-01' }] },
-      { id: 'I002', name: '排骨便當', en: 'Pork Rib Bento',    salesCount: 271, priceTiers: [{ cost: 72, price: 95, effectiveFrom: null }] },
-      { id: 'I003', name: '控肉飯',   en: 'Braised Pork Rice', salesCount: 95,  priceTiers: [{ cost: 65, price: 85, effectiveFrom: null }] },
-      { id: 'I004', name: '滷肉飯',   en: 'Minced Pork Rice',  salesCount: 448, priceTiers: [{ cost: 55, price: 75, effectiveFrom: null }, { cost: 60, price: 80, effectiveFrom: '2026-05-01' }] },
+      { id: 'I001', name: '雞腿便當', en: 'Chicken Leg Bento', salesCount: 382, priceTiers: [{ cost: 82, price: 105, effectiveFrom: null }, { cost: 85, price: 110, effectiveFrom: '2026-05-01' }] },
+      { id: 'I002', name: '排骨便當', en: 'Pork Rib Bento',    salesCount: 271, priceTiers: [{ cost: 78, price: 100, effectiveFrom: null }] },
+      { id: 'I003', name: '控肉飯',   en: 'Braised Pork Rice', salesCount: 95,  priceTiers: [{ cost: 72, price: 95, effectiveFrom: null }] },
+      { id: 'I004', name: '滷肉飯',   en: 'Minced Pork Rice',  salesCount: 448, priceTiers: [{ cost: 68, price: 88, effectiveFrom: null }, { cost: 70, price: 90, effectiveFrom: '2026-05-01' }] },
     ]
   },
   {
@@ -1372,11 +1500,11 @@ const restaurants = [
     closedWeekdays: { breakfast:[0], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-05-01'],
     mealTypes: { breakfast: true, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I010', name: '奶油厚片',     en: 'Butter Toast',           salesCount: 210, priceTiers: [{ cost: 28, price: 40, effectiveFrom: null }] },
-      { id: 'I011', name: '原味蛋餅',     en: 'Plain Egg Crepe',        salesCount: 534, priceTiers: [{ cost: 22, price: 35, effectiveFrom: null }] },
-      { id: 'I012', name: '總匯蛋餅',     en: 'Club Egg Crepe',         salesCount: 189, priceTiers: [{ cost: 38, price: 55, effectiveFrom: null }] },
-      { id: 'I013', name: '火腿蛋餅',     en: 'Ham Egg Crepe',          salesCount: 302, priceTiers: [{ cost: 35, price: 50, effectiveFrom: null }] },
-      { id: 'I014', name: '起司雙層蛋餅', en: 'Double Cheese Egg Crepe',salesCount: 87,  priceTiers: [{ cost: 42, price: 60, effectiveFrom: null }] },
+      { id: 'I010', name: '奶油厚片',     en: 'Butter Toast',           salesCount: 210, priceTiers: [{ cost: 72, price: 92, effectiveFrom: null }] },
+      { id: 'I011', name: '原味蛋餅',     en: 'Plain Egg Crepe',        salesCount: 534, priceTiers: [{ cost: 75, price: 98, effectiveFrom: null }] },
+      { id: 'I012', name: '總匯蛋餅',     en: 'Club Egg Crepe',         salesCount: 189, priceTiers: [{ cost: 80, price: 103, effectiveFrom: null }] },
+      { id: 'I013', name: '火腿蛋餅',     en: 'Ham Egg Crepe',          salesCount: 302, priceTiers: [{ cost: 78, price: 100, effectiveFrom: null }] },
+      { id: 'I014', name: '起司雙層蛋餅', en: 'Double Cheese Egg Crepe',salesCount: 87,  priceTiers: [{ cost: 83, price: 108, effectiveFrom: null }] },
     ]
   },
   {
@@ -1386,9 +1514,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[6,0], afternoon:[], dinner:[6,0], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
-      { id: 'I020', name: '三層肉便當', en: 'Pork Belly Bento',     salesCount: 415, priceTiers: [{ cost: 68, price: 90, effectiveFrom: null }] },
-      { id: 'I021', name: '雞肉飯',     en: 'Chicken Rice',         salesCount: 623, priceTiers: [{ cost: 50, price: 70, effectiveFrom: null }] },
-      { id: 'I022', name: '素食便當',   en: 'Vegetarian Bento',     salesCount: 142, priceTiers: [{ cost: 58, price: 80, effectiveFrom: null }] },
+      { id: 'I020', name: '三層肉便當', en: 'Pork Belly Bento',     salesCount: 415, priceTiers: [{ cost: 76, price: 98, effectiveFrom: null }] },
+      { id: 'I021', name: '雞肉飯',     en: 'Chicken Rice',         salesCount: 623, priceTiers: [{ cost: 80, price: 102, effectiveFrom: null }] },
+      { id: 'I022', name: '素食便當',   en: 'Vegetarian Bento',     salesCount: 142, priceTiers: [{ cost: 85, price: 108, effectiveFrom: null }] },
     ]
   },
   {
@@ -1397,9 +1525,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[], afternoon:[], dinner:[], latenight:[] }, closedDates: [],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: true, latenight: false },
     items: [
-      { id: 'I030', name: '紅燒牛腩飯', en: 'Braised Beef Brisket Rice', salesCount: 198, priceTiers: [{ cost: 95, price: 130, effectiveFrom: null }] },
-      { id: 'I031', name: '咖哩雞飯',   en: 'Curry Chicken Rice',        salesCount: 357, priceTiers: [{ cost: 80, price: 110, effectiveFrom: null }] },
-      { id: 'I032', name: '麻婆豆腐飯', en: 'Mapo Tofu Rice',            salesCount: 276, priceTiers: [{ cost: 72, price: 100, effectiveFrom: null }] },
+      { id: 'I030', name: '紅燒牛腩飯', en: 'Braised Beef Brisket Rice', salesCount: 198, priceTiers: [{ cost: 88, price: 112, effectiveFrom: null }] },
+      { id: 'I031', name: '咖哩雞飯',   en: 'Curry Chicken Rice',        salesCount: 357, priceTiers: [{ cost: 74, price: 96, effectiveFrom: null }] },
+      { id: 'I032', name: '麻婆豆腐飯', en: 'Mapo Tofu Rice',            salesCount: 276, priceTiers: [{ cost: 70, price: 90, effectiveFrom: null }] },
     ]
   },
   {
@@ -1408,9 +1536,9 @@ const restaurants = [
     closedWeekdays: { breakfast:[], lunch:[0], afternoon:[], dinner:[], latenight:[] }, closedDates: ['2026-04-04'],
     mealTypes: { breakfast: false, lunch: true, afternoon: false, dinner: false, latenight: false },
     items: [
-      { id: 'I040', name: '陽春麵', en: 'Plain Noodle Soup',    salesCount: 441, priceTiers: [{ cost: 38, price: 55, effectiveFrom: null }] },
-      { id: 'I041', name: '牛肉麵', en: 'Beef Noodle Soup',     salesCount: 284, priceTiers: [{ cost: 88, price: 120, effectiveFrom: null }] },
-      { id: 'I042', name: '刀削麵', en: 'Knife-Cut Noodle Soup',salesCount: 193, priceTiers: [{ cost: 62, price: 85, effectiveFrom: null }] },
+      { id: 'I040', name: '陽春麵', en: 'Plain Noodle Soup',    salesCount: 441, priceTiers: [{ cost: 73, price: 94, effectiveFrom: null }] },
+      { id: 'I041', name: '牛肉麵', en: 'Beef Noodle Soup',     salesCount: 284, priceTiers: [{ cost: 82, price: 106, effectiveFrom: null }] },
+      { id: 'I042', name: '刀削麵', en: 'Knife-Cut Noodle Soup',salesCount: 193, priceTiers: [{ cost: 77, price: 99, effectiveFrom: null }] },
     ]
   },
 ];
@@ -1459,9 +1587,11 @@ const templates = [
 /* ══════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════ */
-let curSiteId   = sites[0].id;
-let curYear     = 2026;
-let curMonth    = 3; // 0-based
+let curSiteId      = sites[0].id;
+let selectedSiteIds = [sites[0].id]; // 多廠複選陣列
+let planTypeFilter  = 'store';       // 'store' | 'guarantee' | 'surcharge'
+let curYear     = new Date().getFullYear();
+let curMonth    = new Date().getMonth(); // 0-based
 let mealFilter  = 'lunch'; // 'all' or meal id
 
 let detailDate  = null; // currently open detail panel date
@@ -1492,10 +1622,13 @@ let mgrSelectedRestId = '';
    INIT
 ══════════════════════════════════════════════════ */
 function init() {
-  // site searchable dropdown
+  // 多廠複選初始化
+  selectedSiteIds = [sites[0].id];
+  curSiteId = sites[0].id;
   renderSiteDropOpts();
-  const firstSite = sites.find(s => s.id === curSiteId) || sites[0];
-  document.getElementById('site-filter-label').textContent = firstSite.name;
+  updateSiteFilterLabel();
+
+  updatePlanTypeDisplay();
 
   // pub month
   document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((m,i) =>
@@ -1571,7 +1704,9 @@ function renderCalendar() {
       const dateStr  = getDateStr(curYear, curMonth, cell.day);
       const isWkend  = wi === 0 || wi === 6;
       const isToday  = dateStr === todayStr;
-      const entries  = (scheduleData[curSiteId] || {})[dateStr] || [];
+      const entries  = selectedSiteIds.flatMap(sid =>
+        ((scheduleData[sid] || {})[dateStr] || []).map(e => ({ ...e, _siteId: sid }))
+      );
       const filtered = filterEntries(entries);
       const mbEntries = (meetingBentoData[curSiteId] || {})[dateStr] || [];
 
@@ -1593,8 +1728,8 @@ function renderCalendar() {
 }
 
 function filterEntries(entries) {
-  if (mealFilter === 'all') return entries;
-  return entries.filter(e => e.mealType === mealFilter);
+  if (mealFilter !== 'all') return entries.filter(e => e.mealType === mealFilter);
+  return entries;
 }
 
 function renderEntryChip(entry, dateStr) {
@@ -1602,10 +1737,17 @@ function renderEntryChip(entry, dateStr) {
   if (!rest) return '';
   const mi = mealInfo(entry.mealType);
   const itemCount = entry.items.length;
+  const sentIcon = entry.sentToStoreAt ? '📤' : '';
+  const pubIcon  = entry.publishedAt   ? '✓'  : '';
+  const statusIcons = (sentIcon || pubIcon) ? `<span style="font-size:10px;opacity:.75;margin-left:2px">${sentIcon}${pubIcon}</span>` : '';
+  const siteBadge = selectedSiteIds.length > 1 && entry._siteId
+    ? `<div class="entry-chip-site">${sites.find(s => s.id === entry._siteId)?.name || ''}</div>`
+    : '';
   return `<div class="entry-chip ${mi.chipCls}" onclick="event.stopPropagation();openDetail('${dateStr}')" data-tooltip-type="entry" data-entry-id="${entry.entryId}" data-date="${dateStr}">
     <button class="entry-chip-del" onclick="event.stopPropagation();removeEntry('${dateStr}','${entry.entryId}')" title="移除">✕</button>
     <div class="entry-chip-name">${rest.name}</div>
-    <div class="entry-chip-items">${mi.label}　${itemCount} 品項</div>
+    <div class="entry-chip-items">${mi.label}　${itemCount} 品項${statusIcons}</div>
+    ${siteBadge}
   </div>`;
 }
 
@@ -1634,7 +1776,9 @@ function closeDetail() {
 }
 
 function renderDetailBody(dateStr) {
-  const entries   = (scheduleData[curSiteId] || {})[dateStr] || [];
+  const entries   = selectedSiteIds.flatMap(sid =>
+    ((scheduleData[sid] || {})[dateStr] || []).map(e => ({ ...e, _siteId: sid }))
+  );
   const filtered  = filterEntries(entries);
   const mbEntries = (meetingBentoData[curSiteId] || {})[dateStr] || [];
   const body      = document.getElementById('detail-body');
@@ -1650,9 +1794,6 @@ function renderDetailBody(dateStr) {
     bulkHtml += `<button class="btn btn-sm" style="border-color:var(--orange);color:var(--orange)" onclick="bulkPublish('${dateStr}','dirty')">↺ 更新已修改</button>`;
   if (!anyUnpublished && !anyDirty && filtered.length)
     bulkHtml += `<span style="font-size:15px;color:var(--green)">✓ 全部已是最新發布</span>`;
-  if (filtered.length) {
-    bulkHtml += `<button class="btn btn-sm" style="margin-left:auto;border-color:var(--purple);color:var(--purple)" onclick="openBpa('date')">批次調整價格</button>`;
-  }
   bulkBar.style.display = filtered.length ? '' : 'none';
   bulkBar.innerHTML = bulkHtml;
 
@@ -1729,14 +1870,17 @@ function renderDetailBody(dateStr) {
     const revertBtn = entry.dirtyAfterPublish
       ? `<button class="pub-btn" style="border-color:var(--text-3);color:var(--text-3)" onclick="revertEntry('${dateStr}','${entry.entryId}')">取消變更</button>`
       : '';
+    const sentBadge = entry.sentToStoreAt
+      ? `<span class="sent-badge sent" title="傳送於 ${entry.sentToStoreAt}">📤 已傳送</span>`
+      : `<span class="sent-badge not-sent">未傳送</span>`;
     const branchBadge = entry.branchId ? `<span class="branch-badge">${getBranchName(rest, entry.branchId)}</span>` : '';
-    const curSite     = sites.find(s => s.id === curSiteId);
-    const metaLine    = `<div class="rest-card-meta">廠區：${curSite?.name || '—'}　${entry.publishedAt ? `發布：${entry.publishedAt}` : '尚未發布'}</div>`;
+    const entrySite   = entry._siteId ? sites.find(s => s.id === entry._siteId) : sites.find(s => s.id === curSiteId);
+    const metaLine    = `<div class="rest-card-meta">廠區：${entrySite?.name || '—'}　${entry.publishedAt ? `發布：${entry.publishedAt}` : '尚未發布'}</div>`;
     return `<div class="rest-card">
       <div class="rest-card-header">
         <span class="rest-card-name">${rest.name}</span>${branchBadge}
         <span class="rest-card-meal ${mi.tagCls}">${mi.label}</span>
-        <div class="pub-status">${pubBadge}${revertBtn}${pubBtn}</div>
+        <div class="pub-status">${sentBadge}${pubBadge}${revertBtn}${pubBtn}</div>
         <button class="rest-card-remove" onclick="removeEntry('${dateStr}','${entry.entryId}')">✕</button>
       </div>
       ${metaLine}
@@ -1758,9 +1902,11 @@ function renderDetailBody(dateStr) {
   html += `<button class="detail-add-btn" onclick="openRestPicker('${dateStr}')">
     <span style="font-size:16px">＋</span> 新增店家
   </button>`;
-  html += `<button class="detail-add-btn" style="border-color:#f8bbd0;color:#c2185b;margin-top:6px" onclick="openMbPicker('${dateStr}')">
-    <span style="font-size:16px">🍱</span> 新增會議便當
-  </button>`;
+  if (mealFilter === 'special') {
+    html += `<button class="detail-add-btn" style="border-color:#f8bbd0;color:#c2185b;margin-top:6px" onclick="openMbPicker('${dateStr}')">
+      <span style="font-size:16px">🍱</span> 新增會議便當
+    </button>`;
+  }
 
   body.innerHTML = html;
 }
@@ -2187,14 +2333,60 @@ function renderSiteDropOpts() {
   const q = (document.getElementById('site-filter-search')?.value || '').toLowerCase();
   document.getElementById('site-filter-opts').innerHTML = sites
     .filter(s => s.name.toLowerCase().includes(q))
-    .map(s => `<div onclick="selectSite('${s.id}','${s.name}')"
-      style="padding:9px 14px;font-size:15px;cursor:pointer;background:${s.id===curSiteId?'var(--blue-bg)':'transparent'};transition:background .08s"
-      onmouseover="if('${s.id}'!==curSiteId)this.style.background='var(--bg-2)'"
-      onmouseout="if('${s.id}'!==curSiteId)this.style.background='transparent'"
-    >${s.name}</div>`).join('') || '<div style="padding:10px 14px;font-size:14px;color:var(--text-3)">無結果</div>';
+    .map(s => {
+      const checked = selectedSiteIds.includes(s.id);
+      return `<label style="display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;font-size:15px;
+          background:${checked ? 'var(--blue-bg)' : 'transparent'};transition:background .08s"
+          onmouseover="this.style.background='var(--bg-2)'" onmouseout="this.style.background='${checked ? 'var(--blue-bg)' : 'transparent'}'">
+        <input type="checkbox" value="${s.id}" ${checked ? 'checked' : ''}
+          onchange="toggleSiteSelection('${s.id}', this.checked)" style="width:15px;height:15px;accent-color:var(--blue);flex-shrink:0">
+        ${s.name}
+      </label>`;
+    }).join('') || '<div style="padding:10px 14px;font-size:14px;color:var(--text-3)">無結果</div>';
 }
 
 function filterSiteDrop() { renderSiteDropOpts(); }
+
+function toggleSiteSelection(siteId, checked) {
+  if (checked && !selectedSiteIds.includes(siteId)) {
+    selectedSiteIds.push(siteId);
+  } else if (!checked) {
+    selectedSiteIds = selectedSiteIds.filter(id => id !== siteId);
+    if (!selectedSiteIds.length) selectedSiteIds = [sites[0].id];
+  }
+  curSiteId = selectedSiteIds[0];
+  updateSiteFilterLabel();
+  updatePlanTypeDisplay();
+  renderSiteDropOpts();
+  closeDetail();
+  renderCalendar();
+}
+
+function updateSiteFilterLabel() {
+  const el = document.getElementById('site-filter-label');
+  if (!el) return;
+  if (selectedSiteIds.length === 1) {
+    el.textContent = sites.find(s => s.id === selectedSiteIds[0])?.name || '請選擇';
+  } else {
+    el.textContent = `已選 ${selectedSiteIds.length} 個廠區`;
+  }
+}
+
+function updatePlanTypeDisplay() {
+  // 切換廠區時，將下拉預設值同步為第一個選中廠區的策略
+  const site = sites.find(s => s.id === selectedSiteIds[0]);
+  if (site?.pricingStrategy) {
+    planTypeFilter = site.pricingStrategy;
+    const sel = document.getElementById('plan-type-sel');
+    if (sel) sel.value = planTypeFilter;
+  }
+}
+
+function onPlanTypeChange() {
+  planTypeFilter = document.getElementById('plan-type-sel').value;
+  closeDetail();
+  rerenderCalendar();
+}
 
 function toggleSiteDrop() {
   const drop = document.getElementById('site-filter-drop');
@@ -2204,7 +2396,7 @@ function toggleSiteDrop() {
   const rect = btn.getBoundingClientRect();
   drop.style.display = 'block';
   drop.style.left  = rect.left + 'px';
-  drop.style.width = rect.width + 'px';
+  drop.style.width = Math.max(rect.width, 180) + 'px';
   drop.style.top   = rect.bottom + 4 + 'px';
   document.getElementById('site-filter-search').value = '';
   renderSiteDropOpts();
@@ -2234,6 +2426,7 @@ function onMealFilterChange() {
   mealFilter = document.getElementById('meal-filter-sel').value;
   rerenderCalendar();
 }
+
 
 /* ══════════════════════════════════════════════════
    MODALS
@@ -2385,26 +2578,39 @@ function buildNewRestItemChecklist() {
   document.getElementById('item-checklist-search').value = '';
   const list = document.getElementById('item-checklist');
   list.innerHTML = sortedItems.map(item => {
-    const tier   = getPriceForDate(item, pickerDate);
-    const cost   = getCostForDate(item, pickerDate);
-    const isAuto = !!tier.effectiveFrom;
+    const tier     = getPriceForDate(item, pickerDate);
+    const cost     = getCostForDate(item, pickerDate);
+    const endPrice = calcEndPrice(tier);
+    const pricingHint = planTypeFilter === 'store'
+      ? `<span class="item-check-auto-badge">自動帶入店內價</span>`
+      : planTypeFilter === 'guarantee'
+      ? (tier.price < PRICING_GUARANTEE_FLOOR
+          ? `<span class="item-check-auto-badge" style="background:#fef9c3;color:#854d0e;border-color:#fde047">店內價 $${tier.price} → 調升至保障金額</span>`
+          : `<span class="item-check-auto-badge" style="background:#fef9c3;color:#854d0e;border-color:#fde047">店內價 $${tier.price} ≥ 保障金額</span>`)
+      : planTypeFilter === 'surcharge'
+      ? `<span class="item-check-auto-badge" style="background:#f0fdf4;color:#166534;border-color:#86efac">成本 $${cost} + ${PRICING_SURCHARGE_AMOUNT} = $${endPrice}</span>`
+      : '';
     const eid    = 'iex-' + item.id;
     return `<div>
       <label class="item-check-row" onclick="toggleItemExtra('${eid}', this); updateNewRestItemCount()">
-        <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" data-auto="${isAuto}" ${checkedIds.has(item.id) ? 'checked' : ''} onclick="event.stopPropagation(); document.getElementById('${eid}').classList.toggle('show', this.checked); updateNewRestItemCount()">
+        <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${endPrice}" ${checkedIds.has(item.id) ? 'checked' : ''} onclick="event.stopPropagation(); document.getElementById('${eid}').classList.toggle('show', this.checked); updateNewRestItemCount()">
         <span class="item-check-name">${item.name}</span><span class="item-check-sales">銷量 ${item.salesCount ?? '-'}</span>
         <span class="item-check-cost">成本 $${cost}</span>
-        <span class="item-check-price${isAuto?' is-auto':''}">$${tier.price}${isAuto?` <span class="item-check-auto-badge">自動帶入</span>`:''}</span>
+        <span class="item-check-price">$${endPrice} ${pricingHint}</span>
       </label>
       <div class="item-extra${checkedIds.has(item.id) ? ' show' : ''}" id="${eid}">
         <div class="item-extra-row">
+          <div>
+            <div class="item-extra-label">店內價</div>
+            <div style="padding:6px 0;font-size:13px;color:var(--text-3)">$${tier.price}</div>
+          </div>
           <div>
             <div class="item-extra-label">成本價</div>
             <div style="padding:6px 0;font-size:13px;color:var(--text-3)">$${cost}</div>
           </div>
           <div>
             <div class="item-extra-label">終端價</div>
-            <input type="number" id="endprice-${item.id}" min="0" value="${tier.price}" style="width:100%">
+            <input type="number" id="endprice-${item.id}" min="0" value="${endPrice}" style="width:100%">
           </div>
           <div style="flex:2">
             <div class="item-extra-label">櫃位</div>
@@ -2548,7 +2754,7 @@ function confirmAddRest() {
     return { itemId: id, name: inp.dataset.name, price, isAuto: inp.dataset.auto === 'true', cabinetTemp, cabinetSlot, onlineQty, offlineQty, storeQty };
   });
   if (!scheduleData[curSiteId][pickerDate]) scheduleData[curSiteId][pickerDate] = [];
-  scheduleData[curSiteId][pickerDate].push({ entryId, restaurantId: pickerRestId, branchId: pickerBranchId || null, mealType, addedBy: CURRENT_USER, items });
+  scheduleData[curSiteId][pickerDate].push({ entryId, restaurantId: pickerRestId, branchId: pickerBranchId || null, mealType, addedBy: CURRENT_USER, planType: planTypeFilter, sentToStoreAt: null, items });
   closeModal('rest-picker-modal');
   rerenderCalendar();
   showToast('已新增店家', 'success');
@@ -3072,6 +3278,7 @@ function confirmCopyToSites() {
         scheduleData[siteId][ds].push({
           entryId: genEntryId(), restaurantId: src.restaurantId,
           mealType: src.mealType, addedBy: CURRENT_USER,
+          planType: src.planType || 'store', sentToStoreAt: null,
           items: src.items.map(it => ({ ...it, isAuto: false }))
         });
         copiedEntries++;
@@ -3370,6 +3577,118 @@ function executePublish() {
 }
 
 /* ══════════════════════════════════════════════════
+   SEND TO STORE
+══════════════════════════════════════════════════ */
+function openSendToStore() {
+  document.getElementById('send-month-sel').innerHTML = MONTH_NAMES.map((m, i) =>
+    `<option value="${i}"${i === curMonth ? ' selected' : ''}>${curYear}年${m}</option>`
+  ).join('');
+
+  document.getElementById('send-sites').innerHTML = sites.map(s =>
+    `<label class="check-item">
+      <input type="checkbox" data-site="${s.id}" ${selectedSiteIds.includes(s.id) ? 'checked' : ''}
+        onchange="updateSendSummary()"> ${s.name}
+    </label>`
+  ).join('');
+
+  document.getElementById('send-meals').innerHTML = MEAL_TYPES.map(m =>
+    `<label class="check-item">
+      <input type="checkbox" data-meal="${m.id}" ${m.id === mealFilter || mealFilter === 'all' ? 'checked' : ''}
+        onchange="updateSendSummary()"> ${m.label}
+    </label>`
+  ).join('');
+
+  updateSendSummary();
+  openModal('send-to-store-modal');
+}
+
+function updateSendSummary() {
+  const monthVal = parseInt(document.getElementById('send-month-sel').value);
+  const selSites = [...document.querySelectorAll('#send-sites input:checked')].map(el => el.dataset.site);
+  const selMeals = [...document.querySelectorAll('#send-meals input:checked')].map(el => el.dataset.meal);
+
+  let totalDays = 0; const totalStores = new Set(); let totalItems = 0;
+  selSites.forEach(siteId => {
+    Object.entries(scheduleData[siteId] || {}).forEach(([dateStr, entries]) => {
+      const d = new Date(dateStr);
+      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
+      const filtered = entries.filter(e =>
+        selMeals.includes(e.mealType) && (e.planType || 'store') === planTypeFilter
+      );
+      if (filtered.length) {
+        totalDays++;
+        filtered.forEach(e => { totalStores.add(e.restaurantId); totalItems += e.items.length; });
+      }
+    });
+  });
+
+  const mealLabels = selMeals.map(id => mealInfo(id).label).join('、') || '（未選餐期）';
+  document.getElementById('send-summary').innerHTML =
+    `傳送範圍：${curYear}年${MONTH_NAMES[monthVal]}｜` +
+    `${selSites.map(id => sites.find(s => s.id === id)?.name).join('、') || '（未選廠區）'}<br>` +
+    `餐期：${mealLabels}<br>` +
+    `定價策略：${PLAN_TYPES.find(p => p.id === planTypeFilter)?.label || planTypeFilter}<br>` +
+    `共 <strong>${totalDays}</strong> 天有排程、<strong>${totalStores.size}</strong> 間店家、<strong>${totalItems}</strong> 個品項`;
+}
+
+function doSendToStore() {
+  const monthVal = parseInt(document.getElementById('send-month-sel').value);
+  const selSites = [...document.querySelectorAll('#send-sites input:checked')].map(el => el.dataset.site);
+  const selMeals = [...document.querySelectorAll('#send-meals input:checked')].map(el => el.dataset.meal);
+  if (!selSites.length || !selMeals.length) { showToast('請選擇廠區與餐期', 'error'); return; }
+
+  let total = 0;
+  selSites.forEach(siteId => {
+    Object.entries(scheduleData[siteId] || {}).forEach(([dateStr, entries]) => {
+      const d = new Date(dateStr);
+      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
+      total += entries.filter(e =>
+        selMeals.includes(e.mealType) && (e.planType || 'store') === planTypeFilter
+      ).length;
+    });
+  });
+
+  const siteNames = selSites.map(id => sites.find(s => s.id === id)?.name || id).join('、');
+  const mealNames = selMeals.map(id => MEAL_TYPES.find(m => m.id === id)?.label || id).join('、');
+
+  document.getElementById('send-confirm-summary').innerHTML =
+    `<b>月份：</b>${curYear}年${MONTH_NAMES[monthVal]}<br>` +
+    `<b>廠區：</b>${siteNames}<br>` +
+    `<b>餐期：</b>${mealNames}<br>` +
+    `<b>定價策略：</b>${PLAN_TYPES.find(p => p.id === planTypeFilter)?.label || planTypeFilter}<br>` +
+    `<b>排程筆數：</b>${total} 筆`;
+
+  window._pendingSend = { monthVal, selSites, selMeals, total };
+  openModal('send-to-store-confirm-modal');
+}
+
+function executeSendToStore() {
+  const { monthVal, selSites, selMeals, total } = window._pendingSend || {};
+  closeModal('send-to-store-confirm-modal');
+  closeModal('send-to-store-modal');
+
+  const now = new Date();
+  const ts  = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  (selSites || []).forEach(siteId => {
+    const siteData = scheduleData[siteId] || {};
+    Object.keys(siteData).forEach(dateStr => {
+      const d = new Date(dateStr);
+      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
+      siteData[dateStr].forEach(entry => {
+        if (!(selMeals || []).includes(entry.mealType)) return;
+        if ((entry.planType || 'store') !== planTypeFilter) return;
+        entry.sentToStoreAt = ts;
+      });
+    });
+  });
+
+  if (detailDate) renderDetailBody(detailDate);
+  rerenderCalendar();
+  showToast(`已傳送 ${total || 0} 筆排程給店家（${curYear}年${MONTH_NAMES[monthVal]}）`, 'success');
+}
+
+/* ══════════════════════════════════════════════════
    CSV EXPORT
 ══════════════════════════════════════════════════ */
 function toggleExportMenu() {
@@ -3377,101 +3696,275 @@ function toggleExportMenu() {
   m.style.display = m.style.display === 'none' ? 'block' : 'none';
 }
 
+function handleExportCSV() {
+  if (planTypeFilter === 'surcharge') { openExportMeetingModal(); return; }
+  exportCSV();
+}
+
+function handleExportJSON() {
+  if (planTypeFilter === 'surcharge') { openExportMeetingModal(); return; }
+  exportJSON();
+}
+
 function exportCSV() {
   document.getElementById('export-menu').style.display = 'none';
-  const rows = [['日期', '星期', '廠區', '餐廳', '分店', '餐期', '品項', '售價']];
-  const site = sites.find(s => s.id === curSiteId);
-  const siteData = scheduleData[curSiteId] || {};
+  const WD_SHORT = ['日','一','二','三','四','五','六'];
   const days = new Date(curYear, curMonth+1, 0).getDate();
+  let rows = [];
+  let filename = '';
 
-  for (let d = 1; d <= days; d++) {
-    const dateStr = getDateStr(curYear, curMonth, d);
-    const wd      = new Date(curYear, curMonth, d).getDay();
-    const entries = siteData[dateStr] || [];
-    if (!entries.length) { rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, '', '', '', '', '']); continue; }
-    entries.forEach(entry => {
-      const rest      = restaurants.find(r => r.id === entry.restaurantId);
-      const branchName = getBranchName(rest, entry.branchId);
-      const mealLabel = mealInfo(entry.mealType).label;
-      if (!entry.items.length) {
-        rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, rest?.name||'', branchName, mealLabel, '', '']);
-      } else {
-        entry.items.forEach(it => {
-          rows.push([dateStr, `週${WD_NAMES[wd]}`, site.name, rest?.name||'', branchName, mealLabel, it.name, it.price]);
+  if (planTypeFilter === 'guarantee') {
+    rows.push(['日期','星期','時段','據點','分店','餐點名稱','數量','售價','餐點編號','分店編號']);
+    selectedSiteIds.forEach(siteId => {
+      const site = sites.find(s => s.id === siteId);
+      const siteData = scheduleData[siteId] || {};
+      for (let d = 1; d <= days; d++) {
+        const dateStr = getDateStr(curYear, curMonth, d);
+        const wd = new Date(curYear, curMonth, d).getDay();
+        const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
+        const entries = (siteData[dateStr] || []).filter(e => (e.planType || 'store') === 'guarantee');
+        entries.forEach(entry => {
+          const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
+          const rest = restaurants.find(r => r.id === entry.restaurantId);
+          const branch = rest && rest.branches ? rest.branches.find(b => b.id === entry.branchId) : null;
+          if (!entry.items.length) {
+            rows.push([dateLabel, WD_SHORT[wd], pickupTime, siteId, rest ? rest.name : '', '', '', '', '', branch ? branch.id : '']);
+          } else {
+            entry.items.forEach(it => {
+              const qty = (it.onlineQty||0) + (it.offlineQty||0) + (it.storeQty||0);
+              rows.push([dateLabel, WD_SHORT[wd], pickupTime, siteId, rest ? rest.name : '', it.name, qty, it.price, it.itemId||'', branch ? branch.id : '']);
+            });
+          }
         });
       }
     });
+    filename = '保障金額_' + curYear + '年' + MONTH_NAMES[curMonth] + '.csv';
+
+  } else {
+    rows.push(['日期','星期','時段','據點','分店','餐點名稱','訂購總數量']);
+    selectedSiteIds.forEach(siteId => {
+      const site = sites.find(s => s.id === siteId);
+      const siteData = scheduleData[siteId] || {};
+      for (let d = 1; d <= days; d++) {
+        const dateStr = getDateStr(curYear, curMonth, d);
+        const wd = new Date(curYear, curMonth, d).getDay();
+        const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
+        const entries = (siteData[dateStr] || []).filter(e => (e.planType || 'store') === 'store');
+        entries.forEach(entry => {
+          const mi = mealInfo(entry.mealType);
+          const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
+          const timeLabel = mi.label + '(早上' + pickupTime + '取餐)';
+          const rest = restaurants.find(r => r.id === entry.restaurantId);
+          const branchName = getBranchName(rest, entry.branchId);
+          const branchLabel = (rest ? rest.name : '') + '-' + branchName;
+          if (!entry.items.length) {
+            rows.push([dateLabel, WD_SHORT[wd], timeLabel, site.name, branchLabel, '', '']);
+          } else {
+            entry.items.forEach(it => {
+              const qty = (it.onlineQty||0) + (it.offlineQty||0);
+              rows.push([dateLabel, WD_SHORT[wd], timeLabel, site.name, branchLabel, it.name, qty]);
+            });
+          }
+        });
+      }
+    });
+    filename = '店內價_' + curYear + '年' + MONTH_NAMES[curMonth] + '.csv';
   }
 
-  const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  if (rows.length <= 1) { showToast('本月無排程資料', 'error'); return; }
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\r\n');
+  const bom = '﻿';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
-  a.download = `菜單排程_${site.name}_${curYear}年${MONTH_NAMES[curMonth]}.csv`;
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
   showToast('CSV 已匯出', 'success');
 }
-
 function exportJSON() {
   document.getElementById('export-menu').style.display = 'none';
-  const site     = sites.find(s => s.id === curSiteId);
-  const siteData = scheduleData[curSiteId] || {};
-  const days     = new Date(curYear, curMonth+1, 0).getDate();
+  const WD_FULL = ['日','一','二','三','四','五','六'];
+  const days = new Date(curYear, curMonth+1, 0).getDate();
+  let allRows = [];
+  let filename = '';
 
-  // 依餐期分組
-  const byMeal = {}; // { mealId: { label, rows[] } }
+  if (planTypeFilter === 'guarantee') {
+    selectedSiteIds.forEach(siteId => {
+      const site = sites.find(s => s.id === siteId);
+      const siteData = scheduleData[siteId] || {};
+      for (let d = 1; d <= days; d++) {
+        const dateStr = getDateStr(curYear, curMonth, d);
+        const wd = new Date(curYear, curMonth, d).getDay();
+        const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
+        const entries = (siteData[dateStr] || []).filter(e => (e.planType || 'store') === 'guarantee');
+        entries.forEach(entry => {
+          const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
+          const rest = restaurants.find(r => r.id === entry.restaurantId);
+          const branch = rest && rest.branches ? rest.branches.find(b => b.id === entry.branchId) : null;
+          entry.items.forEach(it => {
+            const qty = (it.onlineQty||0) + (it.offlineQty||0) + (it.storeQty||0);
+            allRows.push({
+              日期: dateLabel,
+              星期: WD_FULL[wd],
+              時段: pickupTime,
+              據點: siteId,
+              分店: rest ? rest.name : '',
+              餐點名稱: it.name,
+              數量: qty,
+              售價: it.price,
+              餐點編號: it.itemId || '',
+              分店編號: branch ? branch.id : ''
+            });
+          });
+        });
+      }
+    });
+    filename = '保障金額_' + curYear + '年' + MONTH_NAMES[curMonth] + '.json';
+
+  } else {
+    selectedSiteIds.forEach(siteId => {
+      const site = sites.find(s => s.id === siteId);
+      const siteData = scheduleData[siteId] || {};
+      for (let d = 1; d <= days; d++) {
+        const dateStr = getDateStr(curYear, curMonth, d);
+        const wd = new Date(curYear, curMonth, d).getDay();
+        const dateLabel = curYear + '/' + (curMonth+1) + '/' + d;
+        const entries = (siteData[dateStr] || []).filter(e => (e.planType || 'store') === 'store');
+        entries.forEach(entry => {
+          const mi = mealInfo(entry.mealType);
+          const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
+          const timeLabel = mi.label + '(早上' + pickupTime + '取餐)';
+          const rest = restaurants.find(r => r.id === entry.restaurantId);
+          const branchName = getBranchName(rest, entry.branchId);
+          const branchLabel = (rest ? rest.name : '') + '-' + branchName;
+          entry.items.forEach(it => {
+            const qty = (it.onlineQty||0) + (it.offlineQty||0);
+            allRows.push({
+              日期: dateLabel,
+              星期: WD_FULL[wd],
+              時段: timeLabel,
+              據點: site.name,
+              分店: branchLabel,
+              餐點名稱: it.name,
+              訂購總數量: qty
+            });
+          });
+        });
+      }
+    });
+    filename = '店內價_' + curYear + '年' + MONTH_NAMES[curMonth] + '.json';
+  }
+
+  if (!allRows.length) { showToast('本月無排程資料', 'error'); return; }
+  const blob = new Blob([JSON.stringify(allRows, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSON 已匯出（共 ' + allRows.length + ' 筆）', 'success');
+}
+
+
+/* ══════════════════════════════════════════════════
+   MENU SUMMARY EXPORT
+══════════════════════════════════════════════════ */
+function openExportSummaryModal() {
+  document.getElementById('export-menu').style.display = 'none';
+
+  document.getElementById('summary-month-sel').innerHTML = MONTH_NAMES.map((m, i) =>
+    `<option value="${i}"${i === curMonth ? ' selected' : ''}>${curYear}年${m}</option>`
+  ).join('');
+
+  document.getElementById('summary-sites').innerHTML = sites.map(s =>
+    `<label class="check-item">
+      <input type="checkbox" value="${s.id}" ${selectedSiteIds.includes(s.id) ? 'checked' : ''}> ${s.name}
+    </label>`
+  ).join('');
+
+  document.getElementById('summary-meals').innerHTML = MEAL_TYPES.map(m =>
+    `<label class="check-item">
+      <input type="checkbox" value="${m.id}" ${m.id === mealFilter || mealFilter === 'all' ? 'checked' : ''}> ${m.label}
+    </label>`
+  ).join('');
+
+  document.getElementById('summary-plans').innerHTML = PLAN_TYPES.map(p =>
+    `<label class="check-item">
+      <input type="checkbox" value="${p.id}" ${p.id === planTypeFilter ? 'checked' : ''}> ${p.label}
+    </label>`
+  ).join('');
+
+  openModal('export-summary-modal');
+}
+
+function doExportSummaryCSV() {
+  const monthVal   = parseInt(document.getElementById('summary-month-sel').value);
+  const selSiteIds = [...document.querySelectorAll('#summary-sites input:checked')].map(cb => cb.value);
+  const selMealIds = [...document.querySelectorAll('#summary-meals input:checked')].map(cb => cb.value);
+  const selPlans   = [...document.querySelectorAll('#summary-plans input:checked')].map(cb => cb.value);
+
+  if (!selSiteIds.length || !selMealIds.length || !selPlans.length) {
+    showToast('請選擇廠區、餐期與定價策略', 'error'); return;
+  }
+
+  const rows = [['日期', '星期', '時段', '據點', '餐廳', '分店', '餐點名稱', '訂購數量']];
+  const days = new Date(curYear, monthVal + 1, 0).getDate();
 
   for (let d = 1; d <= days; d++) {
-    const dateStr = getDateStr(curYear, curMonth, d);
-    const wd      = new Date(curYear, curMonth, d).getDay();
-    const wdLabel = `星期${['日','一','二','三','四','五','六'][wd]}`;
-    const entries = siteData[dateStr] || [];
-    entries.forEach(entry => {
-      const rest      = restaurants.find(r => r.id === entry.restaurantId);
-      const mi        = mealInfo(entry.mealType);
-      if (!byMeal[entry.mealType]) byMeal[entry.mealType] = { label: mi.label, rows: [], rowId: 1 };
-      entry.items.forEach(it => {
-        const itemDef = rest?.items.find(i => i.id === it.itemId);
-        byMeal[entry.mealType].rows.push({
-          id:       byMeal[entry.mealType].rowId++,
-          分店:     `${rest?.name || ''}-${site.name}`,
-          分類:     '餐點',
-          售價:     String(it.price),
-          圖片網址: rest?.imageUrl || '',
-          據點:     site.name,
-          日期:     dateStr,
-          星期:     wdLabel,
-          時段:     mi.label,
-          英文名稱: itemDef?.en || '',
-          餐廳名稱: rest?.name || '',
-          餐廳地址: rest?.address || ' ',
-          餐廳編號: rest?.id || '',
-          餐點名稱: it.name,
-          餐點編號: it.itemId
-        });
+    const dateStr = getDateStr(curYear, monthVal, d);
+    const wd      = new Date(curYear, monthVal, d).getDay();
+    const wdLabel = `週${WD_NAMES[wd]}`;
+
+    selSiteIds.forEach(siteId => {
+      const site    = sites.find(s => s.id === siteId);
+      const entries = (scheduleData[siteId] || {})[dateStr] || [];
+
+      entries.forEach(entry => {
+        if (!selMealIds.includes(entry.mealType)) return;
+        if (!selPlans.includes(entry.planType || 'store')) return;
+
+        const rest       = restaurants.find(r => r.id === entry.restaurantId);
+        const branchName = getBranchName(rest, entry.branchId);
+        const mi         = mealInfo(entry.mealType);
+        const pickupTime = MEAL_PICKUP_TIMES[entry.mealType] || '';
+        const timeSlot   = `${mi.label} ${pickupTime}取餐`;
+
+        if (!entry.items.length) {
+          rows.push([dateStr, wdLabel, timeSlot, site?.name || '', rest?.name || '', branchName, '', '']);
+        } else {
+          entry.items.forEach(it => {
+            const totalQty = (it.onlineQty || 0) + (it.offlineQty || 0);
+            rows.push([
+              dateStr, wdLabel, timeSlot,
+              site?.name || '',
+              rest?.name || '',
+              branchName,
+              it.name,
+              totalQty || ''
+            ]);
+          });
+        }
       });
     });
   }
 
-  const mealEntries = Object.values(byMeal).filter(m => m.rows.length > 0);
-  if (!mealEntries.length) { showToast('本月無排程資料', 'error'); return; }
+  if (rows.length <= 1) { showToast('選定條件無排程資料', 'error'); return; }
 
-  // 逐餐期下載（延遲觸發避免瀏覽器攔截）
-  mealEntries.forEach((m, i) => {
-    setTimeout(() => {
-      const blob = new Blob([JSON.stringify(m.rows, null, 2)], { type: 'application/json' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url;
-      a.download = `${site.name}_${curYear}年${MONTH_NAMES[curMonth]}${m.label}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }, i * 300);
-  });
-
-  showToast(`JSON 已匯出（共 ${mealEntries.length} 個餐期檔案）`, 'success');
+  const csvYear  = curYear;
+  const csvMonth = MONTH_NAMES[monthVal];
+  const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `菜單總表_${csvYear}年${csvMonth}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  closeModal('export-summary-modal');
+  showToast('菜單總表 CSV 已匯出', 'success');
 }
 
 /* ══════════════════════════════════════════════════
