@@ -165,6 +165,7 @@ body {
 .cal-day-num {
   font-size: 16px; font-weight: 600; color: var(--text-2);
   line-height: 1; margin-bottom: 2px;
+  height: 24px; display: flex; align-items: center;
 }
 .cal-day-num.today {
   background: var(--blue); color: #fff;
@@ -625,7 +626,7 @@ body {
 .chip-add-meeting {
   border: 1.5px dashed #f8bbd0; background: transparent; color: #c2185b;
   cursor: pointer; font-size: 18px; border-radius: 5px; padding: 4px 6px;
-  text-align: left; width: 100%; transition: all .1s; margin-top: 2px;
+  text-align: left; width: 100%; transition: all .1s;
   display: block;
 }
 .chip-add-meeting:hover { border-color: #e91e63; background: #fff0f6; }
@@ -1718,7 +1719,7 @@ function renderCalendar() {
         ${filterMbEntries(mbEntries).map(mb => renderMbChip(mb, dateStr)).join('')}
         ${holidayHtml}
         <button class="chip-add" onclick="event.stopPropagation();openRestPicker('${dateStr}')">＋ 新增店家</button>
-        ${mealFilter === 'special' ? `<button class="chip-add-meeting" onclick="event.stopPropagation();openMbPicker('${dateStr}')">🍱 新增會議餐</button>` : ''}
+        ${mealFilter === 'special' ? `<button class="chip-add-meeting" onclick="event.stopPropagation();openMbPicker('${dateStr}')">＋ 新增會議餐</button>` : ''}
       </div>`;
     });
     html += `</div>`;
