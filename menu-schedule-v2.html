@@ -1058,7 +1058,7 @@ body {
 
 <!-- Modal: 追加品項（既有店家） -->
 <div class="overlay" id="item-picker-modal">
-  <div class="modal modal-sm">
+  <div class="modal modal-lg modal-full">
     <div class="modal-head">
       <div class="modal-title">新增品項</div>
       <button class="modal-close" onclick="closeModal('item-picker-modal')">✕</button>
@@ -2684,7 +2684,7 @@ function filterMbItemList() {
 
 function filterAddItemChecklist() {
   const q = document.getElementById('add-item-search').value.trim().toLowerCase();
-  document.querySelectorAll('#add-item-checklist label').forEach(row => {
+  document.querySelectorAll('#add-item-checklist > div').forEach(row => {
     const name = row.querySelector('.item-check-name')?.textContent.toLowerCase() || '';
     row.style.display = (!q || name.includes(q)) ? '' : 'none';
   });
@@ -3118,13 +3118,72 @@ function openItemPicker(dateStr, entryId, restId) {
   } else {
     document.getElementById('add-toggle-all-btn').style.display = '';
     list.innerHTML = avail.map(item => {
-      const tier   = getPriceForDate(item, dateStr);
-      const isAuto = !!tier.effectiveFrom;
-      return `<label class="item-check-row" onclick="updateAddItemCount()">
-        <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${tier.price}" data-auto="${isAuto}">
-        <span class="item-check-name">${item.name}</span>
-        <span class="item-check-price${isAuto?' is-auto':''}">$${tier.price}${isAuto?` <span class="item-check-auto-badge">自動帶入</span>`:''}</span>
-      </label>`;
+      const tier     = getPriceForDate(item, dateStr);
+      const cost     = getCostForDate(item, dateStr);
+      const endPrice = calcEndPrice(tier);
+      const pricingHint = planTypeFilter === 'store'
+        ? `<span class="item-check-auto-badge">自動帶入店內價</span>`
+        : planTypeFilter === 'guarantee'
+        ? (tier.price < PRICING_GUARANTEE_FLOOR
+            ? `<span class="item-check-auto-badge" style="background:#fef9c3;color:#854d0e;border-color:#fde047">店內價 $${tier.price} → 調升至保障金額</span>`
+            : `<span class="item-check-auto-badge" style="background:#fef9c3;color:#854d0e;border-color:#fde047">店內價 $${tier.price} ≥ 保障金額</span>`)
+        : planTypeFilter === 'surcharge'
+        ? `<span class="item-check-auto-badge" style="background:#f0fdf4;color:#166534;border-color:#86efac">成本 $${cost} + ${PRICING_SURCHARGE_AMOUNT} = $${endPrice}</span>`
+        : '';
+      const eid = 'iex2-' + item.id;
+      return `<div>
+        <label class="item-check-row" onclick="toggleItemExtra2('${eid}', this); updateAddItemCount()">
+          <input type="checkbox" value="${item.id}" data-name="${item.name}" data-price="${endPrice}" onclick="event.stopPropagation(); document.getElementById('${eid}').classList.toggle('show', this.checked); updateAddItemCount()">
+          <span class="item-check-name">${item.name}</span><span class="item-check-sales">銷量 ${item.salesCount ?? '-'}</span>
+          <span class="item-check-cost">成本 $${cost}</span>
+          <span class="item-check-price">$${endPrice} ${pricingHint}</span>
+        </label>
+        <div class="item-extra" id="${eid}">
+          <div class="item-extra-row">
+            <div>
+              <div class="item-extra-label">店內價</div>
+              <div style="padding:6px 0;font-size:13px;color:var(--text-3)">$${tier.price}</div>
+            </div>
+            <div>
+              <div class="item-extra-label">成本價</div>
+              <div style="padding:6px 0;font-size:13px;color:var(--text-3)">$${cost}</div>
+            </div>
+            <div>
+              <div class="item-extra-label">終端價</div>
+              <input type="number" id="additem-endprice-${item.id}" min="0" value="${endPrice}" style="width:100%">
+            </div>
+            <div style="flex:2">
+              <div class="item-extra-label">櫃位</div>
+              <div class="cabinet-opts">
+                <div class="cabinet-opts-row">
+                  <label><input type="radio" name="additem-cab-temp-${item.id}" value="hot"  checked> 熱櫃</label>
+                  <label><input type="radio" name="additem-cab-temp-${item.id}" value="cold"> 冷櫃</label>
+                </div>
+                <div class="cabinet-opts-row">
+                  <label><input type="radio" name="additem-cab-slot-${item.id}" value="none" checked> 不指定</label>
+                  <label><input type="radio" name="additem-cab-slot-${item.id}" value="a"> A櫃</label>
+                  <label><input type="radio" name="additem-cab-slot-${item.id}" value="b"> B櫃</label>
+                  <label><input type="radio" name="additem-cab-slot-${item.id}" value="c"> C櫃</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="item-extra-row">
+            <div>
+              <div class="item-extra-label">線上可預約數</div>
+              <input type="number" id="additem-online-${item.id}" min="0" value="30">
+            </div>
+            <div>
+              <div class="item-extra-label">線下可預約數</div>
+              <input type="number" id="additem-offline-${item.id}" min="0" placeholder="0">
+            </div>
+            <div>
+              <div class="item-extra-label">店家預定數</div>
+              <input type="number" id="additem-store-${item.id}" min="0" placeholder="0">
+            </div>
+          </div>
+        </div>
+      </div>`;
     }).join('');
   }
   updateAddItemCount();
@@ -3132,16 +3191,20 @@ function openItemPicker(dateStr, entryId, restId) {
 }
 
 function updateAddItemCount() {
-  const checked = document.querySelectorAll('#add-item-checklist input:checked').length;
-  const total   = document.querySelectorAll('#add-item-checklist input').length;
+  const checked = document.querySelectorAll('#add-item-checklist input[type=checkbox]:checked').length;
+  const total   = document.querySelectorAll('#add-item-checklist input[type=checkbox]').length;
   document.getElementById('add-item-check-count').textContent = checked ? `已選 ${checked} / ${total}` : `共 ${total} 項`;
   document.getElementById('add-toggle-all-btn').textContent = (checked === total && total > 0) ? '取消全選' : '全選';
 }
 
 function toggleAllAddItems() {
-  const inputs     = document.querySelectorAll('#add-item-checklist input');
-  const allChecked = [...inputs].every(i => i.checked);
-  inputs.forEach(i => i.checked = !allChecked);
+  const inputs     = [...document.querySelectorAll('#add-item-checklist input[type=checkbox]')];
+  const allChecked = inputs.every(i => i.checked);
+  inputs.forEach(i => {
+    i.checked = !allChecked;
+    const extra = document.getElementById('iex2-' + i.value);
+    if (extra) extra.classList.toggle('show', i.checked);
+  });
   updateAddItemCount();
 }
 
@@ -3149,15 +3212,29 @@ function toggleItemDrop() {}
 function closeItemDrop()  {}
 function filterItemDrop() {}
 
+function toggleItemExtra2(eid, labelEl) {
+  const extra = document.getElementById(eid);
+  if (!extra) return;
+  const cb = labelEl.querySelector('input[type=checkbox]');
+  if (cb) extra.classList.toggle('show', cb.checked);
+}
+
 function confirmAddItem() {
   const entry = getEntry(pickerItemDate, pickerItemEntryId);
   if (!entry) return;
-  const checkedInputs = [...document.querySelectorAll('#add-item-checklist input:checked')];
+  const checkedInputs = [...document.querySelectorAll('#add-item-checklist input[type=checkbox]:checked')];
   if (!checkedInputs.length) { showToast('請至少選擇一個品項', 'error'); return; }
   checkedInputs.forEach(inp => {
-    if (!entry.items.some(i => i.itemId === inp.value)) {
-      entry.items.push({ itemId: inp.value, name: inp.dataset.name, price: Number(inp.dataset.price), isAuto: inp.dataset.auto === 'true', cabinetTemp: 'hot', cabinetSlot: 'none', onlineQty: 30, offlineQty: 0, storeQty: 0 });
-    }
+    if (entry.items.some(i => i.itemId === inp.value)) return;
+    const id          = inp.value;
+    const cabinetTemp = document.querySelector(`input[name="additem-cab-temp-${id}"]:checked`)?.value || 'hot';
+    const cabinetSlot = document.querySelector(`input[name="additem-cab-slot-${id}"]:checked`)?.value || 'none';
+    const onlineQty   = Number(document.getElementById(`additem-online-${id}`)?.value) || 30;
+    const offlineQty  = Number(document.getElementById(`additem-offline-${id}`)?.value) || 0;
+    const storeQty    = Number(document.getElementById(`additem-store-${id}`)?.value) || 0;
+    const endPriceEl  = document.getElementById(`additem-endprice-${id}`);
+    const price       = endPriceEl && endPriceEl.value !== '' ? Number(endPriceEl.value) : Number(inp.dataset.price);
+    entry.items.push({ itemId: id, name: inp.dataset.name, price, isAuto: false, cabinetTemp, cabinetSlot, onlineQty, offlineQty, storeQty });
   });
   markDirty(pickerItemDate, pickerItemEntryId);
   closeModal('item-picker-modal');
