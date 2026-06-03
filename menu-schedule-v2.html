@@ -1435,13 +1435,14 @@ body {
    CONSTANTS
 ══════════════════════════════════════════════════ */
 const MEAL_TYPES = [
-  { id: 'breakfast', label: '早餐',  chipCls: 'chip-breakfast',  tagCls: 'tag-breakfast'  },
-  { id: 'lunch',     label: '午餐',  chipCls: 'chip-lunch',      tagCls: 'tag-lunch'      },
+  { id: 'breakfast', label: '早餐',   chipCls: 'chip-breakfast',  tagCls: 'tag-breakfast'  },
+  { id: 'lunch',     label: '午餐',   chipCls: 'chip-lunch',      tagCls: 'tag-lunch'      },
   { id: 'afternoon', label: '下午茶', chipCls: 'chip-afternoon',  tagCls: 'tag-afternoon'  },
-  { id: 'dinner',    label: '晚餐',  chipCls: 'chip-dinner',     tagCls: 'tag-dinner'     },
-  { id: 'latenight', label: '宵夜',  chipCls: 'chip-latenight',  tagCls: 'tag-latenight'  },
+  { id: 'dinner',    label: '晚餐',   chipCls: 'chip-dinner',     tagCls: 'tag-dinner'     },
+  { id: 'latenight', label: '宵夜',   chipCls: 'chip-latenight',  tagCls: 'tag-latenight'  },
 ];
-function mealInfo(id) { return MEAL_TYPES.find(m => m.id === id) || MEAL_TYPES[1]; }
+const SPECIAL_MEAL_INFO = { id: 'special', label: '特殊訂餐', chipCls: 'chip-special', tagCls: 'tag-special' };
+function mealInfo(id) { return id === 'special' ? SPECIAL_MEAL_INFO : (MEAL_TYPES.find(m => m.id === id) || MEAL_TYPES[1]); }
 
 const PLAN_TYPES = [
   { id: 'store',     label: '店內價'   },
@@ -2500,7 +2501,7 @@ function buildRestOptions(dateStr) {
     const closedInfo = isRestClosed(rest, dateStr, mealType);
     const conflict   = getConflictSite(rest.id, dateStr, mealType);
     const dupInSite  = isDupRestInSite(rest.id, dateStr, mealType);
-    const noMeal     = !rest.mealTypes[mealType];
+    const noMeal     = mealType !== 'special' && !rest.mealTypes[mealType];
     let disabled = false, tipHtml = '';
     if (closedInfo.closed) {
       disabled = true; tipHtml = `<span class="closed-tip">${closedInfo.reason}</span>`;
