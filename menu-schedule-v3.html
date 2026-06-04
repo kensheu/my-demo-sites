@@ -3613,14 +3613,11 @@ function saveMgrMeal(restId, mealId, checked) {
 function openMonthPicker() {
   document.getElementById('jump-year').value  = curYear;
   document.getElementById('jump-month').value = curMonth;
-  // 快速捷徑：前後 6 個月
+  // 快速捷徑：當年 1~12 月
   const grid = document.getElementById('month-quick-grid');
-  const now  = new Date();
   const rows = [];
-  for (let i = -3; i <= 3; i++) {
-    let y = now.getFullYear(), m = now.getMonth() + i;
-    while (m < 0)  { m += 12; y--; }
-    while (m > 11) { m -= 12; y++; }
+  const y = curYear;
+  for (let m = 0; m < 12; m++) {
     const isCur = (y === curYear && m === curMonth);
     rows.push(`<button class="btn${isCur?' btn-primary':''}" style="font-size:13px;padding:6px 4px;text-align:center"
       onclick="jumpToMonth(${y},${m});closeModal('month-picker-modal')">${y}/${String(m+1).padStart(2,'0')}</button>`);
