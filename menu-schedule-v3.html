@@ -147,7 +147,9 @@ body {
   border-right: 1px solid var(--border-2);
   background: var(--bg-2);
   font-size: 12px; color: var(--text-3); gap: 2px;
+  user-select: none; transition: background .1s;
 }
+.cal-week-label:hover { background: var(--bg-3); }
 .cal-week-label .wk-num { font-weight: 600; font-size: 20px; color: var(--text-2); text-align: center; line-height: 1.3; }
 
 .cal-cell {
@@ -319,9 +321,14 @@ body {
   font-size: 13px; font-weight: 500; padding: 3px 10px;
   border-radius: 100px; white-space: nowrap;
 }
-.pub-badge.unpublished { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
-.pub-badge.published   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
-.pub-badge.dirty       { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.pub-badge.unpublished  { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.pub-badge.published    { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.pub-badge.dirty        { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+/* ── 四狀態 badge ── */
+.pub-badge.status-draft     { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.pub-badge.status-reviewing { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.pub-badge.status-reviewed  { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-bdr); }
+.pub-badge.status-published { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 .sent-badge { font-size:13px;font-weight:500;padding:3px 10px;border-radius:100px;white-space:nowrap; }
 .sent-badge.not-sent { background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1; }
 .sent-badge.sent     { background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bdr); }
@@ -777,6 +784,69 @@ body.st-meeting  .chip-mb-badge { background: #7b0be8; }
   max-height: 360px; overflow-y: auto;
   border: 1px solid var(--border); border-radius: 8px;
 }
+
+/* ─── Date selection checkboxes ─── */
+.cal-month-select-cell {
+  border-right: 1px solid var(--border-2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; font-size: 11px; color: var(--text-3); padding: 4px 2px;
+  user-select: none; transition: background .1s;
+}
+.cal-month-select-cell:hover { background: var(--bg-3); }
+.cal-month-select-cell input[type=checkbox] {
+  width: 14px; height: 14px; cursor: pointer; accent-color: var(--blue); display: block; margin: 0;
+}
+.cal-day-header {
+  display: flex; align-items: center; gap: 4px; margin-bottom: 2px;
+  cursor: pointer; padding: 2px 2px 2px 0; border-radius: 4px;
+  user-select: none;
+}
+.cal-day-header:hover { background: rgba(0,0,0,.05); }
+.cal-date-check {
+  width: 14px; height: 14px; cursor: pointer; flex-shrink: 0;
+  accent-color: var(--blue); margin: 0;
+}
+/* 供餐方案對應的勾選 highlight */
+body.st-system   .cal-cell.date-selected {
+  background: #dbeeff !important;
+  outline: 2px solid #0d76b5; outline-offset: -2px;
+}
+body.st-system   .cal-date-check,
+body.st-system   .cal-week-check,
+body.st-system   #cal-month-cb { accent-color: #0d76b5; }
+body.st-internal .cal-cell.date-selected {
+  background: #fef3c7 !important;
+  outline: 2px solid #9b4f33; outline-offset: -2px;
+}
+body.st-internal .cal-date-check,
+body.st-internal .cal-week-check,
+body.st-internal #cal-month-cb { accent-color: #9b4f33; }
+body.st-meeting  .cal-cell.date-selected {
+  background: #ede9fe !important;
+  outline: 2px solid #7b0be8; outline-offset: -2px;
+}
+body.st-meeting  .cal-date-check,
+body.st-meeting  .cal-week-check,
+body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
+.cal-week-check {
+  width: 14px; height: 14px; cursor: pointer; accent-color: var(--blue);
+  margin-top: 4px; display: block;
+}
+.date-sel-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--blue); color: #fff; border-radius: 100px;
+  font-size: 12px; font-weight: 600; padding: 1px 7px; min-width: 22px;
+  margin-left: 4px;
+}
+/* ── entry chip 狀態文字 ── */
+.entry-status {
+  font-size: 10px; font-weight: 500; padding: 1px 5px; border-radius: 100px;
+  margin-left: 4px; white-space: nowrap;
+}
+.entry-status.status-draft     { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.entry-status.status-reviewing { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.entry-status.status-reviewed  { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-bdr); }
+.entry-status.status-published { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 </style>
   <link rel="stylesheet" href="shared-nav.css">
 </head>
@@ -793,12 +863,11 @@ body.st-meeting  .chip-mb-badge { background: #7b0be8; }
   <!-- Machine Actions -->
   <div style="display:flex;gap:10px;margin-bottom:12px;justify-content:flex-end">
     <button class="btn" onclick="openRestMgr()">🏪 餐廳管理</button>
-    <button class="btn" onclick="showToast('功能開發中', 'info')">傳送訂單資料至販賣機</button>
     <button class="btn" onclick="showToast('功能開發中', 'info')">傳送巡捕資料至販賣機</button>
-    <button class="btn" onclick="showToast('功能開發中', 'info')">重整餐點圖片</button>
     <button class="btn" onclick="openCopySiteModal()">⇉ 複製整月排程</button>
-    <button class="btn" id="send-to-store-btn" style="border-color:var(--teal);color:var(--teal)" onclick="openSendToStore()">📤 傳送給店家</button>
-    <button class="btn-primary btn" onclick="openPublish()">▶ 發佈訂餐</button>
+    <button class="btn" id="send-to-store-btn" style="border-color:var(--teal);color:var(--teal)" onclick="doSendToStoreDirect()">📤 傳送給店家審核<span class="date-sel-badge" id="send-sel-count" style="display:none;background:var(--teal)"></span></button>
+    <button class="btn" style="border-color:var(--orange);color:var(--orange)" onclick="doSimulateReviewDirect()">✅ 模擬審核完畢<span class="date-sel-badge" id="review-sel-count" style="display:none;background:var(--orange)"></span></button>
+    <button class="btn-primary btn" onclick="doPublishDirect()">▶ 發佈訂餐<span class="date-sel-badge" id="pub-sel-count" style="display:none"></span></button>
   </div>
 
   <!-- Toolbar -->
@@ -1166,58 +1235,6 @@ body.st-meeting  .chip-mb-badge { background: #7b0be8; }
   </div>
 </div>
 
-<!-- Modal: 傳送訂單給店家 -->
-<div class="overlay" id="send-to-store-modal">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">📤 傳送訂單給店家</div>
-      <button class="modal-close" onclick="closeModal('send-to-store-modal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="display:flex;align-items:center;gap:8px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--blue-text);margin-bottom:18px">
-        📤 傳送後，店家端將收到菜單確認請求。請等待店家確認後，再執行「發佈訂餐」。
-      </div>
-      <div class="pub-section">
-        <div class="pub-section-label">月份</div>
-        <select class="form-select" id="send-month-sel" onchange="updateSendSummary()"></select>
-      </div>
-      <div class="pub-section">
-        <div class="pub-section-label">廠區（可複選）</div>
-        <div class="check-group" id="send-sites"></div>
-      </div>
-      <div class="pub-section">
-        <div class="pub-section-label">餐期（可複選）</div>
-        <div class="check-group" id="send-meals"></div>
-      </div>
-      <div class="pub-summary" id="send-summary"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('send-to-store-modal')">取消</button>
-      <button class="btn" style="background:var(--teal);color:#fff;border-color:var(--teal)" onclick="doSendToStore()">📤 確認傳送</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 傳送二次確認 -->
-<div class="overlay" id="send-to-store-confirm-modal">
-  <div class="modal modal-sm">
-    <div class="modal-head">
-      <div class="modal-title">確認傳送？</div>
-      <button class="modal-close" onclick="closeModal('send-to-store-confirm-modal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div id="send-confirm-summary" style="font-size:15px;line-height:1.8;color:var(--text-2)"></div>
-      <div style="margin-top:14px;padding:12px 14px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:8px;font-size:14px;color:var(--blue-text)">
-        📤 傳送後，店家端將收到菜單確認請求。請等待店家確認後再執行發佈。
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('send-to-store-confirm-modal')">返回修改</button>
-      <button class="btn" style="background:var(--teal);color:#fff;border-color:var(--teal)" onclick="executeSendToStore()">📤 確定傳送</button>
-    </div>
-  </div>
-</div>
-
 <!-- Modal: 菜單總表匯出 -->
 <div class="overlay" id="export-summary-modal">
   <div class="modal">
@@ -1249,58 +1266,6 @@ body.st-meeting  .chip-mb-badge { background: #7b0be8; }
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('export-summary-modal')">取消</button>
       <button class="btn btn-primary" onclick="doExportSummaryCSV()">↓ 下載 CSV</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 發佈訂餐 -->
-<div class="overlay" id="publish-modal">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">發佈訂餐</div>
-      <button class="modal-close" onclick="closeModal('publish-modal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="display:flex;align-items:center;gap:8px;background:var(--orange-bg);border:1px solid var(--orange-bdr);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--orange);margin-bottom:18px">
-        ⚠ 請確認已先傳送給店家確認，再進行發佈。
-      </div>
-      <div class="pub-section">
-        <div class="pub-section-label">月份</div>
-        <select class="form-select" id="pub-month-sel" onchange="updatePubSummary()"></select>
-      </div>
-      <div class="pub-section">
-        <div class="pub-section-label">廠區（可複選）</div>
-        <div class="check-group" id="pub-sites"></div>
-      </div>
-      <div class="pub-section">
-        <div class="pub-section-label">餐期（可複選）</div>
-        <div class="check-group" id="pub-meals"></div>
-      </div>
-      <div class="pub-summary" id="pub-summary"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('publish-modal')">取消</button>
-      <button class="btn btn-green" onclick="doPublish()">▶ 確認發佈</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 發佈二次確認 -->
-<div class="overlay" id="publish-confirm-modal">
-  <div class="modal modal-sm">
-    <div class="modal-head">
-      <div class="modal-title">確認發佈？</div>
-      <button class="modal-close" onclick="closeModal('publish-confirm-modal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div id="publish-confirm-summary" style="font-size:15px;line-height:1.8;color:var(--text-2)"></div>
-      <div style="margin-top:14px;padding:12px 14px;background:var(--orange-bg);border:1px solid var(--orange-bdr);border-radius:8px;font-size:14px;color:var(--orange)">
-        ⚠ 發佈後將通知店家，請確認資料無誤再送出。
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('publish-confirm-modal')">返回修改</button>
-      <button class="btn btn-green" onclick="executePublish()">▶ 確定發佈</button>
     </div>
   </div>
 </div>
@@ -1619,6 +1584,7 @@ let mealFilter  = 'lunch'; // 'all' or meal id
 let serviceType = 'system'; // 'system' | 'internal' | 'meeting'
 
 let detailDate  = null; // currently open detail panel date
+let selectedDates = new Set(); // Set<dateStr>，月曆日期勾選集合
 
 // rest picker
 let pickerDate      = null;
@@ -1653,21 +1619,6 @@ function init() {
   updateSiteFilterLabel();
 
   updatePlanTypeDisplay();
-
-  // pub month
-  document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((m,i) =>
-    `<option value="${i}"${i===curMonth?' selected':''}>${curYear}年${m}</option>`
-  ).join('');
-
-  // pub sites
-  document.getElementById('pub-sites').innerHTML = sites.map(s =>
-    `<label class="check-item"><input type="checkbox" data-site="${s.id}" checked onchange="updatePubSummary()"> ${s.name}</label>`
-  ).join('');
-
-  // pub meals
-  document.getElementById('pub-meals').innerHTML = MEAL_TYPES.map(m =>
-    `<label class="check-item"><input type="checkbox" data-meal="${m.id}" ${m.id==='lunch'?'checked':''} onchange="updatePubSummary()"> ${m.label}</label>`
-  ).join('');
 
   // meal filter sel sync
   document.getElementById('meal-filter-sel').value = mealFilter;
@@ -1705,7 +1656,10 @@ function renderCalendar() {
 
   // header
   document.getElementById('cal-header').innerHTML =
-    `<div class="wh-spacer"></div>` +
+    `<div class="cal-month-select-cell" onclick="toggleMonthSelectByLabel()" style="cursor:pointer">
+       <input type="checkbox" id="cal-month-cb" onclick="event.stopPropagation();toggleMonthSelect(this)">
+       <span>全月</span>
+     </div>` +
     WD_NAMES.map((wd,i) => `<div class="cal-wh-cell${i===0||i===6?' weekend':''}">${wd}</div>`).join('');
 
   // build weeks
@@ -1722,7 +1676,11 @@ function renderCalendar() {
     // week number label (use ISO or just ordinal)
     const weekNum = w + 1;
     html += `<div class="cal-week-row">
-      <div class="cal-week-label"><span class="wk-num">${('第'+weekNum+'週').split('').join('<br>')}</span></div>`;
+      <div class="cal-week-label" onclick="toggleWeekSelectByLabel(${w})" style="cursor:pointer">
+        <input type="checkbox" class="cal-week-check" id="week-cb-${w}"
+          onclick="event.stopPropagation();toggleWeekSelect(${w}, this)">
+        <span class="wk-num">${('第'+weekNum+'週').split('').join('<br>')}</span>
+      </div>`;
     weekCells.forEach((cell, wi) => {
       if (!cell.day) {
         html += `<div class="cal-cell other-month${wi===0||wi===6?' weekend':''}"></div>`;
@@ -1740,8 +1698,14 @@ function renderCalendar() {
       const numCls = isToday ? 'today' : (isWkend ? 'weekend' : '');
       const holidayName = TW_FIXED_HOLIDAYS[dateStr.slice(5)] || '';
       const holidayHtml = holidayName ? `<div class="cal-holiday-badge">${holidayName}</div>` : '';
-      html += `<div class="cal-cell${isWkend?' weekend':''}" onclick="openDetail('${dateStr}')">
-        <div class="cal-day-num ${numCls}">${cell.day}</div>
+      const isSelected = selectedDates.has(dateStr);
+      html += `<div class="cal-cell${isWkend?' weekend':''}${isSelected?' date-selected':''}" onclick="openDetail('${dateStr}')">
+        <div class="cal-day-header" onclick="event.stopPropagation();toggleDateSelectByHeader('${dateStr}')">
+          <input type="checkbox" class="cal-date-check" id="date-cb-${dateStr}"
+            ${isSelected?'checked':''}
+            onclick="event.stopPropagation()">
+          <div class="cal-day-num ${numCls}">${cell.day}</div>
+        </div>
         ${filtered.map(e => renderEntryChip(e, dateStr)).join('')}
         ${filterMbEntries(mbEntries).map(mb => renderMbChip(mb, dateStr)).join('')}
         ${holidayHtml}
@@ -1761,21 +1725,115 @@ function filterEntries(entries) {
   return byType;
 }
 
+/* ══════════════════════════════════════════════════
+   DATE SELECTION
+══════════════════════════════════════════════════ */
+function toggleDateSelect(dateStr, cb) {
+  if (cb.checked) selectedDates.add(dateStr);
+  else selectedDates.delete(dateStr);
+  const cell = document.getElementById('date-cb-' + dateStr)?.closest('.cal-cell');
+  if (cell) cell.classList.toggle('date-selected', cb.checked);
+  updateSelectionUI();
+}
+
+function toggleDateSelectByHeader(dateStr) {
+  const cb = document.getElementById('date-cb-' + dateStr);
+  if (!cb) return;
+  cb.checked = !cb.checked;
+  toggleDateSelect(dateStr, cb);
+}
+
+function toggleWeekSelectByLabel(weekIndex) {
+  const cb = document.getElementById(`week-cb-${weekIndex}`);
+  if (!cb) return;
+  cb.checked = cb.indeterminate ? true : !cb.checked;
+  cb.indeterminate = false;
+  toggleWeekSelect(weekIndex, cb);
+}
+
+function toggleWeekSelect(weekIndex, weekCb) {
+  const rows = document.querySelectorAll('.cal-week-row');
+  const row = rows[weekIndex];
+  if (!row) return;
+  const dateCbs = row.querySelectorAll('.cal-date-check');
+  dateCbs.forEach(cb => {
+    const dateStr = cb.id.replace('date-cb-', '');
+    if (weekCb.checked) selectedDates.add(dateStr);
+    else selectedDates.delete(dateStr);
+    cb.checked = weekCb.checked;
+    const cell = cb.closest('.cal-cell');
+    if (cell) cell.classList.toggle('date-selected', weekCb.checked);
+  });
+  updateSelectionUI();
+}
+
+function toggleMonthSelectByLabel() {
+  const cb = document.getElementById('cal-month-cb');
+  if (!cb) return;
+  cb.checked = cb.indeterminate ? true : !cb.checked;
+  cb.indeterminate = false;
+  toggleMonthSelect(cb);
+}
+
+function toggleMonthSelect(monthCb) {
+  const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = getDateStr(curYear, curMonth, d);
+    if (monthCb.checked) selectedDates.add(dateStr);
+    else selectedDates.delete(dateStr);
+  }
+  renderCalendar();
+  updateSelectionUI();
+}
+
+function updateSelectionUI() {
+  const count = selectedDates.size;
+  ['send-sel-count', 'review-sel-count', 'pub-sel-count'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = count; el.style.display = count ? '' : 'none'; }
+  });
+
+  const monthCb = document.getElementById('cal-month-cb');
+  if (monthCb) {
+    const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+    const prefix = `${curYear}-${String(curMonth + 1).padStart(2, '0')}-`;
+    const thisMonthSel = [...selectedDates].filter(d => d.startsWith(prefix)).length;
+    monthCb.checked = thisMonthSel === daysInMonth && daysInMonth > 0;
+    monthCb.indeterminate = thisMonthSel > 0 && thisMonthSel < daysInMonth;
+  }
+
+  document.querySelectorAll('.cal-week-row').forEach((row, wi) => {
+    const weekCb = document.getElementById(`week-cb-${wi}`);
+    if (!weekCb) return;
+    const dateCbs = row.querySelectorAll('.cal-date-check');
+    const total = dateCbs.length;
+    let sel = 0;
+    dateCbs.forEach(cb => { if (selectedDates.has(cb.id.replace('date-cb-', ''))) sel++; });
+    weekCb.checked = total > 0 && sel === total;
+    weekCb.indeterminate = sel > 0 && sel < total;
+  });
+}
+
+function entryStatus(entry) {
+  if (entry.publishedAt)   return { label: '已發布',   cls: 'status-published'  };
+  if (entry.reviewedAt)    return { label: '審核完畢', cls: 'status-reviewed'   };
+  if (entry.sentToStoreAt) return { label: '審核中',   cls: 'status-reviewing'  };
+  return                          { label: '暫存',     cls: 'status-draft'      };
+}
+
 function renderEntryChip(entry, dateStr) {
   const rest = restaurants.find(r => r.id === entry.restaurantId);
   if (!rest) return '';
   const mi = mealInfo(entry.mealType);
   const itemCount = entry.items.length;
-  const sentIcon = entry.sentToStoreAt ? '📤' : '';
-  const pubIcon  = entry.publishedAt   ? '✓'  : '';
-  const statusIcons = (sentIcon || pubIcon) ? `<span style="font-size:10px;opacity:.75;margin-left:2px">${sentIcon}${pubIcon}</span>` : '';
+  const status = entryStatus(entry);
   const siteBadge = selectedSiteIds.length > 1 && entry._siteId
     ? `<div class="entry-chip-site">${sites.find(s => s.id === entry._siteId)?.name || ''}</div>`
     : '';
   return `<div class="entry-chip ${mi.chipCls}" onclick="event.stopPropagation();openDetail('${dateStr}')" data-tooltip-type="entry" data-entry-id="${entry.entryId}" data-date="${dateStr}">
     <button class="entry-chip-del" onclick="event.stopPropagation();removeEntry('${dateStr}','${entry.entryId}')" title="移除">✕</button>
-    <div class="entry-chip-name">${rest.name}</div>
-    <div class="entry-chip-items">${mi.label}　${itemCount} 品項${statusIcons}</div>
+    <div class="entry-chip-name">${rest.name}<span class="entry-status ${status.cls}">${status.label}</span></div>
+    <div class="entry-chip-items">${mi.label}　${itemCount} 品項</div>
     ${siteBadge}
   </div>`;
 }
@@ -1816,15 +1874,13 @@ function renderDetailBody(dateStr) {
   const bulkBar = document.getElementById('detail-bulk-bar');
   const anyUnpublished = filtered.some(e => !e.publishedAt);
   const anyDirty       = filtered.some(e => e.publishedAt && e.dirtyAfterPublish);
-  let bulkHtml = `<span style="font-size:15px;color:var(--text-2);font-weight:500">批量操作：</span>`;
-  if (anyUnpublished)
-    bulkHtml += `<button class="btn btn-sm" style="border-color:var(--green);color:var(--green)" onclick="bulkPublish('${dateStr}','all')">▶ 全部發布</button>`;
-  if (anyDirty)
-    bulkHtml += `<button class="btn btn-sm" style="border-color:var(--orange);color:var(--orange)" onclick="bulkPublish('${dateStr}','dirty')">↺ 更新已修改</button>`;
-  if (!anyUnpublished && !anyDirty && filtered.length)
-    bulkHtml += `<span style="font-size:15px;color:var(--green)">✓ 全部已是最新發布</span>`;
-  bulkBar.style.display = filtered.length ? '' : 'none';
-  bulkBar.innerHTML = bulkHtml;
+  if (!anyUnpublished && !anyDirty && filtered.length) {
+    bulkBar.style.display = '';
+    bulkBar.innerHTML = `<span style="font-size:15px;color:var(--green)">✓ 全部已是最新發布</span>`;
+  } else {
+    bulkBar.style.display = 'none';
+    bulkBar.innerHTML = '';
+  }
 
   let html = filtered.map(entry => {
     const rest   = restaurants.find(r => r.id === entry.restaurantId);
@@ -1888,28 +1944,17 @@ function renderDetailBody(dateStr) {
         </div>
       </li>`;
     }).join('');
-    const pubBadge = !entry.publishedAt
-      ? `<span class="pub-badge unpublished">未發布</span>`
-      : entry.dirtyAfterPublish
-        ? `<span class="pub-badge dirty" title="發布後有修改，建議重新發布">已修改</span>`
-        : `<span class="pub-badge published" title="發布於 ${entry.publishedAt}">已發布</span>`;
-    const pubBtn = !entry.publishedAt
-      ? `<button class="pub-btn do-publish" onclick="publishEntry('${dateStr}','${entry.entryId}')">發布</button>`
-      : `<button class="pub-btn do-republish" onclick="publishEntry('${dateStr}','${entry.entryId}')">重新發布</button>`;
-    const revertBtn = entry.dirtyAfterPublish
-      ? `<button class="pub-btn" style="border-color:var(--text-3);color:var(--text-3)" onclick="revertEntry('${dateStr}','${entry.entryId}')">取消變更</button>`
-      : '';
-    const sentBadge = entry.sentToStoreAt
-      ? `<span class="sent-badge sent" title="傳送於 ${entry.sentToStoreAt}">📤 已傳送</span>`
-      : `<span class="sent-badge not-sent">未傳送</span>`;
+    const status = entryStatus(entry);
+    const tsLabel = entry.publishedAt || entry.reviewedAt || entry.sentToStoreAt || null;
+    const statusBadge = `<span class="pub-badge ${status.cls}"${tsLabel ? ` title="${tsLabel}"` : ''}>${status.label}</span>`;
     const branchBadge = entry.branchId ? `<span class="branch-badge">${getBranchName(rest, entry.branchId)}</span>` : '';
     const entrySite   = entry._siteId ? sites.find(s => s.id === entry._siteId) : sites.find(s => s.id === curSiteId);
-    const metaLine    = `<div class="rest-card-meta">廠區：${entrySite?.name || '—'}　${entry.publishedAt ? `發布：${entry.publishedAt}` : '尚未發布'}</div>`;
+    const metaLine    = `<div class="rest-card-meta">廠區：${entrySite?.name || '—'}　狀態：${status.label}${tsLabel ? `（${tsLabel}）` : ''}</div>`;
     return `<div class="rest-card">
       <div class="rest-card-header">
         <span class="rest-card-name">${rest.name}</span>${branchBadge}
         <span class="rest-card-meal ${mi.tagCls}">${mi.label}</span>
-        <div class="pub-status">${sentBadge}${pubBadge}${revertBtn}${pubBtn}</div>
+        <div class="pub-status">${statusBadge}</div>
         <button class="rest-card-remove" onclick="removeEntry('${dateStr}','${entry.entryId}')">✕</button>
       </div>
       ${metaLine}
@@ -1942,6 +1987,14 @@ function renderDetailBody(dateStr) {
   body.innerHTML = html;
 }
 
+function revertToStaged(entry) {
+  entry.sentToStoreAt = null;
+  entry.reviewedAt    = null;
+  entry.publishedAt   = null;
+  entry.dirtyAfterPublish   = false;
+  entry.publishedSnapshot   = null;
+}
+
 function checkDirty(entry) {
   if (!entry.publishedAt || !entry.publishedSnapshot) return;
   const snap = entry.publishedSnapshot;
@@ -1967,8 +2020,9 @@ function saveItemField(dateStr, entryId, itemId, field, value) {
   const item = entry.items.find(i => i.itemId === itemId);
   if (!item) return;
   item[field] = value;
-  markDirty(dateStr, entryId);
+  revertToStaged(entry);
   renderDetailBody(dateStr);
+  rerenderCalendar();
 }
 
 function saveItemPrice(dateStr, entryId, itemId, value) {
@@ -1978,8 +2032,9 @@ function saveItemPrice(dateStr, entryId, itemId, value) {
   if (!item) return;
   item.price  = value;
   item.isAuto = false;
-  markDirty(dateStr, entryId);
+  revertToStaged(entry);
   renderDetailBody(dateStr);
+  rerenderCalendar();
 }
 
 /* ══════════════════════════════════════════════════
@@ -2154,7 +2209,7 @@ function bpaApply() {
     if (!item) return;
     item.price  = bpaCalcNewPrice(item.price, value, bpaMode);
     item.isAuto = false;
-    if (it.siteId === curSiteId && entry.publishedAt) checkDirty(entry);
+    revertToStaged(entry);
   });
 
   rerenderCalendar();
@@ -2183,7 +2238,7 @@ function bpaRevert() {
         const item = entry.items.find(i => i.itemId === snap.itemId);
         if (!item) return;
         item.price = snap.price;
-        if (snap.siteId === curSiteId && entry.publishedAt) checkDirty(entry);
+        revertToStaged(entry);
       });
       rerenderCalendar();
       if (detailDate) renderDetailBody(detailDate);
@@ -2247,25 +2302,6 @@ function publishEntry(dateStr, entryId) {
   });
 }
 
-function bulkPublish(dateStr, mode) {
-  const entries = (scheduleData[curSiteId]?.[dateStr] || []);
-  const targets = mode === 'dirty'
-    ? entries.filter(e => e.publishedAt && e.dirtyAfterPublish)
-    : entries.filter(e => !e.publishedAt);
-  if (!targets.length) return;
-  const dateLabel = dateStr.slice(5).replace('-','/');
-  const title = mode === 'dirty' ? '確認更新已修改？' : '確認全部發布？';
-  const body  = mode === 'dirty'
-    ? `將重新發布 ${dateLabel} 共 <b>${targets.length} 間</b>已修改的店家排程至店家端。`
-    : `將發布 ${dateLabel} 共 <b>${targets.length} 間</b>尚未發布的店家排程至店家端。`;
-  showConfirm(title, body, mode === 'dirty' ? '更新已修改' : '全部發布', mode === 'dirty' ? 'btn-orange' : 'btn-green', () => {
-    const now = new Date();
-    const ts  = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    targets.forEach(e => { e.publishedAt = ts; e.dirtyAfterPublish = false; e.publishedSnapshot = e.items.map(i => ({ ...i })); });
-    showToast(`已${mode === 'dirty' ? '重新發布' : '發布'} ${targets.length} 間店家`, 'success');
-    renderDetailBody(dateStr);
-  });
-}
 
 /* ══════════════════════════════════════════════════
    HELPERS
@@ -2336,10 +2372,9 @@ function changeMonth(delta) {
   if (curMonth > 11) { curMonth = 0;  curYear++; }
   renderMonthLabel();
   closeDetail();
+  selectedDates.clear();
   renderCalendar();
-  document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((m,i) =>
-    `<option value="${i}"${i===curMonth?' selected':''}>${curYear}年${m}</option>`
-  ).join('');
+  updateSelectionUI();
 }
 
 function goToday() {
@@ -2348,10 +2383,9 @@ function goToday() {
   curMonth = now.getMonth();
   renderMonthLabel();
   closeDetail();
+  selectedDates.clear();
   renderCalendar();
-  document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((m,i) =>
-    `<option value="${i}"${i===curMonth?' selected':''}>${curYear}年${m}</option>`
-  ).join('');
+  updateSelectionUI();
 }
 
 function onSiteFilterChange(siteId) {
@@ -2791,7 +2825,7 @@ function confirmAddRest() {
     return { itemId: id, name: inp.dataset.name, price, isAuto: inp.dataset.auto === 'true', cabinetTemp, cabinetSlot, onlineQty, offlineQty, storeQty };
   });
   if (!scheduleData[curSiteId][pickerDate]) scheduleData[curSiteId][pickerDate] = [];
-  scheduleData[curSiteId][pickerDate].push({ entryId, restaurantId: pickerRestId, branchId: pickerBranchId || null, mealType, addedBy: CURRENT_USER, planType: planTypeFilter, serviceType, sentToStoreAt: null, items });
+  scheduleData[curSiteId][pickerDate].push({ entryId, restaurantId: pickerRestId, branchId: pickerBranchId || null, mealType, addedBy: CURRENT_USER, planType: planTypeFilter, serviceType, sentToStoreAt: null, reviewedAt: null, items });
   closeModal('rest-picker-modal');
   rerenderCalendar();
   showToast('已新增店家', 'success');
@@ -3279,7 +3313,7 @@ function confirmAddItem() {
     const price       = endPriceEl && endPriceEl.value !== '' ? Number(endPriceEl.value) : Number(inp.dataset.price);
     entry.items.push({ itemId: id, name: inp.dataset.name, price, isAuto: false, cabinetTemp, cabinetSlot, onlineQty, offlineQty, storeQty });
   });
-  markDirty(pickerItemDate, pickerItemEntryId);
+  revertToStaged(entry);
   closeModal('item-picker-modal');
   rerenderCalendar();
   showToast(`已新增 ${checkedInputs.length} 個品項`, 'success');
@@ -3313,7 +3347,7 @@ function removeItem(dateStr, entryId, itemId) {
     '移除', 'btn-danger',
     () => {
       entry.items = entry.items.filter(i => i.itemId !== itemId);
-      markDirty(dateStr, entryId);
+      revertToStaged(entry);
       rerenderCalendar();
       showToast('已移除品項');
     }
@@ -3398,7 +3432,7 @@ function confirmCopyToSites() {
         scheduleData[siteId][ds].push({
           entryId: genEntryId(), restaurantId: src.restaurantId,
           mealType: src.mealType, addedBy: CURRENT_USER,
-          planType: src.planType || 'store', sentToStoreAt: null,
+          planType: src.planType || 'store', sentToStoreAt: null, reviewedAt: null,
           items: src.items.map(it => ({ ...it, isAuto: false }))
         });
         copiedEntries++;
@@ -3576,8 +3610,6 @@ function saveMgrMeal(restId, mealId, checked) {
 /* ══════════════════════════════════════════════════
    PUBLISH
 ══════════════════════════════════════════════════ */
-function openPublish() { updatePubSummary(); openModal('publish-modal'); }
-
 function openMonthPicker() {
   document.getElementById('jump-year').value  = curYear;
   document.getElementById('jump-month').value = curMonth;
@@ -3610,202 +3642,116 @@ function jumpToMonth(y, m) {
   curMonth = m;
   renderMonthLabel();
   closeDetail();
+  selectedDates.clear();
   renderCalendar();
-  document.getElementById('pub-month-sel').innerHTML = MONTH_NAMES.map((mn, i) =>
-    `<option value="${i}"${i === curMonth ? ' selected' : ''}>${curYear}年${mn}</option>`
-  ).join('');
-}
-
-function updatePubSummary() {
-  const monthVal  = parseInt(document.getElementById('pub-month-sel').value);
-  const selSites  = [...document.querySelectorAll('#pub-sites input:checked')].map(el => el.dataset.site);
-  const selMeals  = [...document.querySelectorAll('#pub-meals input:checked')].map(el => el.dataset.meal);
-
-  let totalDays = 0; const totalStores = new Set(); let totalItems = 0;
-  selSites.forEach(siteId => {
-    Object.entries(scheduleData[siteId] || {}).forEach(([dateStr, entries]) => {
-      const d = new Date(dateStr);
-      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
-      const filtered = entries.filter(e => selMeals.includes(e.mealType));
-      if (filtered.length) {
-        totalDays++;
-        filtered.forEach(e => { totalStores.add(e.restaurantId); totalItems += e.items.length; });
-      }
-    });
-  });
-
-  const mealLabels = selMeals.map(id => mealInfo(id).label).join('、') || '（未選餐期）';
-  document.getElementById('pub-summary').innerHTML =
-    `發佈範圍：${curYear}年${MONTH_NAMES[monthVal]}｜${selSites.map(id=>sites.find(s=>s.id===id)?.name).join('、')||'（未選廠區）'}<br>
-     餐期：${mealLabels}<br>
-     共 <strong>${totalDays}</strong> 天有排程、<strong>${totalStores.size}</strong> 間店家、<strong>${totalItems}</strong> 個品項`;
-}
-
-function doPublish() {
-  const monthVal = parseInt(document.getElementById('pub-month-sel').value);
-  const selSites = [...document.querySelectorAll('#pub-sites input:checked')].map(el => el.dataset.site);
-  const selMeals = [...document.querySelectorAll('#pub-meals input:checked')].map(el => el.dataset.meal);
-  if (!selSites.length || !selMeals.length) { showToast('請選擇廠區與餐期', 'error'); return; }
-  let total = 0;
-  selSites.forEach(siteId => {
-    Object.entries(scheduleData[siteId] || {}).forEach(([dateStr, entries]) => {
-      const d = new Date(dateStr);
-      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
-      total += entries.filter(e => selMeals.includes(e.mealType)).length;
-    });
-  });
-  const siteNames = selSites.map(id => (sites.find(s => s.id === id) || {}).name || id).join('、');
-  const mealNames = selMeals.map(id => (MEAL_TYPES.find(m => m.id === id) || {}).label || id).join('、');
-  document.getElementById('publish-confirm-summary').innerHTML =
-    `<b>月份：</b>${curYear}年${MONTH_NAMES[monthVal]}<br>` +
-    `<b>廠區：</b>${siteNames}<br>` +
-    `<b>餐期：</b>${mealNames}<br>` +
-    `<b>排程筆數：</b>${total} 筆`;
-  // 暫存發佈參數供 executePublish 使用
-  window._pendingPublish = { monthVal, selSites, selMeals, total };
-  openModal('publish-confirm-modal');
-}
-
-function executePublish() {
-  const { monthVal, selSites, selMeals, total } = window._pendingPublish || {};
-  closeModal('publish-confirm-modal');
-  closeModal('publish-modal');
-
-  const now = new Date();
-  const ts  = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const targetYear  = curYear;
-  const targetMonth = monthVal; // 0-based (同 doPublish)
-
-  (selSites || []).forEach(siteId => {
-    const siteData = scheduleData[siteId] || {};
-    Object.keys(siteData).forEach(dateStr => {
-      const d = new Date(dateStr);
-      if (d.getFullYear() !== targetYear || d.getMonth() !== targetMonth) return;
-      siteData[dateStr].forEach(entry => {
-        if (!(selMeals || []).includes(entry.mealType)) return;
-        entry.publishedAt       = ts;
-        entry.dirtyAfterPublish = false;
-        entry.publishedSnapshot = entry.items.map(i => ({ ...i }));
-      });
-    });
-  });
-
-  // 若目前開啟的 detail panel 也在範圍內，重新渲染
-  if (curDetailDate) renderDetailBody(curDetailDate);
-
-  showToast(`已發佈 ${total||0} 筆排程至店家端（${curYear}年${MONTH_NAMES[monthVal]}）`, 'success');
+  updateSelectionUI();
 }
 
 /* ══════════════════════════════════════════════════
-   SEND TO STORE
+   DIRECT BATCH ACTIONS (月曆勾選後直接執行)
 ══════════════════════════════════════════════════ */
-function openSendToStore() {
-  document.getElementById('send-month-sel').innerHTML = MONTH_NAMES.map((m, i) =>
-    `<option value="${i}"${i === curMonth ? ' selected' : ''}>${curYear}年${m}</option>`
-  ).join('');
-
-  document.getElementById('send-sites').innerHTML = sites.map(s =>
-    `<label class="check-item">
-      <input type="checkbox" data-site="${s.id}" ${selectedSiteIds.includes(s.id) ? 'checked' : ''}
-        onchange="updateSendSummary()"> ${s.name}
-    </label>`
-  ).join('');
-
-  document.getElementById('send-meals').innerHTML = MEAL_TYPES.map(m =>
-    `<label class="check-item">
-      <input type="checkbox" data-meal="${m.id}" ${m.id === mealFilter || mealFilter === 'all' ? 'checked' : ''}
-        onchange="updateSendSummary()"> ${m.label}
-    </label>`
-  ).join('');
-
-  updateSendSummary();
-  openModal('send-to-store-modal');
-}
-
-function updateSendSummary() {
-  const monthVal = parseInt(document.getElementById('send-month-sel').value);
-  const selSites = [...document.querySelectorAll('#send-sites input:checked')].map(el => el.dataset.site);
-  const selMeals = [...document.querySelectorAll('#send-meals input:checked')].map(el => el.dataset.meal);
-
-  let totalDays = 0; const totalStores = new Set(); let totalItems = 0;
-  selSites.forEach(siteId => {
-    Object.entries(scheduleData[siteId] || {}).forEach(([dateStr, entries]) => {
-      const d = new Date(dateStr);
-      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
-      const filtered = entries.filter(e =>
-        selMeals.includes(e.mealType) && (e.planType || 'store') === planTypeFilter
-      );
-      if (filtered.length) {
-        totalDays++;
-        filtered.forEach(e => { totalStores.add(e.restaurantId); totalItems += e.items.length; });
-      }
-    });
-  });
-
-  const mealLabels = selMeals.map(id => mealInfo(id).label).join('、') || '（未選餐期）';
-  document.getElementById('send-summary').innerHTML =
-    `傳送範圍：${curYear}年${MONTH_NAMES[monthVal]}｜` +
-    `${selSites.map(id => sites.find(s => s.id === id)?.name).join('、') || '（未選廠區）'}<br>` +
-    `餐期：${mealLabels}<br>` +
-    `定價策略：${PLAN_TYPES.find(p => p.id === planTypeFilter)?.label || planTypeFilter}<br>` +
-    `共 <strong>${totalDays}</strong> 天有排程、<strong>${totalStores.size}</strong> 間店家、<strong>${totalItems}</strong> 個品項`;
-}
-
-function doSendToStore() {
-  const monthVal = parseInt(document.getElementById('send-month-sel').value);
-  const selSites = [...document.querySelectorAll('#send-sites input:checked')].map(el => el.dataset.site);
-  const selMeals = [...document.querySelectorAll('#send-meals input:checked')].map(el => el.dataset.meal);
-  if (!selSites.length || !selMeals.length) { showToast('請選擇廠區與餐期', 'error'); return; }
-
-  let total = 0;
-  selSites.forEach(siteId => {
-    Object.entries(scheduleData[siteId] || {}).forEach(([dateStr, entries]) => {
-      const d = new Date(dateStr);
-      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
-      total += entries.filter(e =>
-        selMeals.includes(e.mealType) && (e.planType || 'store') === planTypeFilter
-      ).length;
-    });
-  });
-
-  const siteNames = selSites.map(id => sites.find(s => s.id === id)?.name || id).join('、');
-  const mealNames = selMeals.map(id => MEAL_TYPES.find(m => m.id === id)?.label || id).join('、');
-
-  document.getElementById('send-confirm-summary').innerHTML =
-    `<b>月份：</b>${curYear}年${MONTH_NAMES[monthVal]}<br>` +
-    `<b>廠區：</b>${siteNames}<br>` +
-    `<b>餐期：</b>${mealNames}<br>` +
-    `<b>定價策略：</b>${PLAN_TYPES.find(p => p.id === planTypeFilter)?.label || planTypeFilter}<br>` +
-    `<b>排程筆數：</b>${total} 筆`;
-
-  window._pendingSend = { monthVal, selSites, selMeals, total };
-  openModal('send-to-store-confirm-modal');
-}
-
-function executeSendToStore() {
-  const { monthVal, selSites, selMeals, total } = window._pendingSend || {};
-  closeModal('send-to-store-confirm-modal');
-  closeModal('send-to-store-modal');
-
+function _nowTs() {
   const now = new Date();
-  const ts  = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  return `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+}
 
-  (selSites || []).forEach(siteId => {
-    const siteData = scheduleData[siteId] || {};
-    Object.keys(siteData).forEach(dateStr => {
-      const d = new Date(dateStr);
-      if (d.getFullYear() !== curYear || d.getMonth() !== monthVal) return;
-      siteData[dateStr].forEach(entry => {
-        if (!(selMeals || []).includes(entry.mealType)) return;
-        if ((entry.planType || 'store') !== planTypeFilter) return;
-        entry.sentToStoreAt = ts;
+function _getTargetEntries(dateFilter) {
+  const mealIds = mealFilter === 'all' ? MEAL_TYPES.map(m => m.id) : [mealFilter];
+  const result = [];
+  selectedSiteIds.forEach(siteId => {
+    selectedDates.forEach(dateStr => {
+      const entries = (scheduleData[siteId] || {})[dateStr] || [];
+      entries.forEach(entry => {
+        if (!mealIds.includes(entry.mealType)) return;
+        if (dateFilter(entry)) result.push({ entry, siteId, dateStr });
       });
     });
   });
+  return result;
+}
 
-  if (detailDate) renderDetailBody(detailDate);
-  rerenderCalendar();
-  showToast(`已傳送 ${total || 0} 筆排程給店家（${curYear}年${MONTH_NAMES[monthVal]}）`, 'success');
+function _buildDateRange() {
+  const sorted = [...selectedDates].sort();
+  if (!sorted.length) return '';
+  if (sorted.length === 1) return sorted[0].slice(5).replace('-', '/');
+  return `${sorted[0].slice(5).replace('-','/')} ～ ${sorted[sorted.length-1].slice(5).replace('-','/')}（${sorted.length} 天）`;
+}
+
+function doSendToStoreDirect() {
+  if (!selectedDates.size) { showToast('請先在月曆上勾選要傳送的日期', 'error'); return; }
+  const targets = _getTargetEntries(e => !e.sentToStoreAt);
+  if (!targets.length) { showToast('勾選日期內無「暫存」狀態的排程', 'error'); return; }
+
+  const siteNames = selectedSiteIds.map(id => sites.find(s => s.id === id)?.name || id).join('、');
+  const mealNames = (mealFilter === 'all' ? MEAL_TYPES : MEAL_TYPES.filter(m => m.id === mealFilter)).map(m => m.label).join('、');
+  showConfirm(
+    '確認傳送給店家',
+    `<b>廠區：</b>${siteNames}<br>` +
+    `<b>日期：</b>${_buildDateRange()}<br>` +
+    `<b>餐期：</b>${mealNames}<br>` +
+    `<b>排程筆數：</b>${targets.length} 筆<br><br>` +
+    `<div style="padding:10px 12px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:7px;font-size:13px;color:var(--blue-text)">📤 傳送後，店家端將收到菜單確認請求。</div>`,
+    '📤 確認傳送', '',
+    () => {
+      const ts = _nowTs();
+      targets.forEach(({ entry }) => { entry.sentToStoreAt = ts; });
+      if (detailDate) renderDetailBody(detailDate);
+      rerenderCalendar();
+      showToast(`已傳送 ${targets.length} 筆排程給店家`, 'success');
+    }
+  );
+}
+
+function doSimulateReviewDirect() {
+  if (!selectedDates.size) { showToast('請先在月曆上勾選日期', 'error'); return; }
+  const targets = _getTargetEntries(e => e.sentToStoreAt && !e.reviewedAt);
+  if (!targets.length) { showToast('勾選日期內無「審核中」狀態的排程', 'error'); return; }
+
+  const siteNames = selectedSiteIds.map(id => sites.find(s => s.id === id)?.name || id).join('、');
+  showConfirm(
+    '模擬店家審核完畢',
+    `<b>廠區：</b>${siteNames}<br>` +
+    `<b>日期：</b>${_buildDateRange()}<br>` +
+    `<b>排程筆數：</b>${targets.length} 筆<br><br>` +
+    `<div style="padding:10px 12px;background:var(--teal-bg);border:1px solid var(--teal-bdr);border-radius:7px;font-size:13px;color:var(--teal)">✅ 模擬店家回傳審核完畢，狀態將更新為「審核完畢」。</div>`,
+    '✅ 確認審核完畢', '',
+    () => {
+      const ts = _nowTs();
+      targets.forEach(({ entry }) => { entry.reviewedAt = ts; });
+      if (detailDate) renderDetailBody(detailDate);
+      rerenderCalendar();
+      showToast(`已標記 ${targets.length} 筆排程為審核完畢`, 'success');
+    }
+  );
+}
+
+function doPublishDirect() {
+  if (!selectedDates.size) { showToast('請先在月曆上勾選要發布的日期', 'error'); return; }
+  const targets = _getTargetEntries(e => e.reviewedAt && !e.publishedAt);
+  if (!targets.length) { showToast('勾選日期內無「審核完畢」狀態的排程（須先完成審核才能發布）', 'error'); return; }
+
+  const siteNames = selectedSiteIds.map(id => sites.find(s => s.id === id)?.name || id).join('、');
+  const mealNames = (mealFilter === 'all' ? MEAL_TYPES : MEAL_TYPES.filter(m => m.id === mealFilter)).map(m => m.label).join('、');
+  showConfirm(
+    '確認發布訂餐',
+    `<b>廠區：</b>${siteNames}<br>` +
+    `<b>日期：</b>${_buildDateRange()}<br>` +
+    `<b>餐期：</b>${mealNames}<br>` +
+    `<b>排程筆數：</b>${targets.length} 筆<br><br>` +
+    `<div style="padding:10px 12px;background:var(--orange-bg);border:1px solid var(--orange-bdr);border-radius:7px;font-size:13px;color:var(--orange)">⚠ 僅發布已審核完畢的排程。</div>`,
+    '▶ 確認發布', 'btn-green',
+    () => {
+      const ts = _nowTs();
+      targets.forEach(({ entry }) => {
+        entry.publishedAt = ts;
+        entry.dirtyAfterPublish = false;
+        entry.publishedSnapshot = entry.items.map(i => ({ ...i }));
+      });
+      if (detailDate) renderDetailBody(detailDate);
+      rerenderCalendar();
+      showToast(`已發布 ${targets.length} 筆排程至店家端`, 'success');
+    }
+  );
 }
 
 /* ══════════════════════════════════════════════════

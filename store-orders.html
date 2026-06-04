@@ -130,63 +130,61 @@ body {
   font-size: 18px; font-weight: 600;
 }
 
-/* ── 餐期區塊 ── */
-.meal-section { border-bottom: 1px solid var(--border); }
-.meal-section:last-child { border-bottom: none; }
-.meal-section-hd {
-  padding: 11px 20px;
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--border-2);
-  display: flex; align-items: center; gap: 10px;
-  font-size: 16px; font-weight: 500;
-}
-.meal-section-total {
-  font-size: 14px; color: var(--text-3); font-weight: 400;
-}
-
-/* ── 訂單表格 ── */
-.order-table-wrap { overflow-x: auto; }
-.order-table {
-  width: 100%; border-collapse: collapse; font-size: 15px;
-}
-.order-table th {
-  padding: 8px 16px; font-size: 14px; font-weight: 600; color: var(--text-2);
-  background: var(--bg-2); text-align: left; border-bottom: 1px solid var(--border-2);
-  white-space: nowrap;
-}
-.order-table td {
-  padding: 8px 16px; border-bottom: 1px solid var(--border-2); color: var(--text-2);
-  vertical-align: middle;
-}
-.order-table tr:last-child td { border-bottom: none; }
-
-/* ── 分店標題列 ── */
-.branch-hd-row td {
-  background: var(--bg-3); font-weight: 600; font-size: 15px;
-  color: var(--text); padding: 8px 16px; border-top: 1px solid var(--border-2);
-}
-.branch-total-tag {
-  display: inline-block; font-size: 13px; padding: 1px 9px; border-radius: 100px;
-  background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr);
-  margin-left: 8px; font-weight: 500;
-}
-.branch-zero-tag {
-  display: inline-block; font-size: 13px; padding: 1px 9px; border-radius: 100px;
-  background: var(--bg-3); color: var(--text-3); border: 1px solid var(--border);
-  margin-left: 8px; font-weight: 400;
-}
-
-/* 數量為 0 顯示橫線 */
+/* 數量 */
 .qty-zero { color: var(--text-3); }
-.qty-val  { font-weight: 600; color: var(--text); }
+.qty-val  { font-weight: 700; color: var(--text); font-size: 16px; }
 
-/* ── Meal chip ── */
-.meal-chip { padding: 2px 9px; border-radius: 100px; font-size: 13px; font-weight: 500; white-space: nowrap; }
-.chip-breakfast { background: #fef9c3; color: #854d0e; }
-.chip-lunch     { background: var(--orange-bg); color: var(--orange); }
-.chip-dinner    { background: var(--purple-bg); color: var(--purple); }
-.chip-afternoon { background: #f0fdfa; color: #0f766e; }
-.chip-latenight { background: var(--bg-3); color: var(--text-2); }
+/* ── 供餐方案卡片 ── */
+.svc-card {
+  border-radius: 10px; overflow: hidden;
+  margin: 0 20px 16px;
+}
+.svc-card:last-child { margin-bottom: 4px; }
+
+.svc-card-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 18px 12px;
+  font-size: 16px; font-weight: 700;
+}
+.svc-card-hd .svc-sub { font-size: 13px; font-weight: 400; opacity: .75; }
+
+.svc-item-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 18px;
+  font-size: 15px;
+}
+.svc-item-row + .svc-item-row { border-top: 1px solid; }
+.svc-item-name { color: var(--text); }
+.svc-item-qty  { font-weight: 700; font-size: 16px; white-space: nowrap; }
+.svc-item-qty .svc-item-unit { font-size: 13px; font-weight: 400; margin-left: 2px; }
+
+.svc-item-modified { position: relative; }
+.svc-item-original { font-size: 12px; text-decoration: line-through; opacity: .5; margin-right: 6px; }
+.svc-item-removed  { font-size: 13px; }
+
+.svc-version-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 18px; font-size: 13px;
+  border-top: 1px solid;
+}
+
+/* 系統訂餐 — 藍 */
+.svc-system .svc-card-hd        { background: #c5e5fc; color: #0d76b5; }
+.svc-system .svc-item-row       { background: #dbeeff; border-color: #a8d4f5; }
+.svc-system .svc-item-qty       { color: #0d76b5; }
+.svc-system .svc-version-bar    { background: #c5e5fc; border-color: #a8d4f5; color: #0d76b5; }
+
+/* 內部訂餐 — 黃橘 */
+.svc-internal .svc-card-hd      { background: #fde68a; color: #92400e; }
+.svc-internal .svc-item-row     { background: #fef3c7; border-color: #fcd34d; }
+.svc-internal .svc-item-qty     { color: #92400e; }
+.svc-internal .svc-version-bar  { background: #fde68a; border-color: #fcd34d; color: #92400e; }
+
+/* 會議餐 — 紫 */
+.svc-meeting .svc-card-hd       { background: #ddd6fe; color: #6d28d9; }
+.svc-meeting .svc-item-row      { background: #ede9fe; border-color: #c4b5fd; }
+.svc-meeting .svc-item-qty      { color: #6d28d9; }
+.svc-meeting .svc-version-bar   { background: #ddd6fe; border-color: #c4b5fd; color: #6d28d9; }
 
 /* ── 菜單版本提示條 ── */
 .menu-version-bar { display:flex; align-items:center; gap:8px; padding:8px 14px; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; font-size:13px; color:#c2410c; margin-bottom:12px; }
@@ -276,103 +274,143 @@ const currentStore = {
    orderData[dateStr][mealType] = { totalQty, branches: [...] }
    每個 branch = { branchCode, branchName, branchTotal, items:[{itemCode,itemName,qty}] }
 ═══════════════════════════════════════════════ */
+/* orderData[dateStr] = [ { serviceType, mealType, totalQty, menuVersion?, menuUpdatedAt?, branches:[...] } ] */
 const orderData = {
-  '2026-04-22': {
-    lunch: {
-      totalQty: 75,
-      menuVersion: 2,
-      menuUpdatedAt: '04/17 09:00',
+  '2026-04-22': [
+    {
+      serviceType: 'system', mealType: 'lunch',
+      totalQty: 75, menuVersion: 2, menuUpdatedAt: '04/17 09:00',
       branches: [
         {
           branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 45,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 18 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 15 },
-            { itemCode: '9990014099', itemName: '日式炸雞便當',          qty: 12 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 18 },
+            { itemCode: '9990014011', itemName: '親子全熟食',          qty: 15 },
+            { itemCode: '9990014099', itemName: '日式炸雞便當',        qty: 12 },
           ]
         },
         {
           branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 30,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 12 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 10 },
-            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌',   qty: 0,
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 12 },
+            { itemCode: '9990014011', itemName: '親子全熟食',          qty: 10 },
+            { itemCode: '9990014021', itemName: '扇貝茶碗蒸貢丸味噌', qty: 0,
               modified: { field: 'removed', originalQty: 8, note: '菜單更新（04/17 09:00）' } },
-            { itemCode: '9990014099', itemName: '日式炸雞便當',          qty: 8 },
+            { itemCode: '9990014099', itemName: '日式炸雞便當',        qty: 8 },
+          ]
+        }
+      ]
+    },
+    {
+      serviceType: 'internal', mealType: 'lunch',
+      totalQty: 20,
+      branches: [
+        {
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 20,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 12 },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯', qty: 8 },
+          ]
+        }
+      ]
+    },
+    {
+      serviceType: 'meeting', mealType: 'lunch',
+      totalQty: 6,
+      branches: [
+        {
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 6,
+          items: [
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 4 },
+            { itemCode: '9990014011', itemName: '親子全熟食',          qty: 2 },
           ]
         }
       ]
     }
-  },
-  '2026-04-23': {
-    lunch: {
-      totalQty: 60,
-      menuVersion: 2,
-      menuUpdatedAt: '04/17 09:00',
+  ],
+  '2026-04-23': [
+    {
+      serviceType: 'system', mealType: 'lunch',
+      totalQty: 60, menuVersion: 2, menuUpdatedAt: '04/17 09:00',
       branches: [
         {
           branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 35,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 25,
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 25,
               modified: { field: 'qty', originalQty: 20, note: '菜單更新（04/17 09:00）' } },
-            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 10 },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯', qty: 10 },
           ]
         },
         {
           branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 25,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 15 },
-            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯',   qty: 10 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 15 },
+            { itemCode: '9990014026', itemName: '日式煎餃花蛤味噌湯', qty: 10 },
           ]
         }
       ]
     },
-    dinner: {
+    {
+      serviceType: 'system', mealType: 'dinner',
       totalQty: 3,
       branches: [
         {
           branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 3,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 1 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 2 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 1 },
+            { itemCode: '9990014011', itemName: '親子全熟食',          qty: 2 },
           ]
         }
       ]
     }
-  },
-  '2026-04-29': {
-    lunch: {
+  ],
+  '2026-04-29': [
+    {
+      serviceType: 'system', mealType: 'lunch',
       totalQty: 55,
       branches: [
         {
           branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 30,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 30 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 30 },
           ]
         },
         {
           branchCode: '10603003', branchName: '新唐南港辦公室', branchTotal: 25,
           items: [
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 25 },
+            { itemCode: '9990014011', itemName: '親子全熟食',          qty: 25 },
+          ]
+        }
+      ]
+    },
+    {
+      serviceType: 'internal', mealType: 'lunch',
+      totalQty: 10,
+      branches: [
+        {
+          branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 10,
+          items: [
+            { itemCode: '9990014011', itemName: '親子全熟食',          qty: 10 },
           ]
         }
       ]
     }
-  },
-  '2026-03-25': {
-    lunch: {
+  ],
+  '2026-03-25': [
+    {
+      serviceType: 'system', mealType: 'lunch',
       totalQty: 5,
       branches: [
         {
           branchCode: '10501003', branchName: '華邦南港辦公室', branchTotal: 5,
           items: [
-            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',         qty: 3 },
-            { itemCode: '9990014011', itemName: '親子全熟食',            qty: 2 },
+            { itemCode: '9990014002', itemName: '迷你秋刀魚丼',       qty: 3 },
+            { itemCode: '9990014011', itemName: '親子全熟食',          qty: 2 },
           ]
         }
       ]
     }
-  }
+  ]
 };
 
 /* ═══════════════════════════════════════════════
@@ -409,7 +447,19 @@ function selectMealFilter(id) {
   mealFilter = id;
   renderMealFilter();
   renderDateList();
-  if (activeDateStr) renderOrderDetail(activeDateStr);
+  if (activeDateStr) {
+    const dates = getFilteredDates();
+    if (dates.includes(activeDateStr)) {
+      renderOrderDetail(activeDateStr);
+    } else {
+      activeDateStr = null;
+      document.getElementById('order-detail-panel').innerHTML = `
+        <div class="order-detail-placeholder">
+          <div class="icon">📦</div>
+          <p>請從左側選擇日期查看訂單明細</p>
+        </div>`;
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -421,7 +471,7 @@ function getFilteredDates() {
     .filter(d => {
       if (d < start || d > end) return false;
       if (mealFilter === 'all') return true;
-      return !!orderData[d][mealFilter];
+      return orderData[d].some(e => e.mealType === mealFilter);
     })
     .sort();
 }
@@ -435,16 +485,19 @@ function renderDateList() {
   }
   el.innerHTML = dates.map(d => {
     const dt = new Date(d);
-    const mealKeys = mealFilter === 'all'
-      ? Object.keys(orderData[d])
-      : [mealFilter];
-    const totalQty = mealKeys.reduce((s, mk) => s + (orderData[d][mk]?.totalQty || 0), 0);
-    const hasModification = mealKeys.some(mk => (orderData[d][mk]?.menuVersion || 1) > 1);
+    const entries = mealFilter === 'all'
+      ? orderData[d]
+      : orderData[d].filter(e => e.mealType === mealFilter);
+    const totalQty = entries.reduce((s, e) => s + e.totalQty, 0);
+    const hasModification = entries.some(e => (e.menuVersion || 1) > 1);
     const modTag = hasModification ? `<span class="date-mod-tag">有修正</span>` : '';
-    const mealChips = mealKeys.map(mk => {
-      const mi = getMealInfo(mk);
-      return `<span class="meal-chip ${mi.chipCls}">${mi.label}</span>`;
-    }).join(' ');
+    const seenMeals = new Set();
+    const mealChips = entries
+      .filter(e => { if (seenMeals.has(e.mealType)) return false; seenMeals.add(e.mealType); return true; })
+      .map(e => {
+        const mi = getMealInfo(e.mealType);
+        return `<span class="meal-chip ${mi.chipCls}">${mi.label}</span>`;
+      }).join(' ');
     return `<div class="date-item${d === activeDateStr ? ' active' : ''}" onclick="selectDate('${d}')">
       <div class="date-item-date">${d.slice(5).replace('-','/')}（週${WD_NAMES[dt.getDay()]}）</div>
       <div class="date-item-meta">${mealChips}　共 ${totalQty} 份${modTag}</div>
@@ -461,18 +514,87 @@ function selectDate(dateStr) {
 /* ═══════════════════════════════════════════════
    右側訂單明細
 ═══════════════════════════════════════════════ */
+const SVC_ORDER = ['system', 'internal', 'meeting'];
+const SVC_META = {
+  system:   { cls: 'svc-system',   label: '系統訂餐' },
+  internal: { cls: 'svc-internal', label: '內部訂餐' },
+  meeting:  { cls: 'svc-meeting',  label: '會議餐'   },
+};
+const MEAL_ORDER = ['breakfast','lunch','afternoon','dinner','latenight'];
+
+function renderMealBlock(entry, meta) {
+  const svcLabel = meta.label;
+  const mi = getMealInfo(entry.mealType);
+
+  // 合併所有分店品項，同名品項加總
+  const itemMap = new Map();
+  entry.branches.forEach(branch => {
+    branch.items.forEach(item => {
+      const key = item.itemCode;
+      if (itemMap.has(key)) {
+        const existing = itemMap.get(key);
+        existing.qty += item.qty;
+        if (item.modified) existing.modified = item.modified;
+      } else {
+        itemMap.set(key, { ...item });
+      }
+    });
+  });
+
+  let itemsHtml = '';
+  itemMap.forEach(item => {
+    const hasModified = !!item.modified;
+    let qtyHtml;
+    if (hasModified && item.modified.field === 'removed') {
+      qtyHtml = `<span class="svc-item-removed" style="color:#b91c1c">
+        <span class="svc-item-original">${item.modified.originalQty} 份</span>已移除
+      </span>`;
+    } else if (hasModified) {
+      qtyHtml = `<span class="svc-item-qty">
+        <span class="svc-item-original">${item.modified.originalQty}</span>${item.qty}<span class="svc-item-unit">份</span>
+      </span>`;
+    } else {
+      qtyHtml = item.qty > 0
+        ? `<span class="svc-item-qty">${item.qty}<span class="svc-item-unit">份</span></span>`
+        : `<span class="qty-zero">—</span>`;
+    }
+    const modNote = hasModified
+      ? `<span style="font-size:12px;opacity:.6;margin-left:6px">${item.modified.note}</span>` : '';
+    itemsHtml += `<div class="svc-item-row${hasModified ? ' svc-item-modified' : ''}">
+      <span class="svc-item-name">${item.itemName}${modNote}</span>
+      ${qtyHtml}
+    </div>`;
+  });
+
+  let versionBarHtml = '';
+  if (entry.menuVersion && entry.menuVersion > 1) {
+    versionBarHtml = `<div class="svc-version-bar">
+      ⚠ 菜單已於 ${entry.menuUpdatedAt} 更新，如有疑問請聯繫營運部
+    </div>`;
+  }
+
+  return `<div class="svc-card ${meta.cls}">
+    <div class="svc-card-hd">
+      <span>${svcLabel}</span>
+      <span class="svc-sub">${mi.label}　共 ${entry.totalQty} 份</span>
+    </div>
+    ${itemsHtml}
+    ${versionBarHtml}
+  </div>`;
+}
+
 function renderOrderDetail(dateStr) {
-  const dayData = orderData[dateStr];
-  if (!dayData) return;
+  const allEntries = orderData[dateStr];
+  if (!allEntries) return;
 
   const dt = new Date(dateStr);
   const dateLabel = `${dateStr.slice(0,4)}年${dateStr.slice(5,7)}月${dateStr.slice(8,10)}日（週${WD_NAMES[dt.getDay()]}）`;
 
-  const mealKeys = mealFilter === 'all'
-    ? Object.keys(dayData)
-    : Object.keys(dayData).filter(mk => mk === mealFilter);
+  const filtered = mealFilter === 'all'
+    ? allEntries
+    : allEntries.filter(e => e.mealType === mealFilter);
 
-  if (!mealKeys.length) {
+  if (!filtered.length) {
     document.getElementById('order-detail-panel').innerHTML = `
       <div class="order-date-title">${dateLabel}</div>
       <div class="order-detail-placeholder" style="min-height:200px">
@@ -481,83 +603,16 @@ function renderOrderDetail(dateStr) {
     return;
   }
 
-  let html = `<div class="order-date-title">${dateLabel}</div>`;
+  let html = `<div class="order-date-title">${dateLabel}</div><div style="height:12px"></div>`;
 
-  const mealOrder = ['breakfast','lunch','afternoon','dinner','latenight'];
-  const sortedMeals = mealKeys.sort((a, b) => mealOrder.indexOf(a) - mealOrder.indexOf(b));
+  SVC_ORDER.forEach(svcType => {
+    const svcEntries = filtered
+      .filter(e => e.serviceType === svcType)
+      .sort((a, b) => MEAL_ORDER.indexOf(a.mealType) - MEAL_ORDER.indexOf(b.mealType));
+    if (!svcEntries.length) return;
 
-  sortedMeals.forEach(mealType => {
-    const mealData = dayData[mealType];
-    if (!mealData) return;
-    const mi = getMealInfo(mealType);
-
-    let versionBarHtml = '';
-    if (mealData.menuVersion && mealData.menuVersion > 1) {
-      versionBarHtml = `<div class="menu-version-bar">
-        <span>⚠ 此排程菜單已於 ${mealData.menuUpdatedAt} 更新，如有疑問請聯繫營運部</span>
-      </div>`;
-    }
-
-    html += `<div class="meal-section">
-      <div class="meal-section-hd">
-        <span class="meal-chip ${mi.chipCls}">${mi.label}</span>
-        <span class="meal-section-total">預定數量：${mealData.totalQty}</span>
-      </div>
-      <div class="order-table-wrap" style="padding:12px 20px 0">
-        ${versionBarHtml}
-      </div>
-      <div class="order-table-wrap">
-        <table class="order-table">
-          <thead>
-            <tr>
-              <th>分店</th>
-              <th>餐點</th>
-              <th>數量</th>
-            </tr>
-          </thead>
-          <tbody>`;
-
-    mealData.branches.forEach(branch => {
-      const totalTag = branch.branchTotal > 0
-        ? `<span class="branch-total-tag">總數：${branch.branchTotal}</span>`
-        : `<span class="branch-zero-tag">總數：0</span>`;
-      html += `<tr class="branch-hd-row">
-        <td colspan="3">${branch.branchCode}-${branch.branchName}${totalTag}</td>
-      </tr>`;
-
-      branch.items.forEach(item => {
-        const storeCol = `${currentStore.id}-${currentStore.name}`;
-        const itemCol  = `${item.itemCode}-${item.itemName}`;
-        const hasModified = !!item.modified;
-        const trClass = hasModified ? ' class="item-modified"' : '';
-        const modBadge = hasModified ? `<span class="item-modified-badge">已修改</span>` : '';
-
-        let qtyHtml;
-        if (hasModified) {
-          if (item.modified.field === 'removed') {
-            qtyHtml = `<span class="item-original-qty">${item.modified.originalQty}</span><span style="color:#b91c1c">已移除</span>`;
-          } else {
-            qtyHtml = `<span class="item-original-qty">${item.modified.originalQty}</span>${item.qty > 0 ? `<span class="qty-val">${item.qty}</span>` : '-'}`;
-          }
-        } else {
-          qtyHtml = item.qty > 0
-            ? `<span class="qty-val">${item.qty}</span>`
-            : `<span class="qty-zero">-</span>`;
-        }
-
-        html += `<tr${trClass}>
-          <td style="color:var(--text-3);font-size:14px">${storeCol}</td>
-          <td>${itemCol}${modBadge}</td>
-          <td style="text-align:right;padding-right:24px">${qtyHtml}</td>
-        </tr>`;
-
-        if (hasModified) {
-          html += `<tr><td colspan="3" class="item-note-cell">${item.modified.note}</td></tr>`;
-        }
-      });
-    });
-
-    html += `</tbody></table></div></div>`;
+    const meta = SVC_META[svcType];
+    svcEntries.forEach(entry => { html += renderMealBlock(entry, meta); });
   });
 
   document.getElementById('order-detail-panel').innerHTML = html;
