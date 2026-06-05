@@ -342,6 +342,8 @@ body {
 .pub-btn.do-publish:hover { background: var(--green-bg); }
 .pub-btn.do-republish { border-color: var(--orange); color: var(--orange); }
 .pub-btn.do-republish:hover { background: var(--orange-bg); }
+.pub-btn.do-unpublish { border-color: var(--red); color: var(--red); }
+.pub-btn.do-unpublish:hover { background: var(--red-bg); }
 .detail-bulk-bar {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   padding: 10px 18px; border-bottom: 1px solid var(--border);
@@ -868,6 +870,7 @@ body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
     <button class="btn" id="send-to-store-btn" style="border-color:var(--teal);color:var(--teal)" onclick="doSendToStoreDirect()">📤 傳送給店家審核<span class="date-sel-badge" id="send-sel-count" style="display:none;background:var(--teal)"></span></button>
     <button class="btn" style="border-color:var(--orange);color:var(--orange)" onclick="doSimulateReviewDirect()">✅ 模擬審核完畢<span class="date-sel-badge" id="review-sel-count" style="display:none;background:var(--orange)"></span></button>
     <button class="btn-primary btn" onclick="doPublishDirect()">▶ 發佈訂餐<span class="date-sel-badge" id="pub-sel-count" style="display:none"></span></button>
+    <button class="btn" style="border-color:var(--red);color:var(--red)" onclick="doUnpublishDirect()">⏏ 下架<span class="date-sel-badge" id="unpub-sel-count" style="display:none;background:var(--red)"></span></button>
   </div>
 
   <!-- Toolbar -->
@@ -1780,7 +1783,7 @@ function toggleMonthSelect(monthCb) {
 
 function updateSelectionUI() {
   const count = selectedDates.size;
-  ['send-sel-count', 'review-sel-count', 'pub-sel-count'].forEach(id => {
+  ['send-sel-count', 'review-sel-count', 'pub-sel-count', 'unpub-sel-count'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = count; el.style.display = count ? '' : 'none'; }
   });
@@ -1946,7 +1949,7 @@ function renderDetailBody(dateStr) {
       <div class="rest-card-header">
         <span class="rest-card-name">${rest.name}</span>${branchBadge}
         <span class="rest-card-meal ${mi.tagCls}">${mi.label}</span>
-        <div class="pub-status">${statusBadge}</div>
+        <div class="pub-status">${statusBadge}${entry.publishedAt ? `<button class="pub-btn do-unpublish" onclick="unpublishEntry('${dateStr}','${entry.entryId}')">下架</button>` : ''}</div>
         <button class="rest-card-remove" onclick="removeEntry('${dateStr}','${entry.entryId}')">✕</button>
       </div>
       ${metaLine}
@@ -2294,6 +2297,24 @@ function publishEntry(dateStr, entryId) {
   });
 }
 
+
+function unpublishEntry(dateStr, entryId) {
+  const entry = ((scheduleData[curSiteId] || {})[dateStr] || []).find(e => e.entryId === entryId);
+  if (!entry) return;
+  const rest = restaurants.find(r => r.id === entry.restaurantId);
+  const dateLabel = dateStr.slice(5).replace('-','/');
+  showConfirm(
+    '確認下架？',
+    `將下架 <b>${rest?.name || ''}</b> 的排程（${dateLabel}），狀態將回到「暫存」。`,
+    '下架', 'btn-danger',
+    () => {
+      revertToStaged(entry);
+      showToast(`已下架：${rest?.name || ''} ${dateLabel}`);
+      renderDetailBody(dateStr);
+      rerenderCalendar();
+    }
+  );
+}
 
 /* ══════════════════════════════════════════════════
    HELPERS
@@ -3706,6 +3727,30 @@ function doPublishDirect() {
       if (detailDate) renderDetailBody(detailDate);
       rerenderCalendar();
       showToast(`已發布 ${targets.length} 筆排程至店家端`, 'success');
+    }
+  );
+}
+
+function doUnpublishDirect() {
+  if (!selectedDates.size) { showToast('請先在月曆上勾選要下架的日期', 'error'); return; }
+  const targets = _getTargetEntries(e => !!e.publishedAt);
+  if (!targets.length) { showToast('勾選日期內無「已發布」狀態的排程', 'error'); return; }
+
+  const siteNames = selectedSiteIds.map(id => sites.find(s => s.id === id)?.name || id).join('、');
+  const mealNames = (mealFilter === 'all' ? MEAL_TYPES : MEAL_TYPES.filter(m => m.id === mealFilter)).map(m => m.label).join('、');
+  showConfirm(
+    '確認下架',
+    `<b>廠區：</b>${siteNames}<br>` +
+    `<b>日期：</b>${_buildDateRange()}<br>` +
+    `<b>餐期：</b>${mealNames}<br>` +
+    `<b>排程筆數：</b>${targets.length} 筆<br><br>` +
+    `<div style="padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-bdr);border-radius:7px;font-size:13px;color:var(--red)">⚠ 下架後狀態將回到「暫存」，需重新走審核流程才能再次發布。</div>`,
+    '⏏ 確認下架', 'btn-danger',
+    () => {
+      targets.forEach(({ entry }) => { revertToStaged(entry); });
+      if (detailDate) renderDetailBody(detailDate);
+      rerenderCalendar();
+      showToast(`已下架 ${targets.length} 筆排程`);
     }
   );
 }
