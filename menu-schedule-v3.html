@@ -849,6 +849,28 @@ body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
 .entry-status.status-reviewing { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
 .entry-status.status-reviewed  { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-bdr); }
 .entry-status.status-published { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+
+/* ─── 品項勾選與批次操作 ── */
+.item-row-wrap { display: flex; align-items: flex-start; }
+.item-check-col {
+  display: flex; align-items: flex-start; padding: 12px 4px 10px 14px; flex-shrink: 0;
+}
+.item-check-col input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--blue); margin-top: 1px; }
+.item-row-wrap .item-row-top { padding-left: 4px; }
+.item-batch-bar {
+  display: none; align-items: center; gap: 8px;
+  padding: 7px 14px; background: var(--blue-bg);
+  border-top: 1px solid var(--blue-border); border-bottom: 1px solid var(--blue-border);
+}
+.item-batch-bar.show { display: flex; }
+.item-batch-count { font-size: 13px; color: var(--blue-text); font-weight: 500; }
+.item-status-badge {
+  font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 100px; white-space: nowrap; margin-left: 6px;
+}
+.item-status-badge.status-draft     { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.item-status-badge.status-reviewing { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+.item-status-badge.status-reviewed  { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-bdr); }
+.item-status-badge.status-published { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
 </style>
   <link rel="stylesheet" href="shared-nav.css">
 </head>
@@ -1887,11 +1909,16 @@ function renderDetailBody(dateStr) {
       const did = `${entry.entryId}-${it.itemId}`;
       const itemDef = rest.items.find(i => i.id === it.itemId);
       const costPrice = itemDef ? getCostForDate(itemDef, dateStr) : 0;
+      const itStatus = it.status || 'draft';
+      const itStatusLabel = { draft:'暫存', reviewing:'審核中', reviewed:'審核完畢', published:'已發布' }[itStatus] || '暫存';
       return `<li class="item-row" data-item-id="${it.itemId}">
-        <div class="item-row-top">
-          <span class="item-name">${it.name}</span>
-          <button class="item-del" onclick="removeItem('${dateStr}','${entry.entryId}','${it.itemId}')">✕</button>
-        </div>
+        <div class="item-row-wrap">
+          <div class="item-check-col"><input type="checkbox" class="item-sel-cb" data-entry="${entry.entryId}" data-item="${it.itemId}" onchange="onItemCheckChange('${dateStr}','${entry.entryId}')"></div>
+          <div style="flex:1">
+          <div class="item-row-top">
+            <span class="item-name">${it.name}<span class="item-status-badge status-${itStatus}">${itStatusLabel}</span></span>
+            <button class="item-del" onclick="removeItem('${dateStr}','${entry.entryId}','${it.itemId}')">✕</button>
+          </div>
         <div class="item-row-detail">
           <div class="item-row-detail-line">
             <div class="item-row-detail-cell">
@@ -1937,6 +1964,8 @@ function renderDetailBody(dateStr) {
             </div>
           </div>
         </div>
+          </div>
+        </div>
       </li>`;
     }).join('');
     const status = entryStatus(entry);
@@ -1953,6 +1982,12 @@ function renderDetailBody(dateStr) {
         <button class="rest-card-remove" onclick="removeEntry('${dateStr}','${entry.entryId}')">✕</button>
       </div>
       ${metaLine}
+      <div class="item-batch-bar" id="batch-bar-${entry.entryId}">
+        <span class="item-batch-count" id="batch-count-${entry.entryId}">已選 0 項</span>
+        <button class="btn btn-sm" onclick="batchUnpublishItems('${dateStr}','${entry.entryId}')">⏏ 下架</button>
+        <button class="btn btn-sm btn-danger" onclick="batchDeleteItems('${dateStr}','${entry.entryId}')">✕ 刪除</button>
+        <button class="btn btn-sm" style="margin-left:auto" onclick="clearItemChecks('${entry.entryId}')">取消選取</button>
+      </div>
       <ul class="item-list">${items}</ul>
       <button class="add-item-btn" onclick="openItemPicker('${dateStr}','${entry.entryId}','${entry.restaurantId}')">＋ 新增品項</button>
     </div>`;
@@ -3330,6 +3365,55 @@ function removeItem(dateStr, entryId, itemId) {
       revertToStaged(entry);
       rerenderCalendar();
       showToast('已移除品項');
+    }
+  );
+}
+
+function _getCheckedItemIds(entryId) {
+  return [...document.querySelectorAll(`.item-sel-cb[data-entry="${entryId}"]:checked`)].map(cb => cb.dataset.item);
+}
+
+function onItemCheckChange(dateStr, entryId) {
+  const ids = _getCheckedItemIds(entryId);
+  const bar = document.getElementById(`batch-bar-${entryId}`);
+  const cnt = document.getElementById(`batch-count-${entryId}`);
+  if (bar) { bar.classList.toggle('show', ids.length > 0); }
+  if (cnt) cnt.textContent = `已選 ${ids.length} 項`;
+}
+
+function clearItemChecks(entryId) {
+  document.querySelectorAll(`.item-sel-cb[data-entry="${entryId}"]`).forEach(cb => cb.checked = false);
+  const bar = document.getElementById(`batch-bar-${entryId}`);
+  if (bar) bar.classList.remove('show');
+}
+
+function batchUnpublishItems(dateStr, entryId) {
+  const ids = _getCheckedItemIds(entryId);
+  if (!ids.length) return;
+  const entry = getEntry(dateStr, entryId);
+  if (!entry) return;
+  ids.forEach(itemId => {
+    const it = entry.items.find(i => i.itemId === itemId);
+    if (it) it.status = 'draft';
+  });
+  renderDetailBody(dateStr);
+  showToast(`已下架 ${ids.length} 個品項`);
+}
+
+function batchDeleteItems(dateStr, entryId) {
+  const ids = _getCheckedItemIds(entryId);
+  if (!ids.length) return;
+  const entry = getEntry(dateStr, entryId);
+  if (!entry) return;
+  showConfirm(
+    '確認刪除品項',
+    `確定要刪除已勾選的 ${ids.length} 個品項嗎？此動作無法復原。`,
+    '刪除', 'btn-danger',
+    () => {
+      entry.items = entry.items.filter(i => !ids.includes(i.itemId));
+      revertToStaged(entry);
+      rerenderCalendar();
+      showToast(`已刪除 ${ids.length} 個品項`);
     }
   );
 }
