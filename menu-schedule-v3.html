@@ -1703,7 +1703,7 @@ function renderCalendar() {
         <div class="cal-day-header" onclick="event.stopPropagation();toggleDateSelectByHeader('${dateStr}')">
           <input type="checkbox" class="cal-date-check" id="date-cb-${dateStr}"
             ${isSelected?'checked':''}
-            onclick="event.stopPropagation()">
+            onclick="event.stopPropagation()" onchange="event.stopPropagation();toggleDateSelect('${dateStr}',this)">
           <div class="cal-day-num ${numCls}">${cell.day}</div>
         </div>
         ${filtered.map(e => renderEntryChip(e, dateStr)).join('')}
