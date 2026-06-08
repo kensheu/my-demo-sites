@@ -267,6 +267,25 @@ body {
   color: #fbbf24;
   flex-shrink: 0;
 }
+#cal-tooltip .tt-status-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 100px;
+  border: 1px solid #c4b5fd;
+  background: rgba(196, 181, 253, 0.15);
+  color: #c4b5fd;
+  margin-bottom: 6px;
+}
+#cal-tooltip .tt-item-unpublished {
+  color: #a78bfa;
+}
+#cal-tooltip .tt-item-unpublished .tt-unpub-badge {
+  font-size: 10px;
+  margin-left: 4px;
+  opacity: 0.85;
+}
 
 /* ─── Detail panel (below calendar) ─── */
 .detail-panel {
@@ -838,8 +857,9 @@ body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--blue); color: #fff; border-radius: 100px;
   font-size: 12px; font-weight: 600; padding: 1px 7px; min-width: 22px;
-  margin-left: 4px;
+  margin-left: 4px; visibility: hidden;
 }
+.date-sel-badge.visible { visibility: visible; }
 /* ── entry chip 狀態文字 ── */
 .entry-status {
   font-size: 10px; font-weight: 500; padding: 1px 5px; border-radius: 100px;
@@ -849,21 +869,16 @@ body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
 .entry-status.status-reviewing { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
 .entry-status.status-reviewed  { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-bdr); }
 .entry-status.status-published { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+.entry-status.status-updated   { background: #fdf4ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+.pub-badge.status-updated      { background: #fdf4ff; color: #7e22ce; border: 1px solid #e9d5ff; }
 
-/* ─── 品項勾選與批次操作 ── */
+/* ─── 品項勾選 ── */
 .item-row-wrap { display: flex; align-items: flex-start; }
 .item-check-col {
-  display: flex; align-items: flex-start; padding: 12px 4px 10px 14px; flex-shrink: 0;
+  display: flex; align-items: flex-start; padding: 10px 6px 10px 14px; flex-shrink: 0;
 }
-.item-check-col input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--blue); margin-top: 1px; }
-.item-row-wrap .item-row-top { padding-left: 4px; }
-.item-batch-bar {
-  display: none; align-items: center; gap: 8px;
-  padding: 7px 14px; background: var(--blue-bg);
-  border-top: 1px solid var(--blue-border); border-bottom: 1px solid var(--blue-border);
-}
-.item-batch-bar.show { display: flex; }
-.item-batch-count { font-size: 13px; color: var(--blue-text); font-weight: 500; }
+.item-check-col input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--blue); margin-top: 1px; }
+.item-row-wrap .item-row-top { padding-left: 4px; display: flex; align-items: center; gap: 6px; width: 100%; }
 .item-status-badge {
   font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 100px; white-space: nowrap; margin-left: 6px;
 }
@@ -889,10 +904,10 @@ body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
     <button class="btn" onclick="openRestMgr()">🏪 餐廳管理</button>
     <button class="btn" onclick="showToast('功能開發中', 'info')">傳送巡捕資料至販賣機</button>
     <button class="btn" onclick="openCopySiteModal()">⇉ 複製整月排程</button>
-    <button class="btn" id="send-to-store-btn" style="border-color:var(--teal);color:var(--teal)" onclick="doSendToStoreDirect()">📤 傳送給店家審核<span class="date-sel-badge" id="send-sel-count" style="display:none;background:var(--teal)"></span></button>
-    <button class="btn" style="border-color:var(--orange);color:var(--orange)" onclick="doSimulateReviewDirect()">✅ 模擬審核完畢<span class="date-sel-badge" id="review-sel-count" style="display:none;background:var(--orange)"></span></button>
-    <button class="btn-primary btn" onclick="doPublishDirect()">▶ 發佈訂餐<span class="date-sel-badge" id="pub-sel-count" style="display:none"></span></button>
-    <button class="btn" style="border-color:var(--red);color:var(--red)" onclick="doUnpublishDirect()">⏏ 下架<span class="date-sel-badge" id="unpub-sel-count" style="display:none;background:var(--red)"></span></button>
+    <button class="btn" id="send-to-store-btn" style="border-color:var(--teal);color:var(--teal)" onclick="doSendToStoreDirect()">📤 傳送給店家審核</button>
+    <button class="btn" style="border-color:var(--orange);color:var(--orange)" onclick="doSimulateReviewDirect()">✅ 模擬審核完畢</button>
+    <button class="btn-primary btn" onclick="doPublishDirect()">▶ 發佈訂餐</button>
+    <button class="btn" style="border-color:var(--red);color:var(--red)" onclick="doUnpublishDirect()">⏏ 下架</button>
   </div>
 
   <!-- Toolbar -->
@@ -976,10 +991,18 @@ body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
   <!-- Detail panel -->
   <div class="detail-panel" id="detail-panel">
     <div class="detail-head">
-      <div class="detail-head-title" id="detail-title"></div>
-      <button class="detail-head-close" onclick="closeDetail()">✕</button>
+      <div class="detail-head-title" id="detail-title" style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;flex:1;min-width:0;padding:6px 0;margin:-6px 0" onclick="toggleDetailDateSelect()">
+        <input type="checkbox" id="detail-date-cb" style="width:18px;height:18px;accent-color:var(--blue);flex-shrink:0" onclick="event.stopPropagation()" onchange="toggleDetailDateSelect(this)">
+        <span id="detail-title-text"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn" id="detail-head-send-btn" style="border-color:var(--teal);color:var(--teal);padding:5px 12px;font-size:13px" onclick="detailSendToStore()">📤 傳送審核</button>
+        <button class="btn" id="detail-head-review-btn" style="border-color:var(--orange);color:var(--orange);padding:5px 12px;font-size:13px" onclick="detailSimulateReview()">✅ 模擬審核</button>
+        <button class="btn" id="detail-head-pub-btn" style="border-color:var(--green);color:var(--green);padding:5px 12px;font-size:13px" onclick="detailPublish()">▶ 發布</button>
+        <button class="btn" id="detail-head-unpub-btn" style="border-color:var(--red);color:var(--red);padding:5px 12px;font-size:13px" onclick="detailUnpublishItems()">⏏ 下架</button>
+        <button class="btn" id="detail-head-del-btn" style="border-color:var(--red);color:var(--red);padding:5px 12px;font-size:13px" onclick="detailDeleteItems()">✕ 刪除</button>
+      </div>
     </div>
-    <div class="detail-bulk-bar" id="detail-bulk-bar"></div>
     <div class="detail-body" id="detail-body"></div>
   </div>
 
@@ -1804,11 +1827,6 @@ function toggleMonthSelect(monthCb) {
 }
 
 function updateSelectionUI() {
-  const count = selectedDates.size;
-  ['send-sel-count', 'review-sel-count', 'pub-sel-count', 'unpub-sel-count'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = count; el.style.display = count ? '' : 'none'; }
-  });
 
   const monthCb = document.getElementById('cal-month-cb');
   if (monthCb) {
@@ -1832,7 +1850,11 @@ function updateSelectionUI() {
 }
 
 function entryStatus(entry) {
-  if (entry.publishedAt)   return { label: '已發布',   cls: 'status-published'  };
+  if (entry.publishedAt) {
+    const hasUpdated = entry.items.some(it => it.status === 'draft');
+    if (hasUpdated) return { label: '有更新', cls: 'status-updated' };
+    return { label: '已發布', cls: 'status-published' };
+  }
   if (entry.reviewedAt)    return { label: '審核完畢', cls: 'status-reviewed'   };
   if (entry.sentToStoreAt) return { label: '審核中',   cls: 'status-reviewing'  };
   return                          { label: '暫存',     cls: 'status-draft'      };
@@ -1867,8 +1889,10 @@ function openDetail(dateStr) {
   detailDate = dateStr;
   const d   = new Date(dateStr);
   const wd  = d.getDay();
-  document.getElementById('detail-title').textContent =
+  document.getElementById('detail-title-text').textContent =
     `${curYear}年${MONTH_NAMES[d.getMonth()]}${d.getDate()}日（週${WD_NAMES[wd]}）`;
+  const dateCb = document.getElementById('detail-date-cb');
+  if (dateCb) dateCb.checked = selectedDates.has(dateStr);
   document.getElementById('detail-panel').classList.add('open');
   renderDetailBody(dateStr);
   document.getElementById('detail-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1887,17 +1911,6 @@ function renderDetailBody(dateStr) {
   const mbEntries = (meetingBentoData[curSiteId] || {})[dateStr] || [];
   const body      = document.getElementById('detail-body');
 
-  // ── Bulk bar ──
-  const bulkBar = document.getElementById('detail-bulk-bar');
-  const anyUnpublished = filtered.some(e => !e.publishedAt);
-  const anyDirty       = filtered.some(e => e.publishedAt && e.dirtyAfterPublish);
-  if (!anyUnpublished && !anyDirty && filtered.length) {
-    bulkBar.style.display = '';
-    bulkBar.innerHTML = `<span style="font-size:15px;color:var(--green)">✓ 全部已是最新發布</span>`;
-  } else {
-    bulkBar.style.display = 'none';
-    bulkBar.innerHTML = '';
-  }
 
   let html = filtered.map(entry => {
     const rest   = restaurants.find(r => r.id === entry.restaurantId);
@@ -1909,16 +1922,15 @@ function renderDetailBody(dateStr) {
       const did = `${entry.entryId}-${it.itemId}`;
       const itemDef = rest.items.find(i => i.id === it.itemId);
       const costPrice = itemDef ? getCostForDate(itemDef, dateStr) : 0;
-      const itStatus = it.status || 'draft';
+      const itStatus = it.status || entryStatus(entry).cls.replace('status-','');
       const itStatusLabel = { draft:'暫存', reviewing:'審核中', reviewed:'審核完畢', published:'已發布' }[itStatus] || '暫存';
       return `<li class="item-row" data-item-id="${it.itemId}">
         <div class="item-row-wrap">
-          <div class="item-check-col"><input type="checkbox" class="item-sel-cb" data-entry="${entry.entryId}" data-item="${it.itemId}" onchange="onItemCheckChange('${dateStr}','${entry.entryId}')"></div>
+          <div class="item-check-col"><input type="checkbox" class="item-sel-cb" id="cb-${entry.entryId}-${it.itemId}" data-entry="${entry.entryId}" data-item="${it.itemId}"></div>
           <div style="flex:1">
-          <div class="item-row-top">
+          <label class="item-row-top" for="cb-${entry.entryId}-${it.itemId}" style="cursor:pointer">
             <span class="item-name">${it.name}<span class="item-status-badge status-${itStatus}">${itStatusLabel}</span></span>
-            <button class="item-del" onclick="removeItem('${dateStr}','${entry.entryId}','${it.itemId}')">✕</button>
-          </div>
+          </label>
         <div class="item-row-detail">
           <div class="item-row-detail-line">
             <div class="item-row-detail-cell">
@@ -1976,18 +1988,16 @@ function renderDetailBody(dateStr) {
     const metaLine    = `<div class="rest-card-meta">廠區：${entrySite?.name || '—'}　狀態：${status.label}${tsLabel ? `（${tsLabel}）` : ''}</div>`;
     return `<div class="rest-card">
       <div class="rest-card-header">
-        <span class="rest-card-name">${rest.name}</span>${branchBadge}
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;flex-shrink:0;padding:4px 0;margin:-4px 0" onclick="const c=this.querySelector('.entry-sel-cb');c.checked=!c.checked;toggleEntrySelect(c)">
+          <input type="checkbox" class="entry-sel-cb" data-entry="${entry.entryId}" data-date="${dateStr}" style="width:18px;height:18px;cursor:pointer;accent-color:var(--blue);flex-shrink:0" onclick="event.stopPropagation()" onchange="toggleEntrySelect(this)">
+          <span class="rest-card-name">${rest.name}</span>${branchBadge}
+        </div>
         <span class="rest-card-meal ${mi.tagCls}">${mi.label}</span>
-        <div class="pub-status">${statusBadge}${entry.publishedAt ? `<button class="pub-btn do-unpublish" onclick="unpublishEntry('${dateStr}','${entry.entryId}')">下架</button>` : ''}</div>
-        <button class="rest-card-remove" onclick="removeEntry('${dateStr}','${entry.entryId}')">✕</button>
+        <div class="pub-status">
+          ${statusBadge}
+        </div>
       </div>
       ${metaLine}
-      <div class="item-batch-bar" id="batch-bar-${entry.entryId}">
-        <span class="item-batch-count" id="batch-count-${entry.entryId}">已選 0 項</span>
-        <button class="btn btn-sm" onclick="batchUnpublishItems('${dateStr}','${entry.entryId}')">⏏ 下架</button>
-        <button class="btn btn-sm btn-danger" onclick="batchDeleteItems('${dateStr}','${entry.entryId}')">✕ 刪除</button>
-        <button class="btn btn-sm" style="margin-left:auto" onclick="clearItemChecks('${entry.entryId}')">取消選取</button>
-      </div>
       <ul class="item-list">${items}</ul>
       <button class="add-item-btn" onclick="openItemPicker('${dateStr}','${entry.entryId}','${entry.restaurantId}')">＋ 新增品項</button>
     </div>`;
@@ -2015,6 +2025,9 @@ function renderDetailBody(dateStr) {
   }
 
   body.innerHTML = html;
+  _updateDetailActionButtons();
+  const dateCb = document.getElementById('detail-date-cb');
+  if (dateCb && detailDate) dateCb.checked = selectedDates.has(detailDate);
 }
 
 function revertToStaged(entry) {
@@ -3326,7 +3339,7 @@ function confirmAddItem() {
     const storeQty    = Number(document.getElementById(`additem-store-${id}`)?.value) || 0;
     const endPriceEl  = document.getElementById(`additem-endprice-${id}`);
     const price       = endPriceEl && endPriceEl.value !== '' ? Number(endPriceEl.value) : Number(inp.dataset.price);
-    entry.items.push({ itemId: id, name: inp.dataset.name, price, isAuto: false, cabinetTemp, cabinetSlot, onlineQty, offlineQty, storeQty });
+    entry.items.push({ itemId: id, name: inp.dataset.name, price, isAuto: false, cabinetTemp, cabinetSlot, onlineQty, offlineQty, storeQty, status: entryStatus(entry).cls.replace('status-','') });
   });
   revertToStaged(entry);
   closeModal('item-picker-modal');
@@ -3369,40 +3382,272 @@ function removeItem(dateStr, entryId, itemId) {
   );
 }
 
+function _getCheckedEntryIds() {
+  return [...document.querySelectorAll('.entry-sel-cb:checked')].map(cb => ({ entryId: cb.dataset.entry, dateStr: cb.dataset.date }));
+}
+
+function _getDetailSelection() {
+  const itemIds  = [...document.querySelectorAll('.item-sel-cb:checked')].map(cb => ({ entryId: cb.dataset.entry, itemId: cb.dataset.item, dateStr: cb.dataset.date || detailDate }));
+  const entryIds = _getCheckedEntryIds();
+  const dateChecked = document.getElementById('detail-date-cb')?.checked && !!detailDate;
+  return { itemIds, entryIds, dateChecked };
+}
+
+function _resolveItemStatus(it, entry) {
+  const s = it.status || entryStatus(entry).cls.replace('status-', '');
+  return s === 'updated' ? 'published' : s;
+}
+
+function _updateDetailActionButtons() {
+  // badge 已移除，此函式保留供 checkbox change 事件呼叫
+}
+
+function toggleDetailDateSelect(cb) {
+  if (!detailDate) return;
+  const dateCb = document.getElementById('detail-date-cb');
+  if (!dateCb) return;
+  if (!cb) { dateCb.checked = !dateCb.checked; }  // 外層 div 點擊，手動翻轉
+  const checked = dateCb.checked;
+  if (checked) selectedDates.add(detailDate);
+  else selectedDates.delete(detailDate);
+  const calCb = document.getElementById('date-cb-' + detailDate);
+  if (calCb) calCb.checked = checked;
+  const cell = calCb?.closest('.cal-cell');
+  if (cell) cell.classList.toggle('date-selected', checked);
+  // 同步所有店家與品項 checkbox
+  document.querySelectorAll('.entry-sel-cb').forEach(el => el.checked = checked);
+  document.querySelectorAll('.item-sel-cb').forEach(el => el.checked = checked);
+  updateSelectionUI();
+  _updateDetailActionButtons();
+}
+
+function toggleEntrySelect(cb) {
+  const entryId = cb.dataset.entry;
+  const checked = cb.checked;
+  document.querySelectorAll(`.item-sel-cb[data-entry="${entryId}"]`).forEach(el => el.checked = checked);
+  _updateDetailActionButtons();
+}
+
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('entry-sel-cb') || e.target.classList.contains('item-sel-cb')) _updateDetailActionButtons();
+});
+
+function _collectTargetItems(filterFn) {
+  const { itemIds, entryIds, dateChecked } = _getDetailSelection();
+  const targets = [];
+  if (itemIds.length) {
+    itemIds.forEach(({ entryId, itemId }) => {
+      const entry = getEntry(detailDate, entryId);
+      const it = entry?.items.find(i => i.itemId === itemId);
+      if (it && filterFn(_resolveItemStatus(it, entry))) targets.push({ entry, it });
+    });
+  } else if (entryIds.length) {
+    entryIds.forEach(({ entryId, dateStr }) => {
+      const entry = getEntry(dateStr, entryId);
+      if (!entry) return;
+      entry.items.forEach(it => { if (filterFn(_resolveItemStatus(it, entry))) targets.push({ entry, it }); });
+    });
+  } else if (dateChecked) {
+    selectedSiteIds.forEach(sid => {
+      ((scheduleData[sid] || {})[detailDate] || []).forEach(entry => {
+        entry.items.forEach(it => { if (filterFn(_resolveItemStatus(it, entry))) targets.push({ entry, it }); });
+      });
+    });
+  }
+  return targets;
+}
+
+function detailSendToStore() {
+  const targets = _collectTargetItems(s => s === 'draft');
+  if (!targets.length) { showToast('沒有可傳送的品項', 'error'); return; }
+  showConfirm('確認傳送審核', `確定要傳送 ${targets.length} 個品項給店家審核嗎？`, '📤 確認傳送', '', () => {
+    const now = new Date().toLocaleString('zh-TW');
+    targets.forEach(({ entry, it }) => {
+      it.status = 'reviewing';
+      if (!entry.sentToStoreAt) entry.sentToStoreAt = now;
+    });
+    rerenderCalendar();
+    if (detailDate) renderDetailBody(detailDate);
+    showToast(`已傳送 ${targets.length} 個品項給店家審核`);
+  });
+}
+
+function detailSimulateReview() {
+  const targets = _collectTargetItems(s => s === 'reviewing');
+  if (!targets.length) { showToast('沒有審核中的品項', 'error'); return; }
+  showConfirm('確認模擬審核', `確定要將 ${targets.length} 個品項標記為審核完畢嗎？`, '✅ 確認審核', '', () => {
+    const now = new Date().toLocaleString('zh-TW');
+    targets.forEach(({ entry, it }) => {
+      it.status = 'reviewed';
+      if (!entry.reviewedAt) entry.reviewedAt = now;
+    });
+    rerenderCalendar();
+    if (detailDate) renderDetailBody(detailDate);
+    showToast(`已完成 ${targets.length} 個品項的模擬審核`);
+  });
+}
+
+function detailPublish() {
+  const targets = _collectTargetItems(s => s === 'reviewed');
+  if (!targets.length) { showToast('沒有可發布的品項', 'error'); return; }
+  showConfirm('確認發布', `確定要發布 ${targets.length} 個品項嗎？`, '▶ 確認發布', 'btn-green', () => {
+    const now = new Date().toLocaleString('zh-TW');
+    targets.forEach(({ entry, it }) => {
+      it.status = 'published';
+      if (!entry.publishedAt) entry.publishedAt = now;
+    });
+    rerenderCalendar();
+    if (detailDate) renderDetailBody(detailDate);
+    showToast(`已發布 ${targets.length} 個品項`);
+  });
+}
+
+function detailUnpublishItems() {
+  const { itemIds, entryIds, dateChecked } = _getDetailSelection();
+  if (itemIds.length) {
+    // 品項層級：下架勾選的品項（只有 published 才能下架）
+    const publishedItems = itemIds.filter(({ entryId, itemId }) => {
+      const entry = getEntry(detailDate, entryId);
+      const it = entry?.items.find(i => i.itemId === itemId);
+      if (!it) return false;
+      const status = it.status || entryStatus(entry).cls.replace('status-', '');
+      return status === 'published';
+    });
+    if (!publishedItems.length) { showToast('勾選的品項都不是已發布狀態', 'error'); return; }
+    showConfirm('確認下架', `確定要下架 ${publishedItems.length} 個品項嗎？`, '⏏ 確認下架', 'btn-danger', () => {
+      const affectedEntryIds = [...new Set(publishedItems.map(p => p.entryId))];
+      affectedEntryIds.forEach(entryId => {
+        const entry = getEntry(detailDate, entryId);
+        if (!entry) return;
+        const resolvedStatus = entryStatus(entry).cls.replace('status-', '');
+        entry.items.forEach(it => { if (!it.status) it.status = resolvedStatus === 'updated' ? 'published' : resolvedStatus; });
+      });
+      publishedItems.forEach(({ entryId, itemId }) => {
+        const entry = getEntry(detailDate, entryId);
+        const it = entry?.items.find(i => i.itemId === itemId);
+        if (it) it.status = 'draft';
+      });
+      rerenderCalendar();
+      if (detailDate) renderDetailBody(detailDate);
+      showToast(`已下架 ${publishedItems.length} 個品項`);
+    });
+  } else if (entryIds.length) {
+    // 排程層級：下架勾選排程的所有已發布品項
+    const totalItems = entryIds.reduce((acc, { entryId, dateStr }) => {
+      const entry = getEntry(dateStr, entryId);
+      if (!entry) return acc;
+      const resolvedStatus = entryStatus(entry).cls.replace('status-', '');
+      return acc + entry.items.filter(it => { const s = it.status || (resolvedStatus === 'updated' ? 'published' : resolvedStatus); return s === 'published'; }).length;
+    }, 0);
+    if (!totalItems) { showToast('沒有已發布的品項可下架', 'error'); return; }
+    showConfirm('確認下架', `確定要下架 ${entryIds.length} 個排程共 ${totalItems} 個已發布品項嗎？`, '⏏ 確認下架', 'btn-danger', () => {
+      entryIds.forEach(({ entryId, dateStr }) => {
+        const entry = getEntry(dateStr, entryId);
+        if (!entry) return;
+        const resolvedStatus = entryStatus(entry).cls.replace('status-', '');
+        entry.items.forEach(it => {
+          const s = it.status || (resolvedStatus === 'updated' ? 'published' : resolvedStatus);
+          if (s === 'published') it.status = 'draft';
+        });
+      });
+      rerenderCalendar();
+      if (detailDate) renderDetailBody(detailDate);
+      showToast(`已下架 ${totalItems} 個品項`);
+    });
+  } else if (dateChecked) {
+    // 日期層級：下架當天所有排程的已發布品項
+    const entries = selectedSiteIds.flatMap(sid => ((scheduleData[sid] || {})[detailDate] || []));
+    const totalItems = entries.reduce((acc, entry) => {
+      const resolvedStatus = entryStatus(entry).cls.replace('status-', '');
+      return acc + entry.items.filter(it => { const s = it.status || (resolvedStatus === 'updated' ? 'published' : resolvedStatus); return s === 'published'; }).length;
+    }, 0);
+    if (!totalItems) { showToast('沒有已發布的品項可下架', 'error'); return; }
+    showConfirm('確認下架', `確定要下架當天所有排程共 ${totalItems} 個已發布品項嗎？`, '⏏ 確認下架', 'btn-danger', () => {
+      entries.forEach(entry => {
+        const resolvedStatus = entryStatus(entry).cls.replace('status-', '');
+        entry.items.forEach(it => {
+          const s = it.status || (resolvedStatus === 'updated' ? 'published' : resolvedStatus);
+          if (s === 'published') it.status = 'draft';
+        });
+      });
+      rerenderCalendar();
+      if (detailDate) renderDetailBody(detailDate);
+      showToast(`已下架 ${totalItems} 個品項`);
+    });
+  } else {
+    showToast('請先勾選日期、店家或品項', 'error');
+  }
+}
+
+function detailDeleteItems() {
+  const { itemIds, entryIds, dateChecked } = _getDetailSelection();
+  if (itemIds.length) {
+    // 品項層級：刪除勾選的品項
+    showConfirm('確認刪除品項', `確定要刪除已勾選的 ${itemIds.length} 個品項嗎？此動作無法復原。`, '刪除', 'btn-danger', () => {
+      const byEntry = {};
+      itemIds.forEach(({ entryId, itemId }) => { (byEntry[entryId] = byEntry[entryId] || []).push(itemId); });
+      Object.entries(byEntry).forEach(([entryId, ids]) => {
+        const entry = getEntry(detailDate, entryId);
+        if (entry) { entry.items = entry.items.filter(i => !ids.includes(i.itemId)); revertToStaged(entry); }
+      });
+      rerenderCalendar();
+      if (detailDate) renderDetailBody(detailDate);
+      showToast(`已刪除 ${itemIds.length} 個品項`);
+    });
+  } else if (entryIds.length) {
+    // 排程層級：刪除勾選的排程
+    showConfirm('確認刪除排程', `確定要刪除已勾選的 ${entryIds.length} 個店家排程嗎？此動作無法復原。`, '刪除', 'btn-danger', () => {
+      entryIds.forEach(({ entryId, dateStr }) => {
+        const d = scheduleData[curSiteId];
+        if (d && d[dateStr]) d[dateStr] = d[dateStr].filter(e => e.entryId !== entryId);
+      });
+      rerenderCalendar();
+      if (detailDate) renderDetailBody(detailDate);
+      showToast(`已刪除 ${entryIds.length} 個排程`);
+    });
+  } else if (dateChecked) {
+    // 日期層級：刪除當天所有排程
+    showConfirm('確認刪除', `確定要刪除當天所有店家排程嗎？此動作無法復原。`, '刪除', 'btn-danger', () => {
+      selectedSiteIds.forEach(sid => { if (scheduleData[sid]) delete scheduleData[sid][detailDate]; });
+      rerenderCalendar();
+      if (detailDate) renderDetailBody(detailDate);
+      showToast(`已刪除當天所有排程`);
+    });
+  } else {
+    showToast('請先勾選日期、店家或品項', 'error');
+  }
+}
+
 function _getCheckedItemIds(entryId) {
   return [...document.querySelectorAll(`.item-sel-cb[data-entry="${entryId}"]:checked`)].map(cb => cb.dataset.item);
 }
 
-function onItemCheckChange(dateStr, entryId) {
-  const ids = _getCheckedItemIds(entryId);
-  const bar = document.getElementById(`batch-bar-${entryId}`);
-  const cnt = document.getElementById(`batch-count-${entryId}`);
-  if (bar) { bar.classList.toggle('show', ids.length > 0); }
-  if (cnt) cnt.textContent = `已選 ${ids.length} 項`;
-}
-
-function clearItemChecks(entryId) {
-  document.querySelectorAll(`.item-sel-cb[data-entry="${entryId}"]`).forEach(cb => cb.checked = false);
-  const bar = document.getElementById(`batch-bar-${entryId}`);
-  if (bar) bar.classList.remove('show');
-}
-
 function batchUnpublishItems(dateStr, entryId) {
   const ids = _getCheckedItemIds(entryId);
-  if (!ids.length) return;
+  if (!ids.length) { showToast('請先勾選要下架的品項', 'error'); return; }
   const entry = getEntry(dateStr, entryId);
   if (!entry) return;
-  ids.forEach(itemId => {
+  const publishedIds = ids.filter(itemId => {
     const it = entry.items.find(i => i.itemId === itemId);
-    if (it) it.status = 'draft';
+    if (!it) return false;
+    const status = it.status || entryStatus(entry).cls.replace('status-', '');
+    return status === 'published';
   });
+  if (!publishedIds.length) { showToast('只有已發布的品項才能下架', 'error'); return; }
+  publishedIds.forEach(itemId => {
+    const it = entry.items.find(i => i.itemId === itemId);
+    it.status = 'draft';
+  });
+  rerenderCalendar();
   renderDetailBody(dateStr);
-  showToast(`已下架 ${ids.length} 個品項`);
+  const skipped = ids.length - publishedIds.length;
+  const msg = skipped ? `已下架 ${publishedIds.length} 個品項（${skipped} 個非已發布，略過）` : `已下架 ${publishedIds.length} 個品項`;
+  showToast(msg);
 }
 
 function batchDeleteItems(dateStr, entryId) {
   const ids = _getCheckedItemIds(entryId);
-  if (!ids.length) return;
+  if (!ids.length) { showToast('請先勾選要刪除的品項', 'error'); return; }
   const entry = getEntry(dateStr, entryId);
   if (!entry) return;
   showConfirm(
@@ -3411,8 +3656,8 @@ function batchDeleteItems(dateStr, entryId) {
     '刪除', 'btn-danger',
     () => {
       entry.items = entry.items.filter(i => !ids.includes(i.itemId));
-      revertToStaged(entry);
       rerenderCalendar();
+      renderDetailBody(dateStr);
       showToast(`已刪除 ${ids.length} 個品項`);
     }
   );
@@ -4279,10 +4524,20 @@ init();
     const mi = mealInfo(entry.mealType);
     const dot = MEAL_DOT_COLOR[entry.mealType] || '#94a3b8';
     const siteName = selectedSiteIds.length > 1 ? `<div class="tt-rest" style="color:var(--text-3);font-size:11px">${sites.find(s => s.id === foundSiteId)?.name || ''}</div>` : '';
-    const items = entry.items.map(it => `<div class="tt-item"><span>• ${it.name}</span><span class="tt-price">$${it.price}</span></div>`).join('');
+    const st = entryStatus(entry);
+    const statusBadge = st.cls === 'status-updated'
+      ? `<div class="tt-status-badge">⚠ 有更新</div>`
+      : '';
+    const isPublishedEntry = !!entry.publishedAt;
+    const items = entry.items.map(it => {
+      const isUnpublished = isPublishedEntry && it.status === 'draft';
+      const unpubBadge = isUnpublished ? `<span class="tt-unpub-badge">已下架</span>` : '';
+      const itemCls = isUnpublished ? ' tt-item-unpublished' : '';
+      return `<div class="tt-item${itemCls}"><span>• ${it.name}${unpubBadge}</span><span class="tt-price">$${it.price}</span></div>`;
+    }).join('');
     return `<div class="tt-meal"><span class="tt-dot" style="background:${dot}"></span>${mi.label}</div>
 <div class="tt-rest">${rest.name}</div>
-${siteName}
+${siteName}${statusBadge}
 <hr class="tt-divider">
 ${items}`;
   }
