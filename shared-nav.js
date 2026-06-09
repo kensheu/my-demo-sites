@@ -72,6 +72,7 @@
               return p.file === 'menu-schedule.html' ||
                      p.file === 'menu-schedule-v2.html' ||
                      p.file === 'menu-schedule-v3.html' ||
+                     p.file === 'menu-schedule-v4.html' ||
                      p.file === 'menu-publish.html' ||
                      p.file === 'menu-schedule-log.html' ||
                      p.file === 'menu-template.html' ||
@@ -83,6 +84,7 @@
               { label: '菜單排程管理',     url: 'menu-schedule.html',         match: function (p) { return p.file === 'menu-schedule.html'; } },
               { label: '菜單排程管理 V2', url: 'menu-schedule-v2.html', match: function (p) { return p.file === 'menu-schedule-v2.html'; } },
               { label: '菜單排程管理 V3', url: 'menu-schedule-v3.html', match: function (p) { return p.file === 'menu-schedule-v3.html'; } },
+              { label: '菜單排程管理 V4', url: 'menu-schedule-v4.html', match: function (p) { return p.file === 'menu-schedule-v4.html'; } },
               { label: '菜單發布管理',     url: 'menu-publish.html',      match: function (p) { return p.file === 'menu-publish.html'; } },
               { label: '菜單管理異動紀錄', url: 'menu-schedule-log.html', match: function (p) { return p.file === 'menu-schedule-log.html'; } },
               { label: '菜單模板管理',     url: 'menu-template.html',     match: function (p) { return p.file === 'menu-template.html'; } },
