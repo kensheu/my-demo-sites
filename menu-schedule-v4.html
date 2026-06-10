@@ -890,6 +890,22 @@ body.st-meeting  #cal-month-cb { accent-color: #c2185b; }
 .item-status-badge.status-reviewing { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
 .item-status-badge.status-reviewed  { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-bdr); }
 .item-status-badge.status-published { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bdr); }
+
+/* ─── 服務編號 tooltip ─── */
+.code-sel-wrap { position: relative; display: inline-block; }
+#service-code-label {
+  position: relative; cursor: default;
+}
+#service-code-label[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 6px); left: 0;
+  background: #1e293b; color: #fff; font-size: 13px;
+  white-space: pre; padding: 8px 12px; border-radius: 7px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  pointer-events: none; opacity: 0; transition: opacity .15s;
+  z-index: 500; line-height: 1.7;
+}
+#service-code-label[data-tip]:hover::after { opacity: 1; }
 </style>
   <link rel="stylesheet" href="shared-nav.css">
 </head>
@@ -934,30 +950,40 @@ body.st-meeting  #cal-month-cb { accent-color: #c2185b; }
     <div class="toolbar-sep"></div>
 
     <div style="display:flex;align-items:center;gap:8px">
-      <label style="font-size:14px;color:var(--text-3);white-space:nowrap">餐期服務編號：</label>
+      <label style="font-size:14px;color:var(--text-3);white-space:nowrap">據點：</label>
       <div style="position:relative;display:inline-flex;align-items:center">
-        <input id="service-code-input" type="text" placeholder="A001-R-L"
-               autocomplete="off"
-               style="width:150px;font-size:18px;padding:5px 32px 5px 10px;border:1px solid var(--border);border-radius:6px;outline:none;background:var(--card);color:var(--text-1)"
-               oninput="onServiceCodeInput(this.value)"
-               onfocus="onServiceCodeInput(this.value)"
-               onblur="setTimeout(()=>closeSuggestions(),150)">
-        <button id="service-code-clear" onclick="clearServiceCode()"
+        <input id="site-filter-input" type="text" placeholder="搜尋據點…" autocomplete="off"
+               style="width:120px;font-size:15px;padding:5px 28px 5px 10px;border:1px solid var(--border);border-radius:6px;outline:none;background:var(--card);color:var(--text-1)"
+               oninput="onSiteFilterInput(this.value)"
+               onfocus="onSiteFilterInput(this.value)"
+               onblur="setTimeout(()=>closeSiteDropdown(),150)">
+        <button id="site-filter-clear" onclick="clearSiteFilter()"
                 style="display:none;position:absolute;right:6px;top:50%;transform:translateY(-50%);
                        background:none;border:none;cursor:pointer;color:var(--text-3);font-size:16px;
                        line-height:1;padding:2px 3px;border-radius:3px"
                 onmouseover="this.style.color='var(--text-1)'" onmouseout="this.style.color='var(--text-3)'"
                 title="清除">✕</button>
-        <ul id="service-code-suggestions"
-            style="display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:230px;background:var(--card);
+        <ul id="site-filter-suggestions"
+            style="display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:160px;background:var(--card);
                    border:1px solid var(--border);border-radius:7px;box-shadow:0 6px 20px rgba(0,0,0,.13);
                    list-style:none;margin:0;padding:4px 0;z-index:300;"></ul>
       </div>
     </div>
 
+    <div style="display:flex;align-items:center;gap:8px">
+      <label id="service-code-label" data-tip="格式：據點-訂單類型-餐期&#10;&#10;訂單類型　R = 一般訂單　S = 特殊訂單&#10;餐　　期　B = 早餐　L = 午餐　D = 晚餐&#10;　　　　　N = 宵夜　T = 下午茶" style="font-size:14px;color:var(--text-3);white-space:nowrap">餐期服務編號：</label>
+      <div class="code-sel-wrap" id="service-code-sel-wrap">
+        <select class="meal-select" id="service-code-sel"
+                onchange="onServiceCodeSelChange()"
+                disabled
+                style="font-size:15px;opacity:0.5;cursor:not-allowed">
+          <option value="">請先選擇據點</option>
+        </select>
+      </div>
+    </div>
+
     <div id="service-code-parsed"
          style="display:flex;align-items:center;gap:5px;font-size:14px">
-      <span id="parsed-site"       style="background:#e8f4fd;padding:1px 9px;border-radius:4px;white-space:nowrap;color:var(--text-3)">據點：—</span>
       <span id="parsed-order-type" style="background:#fef3e2;padding:1px 9px;border-radius:4px;white-space:nowrap;color:var(--text-3)">類型：—</span>
       <span id="parsed-meal"       style="background:#edf7ed;padding:1px 9px;border-radius:4px;white-space:nowrap;color:var(--text-3)">餐期：—</span>
     </div>
@@ -1626,6 +1652,7 @@ let parsedSiteCode  = '';   // 據點編號，如 "A001"
 let parsedOrderType = 'R';  // 訂單類型，預設 R
 let parsedMealCode  = '';   // 餐期碼，如 "L"
 let planTypeFilter  = 'store';       // 'store' | 'guarantee' | 'surcharge'
+let siteFilter      = '';            // 據點過濾碼，如 'A001'，空字串表示尚未選擇
 let curYear     = new Date().getFullYear();
 let curMonth    = new Date().getMonth(); // 0-based
 
@@ -1656,6 +1683,70 @@ let mgrSelectedRestId = '';
 /* ══════════════════════════════════════════════════
    SERVICE CODE INPUT
 ══════════════════════════════════════════════════ */
+/* 據點唯一清單（code 前綴 → 中文名） */
+const SITE_LIST = [...new Map(
+  SERVICE_CODE_LIST.map(s => [s.code.split('-')[0], s.siteName])
+).entries()].map(([code, name]) => ({ code, name }));
+
+function onSiteFilterInput(val) {
+  const raw = (val || '').trim();
+  const ul = document.getElementById('site-filter-suggestions');
+  const matched = raw
+    ? SITE_LIST.filter(s => s.name.includes(raw) || s.code.includes(raw.toUpperCase()))
+    : SITE_LIST;
+  if (matched.length > 0) {
+    ul.innerHTML = matched.map(s =>
+      `<li onclick="selectSite('${s.code}','${s.name}')"
+           style="padding:8px 14px;cursor:pointer;font-size:15px"
+           onmouseover="this.style.background='var(--bg-2)'" onmouseout="this.style.background=''">
+         ${s.name}
+       </li>`
+    ).join('');
+    ul.style.display = 'block';
+  } else {
+    ul.style.display = 'none';
+  }
+}
+
+function selectSite(code, name) {
+  siteFilter = code;
+  document.getElementById('site-filter-input').value = name;
+  document.getElementById('site-filter-suggestions').style.display = 'none';
+  document.getElementById('site-filter-clear').style.display = 'block';
+  serviceCode = '';
+  parseServiceCode('');
+  const sel = document.getElementById('service-code-sel');
+  const options = SERVICE_CODE_LIST.filter(s => s.code.startsWith(siteFilter));
+  sel.innerHTML = '<option value="">請選擇</option>' +
+    options.map(s => `<option value="${s.code}">${s.code}</option>`).join('');
+  sel.disabled = false;
+  sel.style.opacity = '';
+  sel.style.cursor = '';
+}
+
+function clearSiteFilter() {
+  siteFilter = '';
+  document.getElementById('site-filter-input').value = '';
+  document.getElementById('site-filter-clear').style.display = 'none';
+  serviceCode = '';
+  parseServiceCode('');
+  const sel = document.getElementById('service-code-sel');
+  sel.innerHTML = '<option value="">請先選擇據點</option>';
+  sel.disabled = true;
+  sel.style.opacity = '0.5';
+  sel.style.cursor = 'not-allowed';
+}
+
+function closeSiteDropdown() {
+  document.getElementById('site-filter-suggestions').style.display = 'none';
+}
+
+function onServiceCodeSelChange() {
+  const val = document.getElementById('service-code-sel').value;
+  serviceCode = val;
+  parseServiceCode(val);
+}
+
 function onServiceCodeInput(val) {
   const raw = (val || '').trim().toUpperCase();
   const ul = document.getElementById('service-code-suggestions');
@@ -1713,11 +1804,8 @@ function parseServiceCode(code) {
     parsedOrderType = parts[1];
     parsedMealCode  = parts[2];
     const siteEntry = SERVICE_CODE_LIST.find(s => s.code === code);
-    const siteDisplay = siteEntry ? siteEntry.siteName : parsedSiteCode;
-    document.getElementById('parsed-site').textContent       = `據點：${siteDisplay}`;
     document.getElementById('parsed-order-type').textContent = `類型：${ORDER_TYPES[parsedOrderType]}`;
     document.getElementById('parsed-meal').textContent       = `餐期：${MEAL_CODE_MAP[parsedMealCode].label}`;
-    document.getElementById('parsed-site').style.color       = '';
     document.getElementById('parsed-order-type').style.color = '';
     document.getElementById('parsed-meal').style.color       = '';
     const autoPlanType = siteEntry?.planType || 'store';
@@ -1726,19 +1814,20 @@ function parseServiceCode(code) {
     const planDisplay = document.getElementById('plan-type-display');
     planDisplay.textContent = `定價策略：${planLabel}`;
     planDisplay.style.color = '';
+    document.body.classList.remove('st-system', 'st-internal', 'st-meeting');
+    document.body.classList.add(parsedOrderType === 'S' ? 'st-meeting' : 'st-system');
   } else {
     parsedSiteCode = parsedMealCode = '';
     parsedOrderType = 'R';
-    document.getElementById('parsed-site').textContent       = '據點：—';
     document.getElementById('parsed-order-type').textContent = '類型：—';
     document.getElementById('parsed-meal').textContent       = '餐期：—';
-    document.getElementById('parsed-site').style.color       = 'var(--text-3)';
     document.getElementById('parsed-order-type').style.color = 'var(--text-3)';
     document.getElementById('parsed-meal').style.color       = 'var(--text-3)';
     planTypeFilter = 'store';
     const planDisplay = document.getElementById('plan-type-display');
     planDisplay.textContent = '定價策略：—';
     planDisplay.style.color = 'var(--text-3)';
+    document.body.classList.remove('st-system', 'st-internal', 'st-meeting');
   }
   rerenderCalendar();
 }
