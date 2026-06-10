@@ -656,33 +656,33 @@ body {
 
 /* ─── Meeting bento add button (月曆格) ─── */
 .chip-add-meeting {
-  border: 1.5px dashed #7b0be8; background: transparent; color: #7b0be8;
+  border: 1.5px dashed #c2185b; background: transparent; color: #c2185b;
   cursor: pointer; font-size: 18px; border-radius: 5px; padding: 4px 6px;
   text-align: left; width: 100%; transition: all .1s;
   display: block;
 }
-.chip-add-meeting:hover { border-color: #6209c4; background: #f5f3ff; }
+.chip-add-meeting:hover { border-color: #e91e63; background: #fff0f6; }
 
 /* ─── 供餐方案 — 月曆格新增按鈕顏色 ─── */
 body.st-system   .chip-add { border-color: #0d76b5; color: #0d76b5; background: #f0f9ff; }
 body.st-system   .chip-add:hover { border-color: #095d8f; color: #095d8f; background: #dbeeff; }
 body.st-internal .chip-add { border-color: #9b4f33; color: #9b4f33; background: #fffbeb; }
 body.st-internal .chip-add:hover { border-color: #7a3d27; color: #7a3d27; background: #fef3c7; }
-body.st-meeting  .chip-add-meeting { border-color: #7b0be8; color: #7b0be8; background: #f5f3ff; }
-body.st-meeting  .chip-add-meeting:hover { border-color: #6209c4; color: #6209c4; background: #ede9fe; }
+body.st-meeting  .chip-add-meeting { border-color: #c2185b; color: #c2185b; background: #fff0f6; }
+body.st-meeting  .chip-add-meeting:hover { border-color: #e91e63; color: #e91e63; background: #fce4ec; }
 
 /* ─── 供餐方案 — 月曆格 entry chip 顏色覆蓋 ─── */
 body.st-system   .entry-chip { background: #f0f9ff; color: #0d76b5; }
 body.st-system   .entry-chip .entry-chip-items { color: #0d76b5; opacity: .75; }
 body.st-internal .entry-chip { background: #fffbeb; color: #9b4f33; }
 body.st-internal .entry-chip .entry-chip-items { color: #9b4f33; opacity: .75; }
-/* 會議餐 chip 套紫色系 */
-body.st-meeting  .chip-meeting-bento { background: #f5f3ff; color: #7b0be8; border-color: #c4b5fd; }
-body.st-meeting  .chip-meeting-bento:hover { background: #ede9fe; }
-body.st-meeting  .chip-meeting-bento .entry-chip-items { color: #7b0be8; }
-body.st-meeting  .chip-meeting-bento .entry-chip-del { color: #7b0be8; }
-body.st-meeting  .chip-meeting-bento .entry-chip-del:hover { color: #6209c4; }
-body.st-meeting  .chip-mb-badge { background: #7b0be8; }
+/* 會議餐 chip 套粉紅色系 */
+body.st-meeting  .chip-meeting-bento { background: #fff0f6; color: #c2185b; border-color: #f8bbd0; }
+body.st-meeting  .chip-meeting-bento:hover { background: #fce4ec; }
+body.st-meeting  .chip-meeting-bento .entry-chip-items { color: #c2185b; }
+body.st-meeting  .chip-meeting-bento .entry-chip-del { color: #c2185b; }
+body.st-meeting  .chip-meeting-bento .entry-chip-del:hover { color: #e91e63; }
+body.st-meeting  .chip-mb-badge { background: #c2185b; }
 
 /* ─── Meeting bento card (detail panel) ─── */
 .rest-card.meeting-bento-card { border-color: #f8bbd0; }
@@ -847,12 +847,12 @@ body.st-internal .cal-date-check,
 body.st-internal .cal-week-check,
 body.st-internal #cal-month-cb { accent-color: #9b4f33; }
 body.st-meeting  .cal-cell.date-selected {
-  background: #ede9fe !important;
-  outline: 2px solid #7b0be8; outline-offset: -2px;
+  background: #fce4ec !important;
+  outline: 2px solid #c2185b; outline-offset: -2px;
 }
 body.st-meeting  .cal-date-check,
 body.st-meeting  .cal-week-check,
-body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
+body.st-meeting  #cal-month-cb { accent-color: #c2185b; }
 .cal-week-check {
   width: 14px; height: 14px; cursor: pointer; accent-color: var(--blue);
   margin-top: 4px; display: block;
@@ -963,14 +963,8 @@ body.st-meeting  #cal-month-cb { accent-color: #7b0be8; }
     </div>
 
     <div class="meal-select-wrap" style="gap:12px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <label style="font-size:14px;color:var(--text-3);white-space:nowrap">定價策略：</label>
-        <select class="meal-select" id="plan-type-sel" onchange="onPlanTypeChange()">
-          <option value="store">店內價</option>
-          <option value="guarantee">保障金額</option>
-          <option value="surcharge">統一加價</option>
-        </select>
-      </div>
+      <span id="plan-type-display"
+            style="background:#fdf4ff;padding:1px 9px;border-radius:4px;white-space:nowrap;color:var(--text-3);font-size:14px">定價策略：—</span>
     </div>
 
     <button class="btn" onclick="openCopySiteModal()">⇉ 複製整月排程</button>
@@ -1484,14 +1478,14 @@ const MEAL_CODE_MAP = {
 };
 
 const SERVICE_CODE_LIST = [
-  { code: 'A001-R-B', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區' },
-  { code: 'A001-R-L', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區' },
-  { code: 'A001-R-D', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區' },
-  { code: 'A001-S-L', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區' },
-  { code: 'A002-R-L', siteLabel: 'A002 新竹廠二區', siteName: '新竹廠二區' },
-  { code: 'A002-R-D', siteLabel: 'A002 新竹廠二區', siteName: '新竹廠二區' },
-  { code: 'B001-R-L', siteLabel: 'B001 台中廠',     siteName: '台中廠'     },
-  { code: 'B001-R-T', siteLabel: 'B001 台中廠',     siteName: '台中廠'     },
+  { code: 'A001-R-B', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'A001-R-L', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'A001-R-D', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'A001-S-L', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區', planType: 'guarantee' },
+  { code: 'A002-R-L', siteLabel: 'A002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
+  { code: 'A002-R-D', siteLabel: 'A002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
+  { code: 'B001-R-L', siteLabel: 'B001 台中廠',     siteName: '台中廠',     planType: 'store'     },
+  { code: 'B001-R-T', siteLabel: 'B001 台中廠',     siteName: '台中廠',     planType: 'guarantee' },
 ];
 
 // 定價策略 DEMO 參數（實際值將由供餐價格設定頁管理）
@@ -1726,6 +1720,12 @@ function parseServiceCode(code) {
     document.getElementById('parsed-site').style.color       = '';
     document.getElementById('parsed-order-type').style.color = '';
     document.getElementById('parsed-meal').style.color       = '';
+    const autoPlanType = siteEntry?.planType || 'store';
+    planTypeFilter = autoPlanType;
+    const planLabel = PLAN_TYPES.find(p => p.id === autoPlanType)?.label || autoPlanType;
+    const planDisplay = document.getElementById('plan-type-display');
+    planDisplay.textContent = `定價策略：${planLabel}`;
+    planDisplay.style.color = '';
   } else {
     parsedSiteCode = parsedMealCode = '';
     parsedOrderType = 'R';
@@ -1735,6 +1735,10 @@ function parseServiceCode(code) {
     document.getElementById('parsed-site').style.color       = 'var(--text-3)';
     document.getElementById('parsed-order-type').style.color = 'var(--text-3)';
     document.getElementById('parsed-meal').style.color       = 'var(--text-3)';
+    planTypeFilter = 'store';
+    const planDisplay = document.getElementById('plan-type-display');
+    planDisplay.textContent = '定價策略：—';
+    planDisplay.style.color = 'var(--text-3)';
   }
   rerenderCalendar();
 }
