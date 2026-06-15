@@ -1504,14 +1504,14 @@ const MEAL_CODE_MAP = {
 };
 
 const SERVICE_CODE_LIST = [
-  { code: 'A001-R-B', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
-  { code: 'A001-R-L', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
-  { code: 'A001-R-D', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
-  { code: 'A001-S-L', siteLabel: 'A001 新竹廠一區', siteName: '新竹廠一區', planType: 'guarantee' },
-  { code: 'A002-R-L', siteLabel: 'A002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
-  { code: 'A002-R-D', siteLabel: 'A002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
-  { code: 'B001-R-L', siteLabel: 'B001 台中廠',     siteName: '台中廠',     planType: 'store'     },
-  { code: 'B001-R-T', siteLabel: 'B001 台中廠',     siteName: '台中廠',     planType: 'guarantee' },
+  { code: 'C001-R-B', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'C001-R-L', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'C001-R-D', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'C001-S-L', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'guarantee' },
+  { code: 'C002-R-L', siteLabel: 'C002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
+  { code: 'C002-R-D', siteLabel: 'C002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
+  { code: 'C003-R-L', siteLabel: 'C003 台中廠',     siteName: '台中廠',     planType: 'store'     },
+  { code: 'C003-R-T', siteLabel: 'C003 台中廠',     siteName: '台中廠',     planType: 'guarantee' },
 ];
 
 // 定價策略 DEMO 參數（實際值將由供餐價格設定頁管理）
@@ -1617,8 +1617,8 @@ const meetingBentoData = {};
 const templates = [
   {
     id: 'tpl-001',
-    name: 'A001 午餐',
-    serviceCode: 'A001-R-L',
+    name: 'C001 午餐',
+    serviceCode: 'C001-R-L',
     mealType: 'lunch',
     dailyRestCount: 2,
     itemsPerRest: 3,
@@ -1626,8 +1626,8 @@ const templates = [
   },
   {
     id: 'tpl-002',
-    name: 'A002 午餐',
-    serviceCode: 'A002-R-L',
+    name: 'C002 午餐',
+    serviceCode: 'C002-R-L',
     mealType: 'lunch',
     dailyRestCount: 2,
     itemsPerRest: 3,
@@ -1647,12 +1647,12 @@ const templates = [
 /* ══════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════ */
-let serviceCode     = '';   // 完整輸入值，如 "A001-R-L"
-let parsedSiteCode  = '';   // 據點編號，如 "A001"
+let serviceCode     = '';   // 完整輸入值，如 "C001-R-L"
+let parsedSiteCode  = '';   // 據點編號，如 "C001"
 let parsedOrderType = 'R';  // 訂單類型，預設 R
 let parsedMealCode  = '';   // 餐期碼，如 "L"
 let planTypeFilter  = 'store';       // 'store' | 'guarantee' | 'surcharge'
-let siteFilter      = '';            // 據點過濾碼，如 'A001'，空字串表示尚未選擇
+let siteFilter      = '';            // 據點過濾碼，如 'C001'，空字串表示尚未選擇
 let curYear     = new Date().getFullYear();
 let curMonth    = new Date().getMonth(); // 0-based
 

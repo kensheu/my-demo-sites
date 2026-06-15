@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <link rel="icon" type="image/png" href="圖片/LOGO.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日報表 — 內部後台</title>
+  <link rel="stylesheet" href="shared-nav.css">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --yellow:      #a16207;
+  --yellow-bg:   #fefce8;
+  --yellow-bdr:  #fde68a;
+  --gray-disabled: #d1d5db;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 18px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1400px; margin: 0 auto; padding: 12px 20px 80px; }
+
+/* ─── 麵包屑 ─── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 16px;
+  font-size: 14px; color: var(--text-3);
+}
+.bc-item { color: var(--text-2); }
+.bc-home { font-weight: 600; color: var(--text); }
+.bc-sep  { color: var(--text-3); }
+.bc-link { cursor: pointer; }
+.bc-link:hover { color: var(--blue); text-decoration: underline; }
+
+/* ─── Header ─── */
+.page-header { margin-bottom: 12px; }
+.page-title  { font-size: 22px; font-weight: 600; }
+.page-sub    { font-size: 15px; color: var(--text-3); margin-top: 3px; }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+}
+.toolbar-label { font-size: 15px; color: var(--text-2); white-space: nowrap; }
+.toolbar-tilde { color: var(--text-3); font-size: 15px; }
+.date-input {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 15px; color: var(--text); background: var(--card); cursor: pointer;
+  font-family: inherit;
+}
+.date-input:focus { outline: none; border-color: var(--blue); }
+
+/* ─── 按鈕 ─── */
+.btn {
+  padding: 7px 14px; border-radius: 6px;
+  font-size: 15px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card); color: var(--text-2);
+  transition: all .12s; display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap; font-family: inherit;
+}
+.btn:hover { border-color: #a8a29e; color: var(--text); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { background: #1e40af; border-color: #1e40af; color: #fff; }
+
+/* ─── 操作按鈕（表格內） ─── */
+.btn-edit {
+  padding: 5px 14px; border-radius: 6px;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--text-2); transition: all .12s; white-space: nowrap;
+  font-family: inherit;
+}
+.btn-edit:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.btn-edit:disabled {
+  background: var(--bg-3); color: var(--text-3);
+  border-color: var(--border); cursor: not-allowed; opacity: 0.6;
+}
+.btn-edit-mgr {
+  padding: 5px 14px; border-radius: 6px;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--orange-bdr); background: var(--orange-bg);
+  color: var(--orange); transition: all .12s; white-space: nowrap;
+  font-family: inherit;
+}
+.btn-edit-mgr:hover { background: #fed7aa; border-color: var(--orange); }
+
+/* ─── 表格 ─── */
+.table-wrap { overflow-x: auto; }
+.data-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--card); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.data-table th {
+  padding: 10px 14px; background: var(--bg-2);
+  font-size: 14px; font-weight: 600; color: var(--text-2);
+  text-align: left; white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 13px 14px; font-size: 18px; color: var(--text);
+  border-bottom: 1px solid var(--border-2);
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--bg-2); }
+.num-col { text-align: right; font-variant-numeric: tabular-nums; }
+.profit-col { font-weight: 700; }
+.profit-pos { color: var(--green); }
+.profit-neg { color: var(--red); }
+
+/* ─── 狀態 Badge ─── */
+.badge-done {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  background: var(--green-bg); color: var(--green);
+  border: 1px solid var(--green-bdr);
+  font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+.badge-done::before { content: '●'; font-size: 8px; }
+
+.badge-pending {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  background: var(--yellow-bg); color: var(--yellow);
+  border: 1px solid var(--yellow-bdr);
+  font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+.badge-pending::before { content: '●'; font-size: 8px; }
+
+/* 第一層複合燈號 */
+.badge-mixed {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; white-space: nowrap;
+}
+.badge-mixed .done-part {
+  display: inline-flex; align-items: center; gap: 3px;
+  color: var(--green); font-weight: 600;
+}
+.badge-mixed .pending-part {
+  display: inline-flex; align-items: center; gap: 3px;
+  color: var(--yellow); font-weight: 600;
+}
+.badge-mixed .dot { font-size: 8px; }
+
+/* ─── 層切換 ─── */
+.layer { display: none; }
+.layer.layer-active { display: block; }
+
+/* ─── 空狀態 ─── */
+.empty-state {
+  padding: 48px; text-align: center;
+  color: var(--text-3); font-size: 16px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; margin-top: 4px;
+}
+
+/* ─── 第三層合計列 ─── */
+.l3-summary {
+  display: flex; gap: 32px; flex-wrap: wrap;
+  padding: 14px 16px; background: var(--bg-2);
+  border-top: 2px solid var(--border);
+  border-radius: 0 0 10px 10px;
+}
+.l3-summary-item {
+  display: flex; flex-direction: column; align-items: flex-end;
+}
+.l3-summary-label { font-size: 13px; color: var(--text-3); margin-bottom: 2px; }
+.l3-summary-value { font-size: 18px; font-weight: 700; color: var(--text); }
+.l3-summary-value.pos { color: var(--green); }
+.l3-summary-value.neg { color: var(--red); }
+
+/* ─── 服務編號 code ─── */
+.svc-code {
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 14px; background: var(--bg-3); border-radius: 4px;
+  padding: 2px 6px; color: var(--text-2);
+}
+
+/* ─── 訂單編號 ─── */
+.order-id {
+  font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+  font-size: 13px; color: var(--text-3);
+}
+
+/* ─── RWD ─── */
+@media (max-width: 900px) {
+  .data-table th, .data-table td { padding: 9px 10px; }
+  .data-table td { font-size: 16px; }
+  .hide-md { display: none; }
+}
+@media (max-width: 640px) {
+  .toolbar { gap: 6px; }
+  .date-input { width: 130px; font-size: 14px; }
+  .hide-sm { display: none; }
+}
+  </style>
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<div class="page">
+
+  <!-- 麵包屑 -->
+  <nav class="breadcrumb" id="breadcrumb">
+    <span class="bc-item bc-home">日報表</span>
+    <span class="bc-sep" id="bc-sep-2" style="display:none">›</span>
+    <span class="bc-item bc-link" id="bc-layer2" style="display:none" onclick="goLayer2(currentDate)"></span>
+    <span class="bc-sep" id="bc-sep-3" style="display:none">›</span>
+    <span class="bc-item" id="bc-layer3" style="display:none"></span>
+  </nav>
+
+  <!-- ══════════════════════════════════════════
+       第一層：日期總攬
+  ══════════════════════════════════════════ -->
+  <section id="layer-1" class="layer layer-active">
+    <div class="page-header">
+      <div class="page-title">日報表</div>
+      <div class="page-sub">各據點每日財務匯總（僅計入已完成據點）</div>
+    </div>
+    <div class="toolbar">
+      <span class="toolbar-label">日期區間</span>
+      <input type="date" id="l1-date-from" class="date-input">
+      <span class="toolbar-tilde">～</span>
+      <input type="date" id="l1-date-to" class="date-input">
+      <button class="btn btn-primary" onclick="queryLayer1()">查詢</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="l1-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>星期</th>
+            <th class="num-col">總應收</th>
+            <th class="num-col hide-md">應收扣款</th>
+            <th class="num-col hide-md">總應付</th>
+            <th class="num-col hide-md">應付扣款</th>
+            <th class="num-col">實際應收</th>
+            <th class="num-col">實際應付</th>
+            <th class="num-col profit-col">利潤</th>
+            <th>狀態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="l1-tbody"></tbody>
+      </table>
+      <div id="l1-empty" class="empty-state" style="display:none">查無此區間的日報資料</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       第二層：各據點總攬
+  ══════════════════════════════════════════ -->
+  <section id="layer-2" class="layer">
+    <div class="page-header">
+      <div class="page-title">各據點總攬</div>
+      <div class="page-sub" id="l2-subtitle"></div>
+    </div>
+    <div class="toolbar">
+      <span class="toolbar-label">日期</span>
+      <input type="date" id="l2-date" class="date-input">
+      <button class="btn btn-primary" onclick="queryLayer2()">查詢</button>
+      <button class="btn" style="margin-left:auto" onclick="goLayer1()">← 返回</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="l2-table">
+        <thead>
+          <tr>
+            <th>餐期服務編號</th>
+            <th class="num-col">應收</th>
+            <th class="num-col hide-md">應收扣款</th>
+            <th class="num-col">應付</th>
+            <th class="num-col hide-md">應付扣款</th>
+            <th class="num-col">實際應收</th>
+            <th class="num-col">實際應付</th>
+            <th class="num-col profit-col">利潤</th>
+            <th>狀態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="l2-tbody"></tbody>
+      </table>
+      <div id="l2-empty" class="empty-state" style="display:none">此日期無據點資料</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       第三層：據點明細
+  ══════════════════════════════════════════ -->
+  <section id="layer-3" class="layer">
+    <div class="page-header">
+      <div class="page-title">據點明細</div>
+      <div class="page-sub" id="l3-subtitle"></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="l3-toggle-btn" onclick="toggleLayer3Status()">標記為完成</button>
+      <button class="btn" style="margin-left:auto" onclick="goLayer2Back()">← 返回</button>
+    </div>
+    <div class="empty-state" style="color:var(--text-3);font-size:16px">🚧 規劃中</div>
+  </section>
+
+</div><!-- /.page -->
+
+<script>
+/* ════════════════════════════════════════════════════
+   假資料
+════════════════════════════════════════════════════ */
+
+/*
+  資料結構：
+  MOCK_DATA[]
+    └─ { date, siteServices[] }
+         └─ { siteId, siteName, serviceCode, mealPeriod,
+               status, receivable, receivableDeduction,
+               payable, payableDeduction, orders[] }
+              └─ { orderId, date, company, site, itemName,
+                    qty, unitPrice, cost, deduction, note }
+*/
+
+var MOCK_DATA = (function() {
+
+  function makeOrders(date, siteCode, recipes) {
+    return recipes.map(function(r, i) {
+      var seq = String(i + 1).padStart(3, '0');
+      var dateCompact = date.replace(/-/g, '');
+      return {
+        orderId:   'ORD-' + dateCompact + '-' + siteCode + '-' + seq,
+        date:      date,
+        company:   r.company,
+        site:      r.site,
+        itemName:  r.item,
+        qty:       r.qty,
+        unitPrice: r.price,
+        cost:      r.cost,
+        deduction: r.ded || 0,
+        note:      r.note || ''
+      };
+    });
+  }
+
+  function makeSS(siteId, siteName, serviceCode, mealPeriod, status, orders) {
+    var rec = orders.reduce(function(s, o) { return s + o.qty * o.unitPrice; }, 0);
+    var pay = orders.reduce(function(s, o) { return s + o.qty * o.cost; }, 0);
+    var recDed = orders.reduce(function(s, o) { return s + o.deduction; }, 0);
+    var payDed = 0;
+    return {
+      siteId: siteId, siteName: siteName,
+      serviceCode: serviceCode, mealPeriod: mealPeriod,
+      status: status,
+      receivable: rec, receivableDeduction: recDed,
+      payable: pay, payableDeduction: payDed,
+      orders: orders
+    };
+  }
+
+  /* ── 2026-06-09（前 6 天）：全完成 ── */
+  var d0609 = {
+    date: '2026-06-09',
+    siteServices: [
+      makeSS('C001', '台北南港廠', 'C001-R-L', '午餐', 'done',
+        makeOrders('2026-06-09', 'C001L', [
+          { company: '華邦電子', site: '南港辦公室', item: '日式炸雞便當', qty: 25, price: 120, cost: 82 },
+          { company: '華邦電子', site: '南港辦公室', item: '素食燴飯',     qty: 8,  price: 105, cost: 70 },
+          { company: '宏碁',     site: '南港研發中心', item: '雙拼便當',   qty: 18, price: 130, cost: 90 }
+        ])
+      ),
+      makeSS('C002', '新竹竹科廠', 'C002-R-L', '午餐', 'done',
+        makeOrders('2026-06-09', 'C002L', [
+          { company: '台積電', site: '竹科廠', item: '雞腿飯',     qty: 42, price: 115, cost: 78 },
+          { company: '台積電', site: '竹科廠', item: '排骨便當',   qty: 30, price: 110, cost: 75 },
+          { company: '台積電', site: '竹科廠', item: '素食套餐',   qty: 10, price: 100, cost: 68, ded: 100, note: '1份退款' }
+        ])
+      ),
+      makeSS('C003', '桃園中壢廠', 'C003-R-L', '午餐', 'done',
+        makeOrders('2026-06-09', 'C003L', [
+          { company: '鴻海', site: '中壢廠', item: '紅燒肉飯',   qty: 35, price: 118, cost: 80 },
+          { company: '鴻海', site: '中壢廠', item: '麻辣豆腐飯', qty: 12, price: 108, cost: 72 }
+        ])
+      )
+    ]
+  };
+
+  /* ── 2026-06-10：全完成 ── */
+  var d0610 = {
+    date: '2026-06-10',
+    siteServices: [
+      makeSS('C001', '台北南港廠', 'C001-R-B', '早餐', 'done',
+        makeOrders('2026-06-10', 'C001B', [
+          { company: '華邦電子', site: '南港辦公室', item: '總匯三明治', qty: 30, price: 65, cost: 40 },
+          { company: '華邦電子', site: '南港辦公室', item: '蛋餅',       qty: 20, price: 50, cost: 30 }
+        ])
+      ),
+      makeSS('C001', '台北南港廠', 'C001-R-L', '午餐', 'done',
+        makeOrders('2026-06-10', 'C001L', [
+          { company: '華邦電子', site: '南港辦公室', item: '蔥燒豬排飯', qty: 28, price: 125, cost: 85 },
+          { company: '宏碁',     site: '南港研發中心', item: '雞腿便當', qty: 15, price: 130, cost: 88 }
+        ])
+      ),
+      makeSS('C002', '新竹竹科廠', 'C002-R-L', '午餐', 'done',
+        makeOrders('2026-06-10', 'C002L', [
+          { company: '台積電', site: '竹科廠', item: '三杯雞飯',   qty: 50, price: 120, cost: 82 },
+          { company: '台積電', site: '竹科廠', item: '魚香茄子飯', qty: 20, price: 105, cost: 70 }
+        ])
+      ),
+      makeSS('C004', '台中精科廠', 'C004-R-L', '午餐', 'done',
+        makeOrders('2026-06-10', 'C004L', [
+          { company: '中科園區', site: '精科廠', item: '控肉飯',   qty: 38, price: 112, cost: 76 },
+          { company: '中科園區', site: '精科廠', item: '素食便當', qty: 12, price: 100, cost: 65 }
+        ])
+      )
+    ]
+  };
+
+  /* ── 2026-06-11：全完成 ── */
+  var d0611 = {
+    date: '2026-06-11',
+    siteServices: [
+      makeSS('C001', '台北南港廠', 'C001-R-L', '午餐', 'done',
+        makeOrders('2026-06-11', 'C001L', [
+          { company: '華邦電子', site: '南港辦公室', item: '豬排飯',     qty: 32, price: 120, cost: 82 },
+          { company: '宏碁',     site: '南港研發中心', item: '海鮮炒飯', qty: 20, price: 135, cost: 92 }
+        ])
+      ),
+      makeSS('C002', '新竹竹科廠', 'C002-R-L', '午餐', 'done',
+        makeOrders('2026-06-11', 'C002L', [
+          { company: '台積電', site: '竹科廠', item: '日式咖哩飯', qty: 45, price: 118, cost: 80 },
+          { company: '台積電', site: '竹科廠', item: '滷肉飯',     qty: 28, price: 100, cost: 65 }
+        ])
+      ),
+      makeSS('C003', '桃園中壢廠', 'C003-R-L', '午餐', 'done',
+        makeOrders('2026-06-11', 'C003L', [
+          { company: '鴻海', site: '中壢廠', item: '烤雞腿飯',   qty: 40, price: 122, cost: 83 },
+          { company: '鴻海', site: '中壢廠', item: '客家小炒飯', qty: 18, price: 110, cost: 74, ded: 220, note: '2份品質問題退款' }
+        ])
+      )
+    ]
+  };
+
+  /* ── 2026-06-12：全完成 ── */
+  var d0612 = {
+    date: '2026-06-12',
+    siteServices: [
+      makeSS('C001', '台北南港廠', 'C001-R-B', '早餐', 'done',
+        makeOrders('2026-06-12', 'C001B', [
+          { company: '華邦電子', site: '南港辦公室', item: '漢堡套餐', qty: 25, price: 70, cost: 44 },
+          { company: '華邦電子', site: '南港辦公室', item: '豆漿燒餅', qty: 30, price: 45, cost: 28 }
+        ])
+      ),
+      makeSS('C001', '台北南港廠', 'C001-R-L', '午餐', 'done',
+        makeOrders('2026-06-12', 'C001L', [
+          { company: '華邦電子', site: '南港辦公室', item: '薑燒豬肉飯', qty: 30, price: 118, cost: 80 },
+          { company: '宏碁',     site: '南港研發中心', item: '叉燒飯',   qty: 18, price: 125, cost: 85 }
+        ])
+      ),
+      makeSS('C002', '新竹竹科廠', 'C002-R-L', '午餐', 'done',
+        makeOrders('2026-06-12', 'C002L', [
+          { company: '台積電', site: '竹科廠', item: '壽喜燒飯', qty: 55, price: 125, cost: 88 },
+          { company: '台積電', site: '竹科廠', item: '素食咖哩', qty: 15, price: 105, cost: 70 }
+        ])
+      ),
+      makeSS('C004', '台中精科廠', 'C004-R-L', '午餐', 'done',
+        makeOrders('2026-06-12', 'C004L', [
+          { company: '中科園區', site: '精科廠', item: '雞排飯',   qty: 42, price: 115, cost: 78 },
+          { company: '中科園區', site: '精科廠', item: '豬腳飯',   qty: 20, price: 130, cost: 90 }
+        ])
+      )
+    ]
+  };
+
+  /* ── 2026-06-13（前 2 天）：部分完成 ── */
+  var d0613 = {
+    date: '2026-06-13',
+    siteServices: [
+      makeSS('C001', '台北南港廠', 'C001-R-L', '午餐', 'done',
+        makeOrders('2026-06-13', 'C001L', [
+          { company: '華邦電子', site: '南港辦公室', item: '雙拼便當',   qty: 28, price: 130, cost: 88 },
+          { company: '宏碁',     site: '南港研發中心', item: '日式定食', qty: 22, price: 145, cost: 100 }
+        ])
+      ),
+      makeSS('C002', '新竹竹科廠', 'C002-R-L', '午餐', 'done',
+        makeOrders('2026-06-13', 'C002L', [
+          { company: '台積電', site: '竹科廠', item: '烤鴨飯',   qty: 48, price: 128, cost: 88 },
+          { company: '台積電', site: '竹科廠', item: '素食燴飯', qty: 12, price: 100, cost: 66 }
+        ])
+      ),
+      makeSS('C003', '桃園中壢廠', 'C003-R-L', '午餐', 'pending',
+        makeOrders('2026-06-13', 'C003L', [
+          { company: '鴻海', site: '中壢廠', item: '紅椒雞飯',   qty: 36, price: 120, cost: 82 },
+          { company: '鴻海', site: '中壢廠', item: '麻婆豆腐飯', qty: 14, price: 108, cost: 72 }
+        ])
+      ),
+      makeSS('C004', '台中精科廠', 'C004-R-L', '午餐', 'pending',
+        makeOrders('2026-06-13', 'C004L', [
+          { company: '中科園區', site: '精科廠', item: '鮭魚親子丼', qty: 38, price: 150, cost: 108 },
+          { company: '中科園區', site: '精科廠', item: '蒸蛋便當',   qty: 15, price: 95,  cost: 62 }
+        ])
+      )
+    ]
+  };
+
+  /* ── 2026-06-14（前一日）：全未完成 ── */
+  var d0614 = {
+    date: '2026-06-14',
+    siteServices: [
+      makeSS('C001', '台北南港廠', 'C001-R-B', '早餐', 'pending',
+        makeOrders('2026-06-14', 'C001B', [
+          { company: '華邦電子', site: '南港辦公室', item: '起司蛋餅', qty: 35, price: 58, cost: 36 },
+          { company: '華邦電子', site: '南港辦公室', item: '培根三明治', qty: 22, price: 72, cost: 46 }
+        ])
+      ),
+      makeSS('C001', '台北南港廠', 'C001-R-L', '午餐', 'pending',
+        makeOrders('2026-06-14', 'C001L', [
+          { company: '華邦電子', site: '南港辦公室', item: '黑胡椒牛排飯', qty: 30, price: 145, cost: 100 },
+          { company: '宏碁',     site: '南港研發中心', item: '照燒雞腿飯', qty: 20, price: 130, cost: 88 }
+        ])
+      ),
+      makeSS('C002', '新竹竹科廠', 'C002-R-L', '午餐', 'pending',
+        makeOrders('2026-06-14', 'C002L', [
+          { company: '台積電', site: '竹科廠', item: '泰式打拋飯', qty: 52, price: 122, cost: 84 },
+          { company: '台積電', site: '竹科廠', item: '素食咖哩飯', qty: 18, price: 100, cost: 66 }
+        ])
+      ),
+      makeSS('C003', '桃園中壢廠', 'C003-R-L', '午餐', 'pending',
+        makeOrders('2026-06-14', 'C003L', [
+          { company: '鴻海', site: '中壢廠', item: '獅子頭便當', qty: 40, price: 118, cost: 80 },
+          { company: '鴻海', site: '中壢廠', item: '素食套餐',   qty: 10, price: 100, cost: 65 }
+        ])
+      ),
+      makeSS('C004', '台中精科廠', 'C004-R-L', '午餐', 'pending',
+        makeOrders('2026-06-14', 'C004L', [
+          { company: '中科園區', site: '精科廠', item: '宮保雞丁飯', qty: 44, price: 120, cost: 82 },
+          { company: '中科園區', site: '精科廠', item: '椒麻雞飯',   qty: 18, price: 112, cost: 76 }
+        ])
+      )
+    ]
+  };
+
+  return [d0609, d0610, d0611, d0612, d0613, d0614];
+})();
+
+/* ════════════════════════════════════════════════════
+   狀態變數
+════════════════════════════════════════════════════ */
+var currentLayer = 1;
+var currentDate  = null;
+var currentSvcId = null;
+
+/* ════════════════════════════════════════════════════
+   工具函式
+════════════════════════════════════════════════════ */
+var WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+
+function fmt(n) {
+  return Number(n).toLocaleString('zh-TW');
+}
+
+function formatDate(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + dd;
+}
+
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr + 'T00:00:00');
+  return dateStr + '（' + WEEKDAYS[d.getDay()] + '）';
+}
+
+/* ── 計算一筆 siteService 的動態欄位（profit 等） ── */
+function calcSS(ss) {
+  var ar = ss.receivable - ss.receivableDeduction;
+  var ap = ss.payable - ss.payableDeduction;
+  return {
+    actualReceivable: ar,
+    actualPayable: ap,
+    profit: ar - ap
+  };
+}
+
+/* ── 計算一天的第一層彙總（只計 done 的） ── */
+function calcDaily(daily) {
+  var done    = daily.siteServices.filter(function(s) { return s.status === 'done'; });
+  var pending = daily.siteServices.filter(function(s) { return s.status === 'pending'; });
+  var tRec    = done.reduce(function(s, ss) { return s + ss.receivable; }, 0);
+  var tRecDed = done.reduce(function(s, ss) { return s + ss.receivableDeduction; }, 0);
+  var tPay    = done.reduce(function(s, ss) { return s + ss.payable; }, 0);
+  var tPayDed = done.reduce(function(s, ss) { return s + ss.payableDeduction; }, 0);
+  var ar = tRec - tRecDed;
+  var ap = tPay - tPayDed;
+  return {
+    totalRec: tRec, totalRecDed: tRecDed,
+    totalPay: tPay, totalPayDed: tPayDed,
+    actualRec: ar, actualPay: ap, profit: ar - ap,
+    doneCount: done.length, pendingCount: pending.length
+  };
+}
+
+/* ════════════════════════════════════════════════════
+   層切換
+════════════════════════════════════════════════════ */
+function showLayer(n) {
+  document.querySelectorAll('.layer').forEach(function(el) {
+    el.classList.remove('layer-active');
+  });
+  document.getElementById('layer-' + n).classList.add('layer-active');
+  currentLayer = n;
+  updateBreadcrumb();
+  window.scrollTo(0, 0);
+}
+
+function goLayer1() {
+  showLayer(1);
+}
+
+function goLayer2(date) {
+  if (!date) return;
+  currentDate = date;
+  document.getElementById('l2-date').value = date;
+  document.getElementById('l2-subtitle').textContent = formatDateDisplay(date);
+  renderLayer2(date);
+  showLayer(2);
+}
+
+function goLayer2Back() {
+  renderLayer2(currentDate);
+  showLayer(2);
+}
+
+function goLayer3(svcId) {
+  currentSvcId = svcId;
+  renderLayer3(currentDate, svcId);
+  showLayer(3);
+}
+
+/* ── 麵包屑更新 ── */
+function updateBreadcrumb() {
+  var sep2  = document.getElementById('bc-sep-2');
+  var bc2   = document.getElementById('bc-layer2');
+  var sep3  = document.getElementById('bc-sep-3');
+  var bc3   = document.getElementById('bc-layer3');
+
+  sep2.style.display = currentLayer >= 2 ? '' : 'none';
+  bc2.style.display  = currentLayer >= 2 ? '' : 'none';
+  sep3.style.display = currentLayer >= 3 ? '' : 'none';
+  bc3.style.display  = currentLayer >= 3 ? '' : 'none';
+
+  if (currentLayer >= 2) {
+    bc2.textContent = formatDateDisplay(currentDate);
+  }
+  if (currentLayer >= 3) {
+    var daily = MOCK_DATA.find(function(d) { return d.date === currentDate; });
+    var ss = daily && daily.siteServices.find(function(s) { return s.serviceCode === currentSvcId; });
+    bc3.textContent = ss ? ss.siteName + '・' + ss.mealPeriod : currentSvcId;
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   第一層
+════════════════════════════════════════════════════ */
+function initDefaultDates() {
+  var today = new Date();
+  var yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  var start = new Date(yesterday);
+  start.setDate(yesterday.getDate() - 5);
+  document.getElementById('l1-date-from').value = formatDate(start);
+  document.getElementById('l1-date-to').value   = formatDate(yesterday);
+}
+
+function queryLayer1() {
+  var from = document.getElementById('l1-date-from').value;
+  var to   = document.getElementById('l1-date-to').value;
+  if (!from || !to) { alert('請選擇完整日期區間'); return; }
+  if (from > to) { alert('起始日期不能晚於結束日期'); return; }
+
+  var filtered = MOCK_DATA.filter(function(d) {
+    return d.date >= from && d.date <= to;
+  }).slice().sort(function(a, b) {
+    return b.date.localeCompare(a.date);
+  });
+
+  renderLayer1Table(filtered);
+}
+
+function renderLayer1Table(rows) {
+  var tbody = document.getElementById('l1-tbody');
+  var empty = document.getElementById('l1-empty');
+
+  if (rows.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = rows.map(function(daily) {
+    var t = calcDaily(daily);
+    var d = new Date(daily.date + 'T00:00:00');
+    var wd = '（' + WEEKDAYS[d.getDay()] + '）';
+    var profCls = t.profit >= 0 ? 'profit-pos' : 'profit-neg';
+    var isAllDone = t.pendingCount === 0;
+
+    /* 狀態 badge */
+    var statusHtml;
+    if (t.pendingCount === 0 && t.doneCount === 0) {
+      statusHtml = '<span class="badge-pending">無資料</span>';
+    } else if (t.pendingCount === 0) {
+      statusHtml = '<span class="badge-done">已完成</span>';
+    } else if (t.doneCount === 0) {
+      statusHtml = '<span class="badge-pending">未完成 ' + t.pendingCount + '</span>';
+    } else {
+      statusHtml = (
+        '<span class="badge-mixed">' +
+          '<span class="done-part"><span class="dot">●</span>' + t.doneCount + ' 完成</span>' +
+          '<span class="pending-part"><span class="dot">●</span>' + t.pendingCount + ' 未完成</span>' +
+        '</span>'
+      );
+    }
+
+    var editBtn = isAllDone
+      ? '<button class="btn-edit" disabled>編輯</button>'
+      : '<button class="btn-edit" onclick="goLayer2(\'' + daily.date + '\')">編輯</button>';
+
+    return (
+      '<tr>' +
+        '<td>' + daily.date + '</td>' +
+        '<td>' + wd + '</td>' +
+        '<td class="num-col">' + fmt(t.totalRec) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(t.totalRecDed) + '</td>' +
+        '<td class="num-col">' + fmt(t.totalPay) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(t.totalPayDed) + '</td>' +
+        '<td class="num-col">' + fmt(t.actualRec) + '</td>' +
+        '<td class="num-col">' + fmt(t.actualPay) + '</td>' +
+        '<td class="num-col profit-col ' + profCls + '">' + fmt(t.profit) + '</td>' +
+        '<td>' + statusHtml + '</td>' +
+        '<td>' + editBtn + '</td>' +
+      '</tr>'
+    );
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   第二層
+════════════════════════════════════════════════════ */
+function queryLayer2() {
+  var date = document.getElementById('l2-date').value;
+  if (!date) return;
+  currentDate = date;
+  document.getElementById('l2-subtitle').textContent = formatDateDisplay(date);
+  renderLayer2(date);
+}
+
+var MEAL_ORDER = { '早餐': 0, '午餐': 1, '下午茶': 2, '晚餐': 3, '宵夜': 4 };
+
+function renderLayer2(date) {
+  var daily = MOCK_DATA.find(function(d) { return d.date === date; });
+  var tbody = document.getElementById('l2-tbody');
+  var empty = document.getElementById('l2-empty');
+
+  if (!daily || daily.siteServices.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  var sorted = daily.siteServices.slice().sort(function(a, b) {
+    var ma = MEAL_ORDER[a.mealPeriod] !== undefined ? MEAL_ORDER[a.mealPeriod] : 9;
+    var mb = MEAL_ORDER[b.mealPeriod] !== undefined ? MEAL_ORDER[b.mealPeriod] : 9;
+    if (ma !== mb) return ma - mb;
+    return a.serviceCode.localeCompare(b.serviceCode);
+  });
+
+  tbody.innerHTML = sorted.map(function(ss) {
+    var c = calcSS(ss);
+    var isDone = ss.status === 'done';
+    var profCls = c.profit >= 0 ? 'profit-pos' : 'profit-neg';
+    var badge = isDone
+      ? '<span class="badge-done">完成</span>'
+      : '<span class="badge-pending">未完成</span>';
+    var editBtn = isDone
+      ? '<button class="btn-edit" disabled>編輯</button> <button class="btn-edit-mgr" onclick="goLayer3(\'' + ss.serviceCode + '\')">主管編輯</button>'
+      : '<button class="btn-edit" onclick="goLayer3(\'' + ss.serviceCode + '\')">編輯</button>';
+
+    return (
+      '<tr>' +
+        '<td><span class="svc-code">' + ss.serviceCode + '</span></td>' +
+        '<td class="num-col">' + fmt(ss.receivable) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(ss.receivableDeduction) + '</td>' +
+        '<td class="num-col">' + fmt(ss.payable) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(ss.payableDeduction) + '</td>' +
+        '<td class="num-col">' + fmt(c.actualReceivable) + '</td>' +
+        '<td class="num-col">' + fmt(c.actualPayable) + '</td>' +
+        '<td class="num-col profit-col ' + profCls + '">' + fmt(c.profit) + '</td>' +
+        '<td>' + badge + '</td>' +
+        '<td>' + editBtn + '</td>' +
+      '</tr>'
+    );
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   第三層
+════════════════════════════════════════════════════ */
+function renderLayer3(date, svcId) {
+  var daily = MOCK_DATA.find(function(d) { return d.date === date; });
+  var ss = daily && daily.siteServices.find(function(s) { return s.serviceCode === svcId; });
+  var toggleBtn = document.getElementById('l3-toggle-btn');
+
+  document.getElementById('l3-subtitle').textContent = ss
+    ? ss.siteName + '　' + ss.mealPeriod + '　' + ss.serviceCode + '　' + formatDateDisplay(date)
+    : '';
+
+  if (ss) {
+    toggleBtn.textContent = ss.status === 'done' ? '取消完成' : '標記為完成';
+    toggleBtn.style.display = '';
+  } else {
+    toggleBtn.style.display = 'none';
+  }
+}
+
+/* ── 標記 / 取消完成（Demo 互動） ── */
+function toggleLayer3Status() {
+  var daily = MOCK_DATA.find(function(d) { return d.date === currentDate; });
+  var ss = daily && daily.siteServices.find(function(s) { return s.serviceCode === currentSvcId; });
+  if (!ss) return;
+  ss.status = ss.status === 'done' ? 'pending' : 'done';
+  renderLayer3(currentDate, currentSvcId);
+}
+
+/* ════════════════════════════════════════════════════
+   初始化
+════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+  initDefaultDates();
+  queryLayer1();
+});
+</script>
+</body>
+</html>

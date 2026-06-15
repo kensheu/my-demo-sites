@@ -114,6 +114,11 @@
             match: function (p) { return p.file === 'permissions.html'; }
           },
           {
+            label: '日報表',
+            url: 'daily-report.html',
+            match: function (p) { return p.file === 'daily-report.html'; }
+          },
+          {
             label: '問題單&ECR',
             group: true,
             url: 'issue-and-ecr.html',
@@ -375,6 +380,18 @@
     '</ul>'
   );
 
+  var FEATURE_DAILY_REPORT = (
+    '<h2 class="gn-fp-h2">日報表</h2>' +
+    '<ul class="gn-fp-list">' +
+      '<li>以三層架構呈現每日各據點的財務資訊</li>' +
+      '<li><strong>第一層：日期總攬</strong> — 選擇日期區間（預設前一日減五日 ～ 前一日），顯示每日彙總；財務數字僅計入狀態為「完成」的據點；未完成數量為 0 時「編輯」按鈕變灰停用</li>' +
+      '<li><strong>第二層：各據點總攬</strong> — 顯示該日所有服務編號的應收/應付/利潤；狀態預設「未完成」；完成後按鈕變灰停用；可重新選擇日期查詢</li>' +
+      '<li><strong>第三層：據點明細</strong> — 以出餐日期（完成交易日）為依據，列出每筆訂單的數量、單價、成本、扣款與利潤；底部顯示合計列</li>' +
+      '<li>第三層可點擊「標記為完成 / 取消完成」切換狀態（Demo 展示用）</li>' +
+      '<li>頂部麵包屑顯示目前層級，可點擊返回上層</li>' +
+    '</ul>'
+  );
+
   var FEATURE_MENU_PRICING = (
     '<h2 class="gn-fp-h2">供餐價格設定</h2>' +
     '<ul class="gn-fp-list">' +
@@ -420,6 +437,7 @@
     if (file === 'menu-schedule.html') return FEATURE_SCHEDULE;
     if (file === 'complaint.html') return FEATURE_COMPLAINT;
     if (file === 'permissions.html') return FEATURE_PERMISSIONS;
+    if (file === 'daily-report.html') return FEATURE_DAILY_REPORT;
     if (file === 'issue-and-ecr.html') return FEATURE_ISSUE_ECR;
     if (file === 'menu-pricing.html') return FEATURE_MENU_PRICING;
     if (file === 'store-menu.html') return FEATURE_STORE_MENU;
