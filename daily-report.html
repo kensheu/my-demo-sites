@@ -1225,6 +1225,7 @@ function toggleLayer3Status() {
   if (!ss) return;
   ss.status = ss.status === 'done' ? 'pending' : 'done';
   renderLayer3(currentDate, currentSvcId);
+  queryLayer1();
 }
 
 /* ════════════════════════════════════════════════════
