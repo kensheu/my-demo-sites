@@ -166,6 +166,12 @@ body {
 }
 .data-table tbody tr:last-child td { border-bottom: none; }
 .data-table tbody tr:hover { background: var(--bg-2); }
+.subtotal-row td {
+  background: #f0f4ff; font-weight: 600;
+  border-top: 2px solid #c8d4f0;
+}
+.subtotal-row:hover td { background: #e6ecff !important; }
+.subtotal-label { font-size: 14px; color: #5a6a8a; }
 .num-col { text-align: right !important; font-variant-numeric: tabular-nums; }
 .profit-col { font-weight: 700; }
 .profit-pos { color: var(--green); }
@@ -336,7 +342,7 @@ body {
   <section id="layer-1" class="layer layer-active">
     <div class="page-header">
       <div class="page-title">日報表 V2</div>
-      <div class="page-sub">各據點每日財務匯總（僅計入已完成據點）　<span style="color:var(--blue-text);font-size:13px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:4px;padding:1px 8px;white-space:nowrap">V2 新增：第一/二層檢視按鈕・第二層服務編號中文說明・第二層據點／訂單類型／餐期複選篩選</span></div>
+      <div class="page-sub">各據點每日財務匯總（僅計入已完成據點）　<span style="color:var(--blue-text);font-size:13px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:4px;padding:1px 8px;white-space:nowrap">V2 新增：第一/二層檢視按鈕・第二層服務編號中文說明・第二層據點／訂單類型／餐期複選篩選・第二層據點小計</span></div>
     </div>
     <div class="toolbar">
       <span class="toolbar-label">日期區間</span>
@@ -1472,40 +1478,85 @@ function renderLayer2(date) {
     return ma - mb;
   });
 
-  tbody.innerHTML = sorted.map(function(ss) {
-    var c = calcSS(ss);
-    var isDone = ss.status === 'done';
-    var profCls = c.profit >= 0 ? 'profit-pos' : 'profit-neg';
-    var badge = isDone
-      ? '<span class="badge-done">完成</span>'
-      : '<span class="badge-pending">未完成</span>';
-
-    var viewBtn = '<button class="btn-view" onclick="goLayer3View(\'' + ss.serviceCode + '\')">檢視</button>';
-    var editBtn = isDone
-      ? '<button class="btn-edit" disabled>編輯</button>'
-      : '<button class="btn-edit" onclick="goLayer3(\'' + ss.serviceCode + '\')">編輯</button>';
-    if (isL2ViewMode) {
-      editBtn = '<button class="btn-edit" disabled>編輯</button>';
+  /* 依 siteId 分組 */
+  var groups = [];
+  var currentGroup = null;
+  sorted.forEach(function(ss) {
+    if (!currentGroup || currentGroup.siteId !== ss.siteId) {
+      currentGroup = { siteId: ss.siteId, siteName: ss.siteName, items: [] };
+      groups.push(currentGroup);
     }
+    currentGroup.items.push(ss);
+  });
 
-    var desc = parseSvcCode(ss);
+  var rows = [];
+  groups.forEach(function(g) {
+    g.items.forEach(function(ss) {
+      var c = calcSS(ss);
+      var isDone = ss.status === 'done';
+      var profCls = c.profit >= 0 ? 'profit-pos' : 'profit-neg';
+      var badge = isDone
+        ? '<span class="badge-done">完成</span>'
+        : '<span class="badge-pending">未完成</span>';
 
-    return (
-      '<tr>' +
-        '<td><span class="svc-code">' + ss.serviceCode + '</span>' +
-             (desc ? '<span class="svc-desc">' + desc + '</span>' : '') + '</td>' +
-        '<td class="num-col">' + fmt(ss.receivable) + '</td>' +
-        '<td class="num-col hide-md">' + fmt(ss.receivableDeduction) + '</td>' +
-        '<td class="num-col">' + fmt(ss.payable) + '</td>' +
-        '<td class="num-col hide-md">' + fmt(ss.payableDeduction) + '</td>' +
-        '<td class="num-col">' + fmt(c.actualReceivable) + '</td>' +
-        '<td class="num-col">' + fmt(c.actualPayable) + '</td>' +
-        '<td class="num-col profit-col ' + profCls + '">' + fmt(c.profit) + '</td>' +
-        '<td>' + badge + '</td>' +
-        '<td style="white-space:nowrap">' + viewBtn + ' ' + editBtn + '</td>' +
+      var viewBtn = '<button class="btn-view" onclick="goLayer3View(\'' + ss.serviceCode + '\')">檢視</button>';
+      var editBtn = isDone
+        ? '<button class="btn-edit" disabled>編輯</button>'
+        : '<button class="btn-edit" onclick="goLayer3(\'' + ss.serviceCode + '\')">編輯</button>';
+      if (isL2ViewMode) {
+        editBtn = '<button class="btn-edit" disabled>編輯</button>';
+      }
+
+      var desc = parseSvcCode(ss);
+
+      rows.push(
+        '<tr>' +
+          '<td><span class="svc-code">' + ss.serviceCode + '</span>' +
+               (desc ? '<span class="svc-desc">' + desc + '</span>' : '') + '</td>' +
+          '<td class="num-col">' + fmt(ss.receivable) + '</td>' +
+          '<td class="num-col hide-md">' + fmt(ss.receivableDeduction) + '</td>' +
+          '<td class="num-col">' + fmt(ss.payable) + '</td>' +
+          '<td class="num-col hide-md">' + fmt(ss.payableDeduction) + '</td>' +
+          '<td class="num-col">' + fmt(c.actualReceivable) + '</td>' +
+          '<td class="num-col">' + fmt(c.actualPayable) + '</td>' +
+          '<td class="num-col profit-col ' + profCls + '">' + fmt(c.profit) + '</td>' +
+          '<td>' + badge + '</td>' +
+          '<td style="white-space:nowrap">' + viewBtn + ' ' + editBtn + '</td>' +
+        '</tr>'
+      );
+    });
+
+    /* 據點小計列 */
+    var subRec = 0, subRecDed = 0, subPay = 0, subPayDed = 0;
+    var subActRec = 0, subActPay = 0, subProfit = 0;
+    g.items.forEach(function(ss) {
+      var c = calcSS(ss);
+      subRec    += ss.receivable;
+      subRecDed += ss.receivableDeduction;
+      subPay    += ss.payable;
+      subPayDed += ss.payableDeduction;
+      subActRec += c.actualReceivable;
+      subActPay += c.actualPayable;
+      subProfit += c.profit;
+    });
+    var subProfCls = subProfit >= 0 ? 'profit-pos' : 'profit-neg';
+
+    rows.push(
+      '<tr class="subtotal-row">' +
+        '<td><span class="subtotal-label">' + g.siteName + ' 小計</span></td>' +
+        '<td class="num-col">' + fmt(subRec) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(subRecDed) + '</td>' +
+        '<td class="num-col">' + fmt(subPay) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(subPayDed) + '</td>' +
+        '<td class="num-col">' + fmt(subActRec) + '</td>' +
+        '<td class="num-col">' + fmt(subActPay) + '</td>' +
+        '<td class="num-col profit-col ' + subProfCls + '">' + fmt(subProfit) + '</td>' +
+        '<td colspan="2"></td>' +
       '</tr>'
     );
-  }).join('');
+  });
+
+  tbody.innerHTML = rows.join('');
 }
 
 /* ════════════════════════════════════════════════════
