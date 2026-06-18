@@ -90,6 +90,37 @@ body {
   white-space: nowrap; font-family: inherit;
 }
 .btn:hover { border-color: #a8a29e; color: var(--text); }
+@keyframes btn-label-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(.7); }
+}
+@keyframes btn-label-in {
+  from { opacity: 0; transform: scale(.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes check-draw {
+  from { stroke-dashoffset: 22; }
+  to   { stroke-dashoffset: 0; }
+}
+/* done 狀態的按鈕樣式 */
+#l3-toggle-btn.is-done {
+  background: #f0fdf4; border-color: #86efac; color: #16a34a;
+  transition: background .2s, border-color .2s, color .2s;
+}
+#l3-toggle-btn.is-done:hover {
+  background: #fee2e2; border-color: #fca5a5; color: #dc2626;
+}
+/* 勾勾圖示 */
+#l3-toggle-btn .check-icon { display: inline-flex; align-items: center; }
+#l3-toggle-btn.is-done .label-done   { display: inline-flex; align-items: center; gap: 5px; }
+#l3-toggle-btn.is-done .label-undo   { display: none; }
+#l3-toggle-btn.is-done:not(.no-hover):hover .label-done { display: none; }
+#l3-toggle-btn.is-done:not(.no-hover):hover .label-undo { display: inline-flex; align-items: center; gap: 5px; }
+#l3-toggle-btn.is-done.no-hover { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+.check-path {
+  stroke-dasharray: 22; stroke-dashoffset: 22;
+  animation: check-draw .3s ease-out forwards;
+}
 .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
 .btn-primary:hover { background: #1e40af; border-color: #1e40af; color: #fff; }
 
@@ -900,6 +931,18 @@ var MOCK_DATA = (function() {
           { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '椰漿咖哩蝦飯', qty: 16, price: 145, cost: 100 },
           { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '蒸魚便當',     qty: 10, price: 140, cost: 96  }
         ])
+      ),
+      makeSS('C002', '新竹竹科廠', 'C002-S-L', '特殊訂餐', 'pending', 0,
+        makeOrders(D, 'C002SL', 'S', 'L', [
+          { company: '台積電', site: '竹科廠', brand: '饗宴外燴', memberId: '20250002', item: '主管會議便當A', qty: 6,  price: 280, cost: 195 },
+          { company: '台積電', site: '竹科廠', brand: '饗宴外燴', memberId: '20250002', item: '主管會議便當B', qty: 3,  price: 280, cost: 195 }
+        ])
+      ),
+      makeSS('C004', '台中精科廠', 'C004-S-L', '特殊訂餐', 'pending', 0,
+        makeOrders(D, 'C004SL', 'S', 'L', [
+          { company: '友達光電', site: '台中廠', brand: '饗宴外燴', memberId: '20250005', item: '董事會精緻便當', qty: 8,  price: 350, cost: 245 },
+          { company: '友達光電', site: '台中廠', brand: '饗宴外燴', memberId: '20250005', item: '貴賓水果拼盤',  qty: 4,  price: 200, cost: 140 }
+        ])
       )
     ]
   }; })(dateStr(-1));
@@ -1182,7 +1225,7 @@ function renderLayer3(date, svcId) {
     : '';
 
   if (ss) {
-    toggleBtn.textContent = ss.status === 'done' ? '取消完成' : '標記為完成';
+    setToggleBtnState(toggleBtn, ss.status);
     toggleBtn.style.display = '';
   } else {
     toggleBtn.style.display = 'none';
@@ -1219,13 +1262,61 @@ function renderLayer3(date, svcId) {
 }
 
 /* ── 標記 / 取消完成（Demo 互動） ── */
+function setToggleBtnState(btn, status, suppressHover) {
+  if (status === 'done') {
+    btn.classList.add('is-done');
+    if (suppressHover) {
+      btn.classList.add('no-hover');
+      btn.addEventListener('mouseleave', function onLeave() {
+        btn.classList.remove('no-hover');
+        btn.removeEventListener('mouseleave', onLeave);
+      });
+    }
+    btn.innerHTML =
+      '<span class="label-done">' +
+        '<svg class="check-icon" width="18" height="18" viewBox="0 0 20 20" fill="none">' +
+          '<path class="check-path" d="M4 10.5l4.5 4.5 7.5-8" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>已完成</span>' +
+      '<span class="label-undo">取消完成</span>';
+  } else {
+    btn.classList.remove('is-done');
+    btn.innerHTML = '標記為完成';
+  }
+}
+
 function toggleLayer3Status() {
   var daily = MOCK_DATA.find(function(d) { return d.date === currentDate; });
   var ss = daily && daily.siteServices.find(function(s) { return s.serviceCode === currentSvcId; });
   if (!ss) return;
-  ss.status = ss.status === 'done' ? 'pending' : 'done';
-  renderLayer3(currentDate, currentSvcId);
-  queryLayer1();
+  var becomeDone = ss.status !== 'done';
+  ss.status = becomeDone ? 'done' : 'pending';
+
+  var btn = document.getElementById('l3-toggle-btn');
+
+  if (becomeDone) {
+    // 標記完成：文字先淡出，打勾動畫畫完後變成 done 狀態
+    btn.disabled = true;
+    btn.style.animation = 'btn-label-out .15s ease-out forwards';
+    btn.addEventListener('animationend', function onOut() {
+      btn.removeEventListener('animationend', onOut);
+      btn.style.animation = '';
+      setToggleBtnState(btn, 'done', true);
+      // 讓 check-path 重新觸發（強制 reflow）
+      var path = btn.querySelector('.check-path');
+      if (path) { void path.getBoundingClientRect(); }
+      btn.style.animation = 'btn-label-in .2s ease-out forwards';
+      btn.addEventListener('animationend', function onIn() {
+        btn.removeEventListener('animationend', onIn);
+        btn.style.animation = '';
+        btn.disabled = false;
+      }, { once: true });
+      queryLayer1();
+    }, { once: true });
+  } else {
+    // 取消完成：直接切換，無動畫
+    setToggleBtnState(btn, 'pending');
+    queryLayer1();
+  }
 }
 
 /* ════════════════════════════════════════════════════
