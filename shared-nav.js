@@ -114,9 +114,22 @@
             match: function (p) { return p.file === 'permissions.html'; }
           },
           {
-            label: '日報表',
+            label: '統計報表',
+            group: true,
             url: 'daily-report.html',
-            match: function (p) { return p.file === 'daily-report.html'; }
+            match: function (p) { return p.file === 'daily-report.html' || p.file === 'daily-report-v2.html'; },
+            children: [
+              {
+                label: '日報表',
+                url: 'daily-report.html',
+                match: function (p) { return p.file === 'daily-report.html'; }
+              },
+              {
+                label: '日報表 V2',
+                url: 'daily-report-v2.html',
+                match: function (p) { return p.file === 'daily-report-v2.html'; }
+              }
+            ]
           },
           {
             label: '問題單&ECR',
