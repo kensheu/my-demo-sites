@@ -971,7 +971,7 @@ body.st-meeting  #cal-month-cb { accent-color: #c2185b; }
     </div>
 
     <div style="display:flex;align-items:center;gap:8px">
-      <label id="service-code-label" data-tip="格式：據點-訂單類型-餐期&#10;&#10;訂單類型　R = 一般訂單　S = 特殊訂單&#10;餐　　期　B = 早餐　L = 午餐　D = 晚餐&#10;　　　　　N = 宵夜　T = 下午茶" style="font-size:14px;color:var(--text-3);white-space:nowrap">餐期服務編號：</label>
+      <label id="service-code-label" data-tip="格式：公司-據點-訂單類型-餐期&#10;&#10;訂單類型　R = 一般訂單　S = 特殊訂單&#10;餐　　期　B = 早餐　L = 午餐　D = 晚餐&#10;　　　　　N = 宵夜　T = 下午茶" style="font-size:14px;color:var(--text-3);white-space:nowrap">餐期服務編號：</label>
       <div class="code-sel-wrap" id="service-code-sel-wrap">
         <select class="meal-select" id="service-code-sel"
                 onchange="onServiceCodeSelChange()"
@@ -1504,14 +1504,14 @@ const MEAL_CODE_MAP = {
 };
 
 const SERVICE_CODE_LIST = [
-  { code: 'C001-R-B', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
-  { code: 'C001-R-L', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
-  { code: 'C001-R-D', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
-  { code: 'C001-S-L', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'guarantee' },
-  { code: 'C002-R-L', siteLabel: 'C002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
-  { code: 'C002-R-D', siteLabel: 'C002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
-  { code: 'C003-R-L', siteLabel: 'C003 台中廠',     siteName: '台中廠',     planType: 'store'     },
-  { code: 'C003-R-T', siteLabel: 'C003 台中廠',     siteName: '台中廠',     planType: 'guarantee' },
+  { code: 'C001-01-R-B', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'C001-01-R-L', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'C001-01-R-D', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'store'     },
+  { code: 'C001-01-S-L', siteLabel: 'C001 新竹廠一區', siteName: '新竹廠一區', planType: 'guarantee' },
+  { code: 'C002-01-R-L', siteLabel: 'C002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
+  { code: 'C002-01-R-D', siteLabel: 'C002 新竹廠二區', siteName: '新竹廠二區', planType: 'surcharge' },
+  { code: 'C003-01-R-L', siteLabel: 'C003 台中廠',     siteName: '台中廠',     planType: 'store'     },
+  { code: 'C003-01-R-T', siteLabel: 'C003 台中廠',     siteName: '台中廠',     planType: 'guarantee' },
 ];
 
 // 定價策略 DEMO 參數（實際值將由供餐價格設定頁管理）
@@ -1618,7 +1618,7 @@ const templates = [
   {
     id: 'tpl-001',
     name: 'C001 午餐',
-    serviceCode: 'C001-R-L',
+    serviceCode: 'C001-01-R-L',
     mealType: 'lunch',
     dailyRestCount: 2,
     itemsPerRest: 3,
@@ -1627,7 +1627,7 @@ const templates = [
   {
     id: 'tpl-002',
     name: 'C002 午餐',
-    serviceCode: 'C002-R-L',
+    serviceCode: 'C002-01-R-L',
     mealType: 'lunch',
     dailyRestCount: 2,
     itemsPerRest: 3,
@@ -1647,7 +1647,7 @@ const templates = [
 /* ══════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════ */
-let serviceCode     = '';   // 完整輸入值，如 "C001-R-L"
+let serviceCode     = '';   // 完整輸入值，如 "C001-01-R-L"（公司-據點-訂單類型-餐期）
 let parsedSiteCode  = '';   // 據點編號，如 "C001"
 let parsedOrderType = 'R';  // 訂單類型，預設 R
 let parsedMealCode  = '';   // 餐期碼，如 "L"
@@ -1799,10 +1799,10 @@ function closeSuggestions() {
 function parseServiceCode(code) {
   const parts = code.split('-');
   const parsedDiv = document.getElementById('service-code-parsed');
-  if (parts.length === 3 && parts[0] && ORDER_TYPES[parts[1]] && MEAL_CODE_MAP[parts[2]]) {
+  if (parts.length === 4 && parts[0] && parts[1] && ORDER_TYPES[parts[2]] && MEAL_CODE_MAP[parts[3]]) {
     parsedSiteCode  = parts[0];
-    parsedOrderType = parts[1];
-    parsedMealCode  = parts[2];
+    parsedOrderType = parts[2];
+    parsedMealCode  = parts[3];
     const siteEntry = SERVICE_CODE_LIST.find(s => s.code === code);
     document.getElementById('parsed-order-type').textContent = `類型：${ORDER_TYPES[parsedOrderType]}`;
     document.getElementById('parsed-meal').textContent       = `餐期：${MEAL_CODE_MAP[parsedMealCode].label}`;
