@@ -172,6 +172,15 @@ body {
 }
 .subtotal-row:hover td { background: #e6ecff !important; }
 .subtotal-label { font-size: 14px; color: #5a6a8a; }
+.summary-row td {
+  background: var(--bg-2); font-weight: 600;
+  border-top: 2px solid var(--border);
+}
+.summary-row:hover td { background: var(--bg-3) !important; }
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px;
+}
 .num-col { text-align: right !important; font-variant-numeric: tabular-nums; }
 .profit-col { font-weight: 700; }
 .profit-pos { color: var(--green); }
@@ -438,6 +447,8 @@ body {
             <th class="num-col">總數量</th>
             <th class="num-col">應收金額</th>
             <th class="num-col hide-md">應收扣款</th>
+            <th class="num-col hide-md">人力補助</th>
+            <th class="num-col hide-md">車資補助</th>
             <th class="num-col">應付金額</th>
             <th class="num-col hide-md">應付扣款</th>
             <th class="num-col">實際應收</th>
@@ -467,6 +478,16 @@ body {
     <div class="toolbar">
       <button class="btn" style="margin-left:auto" onclick="goLayer2Back()">← 返回</button>
     </div>
+    <div class="l3-subsidy-bar card-wrap" style="display:flex;gap:12px;margin-bottom:12px;">
+      <div class="card" style="flex:1;padding:16px 20px;">
+        <div class="toolbar-label" style="margin-bottom:6px;">人力補助</div>
+        <div id="l3-labor-value" style="font-size:20px;font-weight:700;">—</div>
+      </div>
+      <div class="card" style="flex:1;padding:16px 20px;">
+        <div class="toolbar-label" style="margin-bottom:6px;">車資補助</div>
+        <div id="l3-trans-value" style="font-size:20px;font-weight:700;">—</div>
+      </div>
+    </div>
     <div class="table-wrap">
       <table class="data-table" id="l3-table">
         <thead>
@@ -477,8 +498,6 @@ body {
             <th class="num-col">終端價</th>
             <th class="num-col">應收金額</th>
             <th class="num-col hide-md">應收扣款</th>
-            <th class="num-col hide-md">人力補助</th>
-            <th class="num-col hide-md">車資補助</th>
             <th class="num-col hide-md">成本價</th>
             <th class="num-col">應付金額</th>
             <th class="num-col hide-md">應付扣款</th>
@@ -1508,9 +1527,11 @@ function renderLayer2(date) {
                (desc ? '<span class="svc-desc">' + desc + '</span>' : '') + '</td>' +
           '<td class="num-col">' + totalQty + '</td>' +
           '<td class="num-col">' + fmt(ss.receivable) + '</td>' +
-          '<td class="num-col hide-md">' + fmt(ss.receivableDeduction) + '</td>' +
+          '<td class="num-col hide-md">' + (ss.receivableDeduction ? fmt(ss.receivableDeduction) : '—') + '</td>' +
+          '<td class="num-col hide-md">' + (c.laborSubsidy ? fmt(c.laborSubsidy) : '—') + '</td>' +
+          '<td class="num-col hide-md">' + (c.transportSubsidy ? fmt(c.transportSubsidy) : '—') + '</td>' +
           '<td class="num-col">' + fmt(ss.payable) + '</td>' +
-          '<td class="num-col hide-md">' + fmt(ss.payableDeduction) + '</td>' +
+          '<td class="num-col hide-md">' + (ss.payableDeduction ? fmt(ss.payableDeduction) : '—') + '</td>' +
           '<td class="num-col">' + fmt(c.actualReceivable) + '</td>' +
           '<td class="num-col">' + fmt(c.actualPayable) + '</td>' +
           '<td class="num-col profit-col ' + profCls + '">' + fmt(c.profit) + '</td>' +
@@ -1521,13 +1542,15 @@ function renderLayer2(date) {
     });
 
     /* 據點小計列 */
-    var subQty = 0, subRec = 0, subRecDed = 0, subPay = 0, subPayDed = 0;
-    var subActRec = 0, subActPay = 0, subProfit = 0;
+    var subQty = 0, subRec = 0, subRecDed = 0, subLabor = 0, subTrans = 0;
+    var subPay = 0, subPayDed = 0, subActRec = 0, subActPay = 0, subProfit = 0;
     g.items.forEach(function(ss) {
       var c = calcSS(ss);
       subQty    += ss.orders.reduce(function(s, o) { return s + o.qty; }, 0);
       subRec    += ss.receivable;
       subRecDed += ss.receivableDeduction;
+      subLabor  += c.laborSubsidy;
+      subTrans  += c.transportSubsidy;
       subPay    += ss.payable;
       subPayDed += ss.payableDeduction;
       subActRec += c.actualReceivable;
@@ -1541,9 +1564,11 @@ function renderLayer2(date) {
         '<td><span class="subtotal-label">' + g.siteName + ' 小計</span></td>' +
         '<td class="num-col">' + subQty + '</td>' +
         '<td class="num-col">' + fmt(subRec) + '</td>' +
-        '<td class="num-col hide-md">' + fmt(subRecDed) + '</td>' +
+        '<td class="num-col hide-md">' + (subRecDed ? fmt(subRecDed) : '—') + '</td>' +
+        '<td class="num-col hide-md">' + (subLabor  ? fmt(subLabor)  : '—') + '</td>' +
+        '<td class="num-col hide-md">' + (subTrans  ? fmt(subTrans)  : '—') + '</td>' +
         '<td class="num-col">' + fmt(subPay) + '</td>' +
-        '<td class="num-col hide-md">' + fmt(subPayDed) + '</td>' +
+        '<td class="num-col hide-md">' + (subPayDed ? fmt(subPayDed) : '—') + '</td>' +
         '<td class="num-col">' + fmt(subActRec) + '</td>' +
         '<td class="num-col">' + fmt(subActPay) + '</td>' +
         '<td class="num-col profit-col ' + subProfCls + '">' + fmt(subProfit) + '</td>' +
@@ -1608,9 +1633,20 @@ function renderLayer3(date, svcId) {
     return '<td class="num-col' + (cls ? ' ' + cls : '') + '">' + (v ? fmt(v) : '—') + '</td>';
   }
 
-  tbody.innerHTML = orders.map(function(o) {
+  var totalQty       = 0;
+  var totalReceivable = 0;
+  var totalPayable   = 0;
+  var totalLabor     = 0;
+  var totalTrans     = 0;
+
+  var rows = orders.map(function(o) {
     var receivable = o.qty * o.unitPrice;
     var payable    = o.qty * o.cost;
+    totalQty        += o.qty;
+    totalReceivable += receivable;
+    totalPayable    += payable;
+    totalLabor      += (o.laborSubsidy     || 0);
+    totalTrans      += (o.transportSubsidy || 0);
     return (
       '<tr>' +
         '<td>' + (o.brand || '—') + '</td>' +
@@ -1619,14 +1655,32 @@ function renderLayer3(date, svcId) {
         numCell(o.unitPrice) +
         numCell(receivable) +
         numCell(o.receivableDeduction, 'hide-md') +
-        numCell(o.laborSubsidy, 'hide-md') +
-        numCell(o.transportSubsidy, 'hide-md') +
         numCell(o.cost, 'hide-md') +
         numCell(payable) +
         numCell(o.payableDeduction, 'hide-md') +
       '</tr>'
     );
-  }).join('');
+  });
+
+  rows.push(
+    '<tr class="summary-row">' +
+      '<td colspan="2"><strong>合計</strong></td>' +
+      '<td class="num-col"><strong>' + totalQty + '</strong></td>' +
+      '<td class="num-col">—</td>' +
+      '<td class="num-col"><strong>' + fmt(totalReceivable) + '</strong></td>' +
+      '<td class="num-col hide-md">—</td>' +
+      '<td class="num-col hide-md">—</td>' +
+      '<td class="num-col"><strong>' + fmt(totalPayable) + '</strong></td>' +
+      '<td class="num-col hide-md">—</td>' +
+    '</tr>'
+  );
+
+  tbody.innerHTML = rows.join('');
+
+  var laborEl = document.getElementById('l3-labor-value');
+  var transEl = document.getElementById('l3-trans-value');
+  if (laborEl) laborEl.textContent = totalLabor ? fmt(totalLabor) : '—';
+  if (transEl) transEl.textContent = totalTrans ? fmt(totalTrans) : '—';
 }
 
 /* ── 標記 / 取消完成（Demo 互動） ── */
