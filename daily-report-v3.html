@@ -568,66 +568,66 @@ var MOCK_DATA = (function() {
     date: D,
     siteServices: [
       makeSS('C001', '台北南港廠', 'C001-01-R-B', '早餐', 'done', makeOrders(D, 'C001B', 'R', 'B', [
-        { company: '華邦電子', site: '南港辦公室',   brand: 'XX 早餐店', memberId: '20250001', item: '總匯三明治', qty: 28, price: 65,  cost: 40 },
-        { company: '宏碁',     site: '南港研發中心', brand: 'XX 早餐店', memberId: '20250002', item: '蛋餅',       qty: 15, price: 50,  cost: 30 }
+        { company: '華邦電子', site: '南港辦公室',   brand: 'XX 早餐店', memberId: '20250001', item: '總匯三明治', qty: 28, price: 65,  cost: 40, labor: 200 },
+        { company: '宏碁',     site: '南港研發中心', brand: 'XX 早餐店', memberId: '20250002', item: '蛋餅',       qty: 15, price: 50,  cost: 30, recDed: 50, note: '1份退單' }
       ])),
       makeSS('C001', '台北南港廠', 'C001-01-R-L', '午餐', 'done', makeOrders(D, 'C001L', 'R', 'L', [
-        { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '日式炸雞便當', qty: 25, price: 120, cost: 82 },
+        { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '日式炸雞便當', qty: 25, price: 120, cost: 82, labor: 300, trans: 150 },
         { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '素食燴飯',     qty: 8,  price: 105, cost: 70 },
-        { company: '宏碁',     site: '南港研發中心', brand: '阿成便當',       memberId: '20250002', item: '雙拼便當',     qty: 18, price: 130, cost: 90 }
+        { company: '宏碁',     site: '南港研發中心', brand: '阿成便當',       memberId: '20250002', item: '雙拼便當',     qty: 18, price: 130, cost: 90, recDed: 130, note: '1份取消' }
       ])),
       makeSS('C001', '台北南港廠', 'C001-01-R-D', '晚餐', 'done', makeOrders(D, 'C001D', 'R', 'D', [
-        { company: '華邦電子', site: '南港辦公室',   brand: '阿成便當', memberId: '20250001', item: '燒肉定食', qty: 12, price: 150, cost: 105 },
+        { company: '華邦電子', site: '南港辦公室',   brand: '阿成便當', memberId: '20250001', item: '燒肉定食', qty: 12, price: 150, cost: 105, payDed: 210, note: '2份品質異常' },
         { company: '宏碁',     site: '南港研發中心', brand: '阿成便當', memberId: '20250002', item: '海鮮炒飯', qty: 8,  price: 140, cost: 96  }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-L', '午餐', 'done', makeOrders(D, 'C002L', 'R', 'L', [
-        { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '雞腿飯',   qty: 42, price: 115, cost: 78 },
+        { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '雞腿飯',   qty: 42, price: 115, cost: 78, trans: 200 },
         { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '排骨便當', qty: 30, price: 110, cost: 75 },
         { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '素食套餐', qty: 10, price: 100, cost: 68, recDed: 100, payDed: 50, note: '1份退款' }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-T', '下午茶', 'done', makeOrders(D, 'C002T', 'R', 'T', [
-        { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '泡芙禮盒', qty: 20, price: 80, cost: 52 },
+        { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '泡芙禮盒', qty: 20, price: 80, cost: 52, labor: 150 },
         { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '奶茶套組', qty: 35, price: 65, cost: 42 }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-N', '宵夜', 'done', makeOrders(D, 'C002N', 'R', 'N', [
         { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '鹹粥', qty: 18, price: 70, cost: 44 },
-        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '乾麵', qty: 12, price: 60, cost: 38 }
+        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '乾麵', qty: 12, price: 60, cost: 38, recDed: 60, note: '1份退單' }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-B', '早餐', 'done', makeOrders(D, 'C003B', 'R', 'B', [
-        { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '飯糰',     qty: 40, price: 45, cost: 28 },
+        { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '飯糰',     qty: 40, price: 45, cost: 28, labor: 180, trans: 120 },
         { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '豆漿套餐', qty: 25, price: 55, cost: 34 }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-L', '午餐', 'done', makeOrders(D, 'C003L', 'R', 'L', [
         { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '紅燒肉飯',   qty: 35, price: 118, cost: 80 },
-        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '麻辣豆腐飯', qty: 12, price: 108, cost: 72 }
+        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '麻辣豆腐飯', qty: 12, price: 108, cost: 72, payDed: 144, note: '2份異物事件' }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-D', '晚餐', 'done', makeOrders(D, 'C003D', 'R', 'D', [
-        { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '控肉飯',   qty: 22, price: 125, cost: 85 },
+        { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '控肉飯',   qty: 22, price: 125, cost: 85, trans: 150 },
         { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '炸排骨飯', qty: 15, price: 130, cost: 90 }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-L', '午餐', 'done', makeOrders(D, 'C004L', 'R', 'L', [
-        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '控肉飯',   qty: 38, price: 112, cost: 76 },
-        { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '素食便當', qty: 12, price: 100, cost: 65 }
+        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '控肉飯',   qty: 38, price: 112, cost: 76, labor: 250 },
+        { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '素食便當', qty: 12, price: 100, cost: 65, recDed: 100, note: '1份取消' }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-T', '下午茶', 'done', makeOrders(D, 'C004T', 'R', 'T', [
         { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '蛋糕禮盒', qty: 15, price: 90, cost: 58 },
-        { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '奶茶',     qty: 30, price: 60, cost: 38 }
+        { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '奶茶',     qty: 30, price: 60, cost: 38, labor: 120 }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-D', '晚餐', 'done', makeOrders(D, 'C004D', 'R', 'D', [
-        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '招牌牛肉麵', qty: 20, price: 160, cost: 112 },
+        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '招牌牛肉麵', qty: 20, price: 160, cost: 112, payDed: 112, note: '1份客訴賠償' },
         { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '什錦炒飯',   qty: 14, price: 110, cost: 74  }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-B', '早餐', 'done', makeOrders(D, 'C005B', 'R', 'B', [
-        { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '鮪魚三明治', qty: 30, price: 60, cost: 38 },
+        { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '鮪魚三明治', qty: 30, price: 60, cost: 38, labor: 200, trans: 100 },
         { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '燕麥牛奶',   qty: 20, price: 45, cost: 28 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-L', '午餐', 'done', makeOrders(D, 'C005L', 'R', 'L', [
         { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '椰汁咖哩飯', qty: 45, price: 115, cost: 78 },
-        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '打拋豬飯',   qty: 25, price: 105, cost: 70 },
+        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '打拋豬飯',   qty: 25, price: 105, cost: 70, recDed: 105, note: '1份退單' },
         { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '素食便當',   qty: 10, price: 95,  cost: 62 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-D', '晚餐', 'done', makeOrders(D, 'C005D', 'R', 'D', [
-        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '沙嗲雞飯', qty: 18, price: 130, cost: 88 },
+        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '沙嗲雞飯', qty: 18, price: 130, cost: 88, payDed: 88, note: '1份異物事件' },
         { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '蒸魚便當', qty: 12, price: 140, cost: 96  }
       ]))
     ]
@@ -638,65 +638,65 @@ var MOCK_DATA = (function() {
     date: D,
     siteServices: [
       makeSS('C001', '台北南港廠', 'C001-01-R-B', '早餐', 'done', makeOrders(D, 'C001B', 'R', 'B', [
-        { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '總匯三明治', qty: 30, price: 65, cost: 40 },
-        { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '蛋餅',       qty: 20, price: 50, cost: 30 }
+        { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '總匯三明治', qty: 30, price: 65, cost: 40, labor: 150 },
+        { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '蛋餅',       qty: 20, price: 50, cost: 30, recDed: 50, note: '1份異物退款' }
       ])),
       makeSS('C001', '台北南港廠', 'C001-01-R-L', '午餐', 'done', makeOrders(D, 'C001L', 'R', 'L', [
-        { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '蔥燒豬排飯', qty: 28, price: 125, cost: 85 },
+        { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '蔥燒豬排飯', qty: 28, price: 125, cost: 85, labor: 280, trans: 120 },
         { company: '宏碁',     site: '南港研發中心', brand: 'OO 雞飯專門店', memberId: '20250002', item: '雞腿便當',   qty: 15, price: 130, cost: 88 }
       ])),
       makeSS('C001', '台北南港廠', 'C001-01-R-D', '晚餐', 'done', makeOrders(D, 'C001D', 'R', 'D', [
         { company: '華邦電子', site: '南港辦公室',   brand: '阿成便當', memberId: '20250001', item: '鐵板雞腿飯', qty: 10, price: 155, cost: 108 },
-        { company: '宏碁',     site: '南港研發中心', brand: '阿成便當', memberId: '20250002', item: '燒肉定食',   qty: 8,  price: 150, cost: 105 }
+        { company: '宏碁',     site: '南港研發中心', brand: '阿成便當', memberId: '20250002', item: '燒肉定食',   qty: 8,  price: 150, cost: 105, payDed: 105, note: '1份品質異常' }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-L', '午餐', 'done', makeOrders(D, 'C002L', 'R', 'L', [
-        { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '三杯雞飯',   qty: 50, price: 120, cost: 82 },
-        { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '魚香茄子飯', qty: 20, price: 105, cost: 70 }
+        { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '三杯雞飯',   qty: 50, price: 120, cost: 82, trans: 250 },
+        { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '魚香茄子飯', qty: 20, price: 105, cost: 70, recDed: 105, note: '1份退單' }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-T', '下午茶', 'done', makeOrders(D, 'C002T', 'R', 'T', [
-        { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '馬卡龍禮盒', qty: 18, price: 90, cost: 58 },
+        { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '馬卡龍禮盒', qty: 18, price: 90, cost: 58, labor: 180 },
         { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '咖啡套組',   qty: 30, price: 70, cost: 45 }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-N', '宵夜', 'done', makeOrders(D, 'C002N', 'R', 'N', [
         { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '牛肉湯麵', qty: 22, price: 75, cost: 48 },
-        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '鹹粥',     qty: 14, price: 60, cost: 38 }
+        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '鹹粥',     qty: 14, price: 60, cost: 38, recDed: 60, note: '1份取消' }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-B', '早餐', 'done', makeOrders(D, 'C003B', 'R', 'B', [
-        { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '起司蛋餅',   qty: 35, price: 55, cost: 34 },
+        { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '起司蛋餅',   qty: 35, price: 55, cost: 34, labor: 200, trans: 100 },
         { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '培根三明治', qty: 20, price: 65, cost: 40 }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-L', '午餐', 'done', makeOrders(D, 'C003L', 'R', 'L', [
         { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '薑燒豬肉飯', qty: 30, price: 118, cost: 80 },
-        { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '蒸雞便當',   qty: 18, price: 110, cost: 74 }
+        { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '蒸雞便當',   qty: 18, price: 110, cost: 74, payDed: 148, note: '2份品質問題' }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-D', '晚餐', 'done', makeOrders(D, 'C003D', 'R', 'D', [
-        { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '日式定食', qty: 20, price: 145, cost: 100 },
+        { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '日式定食', qty: 20, price: 145, cost: 100, trans: 200 },
         { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '燉肉飯',   qty: 14, price: 120, cost: 82  }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-L', '午餐', 'done', makeOrders(D, 'C004L', 'R', 'L', [
-        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '控肉飯',   qty: 38, price: 112, cost: 76 },
-        { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '素食便當', qty: 12, price: 100, cost: 65 }
+        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '控肉飯',   qty: 38, price: 112, cost: 76, labor: 300 },
+        { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '素食便當', qty: 12, price: 100, cost: 65, recDed: 100, note: '1份取消' }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-T', '下午茶', 'done', makeOrders(D, 'C004T', 'R', 'T', [
         { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '珍奶禮盒', qty: 20, price: 75, cost: 48 },
-        { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '水果拼盤', qty: 10, price: 120, cost: 82 }
+        { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '水果拼盤', qty: 10, price: 120, cost: 82, labor: 150 }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-D', '晚餐', 'done', makeOrders(D, 'C004D', 'R', 'D', [
-        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '紅燒牛腩飯', qty: 22, price: 155, cost: 108 },
+        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '紅燒牛腩飯', qty: 22, price: 155, cost: 108, payDed: 108, note: '1份異物事件' },
         { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '鮮蝦炒飯',   qty: 16, price: 120, cost: 82  }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-B', '早餐', 'done', makeOrders(D, 'C005B', 'R', 'B', [
-        { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '漢堡套餐', qty: 32, price: 68, cost: 42 },
+        { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '漢堡套餐', qty: 32, price: 68, cost: 42, labor: 180, trans: 120 },
         { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '豆漿燒餅', qty: 18, price: 48, cost: 30 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-L', '午餐', 'done', makeOrders(D, 'C005L', 'R', 'L', [
-        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '叻沙米線', qty: 40, price: 115, cost: 78 },
+        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '叻沙米線', qty: 40, price: 115, cost: 78, recDed: 115, note: '1份退單' },
         { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '肉骨茶飯', qty: 20, price: 125, cost: 86 },
         { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '素食便當', qty: 8,  price: 95,  cost: 62 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-D', '晚餐', 'done', makeOrders(D, 'C005D', 'R', 'D', [
         { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '薑黃雞腿飯', qty: 16, price: 135, cost: 92  },
-        { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '清蒸鱈魚飯', qty: 10, price: 145, cost: 100 }
+        { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '清蒸鱈魚飯', qty: 10, price: 145, cost: 100, payDed: 100, note: '1份客訴' }
       ]))
     ]
   }; })(dateStr(-5));
@@ -706,64 +706,64 @@ var MOCK_DATA = (function() {
     date: D,
     siteServices: [
       makeSS('C001', '台北南港廠', 'C001-01-R-B', '早餐', 'done', makeOrders(D, 'C001B', 'R', 'B', [
-        { company: '華邦電子', site: '南港辦公室',   brand: 'XX 早餐店', memberId: '20250001', item: '肉鬆飯糰', qty: 26, price: 55, cost: 34 },
-        { company: '宏碁',     site: '南港研發中心', brand: 'XX 早餐店', memberId: '20250002', item: '豆漿套餐', qty: 18, price: 60, cost: 38 }
+        { company: '華邦電子', site: '南港辦公室',   brand: 'XX 早餐店', memberId: '20250001', item: '肉鬆飯糰', qty: 26, price: 55, cost: 34, labor: 160 },
+        { company: '宏碁',     site: '南港研發中心', brand: 'XX 早餐店', memberId: '20250002', item: '豆漿套餐', qty: 18, price: 60, cost: 38, trans: 100 }
       ])),
       makeSS('C001', '台北南港廠', 'C001-01-R-L', '午餐', 'done', makeOrders(D, 'C001L', 'R', 'L', [
-        { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '豬排飯',   qty: 32, price: 120, cost: 82 },
+        { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '豬排飯',   qty: 32, price: 120, cost: 82, recDed: 120, note: '1份退單' },
         { company: '宏碁',     site: '南港研發中心', brand: '阿成便當',       memberId: '20250002', item: '海鮮炒飯', qty: 20, price: 135, cost: 92 }
       ])),
       makeSS('C001', '台北南港廠', 'C001-01-R-D', '晚餐', 'done', makeOrders(D, 'C001D', 'R', 'D', [
-        { company: '華邦電子', site: '南港辦公室',   brand: '阿成便當', memberId: '20250001', item: '叉燒飯',   qty: 14, price: 125, cost: 86 },
-        { company: '宏碁',     site: '南港研發中心', brand: '阿成便當', memberId: '20250002', item: '照燒雞腿', qty: 9,  price: 140, cost: 96 }
+        { company: '華邦電子', site: '南港辦公室',   brand: '阿成便當', memberId: '20250001', item: '叉燒飯',   qty: 14, price: 125, cost: 86, labor: 200 },
+        { company: '宏碁',     site: '南港研發中心', brand: '阿成便當', memberId: '20250002', item: '照燒雞腿', qty: 9,  price: 140, cost: 96, payDed: 96, note: '1份客訴' }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-L', '午餐', 'done', makeOrders(D, 'C002L', 'R', 'L', [
-        { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '日式咖哩飯', qty: 45, price: 118, cost: 80 },
+        { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '日式咖哩飯', qty: 45, price: 118, cost: 80, labor: 350, trans: 180 },
         { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '滷肉飯',     qty: 28, price: 100, cost: 65 }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-T', '下午茶', 'done', makeOrders(D, 'C002T', 'R', 'T', [
-        { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '芋頭甜品', qty: 22, price: 75, cost: 48 },
+        { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '芋頭甜品', qty: 22, price: 75, cost: 48, recDed: 75, note: '1份退單' },
         { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '紅茶套組', qty: 30, price: 65, cost: 42 }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-N', '宵夜', 'done', makeOrders(D, 'C002N', 'R', 'N', [
         { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '冬瓜排骨湯麵', qty: 16, price: 80, cost: 52 },
-        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '蛋炒飯',       qty: 10, price: 65, cost: 42 }
+        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '蛋炒飯',       qty: 10, price: 65, cost: 42, payDed: 42, note: '1份品質問題' }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-B', '早餐', 'done', makeOrders(D, 'C003B', 'R', 'B', [
-        { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '鮪魚三明治', qty: 38, price: 62, cost: 38 },
+        { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '鮪魚三明治', qty: 38, price: 62, cost: 38, trans: 150 },
         { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '豆漿蛋餅',   qty: 22, price: 52, cost: 32 }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-L', '午餐', 'done', makeOrders(D, 'C003L', 'R', 'L', [
-        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '烤雞腿飯',   qty: 40, price: 122, cost: 83 },
+        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '烤雞腿飯',   qty: 40, price: 122, cost: 83, labor: 250 },
         { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '客家小炒飯', qty: 18, price: 110, cost: 74, recDed: 220, payDed: 120, note: '2份品質問題退款' }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-D', '晚餐', 'done', makeOrders(D, 'C003D', 'R', 'D', [
         { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '香煎豬排飯', qty: 24, price: 128, cost: 88 },
-        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '宮保雞丁飯', qty: 16, price: 115, cost: 78 }
+        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '宮保雞丁飯', qty: 16, price: 115, cost: 78, recDed: 115, note: '1份取消' }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-L', '午餐', 'done', makeOrders(D, 'C004L', 'R', 'L', [
-        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '燒肉丼',   qty: 35, price: 130, cost: 90 },
+        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '燒肉丼',   qty: 35, price: 130, cost: 90, labor: 280, trans: 160 },
         { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '素食便當', qty: 14, price: 100, cost: 65 }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-T', '下午茶', 'done', makeOrders(D, 'C004T', 'R', 'T', [
         { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '草莓塔',   qty: 16, price: 85, cost: 55 },
-        { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '烏龍茶組', qty: 25, price: 62, cost: 40 }
+        { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '烏龍茶組', qty: 25, price: 62, cost: 40, labor: 120 }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-D', '晚餐', 'done', makeOrders(D, 'C004D', 'R', 'D', [
-        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '三鮮炒飯', qty: 20, price: 125, cost: 86 },
+        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '三鮮炒飯', qty: 20, price: 125, cost: 86, payDed: 86, note: '1份異物' },
         { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '燉排骨飯', qty: 14, price: 135, cost: 92 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-B', '早餐', 'done', makeOrders(D, 'C005B', 'R', 'B', [
-        { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '蛋餅加蛋',   qty: 28, price: 52, cost: 32 },
+        { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '蛋餅加蛋',   qty: 28, price: 52, cost: 32, labor: 140, trans: 100 },
         { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '總匯三明治', qty: 22, price: 65, cost: 40 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-L', '午餐', 'done', makeOrders(D, 'C005L', 'R', 'L', [
         { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '越式河粉',   qty: 42, price: 110, cost: 74 },
-        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '椰汁咖哩飯', qty: 22, price: 115, cost: 78 },
+        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '椰汁咖哩飯', qty: 22, price: 115, cost: 78, recDed: 115, note: '1份退單' },
         { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '素食套餐',   qty: 8,  price: 95,  cost: 62 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-D', '晚餐', 'done', makeOrders(D, 'C005D', 'R', 'D', [
-        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '咖哩烤雞飯', qty: 18, price: 130, cost: 88  },
+        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '咖哩烤雞飯', qty: 18, price: 130, cost: 88, trans: 180 },
         { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '清燉牛肉麵', qty: 10, price: 150, cost: 105 }
       ]))
     ]
@@ -774,64 +774,64 @@ var MOCK_DATA = (function() {
     date: D,
     siteServices: [
       makeSS('C001', '台北南港廠', 'C001-01-R-B', '早餐', 'done', makeOrders(D, 'C001B', 'R', 'B', [
-        { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '漢堡套餐', qty: 25, price: 70, cost: 44 },
-        { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '豆漿燒餅', qty: 30, price: 45, cost: 28 }
+        { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '漢堡套餐', qty: 25, price: 70, cost: 44, labor: 200 },
+        { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '豆漿燒餅', qty: 30, price: 45, cost: 28, trans: 100 }
       ])),
       makeSS('C001', '台北南港廠', 'C001-01-R-L', '午餐', 'done', makeOrders(D, 'C001L', 'R', 'L', [
-        { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '薑燒豬肉飯', qty: 30, price: 118, cost: 80 },
+        { company: '華邦電子', site: '南港辦公室',   brand: 'OO 雞飯專門店', memberId: '20250001', item: '薑燒豬肉飯', qty: 30, price: 118, cost: 80, recDed: 118, note: '1份退單' },
         { company: '宏碁',     site: '南港研發中心', brand: '阿成便當',       memberId: '20250002', item: '叉燒飯',     qty: 18, price: 125, cost: 85 }
       ])),
       makeSS('C001', '台北南港廠', 'C001-01-R-D', '晚餐', 'done', makeOrders(D, 'C001D', 'R', 'D', [
-        { company: '華邦電子', site: '南港辦公室',   brand: '阿成便當', memberId: '20250001', item: '鐵板豬排飯', qty: 13, price: 150, cost: 105 },
+        { company: '華邦電子', site: '南港辦公室',   brand: '阿成便當', memberId: '20250001', item: '鐵板豬排飯', qty: 13, price: 150, cost: 105, payDed: 210, note: '2份品質異常' },
         { company: '宏碁',     site: '南港研發中心', brand: '阿成便當', memberId: '20250002', item: '魚排便當',   qty: 8,  price: 130, cost: 90  }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-L', '午餐', 'done', makeOrders(D, 'C002L', 'R', 'L', [
-        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '壽喜燒飯', qty: 55, price: 125, cost: 88 },
+        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '壽喜燒飯', qty: 55, price: 125, cost: 88, labor: 400, trans: 200 },
         { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '素食咖哩', qty: 15, price: 105, cost: 70 }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-T', '下午茶', 'done', makeOrders(D, 'C002T', 'R', 'T', [
         { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '提拉米蘇',   qty: 20, price: 88, cost: 56 },
-        { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '伯爵奶茶組', qty: 28, price: 72, cost: 46 }
+        { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '伯爵奶茶組', qty: 28, price: 72, cost: 46, recDed: 72, note: '1份取消' }
       ])),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-N', '宵夜', 'done', makeOrders(D, 'C002N', 'R', 'N', [
-        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '雞絲涼麵', qty: 20, price: 72, cost: 46 },
+        { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '雞絲涼麵', qty: 20, price: 72, cost: 46, labor: 160 },
         { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '蔬菜粥',   qty: 12, price: 58, cost: 36 }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-B', '早餐', 'done', makeOrders(D, 'C003B', 'R', 'B', [
-        { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '燕麥粥套餐', qty: 32, price: 58, cost: 36 },
+        { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '燕麥粥套餐', qty: 32, price: 58, cost: 36, trans: 130 },
         { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '漢堡',       qty: 24, price: 65, cost: 40 }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-L', '午餐', 'done', makeOrders(D, 'C003L', 'R', 'L', [
-        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '炸排骨便當', qty: 36, price: 125, cost: 85 },
-        { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '蒸魚便當',   qty: 16, price: 118, cost: 80 }
+        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '炸排骨便當', qty: 36, price: 125, cost: 85, labor: 300 },
+        { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '蒸魚便當',   qty: 16, price: 118, cost: 80, payDed: 160, note: '2份異物退款' }
       ])),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-D', '晚餐', 'done', makeOrders(D, 'C003D', 'R', 'D', [
         { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '燒肉定食',   qty: 22, price: 145, cost: 100 },
-        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '香菇燉雞飯', qty: 14, price: 120, cost: 82  }
+        { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '香菇燉雞飯', qty: 14, price: 120, cost: 82, recDed: 120, note: '1份退單'  }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-L', '午餐', 'done', makeOrders(D, 'C004L', 'R', 'L', [
-        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '雞排飯', qty: 42, price: 115, cost: 78 },
-        { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '豬腳飯', qty: 20, price: 130, cost: 90 }
+        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '雞排飯', qty: 42, price: 115, cost: 78, labor: 350 },
+        { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '豬腳飯', qty: 20, price: 130, cost: 90, trans: 180 }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-T', '下午茶', 'done', makeOrders(D, 'C004T', 'R', 'T', [
         { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '芒果布丁', qty: 18, price: 78, cost: 50 },
-        { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '綠茶組',   qty: 26, price: 62, cost: 40 }
+        { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '綠茶組',   qty: 26, price: 62, cost: 40, recDed: 62, note: '1份退單' }
       ])),
       makeSS('C004', '台中精科廠', 'C004-01-R-D', '晚餐', 'done', makeOrders(D, 'C004D', 'R', 'D', [
-        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '招牌牛肉麵', qty: 18, price: 160, cost: 112 },
+        { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '招牌牛肉麵', qty: 18, price: 160, cost: 112, payDed: 112, note: '1份客訴' },
         { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '紅燒肉飯',   qty: 12, price: 118, cost: 80  }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-B', '早餐', 'done', makeOrders(D, 'C005B', 'R', 'B', [
-        { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '起司蛋餅', qty: 30, price: 55, cost: 34 },
+        { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '起司蛋餅', qty: 30, price: 55, cost: 34, labor: 160, trans: 100 },
         { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '燕麥牛奶', qty: 20, price: 45, cost: 28 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-L', '午餐', 'done', makeOrders(D, 'C005L', 'R', 'L', [
         { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '沙嗲牛肉飯', qty: 38, price: 120, cost: 82 },
-        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '打拋豬飯',   qty: 22, price: 105, cost: 70 },
+        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '打拋豬飯',   qty: 22, price: 105, cost: 70, recDed: 105, note: '1份退單' },
         { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '素食便當',   qty: 10, price: 95,  cost: 62 }
       ])),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-D', '晚餐', 'done', makeOrders(D, 'C005D', 'R', 'D', [
-        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '辣椒蟹炒飯', qty: 16, price: 140, cost: 96  },
+        { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '辣椒蟹炒飯', qty: 16, price: 140, cost: 96, payDed: 96, note: '1份異物'  },
         { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '蒸魚便當',   qty: 12, price: 140, cost: 96  }
       ]))
     ]
@@ -843,82 +843,82 @@ var MOCK_DATA = (function() {
     siteServices: [
       /* C001 台北南港廠：早餐(done)、午餐(done)、晚餐(done) */
       makeSS('C001', '台北南港廠', 'C001-01-R-B', '早餐', 'done', makeOrders(D, 'C001B', 'R', 'B', [
-          { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '培根蛋餅', qty: 27, price: 62, cost: 38 },
+          { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '培根蛋餅', qty: 27, price: 62, cost: 38, labor: 180, trans: 100 },
           { company: '宏碁',     site: '南港研發中心', brand: 'XX 早餐店', memberId: '20250002', item: '饅頭夾蛋', qty: 16, price: 48, cost: 30 }
         ])
       ),
       makeSS('C001', '台北南港廠', 'C001-01-R-L', '午餐', 'done', makeOrders(D, 'C001L', 'R', 'L', [
-          { company: '華邦電子', site: '南港辦公室',  brand: 'OO 雞飯專門店', memberId: '20250001', item: '雙拼便當', qty: 28, price: 130, cost: 88 },
+          { company: '華邦電子', site: '南港辦公室',  brand: 'OO 雞飯專門店', memberId: '20250001', item: '雙拼便當', qty: 28, price: 130, cost: 88, recDed: 130, note: '1份取消' },
           { company: '宏碁',     site: '南港研發中心', brand: '阿成便當',      memberId: '20250002', item: '日式定食', qty: 22, price: 145, cost: 100 }
         ])
       ),
       makeSS('C001', '台北南港廠', 'C001-01-R-D', '晚餐', 'done', makeOrders(D, 'C001D', 'R', 'D', [
-          { company: '華邦電子', site: '南港辦公室', brand: '阿成便當', memberId: '20250001', item: '蔥燒牛肉飯', qty: 12, price: 145, cost: 100 },
+          { company: '華邦電子', site: '南港辦公室', brand: '阿成便當', memberId: '20250001', item: '蔥燒牛肉飯', qty: 12, price: 145, cost: 100, payDed: 100, note: '1份品質問題' },
           { company: '宏碁',     site: '南港研發中心', brand: '阿成便當', memberId: '20250002', item: '鮭魚定食',   qty: 8,  price: 160, cost: 112 }
         ])
       ),
       /* C002 新竹竹科廠：午餐(done)、下午茶(done)、宵夜(pending) */
       makeSS('C002', '新竹竹科廠', 'C002-01-R-L', '午餐', 'done', makeOrders(D, 'C002L', 'R', 'L', [
-          { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '烤鴨飯',   qty: 48, price: 128, cost: 88 },
+          { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '烤鴨飯',   qty: 48, price: 128, cost: 88, labor: 420, trans: 200 },
           { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '素食燴飯', qty: 12, price: 100, cost: 66 }
         ])
       ),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-T', '下午茶', 'done', makeOrders(D, 'C002T', 'R', 'T', [
-          { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '抹茶蛋糕',   qty: 18, price: 82, cost: 52 },
+          { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '抹茶蛋糕',   qty: 18, price: 82, cost: 52, recDed: 82, note: '1份退單' },
           { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '紅茶套組',   qty: 25, price: 65, cost: 42 }
         ])
       ),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-N', '宵夜', 'pending', makeOrders(D, 'C002N', 'R', 'N', [
           { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '豬血糕',   qty: 18, price: 65, cost: 42 },
-          { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '清湯麵',   qty: 12, price: 58, cost: 36 }
+          { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '清湯麵',   qty: 12, price: 58, cost: 36, labor: 150 }
         ])
       ),
       /* C003 桃園中壢廠：早餐(pending)、午餐(pending)、晚餐(pending) */
       makeSS('C003', '桃園中壢廠', 'C003-01-R-B', '早餐', 'pending', makeOrders(D, 'C003B', 'R', 'B', [
-          { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '豆漿油條', qty: 35, price: 48, cost: 30 },
+          { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '豆漿油條', qty: 35, price: 48, cost: 30, trans: 120 },
           { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '玉米蛋餅', qty: 22, price: 55, cost: 34 }
         ])
       ),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-L', '午餐', 'pending', makeOrders(D, 'C003L', 'R', 'L', [
-          { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '紅椒雞飯',   qty: 36, price: 120, cost: 82 },
-          { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '麻婆豆腐飯', qty: 14, price: 108, cost: 72 }
+          { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '紅椒雞飯',   qty: 36, price: 120, cost: 82, labor: 280 },
+          { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '麻婆豆腐飯', qty: 14, price: 108, cost: 72, recDed: 108, note: '1份退單' }
         ])
       ),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-D', '晚餐', 'pending', makeOrders(D, 'C003D', 'R', 'D', [
-          { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '煎魚定食',   qty: 20, price: 135, cost: 92 },
+          { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '煎魚定食',   qty: 20, price: 135, cost: 92, payDed: 92, note: '1份異物' },
           { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '番茄燉肉飯', qty: 14, price: 118, cost: 80 }
         ])
       ),
       /* C004 台中精科廠：午餐(pending)、下午茶(pending)、晚餐(pending) */
       makeSS('C004', '台中精科廠', 'C004-01-R-L', '午餐', 'pending', makeOrders(D, 'C004L', 'R', 'L', [
-          { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '鮭魚親子丼', qty: 38, price: 150, cost: 108 },
+          { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '鮭魚親子丼', qty: 38, price: 150, cost: 108, labor: 380, trans: 200 },
           { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '蒸蛋便當',   qty: 15, price: 95,  cost: 62 }
         ])
       ),
       makeSS('C004', '台中精科廠', 'C004-01-R-T', '下午茶', 'pending', makeOrders(D, 'C004T', 'R', 'T', [
           { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '乳酪蛋糕', qty: 15, price: 88, cost: 56 },
-          { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '花茶套組', qty: 22, price: 65, cost: 42 }
+          { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '花茶套組', qty: 22, price: 65, cost: 42, recDed: 65, note: '1份取消' }
         ])
       ),
       makeSS('C004', '台中精科廠', 'C004-01-R-D', '晚餐', 'pending', makeOrders(D, 'C004D', 'R', 'D', [
           { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '麻油雞飯', qty: 18, price: 145, cost: 100 },
-          { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '玉米炒飯', qty: 14, price: 105, cost: 70  }
+          { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '玉米炒飯', qty: 14, price: 105, cost: 70, payDed: 70, note: '1份品質問題'  }
         ])
       ),
       /* C005 高雄楠梓廠：早餐(done)、午餐(done)、晚餐(pending) */
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-B', '早餐', 'done', makeOrders(D, 'C005B', 'R', 'B', [
-          { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '鮪魚三明治', qty: 28, price: 60, cost: 38 },
-          { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '豆漿饅頭',   qty: 20, price: 45, cost: 28 }
+          { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '鮪魚三明治', qty: 28, price: 60, cost: 38, labor: 200 },
+          { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '豆漿饅頭',   qty: 20, price: 45, cost: 28, trans: 100 }
         ])
       ),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-L', '午餐', 'done', makeOrders(D, 'C005L', 'R', 'L', [
           { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '叻沙米線',   qty: 36, price: 110, cost: 74 },
-          { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '椰汁咖哩飯', qty: 18, price: 115, cost: 78 },
+          { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '椰汁咖哩飯', qty: 18, price: 115, cost: 78, recDed: 115, note: '1份退單' },
           { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '素食套餐',   qty: 8,  price: 95,  cost: 62 }
         ])
       ),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-D', '晚餐', 'pending', makeOrders(D, 'C005D', 'R', 'D', [
-          { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '香茅烤雞飯', qty: 16, price: 132, cost: 90 },
+          { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '香茅烤雞飯', qty: 16, price: 132, cost: 90, payDed: 90, note: '1份客訴' },
           { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '清蒸魚便當', qty: 10, price: 140, cost: 96 }
         ])
       ),
@@ -946,83 +946,83 @@ var MOCK_DATA = (function() {
     siteServices: [
       /* C001 台北南港廠：早餐、午餐、晚餐 */
       makeSS('C001', '台北南港廠', 'C001-01-R-B', '早餐', 'pending', makeOrders(D, 'C001B', 'R', 'B', [
-          { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '起司蛋餅',   qty: 35, price: 58, cost: 36 },
+          { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '起司蛋餅',   qty: 35, price: 58, cost: 36, labor: 200, trans: 120 },
           { company: '華邦電子', site: '南港辦公室', brand: 'XX 早餐店', memberId: '20250001', item: '培根三明治', qty: 22, price: 72, cost: 46 }
         ])
       ),
       makeSS('C001', '台北南港廠', 'C001-01-R-L', '午餐', 'pending', makeOrders(D, 'C001L', 'R', 'L', [
-          { company: '華邦電子', site: '南港辦公室',  brand: 'OO 雞飯專門店', memberId: '20250001', item: '黑胡椒牛排飯', qty: 30, price: 145, cost: 100 },
+          { company: '華邦電子', site: '南港辦公室',  brand: 'OO 雞飯專門店', memberId: '20250001', item: '黑胡椒牛排飯', qty: 30, price: 145, cost: 100, recDed: 145, note: '1份退單' },
           { company: '宏碁',     site: '南港研發中心', brand: '阿成便當',      memberId: '20250002', item: '照燒雞腿飯',   qty: 20, price: 130, cost: 88 }
         ])
       ),
       makeSS('C001', '台北南港廠', 'C001-01-R-D', '晚餐', 'pending', makeOrders(D, 'C001D', 'R', 'D', [
-          { company: '華邦電子', site: '南港辦公室', brand: '阿成便當', memberId: '20250001', item: '蒜香豬排飯', qty: 14, price: 140, cost: 96 },
+          { company: '華邦電子', site: '南港辦公室', brand: '阿成便當', memberId: '20250001', item: '蒜香豬排飯', qty: 14, price: 140, cost: 96, payDed: 96, note: '1份品質問題' },
           { company: '宏碁',     site: '南港研發中心', brand: '阿成便當', memberId: '20250002', item: '鮭魚炒飯',   qty: 9,  price: 145, cost: 100 }
         ])
       ),
       /* C002 新竹竹科廠：午餐、下午茶、宵夜 */
       makeSS('C002', '新竹竹科廠', 'C002-01-R-L', '午餐', 'pending', makeOrders(D, 'C002L', 'R', 'L', [
-          { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '泰式打拋飯', qty: 52, price: 122, cost: 84 },
+          { company: '台積電', site: '竹科廠', brand: '阿成便當', memberId: '20250003', item: '泰式打拋飯', qty: 52, price: 122, cost: 84, labor: 450, trans: 220 },
           { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '素食咖哩飯', qty: 18, price: 100, cost: 66 }
         ])
       ),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-T', '下午茶', 'pending', makeOrders(D, 'C002T', 'R', 'T', [
           { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '巧克力蛋糕', qty: 20, price: 85, cost: 54 },
-          { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '拿鐵套組',   qty: 30, price: 72, cost: 46 }
+          { company: '台積電', site: '竹科廠', brand: '甜點工房', memberId: '20250003', item: '拿鐵套組',   qty: 30, price: 72, cost: 46, recDed: 72, note: '1份取消' }
         ])
       ),
       makeSS('C002', '新竹竹科廠', 'C002-01-R-N', '宵夜', 'pending', makeOrders(D, 'C002N', 'R', 'N', [
-          { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '肉燥麵',   qty: 20, price: 68, cost: 44 },
+          { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '肉燥麵',   qty: 20, price: 68, cost: 44, labor: 180 },
           { company: '台積電', site: '竹科廠', brand: '好味食堂', memberId: '20250003', item: '酸辣湯',   qty: 15, price: 55, cost: 35 }
         ])
       ),
       /* C003 桃園中壢廠：早餐、午餐、晚餐 */
       makeSS('C003', '桃園中壢廠', 'C003-01-R-B', '早餐', 'pending', makeOrders(D, 'C003B', 'R', 'B', [
-          { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '蘿蔔糕套餐', qty: 32, price: 55, cost: 34 },
+          { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '蘿蔔糕套餐', qty: 32, price: 55, cost: 34, trans: 150 },
           { company: '鴻海', site: '中壢廠', brand: 'XX 早餐店', memberId: '20250004', item: '豆漿套餐',   qty: 20, price: 48, cost: 30 }
         ])
       ),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-L', '午餐', 'pending', makeOrders(D, 'C003L', 'R', 'L', [
-          { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '獅子頭便當', qty: 40, price: 118, cost: 80 },
+          { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '獅子頭便當', qty: 40, price: 118, cost: 80, recDed: 118, note: '1份取消' },
           { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '素食套餐',   qty: 10, price: 100, cost: 65 }
         ])
       ),
       makeSS('C003', '桃園中壢廠', 'C003-01-R-D', '晚餐', 'pending', makeOrders(D, 'C003D', 'R', 'D', [
-          { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '紅燒獅子頭', qty: 20, price: 130, cost: 90 },
-          { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '炒蔬菜飯',   qty: 14, price: 100, cost: 65 }
+          { company: '鴻海', site: '中壢廠', brand: '阿成便當', memberId: '20250004', item: '紅燒獅子頭', qty: 20, price: 130, cost: 90, labor: 200 },
+          { company: '鴻海', site: '中壢廠', brand: '好味食堂', memberId: '20250004', item: '炒蔬菜飯',   qty: 14, price: 100, cost: 65, payDed: 65, note: '1份品質問題' }
         ])
       ),
       /* C004 台中精科廠：午餐、下午茶、晚餐 */
       makeSS('C004', '台中精科廠', 'C004-01-R-L', '午餐', 'pending', makeOrders(D, 'C004L', 'R', 'L', [
-          { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '宮保雞丁飯', qty: 44, price: 120, cost: 82 },
+          { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '宮保雞丁飯', qty: 44, price: 120, cost: 82, labor: 320, trans: 180 },
           { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '椒麻雞飯',   qty: 18, price: 112, cost: 76 }
         ])
       ),
       makeSS('C004', '台中精科廠', 'C004-01-R-T', '下午茶', 'pending', makeOrders(D, 'C004T', 'R', 'T', [
-          { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '原味鬆餅', qty: 16, price: 80, cost: 52 },
+          { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '原味鬆餅', qty: 16, price: 80, cost: 52, recDed: 80, note: '1份退單' },
           { company: '中科園區', site: '精科廠', brand: '甜點工房', memberId: '20250005', item: '奶茶套組', qty: 22, price: 68, cost: 44 }
         ])
       ),
       makeSS('C004', '台中精科廠', 'C004-01-R-D', '晚餐', 'pending', makeOrders(D, 'C004D', 'R', 'D', [
-          { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '三杯中卷飯', qty: 18, price: 165, cost: 115 },
+          { company: '中科園區', site: '精科廠', brand: '家鄉麵食館', memberId: '20250005', item: '三杯中卷飯', qty: 18, price: 165, cost: 115, payDed: 115, note: '1份異物' },
           { company: '中科園區', site: '精科廠', brand: '好味食堂',   memberId: '20250005', item: '素食便當',   qty: 12, price: 100, cost: 65  }
         ])
       ),
       /* C005 高雄楠梓廠：早餐、午餐、晚餐 */
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-B', '早餐', 'pending', makeOrders(D, 'C005B', 'R', 'B', [
-          { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '培根三明治', qty: 30, price: 65, cost: 40 },
+          { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '培根三明治', qty: 30, price: 65, cost: 40, labor: 180, trans: 100 },
           { company: '南科聯電', site: '楠梓廠', brand: '早安早餐', memberId: '20250006', item: '豆漿饅頭',   qty: 18, price: 45, cost: 28 }
         ])
       ),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-L', '午餐', 'pending', makeOrders(D, 'C005L', 'R', 'L', [
           { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '越式河粉',   qty: 40, price: 110, cost: 74 },
-          { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '打拋豬飯',   qty: 20, price: 105, cost: 70 },
+          { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '打拋豬飯',   qty: 20, price: 105, cost: 70, recDed: 105, note: '1份退單' },
           { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '素食便當',   qty: 8,  price: 95,  cost: 62 }
         ])
       ),
       makeSS('C005', '高雄楠梓廠', 'C005-01-R-D', '晚餐', 'pending', makeOrders(D, 'C005D', 'R', 'D', [
           { company: '南科聯電', site: '楠梓廠', brand: '南洋食坊', memberId: '20250006', item: '椰漿咖哩蝦飯', qty: 16, price: 145, cost: 100 },
-          { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '蒸魚便當',     qty: 10, price: 140, cost: 96  }
+          { company: '南科聯電', site: '楠梓廠', brand: '好味食堂', memberId: '20250006', item: '蒸魚便當',     qty: 10, price: 140, cost: 96, payDed: 96, note: '1份客訴'  }
         ])
       ),
       makeSS('C002', '新竹竹科廠', 'C002-01-M-L', '會議餐', 'pending', makeOrders(D, 'C002ML', 'M', 'L', [
