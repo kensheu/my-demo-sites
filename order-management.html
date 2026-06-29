@@ -1185,38 +1185,46 @@ function genOrderId() {
 function addDetailRow() {
   var rid = ++newDetailId;
   newDetailRows.push(rid);
-  renderDetailRows();
+  var tbody = document.getElementById('newDetailTbody');
+  // 移除「尚未新增」提示列
+  var empty = tbody.querySelector('tr[data-empty]');
+  if (empty) empty.remove();
+
+  var brandOpts = BRANDS.map(function(b) {
+    return '<option value="' + escHtml(b.name) + '">' + escHtml(b.name) + '</option>';
+  }).join('');
+  var tr = document.createElement('tr');
+  tr.id = 'dr-' + rid;
+  tr.innerHTML =
+    '<td><select class="form-select" id="dr-brand-' + rid + '" onchange="onBrandChange(' + rid + ')">' +
+      '<option value="">請選擇</option>' + brandOpts +
+    '</select></td>' +
+    '<td><input class="form-input" id="dr-branch-' + rid + '" readonly placeholder="自動帶入"></td>' +
+    '<td><select class="form-select" id="dr-item-' + rid + '" onchange="onItemChange(' + rid + ')">' +
+      '<option value="">請先選品牌</option>' +
+    '</select></td>' +
+    '<td><input class="form-input" id="dr-price-' + rid + '" readonly placeholder="0"></td>' +
+    '<td><input class="form-input" id="dr-cost-' + rid + '" readonly placeholder="0"></td>' +
+    '<td><input type="number" class="form-input" id="dr-qty-' + rid + '" value="1" min="1" style="width:60px"></td>' +
+    '<td><button class="btn btn-sm btn-danger" onclick="removeDetailRow(' + rid + ')">刪除</button></td>';
+  tbody.appendChild(tr);
 }
 
 function removeDetailRow(rid) {
   newDetailRows = newDetailRows.filter(function(r) { return r !== rid; });
-  renderDetailRows();
+  var tr = document.getElementById('dr-' + rid);
+  if (tr) tr.remove();
+  // 若全部刪完則顯示提示
+  if (!newDetailRows.length) {
+    var tbody = document.getElementById('newDetailTbody');
+    tbody.innerHTML = '<tr data-empty><td colspan="7" style="text-align:center;color:var(--text-3);padding:16px">尚未新增明細，請點擊下方「新增明細」按鈕</td></tr>';
+  }
 }
 
 function renderDetailRows() {
+  // 僅在 drawer 開啟初始化時呼叫，清空並顯示提示
   var tbody = document.getElementById('newDetailTbody');
-  if (!newDetailRows.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:16px">尚未新增明細，請點擊下方「新增明細」按鈕</td></tr>';
-    return;
-  }
-  tbody.innerHTML = newDetailRows.map(function(rid) {
-    var brandOpts = BRANDS.map(function(b) {
-      return '<option value="' + escHtml(b.name) + '">' + escHtml(b.name) + '</option>';
-    }).join('');
-    return '<tr id="dr-' + rid + '">' +
-      '<td><select class="form-select" id="dr-brand-' + rid + '" onchange="onBrandChange(' + rid + ')">' +
-        '<option value="">請選擇</option>' + brandOpts +
-      '</select></td>' +
-      '<td><input class="form-input" id="dr-branch-' + rid + '" readonly placeholder="自動帶入"></td>' +
-      '<td><select class="form-select" id="dr-item-' + rid + '" onchange="onItemChange(' + rid + ')">' +
-        '<option value="">請先選品牌</option>' +
-      '</select></td>' +
-      '<td><input class="form-input" id="dr-price-' + rid + '" readonly placeholder="0"></td>' +
-      '<td><input class="form-input" id="dr-cost-' + rid + '" readonly placeholder="0"></td>' +
-      '<td><input type="number" class="form-input" id="dr-qty-' + rid + '" value="1" min="1" style="width:60px"></td>' +
-      '<td><button class="btn btn-sm btn-danger" onclick="removeDetailRow(' + rid + ')">刪除</button></td>' +
-      '</tr>';
-  }).join('');
+  tbody.innerHTML = '<tr data-empty><td colspan="7" style="text-align:center;color:var(--text-3);padding:16px">尚未新增明細，請點擊下方「新增明細」按鈕</td></tr>';
 }
 
 function onBrandChange(rid) {
