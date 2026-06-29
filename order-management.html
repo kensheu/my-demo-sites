@@ -659,66 +659,181 @@ function daysAgo(n) {
   return d.toISOString().slice(0, 10);
 }
 
-var T = new Date().toISOString().slice(0, 10);
-var P = T.replace(/-/g, '').slice(2); // YYMMDD 前綴
+function mkDate(n) {
+  var d = new Date(); d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+function mkP(dateStr) { return dateStr.replace(/-/g, '').slice(2); }
+
+var D0 = mkDate(0), D1 = mkDate(1), D2 = mkDate(2), D3 = mkDate(3),
+    D4 = mkDate(4), D5 = mkDate(5), D6 = mkDate(6);
+var P0 = mkP(D0), P1 = mkP(D1), P2 = mkP(D2), P3 = mkP(D3),
+    P4 = mkP(D4), P5 = mkP(D5), P6 = mkP(D6);
 
 var ORDERS = [
-  { id: P+'C00101C00101RB', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
-  { id: P+'C00102C00102RB', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
-  { id: P+'C00201C00201RL', createdAt: T, mealDate: T, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
-  { id: P+'C00202C00202RL', createdAt: T, mealDate: T, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '處理中' },
-  { id: P+'C00301C00301RL', createdAt: T, mealDate: T, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
-  { id: P+'C00101C00101RL', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '異常' },
-  { id: P+'C00102C00102RL', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'L', memberId: 'C00102', phone: '0912-567-890', status: '已成立' },
-  { id: P+'C00101C00101SL', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
-  { id: P+'C00201C00201RD', createdAt: T, mealDate: T, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
-  { id: P+'C00102C00102RD', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'D', memberId: 'C00102', phone: '0912-567-890', status: '處理中' },
-  { id: P+'C00202C00202RD', createdAt: T, mealDate: T, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
+  // ── today (D0) ──
+  { id: P0+'C00101C00101RB', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
+  { id: P0+'C00102C00102RB', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P0+'C00201C00201RL', createdAt: D0, mealDate: D0, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  { id: P0+'C00202C00202RL', createdAt: D0, mealDate: D0, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '處理中' },
+  { id: P0+'C00301C00301RL', createdAt: D0, mealDate: D0, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '異常' },
+  { id: P0+'C00101C00101SL', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
+  { id: P0+'C00201C00201RD', createdAt: D0, mealDate: D0, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  { id: P0+'C00102C00102RD', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'D', memberId: 'C00102', phone: '0912-567-890', status: '處理中' },
+  // ── D-1 ──
+  { id: P1+'C00101C00101RB', createdAt: D1, mealDate: D1, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
+  { id: P1+'C00201C00201RL', createdAt: D1, mealDate: D1, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已完成' },
+  { id: P1+'C00301C00301RL', createdAt: D1, mealDate: D1, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
+  { id: P1+'C00202C00202RD', createdAt: D1, mealDate: D1, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
+  // ── D-2 ──
+  { id: P2+'C00102C00102RB', createdAt: D2, mealDate: D2, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P2+'C00201C00201RL', createdAt: D2, mealDate: D2, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  { id: P2+'C00202C00202RL', createdAt: D2, mealDate: D2, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '異常' },
+  { id: P2+'C00101C00101SL', createdAt: D2, mealDate: D2, site: 'C001 新竹廠一區', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
+  { id: P2+'C00301C00301RD', createdAt: D2, mealDate: D2, site: 'C003 台中廠',     type: 'R', period: 'D', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
+  // ── D-3 ──
+  { id: P3+'C00101C00101RB', createdAt: D3, mealDate: D3, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
+  { id: P3+'C00102C00102RL', createdAt: D3, mealDate: D3, site: 'C001 新竹廠一區', type: 'R', period: 'L', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P3+'C00301C00301RL', createdAt: D3, mealDate: D3, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '處理中' },
+  { id: P3+'C00201C00201RD', createdAt: D3, mealDate: D3, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  // ── D-4 ──
+  { id: P4+'C00102C00102RB', createdAt: D4, mealDate: D4, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P4+'C00201C00201RL', createdAt: D4, mealDate: D4, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  { id: P4+'C00301C00301RL', createdAt: D4, mealDate: D4, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
+  { id: P4+'C00202C00202RD', createdAt: D4, mealDate: D4, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已完成' },
+  { id: P4+'C00101C00101SL', createdAt: D4, mealDate: D4, site: 'C001 新竹廠一區', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
+  // ── D-5 ──
+  { id: P5+'C00101C00101RB', createdAt: D5, mealDate: D5, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
+  { id: P5+'C00202C00202RL', createdAt: D5, mealDate: D5, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '異常' },
+  { id: P5+'C00301C00301RL', createdAt: D5, mealDate: D5, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
+  { id: P5+'C00101C00101RD', createdAt: D5, mealDate: D5, site: 'C001 新竹廠一區', type: 'R', period: 'D', memberId: 'C00101', phone: '0912-345-678', status: '處理中' },
+  // ── D-6 ──
+  { id: P6+'C00102C00102RB', createdAt: D6, mealDate: D6, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P6+'C00201C00201RL', createdAt: D6, mealDate: D6, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已完成' },
+  { id: P6+'C00301C00301RL', createdAt: D6, mealDate: D6, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
+  { id: P6+'C00202C00202RD', createdAt: D6, mealDate: D6, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
 ];
 
 var ORDER_DETAILS = {};
-ORDER_DETAILS[P+'C00101001C00101RB'] = [
+// D0
+ORDER_DETAILS[P0+'C00101C00101RB'] = [
   { brand: '拿坡里廚房', item: '美式早餐盤', qty: 2, price: 120 },
   { brand: '橄欖小廚',   item: '燕麥粥',     qty: 1, price: 65 },
 ];
-ORDER_DETAILS[P+'C00102001C00102RB'] = [
+ORDER_DETAILS[P0+'C00102C00102RB'] = [
   { brand: '拿坡里廚房', item: '蒜香麵包',   qty: 3, price: 40 },
   { brand: '橄欖小廚',   item: '番茄濃湯',   qty: 2, price: 60 },
 ];
-ORDER_DETAILS[P+'C00201002C00201RL'] = [
+ORDER_DETAILS[P0+'C00201C00201RL'] = [
   { brand: '鮮食工坊', item: '雞腿排便當', qty: 5, price: 110 },
   { brand: '鮮食工坊', item: '素食便當',   qty: 1, price: 100 },
 ];
-ORDER_DETAILS[P+'C00202002C00202RL'] = [
+ORDER_DETAILS[P0+'C00202C00202RL'] = [
   { brand: '鮮食工坊', item: '排骨飯', qty: 6, price: 110 },
-  { brand: '鮮食工坊', item: '滷蛋',   qty: 6, price: 20 },
 ];
-ORDER_DETAILS[P+'C00301003C00301RL'] = [
+ORDER_DETAILS[P0+'C00301C00301RL'] = [
   { brand: '橄欖小廚', item: '燉牛肉飯', qty: 4, price: 150 },
 ];
-ORDER_DETAILS[P+'C00101001C00101RL'] = [
-  { brand: '拿坡里廚房', item: '義大利肉醬麵', qty: 2, price: 120 },
-  { brand: '拿坡里廚房', item: '凱薩沙拉',     qty: 1, price: 80 },
-];
-ORDER_DETAILS[P+'C00102001C00102RL'] = [
-  { brand: '拿坡里廚房', item: '瑪格麗特披薩', qty: 2, price: 180 },
-];
-ORDER_DETAILS[P+'C00101001C00101SL'] = [
+ORDER_DETAILS[P0+'C00101C00101SL'] = [
   { brand: '拿坡里廚房', item: '主廚特餐', qty: 10, price: 200 },
   { brand: '橄欖小廚',   item: '水果拼盤', qty: 5,  price: 80 },
 ];
-ORDER_DETAILS[P+'C00201002C00201RD'] = [
+ORDER_DETAILS[P0+'C00201C00201RD'] = [
   { brand: '鮮食工坊', item: '控肉飯', qty: 4, price: 90 },
   { brand: '鮮食工坊', item: '豆腐湯', qty: 4, price: 30 },
 ];
-ORDER_DETAILS[P+'C00301003C00301ID'] = [
+ORDER_DETAILS[P0+'C00102C00102RD'] = [
+  { brand: '橄欖小廚', item: '地中海海鮮飯', qty: 3, price: 160 },
+];
+// D1
+ORDER_DETAILS[P1+'C00101C00101RB'] = [
+  { brand: '拿坡里廚房', item: '美式早餐盤', qty: 2, price: 120 },
+];
+ORDER_DETAILS[P1+'C00201C00201RL'] = [
+  { brand: '鮮食工坊', item: '雞腿排便當', qty: 6, price: 110 },
+  { brand: '鮮食工坊', item: '素食便當',   qty: 2, price: 100 },
+];
+ORDER_DETAILS[P1+'C00301C00301RL'] = [
+  { brand: '橄欖小廚', item: '燉牛肉飯', qty: 3, price: 150 },
+];
+ORDER_DETAILS[P1+'C00202C00202RD'] = [
+  { brand: '鮮食工坊', item: '便當套餐', qty: 5, price: 130 },
+];
+// D2
+ORDER_DETAILS[P2+'C00102C00102RB'] = [
+  { brand: '拿坡里廚房', item: '蒜香麵包', qty: 4, price: 40 },
+];
+ORDER_DETAILS[P2+'C00201C00201RL'] = [
+  { brand: '鮮食工坊', item: '排骨飯', qty: 5, price: 110 },
+];
+ORDER_DETAILS[P2+'C00202C00202RL'] = [
+  { brand: '橄欖小廚', item: '義大利肉醬麵', qty: 2, price: 120 },
+  { brand: '拿坡里廚房', item: '凱薩沙拉',   qty: 2, price: 80 },
+];
+ORDER_DETAILS[P2+'C00101C00101SL'] = [
+  { brand: '拿坡里廚房', item: '主廚特餐', qty: 8, price: 200 },
+];
+ORDER_DETAILS[P2+'C00301C00301RD'] = [
   { brand: '橄欖小廚', item: '烤雞腿',   qty: 3, price: 170 },
   { brand: '橄欖小廚', item: '奶油濃湯', qty: 3, price: 70 },
 ];
-ORDER_DETAILS[P+'C00102001C00102RD'] = [
-  { brand: '地中海海鮮飯', item: '地中海海鮮飯', qty: 3, price: 160 },
+// D3
+ORDER_DETAILS[P3+'C00101C00101RB'] = [
+  { brand: '橄欖小廚', item: '燕麥粥', qty: 2, price: 65 },
 ];
-ORDER_DETAILS[P+'C00202002C00202RD'] = [
+ORDER_DETAILS[P3+'C00102C00102RL'] = [
+  { brand: '拿坡里廚房', item: '瑪格麗特披薩', qty: 2, price: 180 },
+];
+ORDER_DETAILS[P3+'C00301C00301RL'] = [
+  { brand: '鮮食工坊', item: '控肉飯',   qty: 4, price: 90 },
+  { brand: '鮮食工坊', item: '豆腐湯',   qty: 4, price: 30 },
+];
+ORDER_DETAILS[P3+'C00201C00201RD'] = [
+  { brand: '鮮食工坊', item: '便當套餐', qty: 6, price: 130 },
+];
+// D4
+ORDER_DETAILS[P4+'C00102C00102RB'] = [
+  { brand: '拿坡里廚房', item: '美式早餐盤', qty: 3, price: 120 },
+];
+ORDER_DETAILS[P4+'C00201C00201RL'] = [
+  { brand: '鮮食工坊', item: '雞腿排便當', qty: 5, price: 110 },
+];
+ORDER_DETAILS[P4+'C00301C00301RL'] = [
+  { brand: '橄欖小廚', item: '燉牛肉飯', qty: 5, price: 150 },
+];
+ORDER_DETAILS[P4+'C00202C00202RD'] = [
+  { brand: '鮮食工坊', item: '排骨飯', qty: 4, price: 110 },
+];
+ORDER_DETAILS[P4+'C00101C00101SL'] = [
+  { brand: '拿坡里廚房', item: '主廚特餐', qty: 12, price: 200 },
+  { brand: '橄欖小廚',   item: '水果拼盤', qty: 6,  price: 80 },
+];
+// D5
+ORDER_DETAILS[P5+'C00101C00101RB'] = [
+  { brand: '橄欖小廚', item: '燕麥粥',   qty: 2, price: 65 },
+  { brand: '橄欖小廚', item: '番茄濃湯', qty: 1, price: 60 },
+];
+ORDER_DETAILS[P5+'C00202C00202RL'] = [
+  { brand: '拿坡里廚房', item: '義大利肉醬麵', qty: 3, price: 120 },
+];
+ORDER_DETAILS[P5+'C00301C00301RL'] = [
+  { brand: '鮮食工坊', item: '素食便當', qty: 4, price: 100 },
+];
+ORDER_DETAILS[P5+'C00101C00101RD'] = [
+  { brand: '橄欖小廚', item: '烤雞腿', qty: 2, price: 170 },
+];
+// D6
+ORDER_DETAILS[P6+'C00102C00102RB'] = [
+  { brand: '拿坡里廚房', item: '蒜香麵包', qty: 3, price: 40 },
+];
+ORDER_DETAILS[P6+'C00201C00201RL'] = [
+  { brand: '鮮食工坊', item: '雞腿排便當', qty: 7, price: 110 },
+  { brand: '鮮食工坊', item: '素食便當',   qty: 1, price: 100 },
+];
+ORDER_DETAILS[P6+'C00301C00301RL'] = [
+  { brand: '橄欖小廚', item: '燉牛肉飯', qty: 4, price: 150 },
+];
+ORDER_DETAILS[P6+'C00202C00202RD'] = [
   { brand: '鮮食工坊', item: '便當套餐', qty: 5, price: 130 },
 ];
 
@@ -1174,10 +1289,10 @@ function genOrderId() {
     return;
   }
 
-  // 格式：出餐日期後6碼 + 會員編號 + 餐期服務編號（去除-）+ 訂單類型 + 餐期代碼
+  // 格式：出餐日期後6碼 + 會員編號 + 餐期服務編號（去除 -）
   var datePart    = mealDate.replace(/-/g, '').slice(2); // YYMMDD
   var serviceCode = serviceId.replace(/-/g, '');
-  var orderId     = datePart + memberId + serviceCode + 'S' + periodCode;
+  var orderId     = datePart + memberId + serviceCode;
   document.getElementById('no_orderId').textContent = orderId;
 }
 
