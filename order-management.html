@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <link rel="icon" type="image/png" href="圖片/LOGO.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訂單管理 — 內部後台</title>
+  <link rel="stylesheet" href="shared-nav.css">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --yellow:      #a16207;
+  --yellow-bg:   #fefce8;
+  --yellow-bdr:  #fde68a;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 18px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1400px; margin: 0 auto; padding: 12px 20px 80px; }
+
+/* ─── 麵包屑 ─── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 16px;
+  font-size: 14px; color: var(--text-3);
+}
+.bc-item { color: var(--text-2); }
+.bc-sep  { color: var(--text-3); }
+
+/* ─── Header ─── */
+.page-header { margin-bottom: 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.page-title  { font-size: 22px; font-weight: 600; }
+.page-sub    { font-size: 15px; color: var(--text-3); margin-top: 3px; }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+}
+.toolbar-label { font-size: 15px; color: var(--text-2); white-space: nowrap; }
+.toolbar-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+.toolbar-spacer { flex: 1; }
+
+/* ─── 按鈕 ─── */
+.btn {
+  padding: 7px 14px; border-radius: 6px;
+  font-size: 15px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card); color: var(--text-2);
+  transition: all .12s; display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap; font-family: inherit;
+}
+.btn:hover { border-color: #a8a29e; color: var(--text); }
+.btn-primary {
+  background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600;
+}
+.btn-primary:hover { background: #1e40af; border-color: #1e40af; color: #fff; }
+.btn-sm { padding: 4px 10px; font-size: 14px; }
+.btn-danger { border-color: var(--red-bdr); color: var(--red); background: var(--red-bg); }
+.btn-danger:hover { background: #fee2e2; border-color: var(--red); }
+
+
+/* 日期輸入 */
+.date-input {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 15px; color: var(--text); background: var(--card);
+  font-family: inherit; cursor: pointer;
+}
+.date-input:focus { outline: none; border-color: var(--blue); }
+
+/* ─── 統計列 ─── */
+.summary-bar {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
+}
+.summary-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 20px; display: flex; flex-direction: column; gap: 4px;
+}
+.summary-label { font-size: 15px; color: var(--text-3); }
+.summary-value { font-size: 28px; font-weight: 700; color: var(--text); }
+@media (max-width: 600px) {
+  .summary-bar { grid-template-columns: repeat(2, 1fr); }
+}
+.summary-value.blue { color: var(--blue); }
+.summary-value.green { color: var(--green); }
+.summary-value.orange { color: var(--orange); }
+
+/* ─── 表格 ─── */
+.table-wrap {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden;
+}
+table {
+  width: 100%; border-collapse: collapse; font-size: 15px;
+}
+thead th {
+  background: var(--bg-2); color: var(--text-2); font-weight: 600;
+  padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border);
+  white-space: nowrap; font-size: 14px;
+}
+tbody tr { border-bottom: 1px solid var(--border-2); transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-2); }
+tbody tr.detail-row { background: var(--bg-3); }
+tbody tr.detail-row:hover { background: #e8e5e1; }
+td { padding: 10px 14px; vertical-align: middle; }
+
+.td-mono { font-family: 'SF Mono', Consolas, monospace; font-size: 14px; color: var(--text-2); }
+
+/* 訂單類型 badge */
+.type-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 100px;
+  font-size: 13px; font-weight: 700;
+}
+.type-R { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
+.type-M { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-bdr); }
+.type-I { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); }
+.type-S { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
+
+/* 餐期 badge */
+.period-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 100px;
+  font-size: 13px; font-weight: 600;
+  background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border);
+}
+
+/* 訂單狀態 badge */
+.status-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 100px;
+  font-size: 13px; font-weight: 600;
+}
+.status-已完成  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bdr); }
+.status-處理中  { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-bdr); }
+.status-已成立  { background: var(--blue-bg);   color: var(--blue-text); border: 1px solid var(--blue-border); }
+.status-異常    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bdr); }
+.status-已取消  { background: var(--bg-3);      color: var(--text-3); border: 1px solid var(--border); }
+
+/* 操作欄 */
+.action-group { display: flex; gap: 6px; flex-wrap: nowrap; }
+.btn.active { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-text); }
+
+/* 展開的明細行 */
+.detail-inner {
+  padding: 12px 16px;
+}
+.detail-title { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 8px; }
+.detail-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.detail-table th {
+  background: var(--bg-3); color: var(--text-3); font-weight: 600;
+  padding: 6px 12px; text-align: left; border-bottom: 1px solid var(--border);
+}
+.detail-table td { padding: 7px 12px; border-bottom: 1px solid var(--border-2); }
+.detail-table tr:last-child td { border-bottom: none; }
+
+/* ─── Drawer ─── */
+.drawer-overlay {
+  position: fixed; top: 48px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.35); z-index: 1000;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed; top: 48px; right: 0; bottom: 0; z-index: 1001;
+  background: var(--card); box-shadow: -4px 0 24px rgba(0,0,0,.12);
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform .22s cubic-bezier(.4,0,.2,1);
+  width: 460px;
+}
+.drawer.open { transform: translateX(0); }
+.drawer-lg { width: 620px; }
+
+.drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.drawer-title { font-size: 18px; font-weight: 600; }
+.drawer-sub { font-size: 14px; color: var(--text-3); margin-top: 2px; }
+.drawer-close {
+  width: 32px; height: 32px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--card);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--text-3); transition: all .12s;
+}
+.drawer-close:hover { background: var(--bg-2); color: var(--text); }
+
+.drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+.drawer-footer {
+  display: flex; gap: 10px; padding: 16px 20px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+/* ─── 表單 ─── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-grid .span-2 { grid-column: 1 / -1; }
+.form-field { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 14px; font-weight: 600; color: var(--text-2); }
+.form-label .required { color: var(--red); margin-left: 2px; }
+.form-input, .form-select, .form-textarea {
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 15px; color: var(--text); background: var(--card);
+  font-family: inherit; transition: border-color .12s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--blue);
+}
+.form-input[readonly], .form-select[disabled] {
+  background: var(--bg-2); color: var(--text-2); cursor: default;
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-hint { font-size: 13px; color: var(--text-3); }
+
+/* ─── 新增特殊訂單：訂單資訊卡 ─── */
+.order-info-card {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; margin-bottom: 20px;
+}
+.order-info-card .section-title {
+  font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.order-id-display {
+  font-family: 'SF Mono', Consolas, monospace; font-size: 14px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 12px; color: var(--blue-text); font-weight: 600; letter-spacing: .5px;
+}
+
+/* ─── 新增訂單明細表格 ─── */
+.new-detail-section { }
+.new-detail-section .section-title {
+  font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 10px;
+}
+.new-detail-table-wrap {
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  margin-bottom: 10px;
+}
+.new-detail-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.new-detail-table th {
+  background: var(--bg-2); color: var(--text-3); font-weight: 600;
+  padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.new-detail-table td { padding: 7px 8px; border-bottom: 1px solid var(--border-2); vertical-align: middle; }
+.new-detail-table tr:last-child td { border-bottom: none; }
+.new-detail-table .form-select, .new-detail-table .form-input {
+  padding: 5px 8px; font-size: 14px;
+}
+.new-detail-table .form-input[readonly] { background: var(--bg-2); min-width: 60px; }
+
+.btn-add-row {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 14px; color: var(--blue); cursor: pointer;
+  background: none; border: 1px dashed var(--blue-border);
+  padding: 6px 14px; border-radius: 6px; transition: all .12s;
+  font-family: inherit;
+}
+.btn-add-row:hover { background: var(--blue-bg); }
+
+/* ─── Toast ─── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #1c1b1a; color: #fff; padding: 11px 18px;
+  border-radius: 8px; font-size: 15px; z-index: 3000;
+  display: none; box-shadow: 0 4px 16px rgba(0,0,0,.2);
+  max-width: 340px;
+}
+
+/* ─── 空狀態 ─── */
+.empty-state {
+  text-align: center; padding: 48px 24px; color: var(--text-3);
+}
+.empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state-text { font-size: 16px; }
+
+/* ─── 響應式 ─── */
+@media (max-width: 900px) {
+  .hide-md { display: none; }
+  .drawer { width: 100%; }
+  .drawer-lg { width: 100%; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .span-2 { grid-column: 1; }
+}
+@media (max-width: 600px) {
+  .hide-sm { display: none; }
+  .summary-bar { gap: 8px; }
+  .summary-card { min-width: 90px; padding: 8px 12px; }
+}
+  </style>
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<div class="page">
+  <!-- 麵包屑 -->
+  <nav class="breadcrumb">
+    <span class="bc-item">內部後台</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-item">訂單管理</span>
+  </nav>
+
+  <!-- 頁首 -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">訂單管理</div>
+      <div class="page-sub">查詢、追蹤與處理訂單異常</div>
+    </div>
+    <button class="btn btn-primary" onclick="openNewOrderDrawer()">＋ 新增特殊訂單</button>
+  </div>
+
+  <!-- 工具列 -->
+  <div class="toolbar">
+    <span class="toolbar-label">檢視方式</span>
+    <select class="date-input" id="viewModeSelect" onchange="setViewMode(this.value)">
+      <option value="meal">出餐日期</option>
+      <option value="created">訂單成立日期</option>
+    </select>
+    <div class="toolbar-sep"></div>
+    <span class="toolbar-label">日期範圍</span>
+    <input type="date" class="date-input" id="dateFrom" onchange="onDateChange()">
+    <span style="font-size:15px;color:var(--text-3)">～</span>
+    <input type="date" class="date-input" id="dateTo" onchange="onDateChange()">
+    <button class="btn btn-sm" onclick="renderTable()">🔍 查詢</button>
+    <button class="btn btn-sm" onclick="setToday()">今天</button>
+    <div class="toolbar-spacer"></div>
+  </div>
+
+  <!-- 統計列 -->
+  <div class="summary-bar" id="summaryBar"></div>
+
+  <!-- 訂單列表 -->
+  <div class="table-wrap">
+    <table id="orderTable">
+      <thead>
+        <tr>
+          <th>訂單編號</th>
+          <th class="hide-md">訂單成立日期</th>
+          <th>出餐日期</th>
+          <th>據點名稱</th>
+          <th>訂單類型</th>
+          <th>餐期</th>
+          <th class="hide-sm">會員編號</th>
+          <th class="hide-sm">會員電話號碼</th>
+          <th>訂單狀態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="orderTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 異常處理 Drawer -->
+<div class="drawer-overlay" id="anomalyOverlay" onclick="closeAnomalyDrawer()"></div>
+<div class="drawer" id="anomalyDrawer">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-title">異常處理</div>
+      <div class="drawer-sub" id="anomalyDrawerSub">訂單編號</div>
+    </div>
+    <button class="drawer-close" onclick="closeAnomalyDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-label">異常類別<span class="required">*</span></label>
+        <select class="form-select" id="anomalyType">
+          <option value="">請選擇</option>
+          <option>廚房出餐異常</option>
+          <option>物流配送異常</option>
+          <option>餐點品質異常</option>
+          <option>客戶端異常</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">責任歸屬<span class="required">*</span></label>
+        <select class="form-select" id="anomalyResp">
+          <option value="">請選擇</option>
+          <option>餐廳</option>
+          <option>物流</option>
+          <option>公司吸收</option>
+          <option>客戶自負</option>
+        </select>
+      </div>
+      <div class="form-field span-2">
+        <label class="form-label">補救處置方案<span class="required">*</span></label>
+        <select class="form-select" id="anomalyRemedy">
+          <option value="">請選擇</option>
+          <option>折讓/扣款</option>
+          <option>全單銷退</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">應收扣款</label>
+        <input type="number" class="form-input" id="anomalyAR" placeholder="0" min="0">
+      </div>
+      <div class="form-field">
+        <label class="form-label">應付扣款</label>
+        <input type="number" class="form-input" id="anomalyAP" placeholder="0" min="0">
+      </div>
+      <div class="form-field span-2">
+        <label class="form-label">處理備註</label>
+        <textarea class="form-textarea" id="anomalyNote" placeholder="請輸入處理說明…"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn" onclick="closeAnomalyDrawer()">取消</button>
+    <button class="btn btn-primary" onclick="saveAnomaly()">儲存異常記錄</button>
+  </div>
+</div>
+
+<!-- 新增特殊訂單 Drawer -->
+<div class="drawer-overlay" id="newOrderOverlay" onclick="closeNewOrderDrawer()"></div>
+<div class="drawer drawer-lg" id="newOrderDrawer">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-title">新增特殊訂單</div>
+      <div class="drawer-sub">訂單類型 S — 特殊訂單</div>
+    </div>
+    <button class="drawer-close" onclick="closeNewOrderDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <!-- 訂單資訊 -->
+    <div class="order-info-card">
+      <div class="section-title">訂單基本資料</div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label">出餐日期<span class="required">*</span></label>
+          <input type="date" class="form-input" id="no_mealDate" onchange="genOrderId()">
+        </div>
+        <div class="form-field">
+          <label class="form-label">餐期服務編號<span class="required">*</span></label>
+          <select class="form-select" id="no_serviceId" onchange="onServiceChange()">
+            <option value="">請選擇</option>
+            <option value="S00101">S00101 — 台北信義早餐</option>
+            <option value="S00102">S00102 — 台北信義午餐</option>
+            <option value="S00201">S00201 — 新竹竹北午餐</option>
+            <option value="S00301">S00301 — 台中西屯午餐</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">據點名稱</label>
+          <input type="text" class="form-input" id="no_site" readonly>
+        </div>
+        <div class="form-field">
+          <label class="form-label">餐期</label>
+          <input type="text" class="form-input" id="no_period" readonly placeholder="自動帶入">
+        </div>
+        <div class="form-field">
+          <label class="form-label">訂單類型</label>
+          <input type="text" class="form-input" value="S — 特殊訂單" readonly>
+        </div>
+        <div class="form-field">
+          <label class="form-label">會員編號<span class="required">*</span></label>
+          <select class="form-select" id="no_memberId" onchange="onMemberSelect()">
+            <option value="">請選擇</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">會員電話號碼</label>
+          <input type="text" class="form-input" id="no_phone" readonly placeholder="自動帶入">
+        </div>
+        <div class="form-field span-2">
+          <label class="form-label">訂單編號（自動產生）</label>
+          <div class="order-id-display" id="no_orderId">— 請先選擇出餐日期、餐期服務編號與會員 —</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 訂單明細 -->
+    <div class="new-detail-section">
+      <div class="section-title">訂單明細</div>
+      <div class="new-detail-table-wrap">
+        <table class="new-detail-table">
+          <thead>
+            <tr>
+              <th style="width:160px">品牌名稱</th>
+              <th style="width:100px">分店名稱</th>
+              <th style="min-width:140px">餐點名稱</th>
+              <th style="width:80px">終端價</th>
+              <th style="width:80px">成本價</th>
+              <th style="width:80px">數量</th>
+              <th style="width:80px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="newDetailTbody"></tbody>
+        </table>
+      </div>
+      <button class="btn-add-row" onclick="addDetailRow()">＋ 新增明細</button>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn" onclick="closeNewOrderDrawer()">取消</button>
+    <button class="btn btn-primary" onclick="saveNewOrder()">儲存訂單</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════
+   資料
+════════════════════════════════ */
+var viewMode = 'meal'; // 'meal' | 'created'
+
+function daysAgo(n) {
+  var d = new Date(); d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+var T = new Date().toISOString().slice(0, 10);
+var P = T.replace(/-/g, '').slice(2); // YYMMDD 前綴
+
+var ORDERS = [
+  { id: P+'C00101001C00101RB', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
+  { id: P+'C00102001C00102RB', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P+'C00201002C00201RL', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  { id: P+'C00202002C00202RL', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '處理中' },
+  { id: P+'C00301003C00301RL', createdAt: T, mealDate: T, site: '台中西屯', type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
+  { id: P+'C00101001C00101RL', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '異常' },
+  { id: P+'C00102001C00102RL', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'L', memberId: 'C00102', phone: '0912-567-890', status: '已成立' },
+  { id: P+'C00101001C00101SL', createdAt: T, mealDate: T, site: '台北信義', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
+  { id: P+'C00201002C00201RD', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  { id: P+'C00301003C00301ID', createdAt: T, mealDate: T, site: '台中西屯', type: 'I', period: 'D', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
+  { id: P+'C00102001C00102RD', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'D', memberId: 'C00102', phone: '0912-567-890', status: '處理中' },
+  { id: P+'C00202002C00202RD', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
+];
+
+var ORDER_DETAILS = {};
+ORDER_DETAILS[P+'C00101001C00101RB'] = [
+  { brand: '拿坡里廚房', item: '美式早餐盤', qty: 2, price: 120 },
+  { brand: '橄欖小廚',   item: '燕麥粥',     qty: 1, price: 65 },
+];
+ORDER_DETAILS[P+'C00102001C00102RB'] = [
+  { brand: '拿坡里廚房', item: '蒜香麵包',   qty: 3, price: 40 },
+  { brand: '橄欖小廚',   item: '番茄濃湯',   qty: 2, price: 60 },
+];
+ORDER_DETAILS[P+'C00201002C00201RL'] = [
+  { brand: '鮮食工坊', item: '雞腿排便當', qty: 5, price: 110 },
+  { brand: '鮮食工坊', item: '素食便當',   qty: 1, price: 100 },
+];
+ORDER_DETAILS[P+'C00202002C00202RL'] = [
+  { brand: '鮮食工坊', item: '排骨飯', qty: 6, price: 110 },
+  { brand: '鮮食工坊', item: '滷蛋',   qty: 6, price: 20 },
+];
+ORDER_DETAILS[P+'C00301003C00301RL'] = [
+  { brand: '橄欖小廚', item: '燉牛肉飯', qty: 4, price: 150 },
+];
+ORDER_DETAILS[P+'C00101001C00101RL'] = [
+  { brand: '拿坡里廚房', item: '義大利肉醬麵', qty: 2, price: 120 },
+  { brand: '拿坡里廚房', item: '凱薩沙拉',     qty: 1, price: 80 },
+];
+ORDER_DETAILS[P+'C00102001C00102RL'] = [
+  { brand: '拿坡里廚房', item: '瑪格麗特披薩', qty: 2, price: 180 },
+];
+ORDER_DETAILS[P+'C00101001C00101SL'] = [
+  { brand: '拿坡里廚房', item: '主廚特餐', qty: 10, price: 200 },
+  { brand: '橄欖小廚',   item: '水果拼盤', qty: 5,  price: 80 },
+];
+ORDER_DETAILS[P+'C00201002C00201RD'] = [
+  { brand: '鮮食工坊', item: '控肉飯', qty: 4, price: 90 },
+  { brand: '鮮食工坊', item: '豆腐湯', qty: 4, price: 30 },
+];
+ORDER_DETAILS[P+'C00301003C00301ID'] = [
+  { brand: '橄欖小廚', item: '烤雞腿',   qty: 3, price: 170 },
+  { brand: '橄欖小廚', item: '奶油濃湯', qty: 3, price: 70 },
+];
+ORDER_DETAILS[P+'C00102001C00102RD'] = [
+  { brand: '地中海海鮮飯', item: '地中海海鮮飯', qty: 3, price: 160 },
+];
+ORDER_DETAILS[P+'C00202002C00202RD'] = [
+  { brand: '鮮食工坊', item: '便當套餐', qty: 5, price: 130 },
+];
+
+// 餐期服務編號 → 據點/餐期/聯絡人
+var SERVICE_MAP = {
+  'S00101': { site: '台北信義', period: 'B', members: [
+    { id: 'C00101', name: '王小明', phone: '0912-345-678' },
+    { id: 'C00102', name: '李小花', phone: '0912-567-890' },
+  ]},
+  'S00102': { site: '台北信義', period: 'L', members: [
+    { id: 'C00101', name: '王小明', phone: '0912-345-678' },
+    { id: 'C00102', name: '李小花', phone: '0912-567-890' },
+  ]},
+  'S00201': { site: '新竹竹北', period: 'L', members: [
+    { id: 'C00201', name: '張大華', phone: '0934-111-222' },
+    { id: 'C00202', name: '陳美麗', phone: '0934-555-666' },
+  ]},
+  'S00301': { site: '台中西屯', period: 'L', members: [
+    { id: 'C00301', name: '林志遠', phone: '0956-333-444' },
+  ]},
+};
+
+// 品牌/餐點資料
+var BRANDS = [
+  { name: '拿坡里廚房', branch: '信義分店', items: [
+    { name: '義大利肉醬麵',  price: 120, cost: 65 },
+    { name: '凱薩沙拉',      price: 80,  cost: 40 },
+    { name: '千層麵',         price: 140, cost: 75 },
+    { name: '蒜香麵包',       price: 40,  cost: 18 },
+    { name: '瑪格麗特披薩',  price: 180, cost: 95 },
+    { name: '主廚特餐',       price: 200, cost: 110 },
+    { name: '美式早餐盤',    price: 120, cost: 60 },
+  ]},
+  { name: '橄欖小廚', branch: '大安分店', items: [
+    { name: '地中海海鮮飯', price: 160, cost: 90 },
+    { name: '番茄濃湯',     price: 60,  cost: 25 },
+    { name: '燉牛肉飯',     price: 150, cost: 85 },
+    { name: '水果拼盤',     price: 80,  cost: 45 },
+    { name: '烤雞腿',       price: 170, cost: 95 },
+    { name: '奶油濃湯',     price: 70,  cost: 30 },
+    { name: '燕麥粥',       price: 65,  cost: 28 },
+  ]},
+  { name: '鮮食工坊', branch: '竹北廠', items: [
+    { name: '雞腿排便當', price: 110, cost: 62 },
+    { name: '素食便當',   price: 100, cost: 55 },
+    { name: '排骨飯',     price: 110, cost: 60 },
+    { name: '滷蛋',       price: 20,  cost: 8 },
+    { name: '控肉飯',     price: 90,  cost: 50 },
+    { name: '豆腐湯',     price: 30,  cost: 12 },
+    { name: '便當套餐',   price: 130, cost: 72 },
+  ]},
+];
+
+var PERIOD_LABEL = { B: '早餐', L: '午餐', D: '晚餐', N: '宵夜', T: '下午茶' };
+var TYPE_LABEL   = { R: '一般', M: '會議餐', I: '內部', S: '特殊' };
+
+/* ════════════════════════════════
+   展開明細狀態
+════════════════════════════════ */
+var expandedRows = {};
+var anomalyOrderId = null;
+
+/* ════════════════════════════════
+   檢視模式
+════════════════════════════════ */
+function setViewMode(mode) {
+  viewMode = mode;
+  renderTable();
+}
+
+function setToday() {
+  var t = new Date().toISOString().slice(0, 10);
+  document.getElementById('dateFrom').value = t;
+  document.getElementById('dateTo').value   = t;
+  renderTable();
+}
+
+function onDateChange() {
+  var from = document.getElementById('dateFrom').value;
+  var to   = document.getElementById('dateTo').value;
+  if (from && to && to < from) {
+    document.getElementById('dateTo').value = from;
+  }
+}
+
+/* ════════════════════════════════
+   過濾與統計
+════════════════════════════════ */
+function getFilteredOrders() {
+  var from = document.getElementById('dateFrom').value;
+  var to   = document.getElementById('dateTo').value;
+  return ORDERS.filter(function(o) {
+    var d = viewMode === 'meal' ? o.mealDate : o.createdAt;
+    return (!from || d >= from) && (!to || d <= to);
+  });
+}
+
+/* ════════════════════════════════
+   渲染統計
+════════════════════════════════ */
+function renderSummary(orders) {
+  var total    = orders.length;
+  var completed = orders.filter(function(o) { return o.status === '已完成'; }).length;
+  var anomaly   = orders.filter(function(o) { return o.status === '異常'; }).length;
+  var pending   = total - completed - anomaly;
+
+  document.getElementById('summaryBar').innerHTML =
+    card('訂單總數', total, 'blue') +
+    card('已完成', completed, 'green') +
+    card('待處理', pending, '') +
+    card('異常', anomaly, 'orange');
+}
+
+function card(label, val, cls) {
+  return '<div class="summary-card"><div class="summary-label">' + label + '</div>' +
+    '<div class="summary-value' + (cls ? ' ' + cls : '') + '">' + val + '</div></div>';
+}
+
+/* ════════════════════════════════
+   渲染表格
+════════════════════════════════ */
+function renderTable() {
+  var orders = getFilteredOrders();
+  renderSummary(orders);
+  var tbody = document.getElementById('orderTbody');
+
+  if (!orders.length) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state">' +
+      '<div class="empty-state-icon">📋</div>' +
+      '<div class="empty-state-text">此日期範圍內沒有訂單</div>' +
+      '</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  orders.forEach(function(o) {
+    tbody.appendChild(buildOrderRow(o));
+    if (expandedRows[o.id]) {
+      tbody.appendChild(buildDetailRow(o.id));
+    }
+  });
+}
+
+function buildOrderRow(o) {
+  var tr = document.createElement('tr');
+  tr.id = 'row-' + o.id;
+  tr.innerHTML =
+    '<td class="td-mono">' + escHtml(o.id) + '</td>' +
+    '<td class="hide-md">' + o.createdAt + '</td>' +
+    '<td>' + o.mealDate + '</td>' +
+    '<td>' + escHtml(o.site) + '</td>' +
+    '<td><span class="type-badge type-' + o.type + '">' + (TYPE_LABEL[o.type] || o.type) + ' (' + o.type + ')</span></td>' +
+    '<td><span class="period-badge">' + (PERIOD_LABEL[o.period] || o.period) + '</span></td>' +
+    '<td class="hide-sm td-mono">' + escHtml(o.memberId) + '</td>' +
+    '<td class="hide-sm">' + escHtml(o.phone) + '</td>' +
+    '<td><span class="status-badge status-' + o.status + '">' + escHtml(o.status) + '</span></td>' +
+    '<td><div class="action-group">' +
+      '<button class="btn btn-sm" id="detailBtn-' + o.id + '" onclick="toggleDetail(\'' + o.id + '\')">明細</button>' +
+      '<button class="btn btn-sm" onclick="openAnomalyDrawer(\'' + o.id + '\')">異常處理</button>' +
+    '</div></td>';
+  return tr;
+}
+
+function buildDetailRow(orderId) {
+  var details = ORDER_DETAILS[orderId] || [];
+  var tr = document.createElement('tr');
+  tr.className = 'detail-row';
+  tr.id = 'detail-' + orderId;
+
+  var detailRows = details.length ? details.map(function(d) {
+    return '<tr>' +
+      '<td>' + escHtml(d.brand) + '</td>' +
+      '<td>' + escHtml(d.item) + '</td>' +
+      '<td>' + d.qty + '</td>' +
+      '<td>$' + d.price + '</td>' +
+      '</tr>';
+  }).join('') : '<tr><td colspan="4" style="color:var(--text-3);padding:10px 12px">無明細資料</td></tr>';
+
+  tr.innerHTML = '<td colspan="10"><div class="detail-inner">' +
+    '<div class="detail-title">訂單明細</div>' +
+    '<table class="detail-table">' +
+    '<thead><tr><th>品牌名稱</th><th>餐點名稱</th><th>餐點數量</th><th>餐點售價</th></tr></thead>' +
+    '<tbody>' + detailRows + '</tbody>' +
+    '</table></div></td>';
+  return tr;
+}
+
+function toggleDetail(orderId) {
+  if (expandedRows[orderId]) {
+    delete expandedRows[orderId];
+    var dr = document.getElementById('detail-' + orderId);
+    if (dr) dr.remove();
+    var btn = document.getElementById('detailBtn-' + orderId);
+    if (btn) btn.classList.remove('active');
+  } else {
+    expandedRows[orderId] = true;
+    var row = document.getElementById('row-' + orderId);
+    if (row) {
+      var dr = buildDetailRow(orderId);
+      row.after(dr);
+    }
+    var btn = document.getElementById('detailBtn-' + orderId);
+    if (btn) btn.classList.add('active');
+  }
+}
+
+/* ════════════════════════════════
+   異常處理 Drawer
+════════════════════════════════ */
+function openAnomalyDrawer(orderId) {
+  anomalyOrderId = orderId;
+  document.getElementById('anomalyDrawerSub').textContent = '訂單編號：' + orderId;
+  document.getElementById('anomalyType').value   = '';
+  document.getElementById('anomalyResp').value   = '';
+  document.getElementById('anomalyRemedy').value = '';
+  document.getElementById('anomalyAR').value     = '';
+  document.getElementById('anomalyAP').value     = '';
+  document.getElementById('anomalyNote').value   = '';
+  document.getElementById('anomalyOverlay').classList.add('open');
+  document.getElementById('anomalyDrawer').classList.add('open');
+}
+
+function closeAnomalyDrawer() {
+  document.getElementById('anomalyOverlay').classList.remove('open');
+  document.getElementById('anomalyDrawer').classList.remove('open');
+}
+
+function saveAnomaly() {
+  var type   = document.getElementById('anomalyType').value;
+  var resp   = document.getElementById('anomalyResp').value;
+  var remedy = document.getElementById('anomalyRemedy').value;
+  if (!type || !resp || !remedy) {
+    showToast('請填寫所有必填欄位');
+    return;
+  }
+  // 更新訂單狀態
+  var order = ORDERS.find(function(o) { return o.id === anomalyOrderId; });
+  if (order) order.status = '異常';
+  closeAnomalyDrawer();
+  renderTable();
+  showToast('✅ 異常處理記錄已儲存');
+}
+
+/* ════════════════════════════════
+   新增特殊訂單 Drawer
+════════════════════════════════ */
+var newDetailRows = [];
+var newDetailId = 0;
+
+function openNewOrderDrawer() {
+  newDetailRows = [];
+  newDetailId = 0;
+  document.getElementById('no_mealDate').value  = '';
+  document.getElementById('no_serviceId').value = '';
+  document.getElementById('no_site').value      = '';
+  document.getElementById('no_period').value    = '';
+  document.getElementById('no_memberId').innerHTML = '<option value="">請選擇</option>';
+  document.getElementById('no_phone').value     = '';
+  document.getElementById('no_orderId').textContent = '— 請先選擇出餐日期、餐期服務編號與會員 —';
+  document.getElementById('newDetailTbody').innerHTML = '';
+  document.getElementById('newOrderOverlay').classList.add('open');
+  document.getElementById('newOrderDrawer').classList.add('open');
+}
+
+function closeNewOrderDrawer() {
+  document.getElementById('newOrderOverlay').classList.remove('open');
+  document.getElementById('newOrderDrawer').classList.remove('open');
+}
+
+function onServiceChange() {
+  var sid = document.getElementById('no_serviceId').value;
+  var svc = SERVICE_MAP[sid];
+  if (!svc) {
+    document.getElementById('no_site').value   = '';
+    document.getElementById('no_period').value = '';
+    document.getElementById('no_memberId').innerHTML = '<option value="">請選擇</option>';
+    document.getElementById('no_phone').value  = '';
+    genOrderId();
+    return;
+  }
+  document.getElementById('no_site').value   = svc.site;
+  document.getElementById('no_period').value = (PERIOD_LABEL[svc.period] || svc.period) + ' (' + svc.period + ')';
+  var sel = document.getElementById('no_memberId');
+  sel.innerHTML = '<option value="">請選擇</option>' + svc.members.map(function(m) {
+    return '<option value="' + m.id + '" data-phone="' + m.phone + '">' + m.id + ' — ' + m.name + '</option>';
+  }).join('');
+  document.getElementById('no_phone').value = '';
+  genOrderId();
+}
+
+function onMemberSelect() {
+  var sel = document.getElementById('no_memberId');
+  var opt = sel.options[sel.selectedIndex];
+  var phone = opt ? (opt.getAttribute('data-phone') || '') : '';
+  document.getElementById('no_phone').value = phone;
+  genOrderId();
+}
+
+function genOrderId() {
+  var mealDate  = document.getElementById('no_mealDate').value;
+  var serviceId = document.getElementById('no_serviceId').value;
+  var memberId  = document.getElementById('no_memberId').value;
+  var sid = document.getElementById('no_serviceId').value;
+  var svc = SERVICE_MAP[sid];
+  var periodCode = svc ? svc.period : '';
+
+  if (!mealDate || !serviceId || !memberId || !periodCode) {
+    document.getElementById('no_orderId').textContent = '— 請先選擇出餐日期、餐期服務編號與會員 —';
+    return;
+  }
+
+  // 格式：出餐日期後6碼 + 會員編號 + 餐期服務編號 + 訂單類型 + 餐期代碼
+  // 範例：260623C00101001C00101SL = 23碼
+  var datePart = mealDate.replace(/-/g, '').slice(2); // YYMMDD
+  var orderId  = datePart + memberId + serviceId + 'S' + periodCode;
+  document.getElementById('no_orderId').textContent = orderId;
+}
+
+/* ─── 新增明細列 ─── */
+function addDetailRow() {
+  var rid = ++newDetailId;
+  newDetailRows.push(rid);
+  renderDetailRows();
+}
+
+function removeDetailRow(rid) {
+  newDetailRows = newDetailRows.filter(function(r) { return r !== rid; });
+  renderDetailRows();
+}
+
+function renderDetailRows() {
+  var tbody = document.getElementById('newDetailTbody');
+  if (!newDetailRows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:16px">尚未新增明細，請點擊下方「新增明細」按鈕</td></tr>';
+    return;
+  }
+  tbody.innerHTML = newDetailRows.map(function(rid) {
+    var brandOpts = BRANDS.map(function(b) {
+      return '<option value="' + escHtml(b.name) + '">' + escHtml(b.name) + '</option>';
+    }).join('');
+    return '<tr id="dr-' + rid + '">' +
+      '<td><select class="form-select" id="dr-brand-' + rid + '" onchange="onBrandChange(' + rid + ')">' +
+        '<option value="">請選擇</option>' + brandOpts +
+      '</select></td>' +
+      '<td><input class="form-input" id="dr-branch-' + rid + '" readonly placeholder="自動帶入"></td>' +
+      '<td><select class="form-select" id="dr-item-' + rid + '" onchange="onItemChange(' + rid + ')">' +
+        '<option value="">請先選品牌</option>' +
+      '</select></td>' +
+      '<td><input class="form-input" id="dr-price-' + rid + '" readonly placeholder="0"></td>' +
+      '<td><input class="form-input" id="dr-cost-' + rid + '" readonly placeholder="0"></td>' +
+      '<td><input type="number" class="form-input" id="dr-qty-' + rid + '" value="1" min="1" style="width:60px"></td>' +
+      '<td><button class="btn btn-sm btn-danger" onclick="removeDetailRow(' + rid + ')">刪除</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+function onBrandChange(rid) {
+  var brandName = document.getElementById('dr-brand-' + rid).value;
+  var brand = BRANDS.find(function(b) { return b.name === brandName; });
+  var branchEl = document.getElementById('dr-branch-' + rid);
+  var itemSel  = document.getElementById('dr-item-' + rid);
+  var priceEl  = document.getElementById('dr-price-' + rid);
+  var costEl   = document.getElementById('dr-cost-' + rid);
+
+  if (!brand) {
+    branchEl.value = '';
+    itemSel.innerHTML = '<option value="">請先選品牌</option>';
+    priceEl.value = '';
+    costEl.value  = '';
+    return;
+  }
+
+  branchEl.value = brand.branch;
+  itemSel.innerHTML = '<option value="">請選擇餐點</option>' + brand.items.map(function(it) {
+    return '<option value="' + escHtml(it.name) + '" data-price="' + it.price + '" data-cost="' + it.cost + '">' + escHtml(it.name) + '</option>';
+  }).join('');
+  priceEl.value = '';
+  costEl.value  = '';
+}
+
+function onItemChange(rid) {
+  var itemSel = document.getElementById('dr-item-' + rid);
+  var opt     = itemSel.options[itemSel.selectedIndex];
+  document.getElementById('dr-price-' + rid).value = opt ? (opt.getAttribute('data-price') || '') : '';
+  document.getElementById('dr-cost-'  + rid).value = opt ? (opt.getAttribute('data-cost')  || '') : '';
+}
+
+function saveNewOrder() {
+  var mealDate  = document.getElementById('no_mealDate').value;
+  var serviceId = document.getElementById('no_serviceId').value;
+  var memberId  = document.getElementById('no_memberId').value;
+
+  if (!mealDate || !serviceId || !memberId) {
+    showToast('請填寫出餐日期、餐期服務編號與會員編號');
+    return;
+  }
+  if (!newDetailRows.length) {
+    showToast('請至少新增一筆訂單明細');
+    return;
+  }
+
+  // 驗證明細
+  var hasError = false;
+  newDetailRows.forEach(function(rid) {
+    var brand = document.getElementById('dr-brand-' + rid).value;
+    var item  = document.getElementById('dr-item-' + rid).value;
+    var qty   = parseInt(document.getElementById('dr-qty-' + rid).value) || 0;
+    if (!brand || !item || qty < 1) hasError = true;
+  });
+  if (hasError) {
+    showToast('請確認所有明細的品牌、餐點與數量均已填寫');
+    return;
+  }
+
+  var orderId = document.getElementById('no_orderId').textContent;
+  var svc = SERVICE_MAP[serviceId];
+  var periodCode = svc ? svc.period : '';
+  var today = new Date().toISOString().slice(0, 10);
+
+  // 建立訂單
+  var newOrder = {
+    id: orderId, createdAt: today, mealDate: mealDate,
+    site: document.getElementById('no_site').value,
+    type: 'S', period: periodCode, memberId: memberId,
+    phone: document.getElementById('no_phone').value,
+    status: '已成立',
+  };
+
+  // 建立明細
+  var details = newDetailRows.map(function(rid) {
+    return {
+      brand: document.getElementById('dr-brand-' + rid).value,
+      item:  document.getElementById('dr-item-' + rid).value,
+      qty:   parseInt(document.getElementById('dr-qty-' + rid).value) || 1,
+      price: parseInt(document.getElementById('dr-price-' + rid).value) || 0,
+    };
+  });
+
+  ORDERS.unshift(newOrder);
+  ORDER_DETAILS[orderId] = details;
+
+  closeNewOrderDrawer();
+  renderTable();
+  showToast('✅ 特殊訂單 ' + orderId + ' 已成立');
+}
+
+/* ════════════════════════════════
+   工具
+════════════════════════════════ */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+var _toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { t.style.display = 'none'; }, 3500);
+}
+
+/* ════════════════════════════════
+   初始化
+════════════════════════════════ */
+var _today = new Date().toISOString().slice(0, 10);
+document.getElementById('dateFrom').value = daysAgo(6);
+document.getElementById('dateTo').value   = _today;
+renderTable();
+</script>
+</body>
+</html>
