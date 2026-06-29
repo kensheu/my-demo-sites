@@ -143,8 +143,6 @@ td { padding: 10px 14px; vertical-align: middle; }
   font-size: 13px; font-weight: 700;
 }
 .type-R { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
-.type-M { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-bdr); }
-.type-I { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border); }
 .type-S { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
 
 /* 餐期 badge */
@@ -550,7 +548,6 @@ var ORDERS = [
   { id: P+'C00102001C00102RL', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'L', memberId: 'C00102', phone: '0912-567-890', status: '已成立' },
   { id: P+'C00101001C00101SL', createdAt: T, mealDate: T, site: '台北信義', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
   { id: P+'C00201002C00201RD', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
-  { id: P+'C00301003C00301ID', createdAt: T, mealDate: T, site: '台中西屯', type: 'I', period: 'D', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
   { id: P+'C00102001C00102RD', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'D', memberId: 'C00102', phone: '0912-567-890', status: '處理中' },
   { id: P+'C00202002C00202RD', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
 ];
@@ -652,7 +649,7 @@ var BRANDS = [
 ];
 
 var PERIOD_LABEL = { B: '早餐', L: '午餐', D: '晚餐', N: '宵夜', T: '下午茶' };
-var TYPE_LABEL   = { R: '一般', M: '會議餐', I: '內部', S: '特殊' };
+var TYPE_LABEL   = { R: '一般', S: '特殊' };
 
 /* ════════════════════════════════
    展開明細狀態
