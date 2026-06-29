@@ -98,6 +98,104 @@ body {
 }
 .date-input:focus { outline: none; border-color: var(--blue); }
 
+/* ─── 日期選擇按鈕 ─── */
+.date-range-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 15px; color: var(--text); background: var(--card);
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+  transition: border-color .12s;
+}
+.date-range-btn:hover { border-color: #a8a29e; }
+.date-range-btn.active { border-color: var(--blue); }
+.date-range-btn .drb-icon { font-size: 16px; color: var(--text-3); }
+.date-range-btn .drb-label { color: var(--text-2); font-size: 14px; }
+
+/* ─── 月曆 Popover ─── */
+.cal-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: transparent;
+}
+.cal-popover {
+  position: fixed; z-index: 901;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.14);
+  padding: 16px; width: 308px;
+  opacity: 0; transform: translateY(-6px);
+  transition: opacity .15s, transform .15s;
+  pointer-events: none;
+}
+.cal-popover.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+/* 起訖顯示列 */
+.cal-range-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 12px;
+}
+.cal-range-date {
+  flex: 1; text-align: center;
+}
+.cal-range-date .crd-label { font-size: 12px; color: var(--text-3); margin-bottom: 2px; }
+.cal-range-date .crd-val {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  font-family: 'SF Mono', Consolas, monospace;
+}
+.cal-range-date .crd-val.empty { color: var(--text-3); font-weight: 400; font-family: inherit; }
+.cal-range-sep { font-size: 18px; color: var(--text-3); }
+
+/* 月份導覽 */
+.cal-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.cal-nav-btn {
+  width: 30px; height: 30px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--card);
+  cursor: pointer; font-size: 16px; color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .1s;
+}
+.cal-nav-btn:hover { background: var(--bg-2); color: var(--text); }
+.cal-month-label { font-size: 16px; font-weight: 600; color: var(--text); }
+
+/* 格線 */
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+}
+.cal-weekday {
+  text-align: center; font-size: 12px; color: var(--text-3);
+  padding: 4px 0; font-weight: 600;
+}
+.cal-day {
+  text-align: center; font-size: 14px; padding: 6px 0;
+  border-radius: 6px; cursor: pointer; transition: all .1s;
+  color: var(--text);
+  position: relative;
+}
+.cal-day:hover:not(.cal-day-empty):not(.cal-day-disabled) { background: var(--bg-3); }
+.cal-day-empty { cursor: default; }
+.cal-day-disabled { color: var(--text-3); cursor: default; }
+.cal-day-from { background: var(--blue) !important; color: #fff !important; border-radius: 6px 0 0 6px; }
+.cal-day-to   { background: var(--blue) !important; color: #fff !important; border-radius: 0 6px 6px 0; }
+.cal-day-from.cal-day-same-day { border-radius: 6px !important; }
+.cal-day-in-range { background: var(--blue-bg); color: var(--blue-text); border-radius: 0; }
+.cal-day-today::after {
+  content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; background: var(--blue); border-radius: 50%;
+}
+.cal-day-from.cal-day-today::after,
+.cal-day-to.cal-day-today::after { background: #fff; }
+
+/* 底部按鈕列 */
+.cal-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.cal-footer .btn-sm { font-size: 13px; }
+
 /* ─── 統計列 ─── */
 .summary-bar {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
@@ -343,12 +441,41 @@ td { padding: 10px 14px; vertical-align: middle; }
     </select>
     <div class="toolbar-sep"></div>
     <span class="toolbar-label">日期範圍</span>
-    <input type="date" class="date-input" id="dateFrom" onchange="onDateChange()">
-    <span style="font-size:15px;color:var(--text-3)">～</span>
-    <input type="date" class="date-input" id="dateTo" onchange="onDateChange()">
-    <button class="btn btn-sm" onclick="renderTable()">🔍 查詢</button>
+    <button class="date-range-btn" id="dateRangeBtn" onclick="toggleCal(event)">
+      <span class="drb-icon">📅</span>
+      <span id="dateRangeLabel" class="drb-label">選擇日期</span>
+    </button>
     <button class="btn btn-sm" onclick="setToday()">今天</button>
     <div class="toolbar-spacer"></div>
+  </div>
+  <!-- 隱藏的日期值，供篩選邏輯使用 -->
+  <input type="hidden" id="dateFrom">
+  <input type="hidden" id="dateTo">
+
+  <!-- 月曆 Popover -->
+  <div class="cal-overlay" id="calOverlay" style="display:none" onclick="closeCal()"></div>
+  <div class="cal-popover" id="calPopover">
+    <div class="cal-range-bar">
+      <div class="cal-range-date">
+        <div class="crd-label">起始日</div>
+        <div class="crd-val empty" id="calFrom">—</div>
+      </div>
+      <span class="cal-range-sep">→</span>
+      <div class="cal-range-date">
+        <div class="crd-label">截止日</div>
+        <div class="crd-val empty" id="calTo">—</div>
+      </div>
+    </div>
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+      <span class="cal-month-label" id="calMonthLabel"></span>
+      <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-footer">
+      <button class="btn btn-sm" onclick="calClear()">清除</button>
+      <button class="btn btn-sm btn-primary" onclick="calConfirm()">確認</button>
+    </div>
   </div>
 
   <!-- 統計列 -->
@@ -655,16 +782,171 @@ function setToday() {
   var t = new Date().toISOString().slice(0, 10);
   document.getElementById('dateFrom').value = t;
   document.getElementById('dateTo').value   = t;
+  updateDateRangeLabel();
   renderTable();
 }
 
-function onDateChange() {
+/* ════════════════════════════════
+   月曆 Popover
+════════════════════════════════ */
+var calYear, calMonth;
+var calStep = 0; // 0=尚未選, 1=已選起, 2=已選迄
+
+function toggleCal(e) {
+  e.stopPropagation();
+  var pop = document.getElementById('calPopover');
+  var overlay = document.getElementById('calOverlay');
+  if (pop.classList.contains('open')) { closeCal(); return; }
+
+  // 定位到按鈕下方
+  var btn = document.getElementById('dateRangeBtn');
+  var rect = btn.getBoundingClientRect();
+  pop.style.top  = (rect.bottom + 6) + 'px';
+  pop.style.left = rect.left + 'px';
+
+  // 初始化月份（以 dateFrom 為準，若無則今天）
+  var fromVal = document.getElementById('dateFrom').value;
+  var base = fromVal ? new Date(fromVal + 'T00:00:00') : new Date();
+  calYear  = base.getFullYear();
+  calMonth = base.getMonth();
+
+  // 同步 calStep
+  var toVal = document.getElementById('dateTo').value;
+  calStep = fromVal ? (toVal ? 2 : 1) : 0;
+
+  renderCalRange();
+  renderCalGrid();
+  overlay.style.display = 'block';
+  requestAnimationFrame(function() { pop.classList.add('open'); });
+  document.getElementById('dateRangeBtn').classList.add('active');
+}
+
+function closeCal() {
+  var pop = document.getElementById('calPopover');
+  pop.classList.remove('open');
+  var overlay = document.getElementById('calOverlay');
+  setTimeout(function() { overlay.style.display = 'none'; }, 160);
+  document.getElementById('dateRangeBtn').classList.remove('active');
+}
+
+function calPrevMonth() {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalGrid();
+}
+
+function calNextMonth() {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalGrid();
+}
+
+var CAL_WD = ['日','一','二','三','四','五','六'];
+var CAL_MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+function renderCalGrid() {
+  document.getElementById('calMonthLabel').textContent = calYear + ' 年 ' + CAL_MONTH_NAMES[calMonth];
+
+  var firstDay = new Date(calYear, calMonth, 1).getDay();
+  var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  var today = new Date().toISOString().slice(0, 10);
+  var fromVal = document.getElementById('dateFrom').value;
+  var toVal   = document.getElementById('dateTo').value;
+
+  var html = CAL_WD.map(function(w) {
+    return '<div class="cal-weekday">' + w + '</div>';
+  }).join('');
+
+  for (var i = 0; i < firstDay; i++) {
+    html += '<div class="cal-day cal-day-empty"></div>';
+  }
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var ds = calYear + '-' + pad2(calMonth + 1) + '-' + pad2(d);
+    var cls = 'cal-day';
+    if (ds === today) cls += ' cal-day-today';
+    if (fromVal && toVal) {
+      if (ds === fromVal) cls += ' cal-day-from' + (fromVal === toVal ? ' cal-day-same-day' : '');
+      else if (ds === toVal) cls += ' cal-day-to';
+      else if (ds > fromVal && ds < toVal) cls += ' cal-day-in-range';
+    } else if (fromVal && ds === fromVal) {
+      cls += ' cal-day-from cal-day-same-day';
+    }
+    html += '<div class="' + cls + '" onclick="calPickDay(\'' + ds + '\')">' + d + '</div>';
+  }
+
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+function calPickDay(ds) {
+  if (calStep === 0 || calStep === 2) {
+    // 第一下：填起
+    document.getElementById('dateFrom').value = ds;
+    document.getElementById('dateTo').value   = '';
+    calStep = 1;
+  } else {
+    // 第二下：填迄（若小於起則對調）
+    var from = document.getElementById('dateFrom').value;
+    if (ds < from) {
+      document.getElementById('dateTo').value   = from;
+      document.getElementById('dateFrom').value = ds;
+    } else {
+      document.getElementById('dateTo').value = ds;
+    }
+    calStep = 2;
+    // 選完自動確認
+    setTimeout(calConfirm, 180);
+    renderCalRange();
+    renderCalGrid();
+    return;
+  }
+  renderCalRange();
+  renderCalGrid();
+}
+
+function renderCalRange() {
+  var fromVal = document.getElementById('dateFrom').value;
+  var toVal   = document.getElementById('dateTo').value;
+  var fromEl = document.getElementById('calFrom');
+  var toEl   = document.getElementById('calTo');
+  fromEl.textContent = fromVal || '—';
+  fromEl.className = 'crd-val' + (fromVal ? '' : ' empty');
+  toEl.textContent = toVal || '—';
+  toEl.className = 'crd-val' + (toVal ? '' : ' empty');
+}
+
+function calClear() {
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value   = '';
+  calStep = 0;
+  renderCalRange();
+  renderCalGrid();
+  updateDateRangeLabel();
+  renderTable();
+}
+
+function calConfirm() {
+  closeCal();
+  updateDateRangeLabel();
+  renderTable();
+}
+
+function updateDateRangeLabel() {
   var from = document.getElementById('dateFrom').value;
   var to   = document.getElementById('dateTo').value;
-  if (from && to && to < from) {
-    document.getElementById('dateTo').value = from;
+  var lbl  = document.getElementById('dateRangeLabel');
+  if (from && to && from === to) {
+    lbl.textContent = from;
+  } else if (from && to) {
+    lbl.textContent = from + ' ～ ' + to;
+  } else if (from) {
+    lbl.textContent = from + ' ～ …';
+  } else {
+    lbl.textContent = '選擇日期';
   }
 }
+
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
 
 /* ════════════════════════════════
    過濾與統計
@@ -1050,6 +1332,7 @@ function showToast(msg) {
 var _today = new Date().toISOString().slice(0, 10);
 document.getElementById('dateFrom').value = daysAgo(6);
 document.getElementById('dateTo').value   = _today;
+updateDateRangeLabel();
 renderTable();
 </script>
 </body>
