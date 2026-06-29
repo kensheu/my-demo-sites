@@ -459,10 +459,7 @@ td { padding: 10px 14px; vertical-align: middle; }
           <label class="form-label">餐期服務編號<span class="required">*</span></label>
           <select class="form-select" id="no_serviceId" onchange="onServiceChange()">
             <option value="">請選擇</option>
-            <option value="S00101">S00101 — 台北信義早餐</option>
-            <option value="S00102">S00102 — 台北信義午餐</option>
-            <option value="S00201">S00201 — 新竹竹北午餐</option>
-            <option value="S00301">S00301 — 台中西屯午餐</option>
+            <option value="C001-01-S-L">C001-01-S-L — C001 新竹廠一區 午餐</option>
           </select>
         </div>
         <div class="form-field">
@@ -539,17 +536,17 @@ var T = new Date().toISOString().slice(0, 10);
 var P = T.replace(/-/g, '').slice(2); // YYMMDD 前綴
 
 var ORDERS = [
-  { id: P+'C00101001C00101RB', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
-  { id: P+'C00102001C00102RB', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
-  { id: P+'C00201002C00201RL', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
-  { id: P+'C00202002C00202RL', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '處理中' },
-  { id: P+'C00301003C00301RL', createdAt: T, mealDate: T, site: '台中西屯', type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
-  { id: P+'C00101001C00101RL', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '異常' },
-  { id: P+'C00102001C00102RL', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'L', memberId: 'C00102', phone: '0912-567-890', status: '已成立' },
-  { id: P+'C00101001C00101SL', createdAt: T, mealDate: T, site: '台北信義', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
-  { id: P+'C00201002C00201RD', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
-  { id: P+'C00102001C00102RD', createdAt: T, mealDate: T, site: '台北信義', type: 'R', period: 'D', memberId: 'C00102', phone: '0912-567-890', status: '處理中' },
-  { id: P+'C00202002C00202RD', createdAt: T, mealDate: T, site: '新竹竹北', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
+  { id: P+'C00101C00101RB', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
+  { id: P+'C00102C00102RB', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P+'C00201C00201RL', createdAt: T, mealDate: T, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  { id: P+'C00202C00202RL', createdAt: T, mealDate: T, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '處理中' },
+  { id: P+'C00301C00301RL', createdAt: T, mealDate: T, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
+  { id: P+'C00101C00101RL', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '異常' },
+  { id: P+'C00102C00102RL', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'L', memberId: 'C00102', phone: '0912-567-890', status: '已成立' },
+  { id: P+'C00101C00101SL', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
+  { id: P+'C00201C00201RD', createdAt: T, mealDate: T, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
+  { id: P+'C00102C00102RD', createdAt: T, mealDate: T, site: 'C001 新竹廠一區', type: 'R', period: 'D', memberId: 'C00102', phone: '0912-567-890', status: '處理中' },
+  { id: P+'C00202C00202RD', createdAt: T, mealDate: T, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
 ];
 
 var ORDER_DETAILS = {};
@@ -598,22 +595,11 @@ ORDER_DETAILS[P+'C00202002C00202RD'] = [
   { brand: '鮮食工坊', item: '便當套餐', qty: 5, price: 130 },
 ];
 
-// 餐期服務編號 → 據點/餐期/聯絡人
+// 餐期服務編號 → 據點/餐期/聯絡人（僅特殊訂單 S 類型）
 var SERVICE_MAP = {
-  'S00101': { site: '台北信義', period: 'B', members: [
+  'C001-01-S-L': { site: 'C001 新竹廠一區', period: 'L', members: [
     { id: 'C00101', name: '王小明', phone: '0912-345-678' },
     { id: 'C00102', name: '李小花', phone: '0912-567-890' },
-  ]},
-  'S00102': { site: '台北信義', period: 'L', members: [
-    { id: 'C00101', name: '王小明', phone: '0912-345-678' },
-    { id: 'C00102', name: '李小花', phone: '0912-567-890' },
-  ]},
-  'S00201': { site: '新竹竹北', period: 'L', members: [
-    { id: 'C00201', name: '張大華', phone: '0934-111-222' },
-    { id: 'C00202', name: '陳美麗', phone: '0934-555-666' },
-  ]},
-  'S00301': { site: '台中西屯', period: 'L', members: [
-    { id: 'C00301', name: '林志遠', phone: '0956-333-444' },
   ]},
 };
 
@@ -906,10 +892,10 @@ function genOrderId() {
     return;
   }
 
-  // 格式：出餐日期後6碼 + 會員編號 + 餐期服務編號 + 訂單類型 + 餐期代碼
-  // 範例：260623C00101001C00101SL = 23碼
-  var datePart = mealDate.replace(/-/g, '').slice(2); // YYMMDD
-  var orderId  = datePart + memberId + serviceId + 'S' + periodCode;
+  // 格式：出餐日期後6碼 + 會員編號 + 餐期服務編號（去除-）+ 訂單類型 + 餐期代碼
+  var datePart    = mealDate.replace(/-/g, '').slice(2); // YYMMDD
+  var serviceCode = serviceId.replace(/-/g, '');
+  var orderId     = datePart + memberId + serviceCode + 'S' + periodCode;
   document.getElementById('no_orderId').textContent = orderId;
 }
 
