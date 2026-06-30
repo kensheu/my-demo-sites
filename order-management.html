@@ -356,6 +356,27 @@ td { padding: 10px 14px; vertical-align: middle; }
 }
 .new-detail-table .form-input[readonly] { background: var(--bg-2); min-width: 60px; }
 
+/* ─── 異常明細區塊 ─── */
+.anomaly-detail-block {
+  margin-top: 14px;
+  border: 1.5px solid var(--red-bdr);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.anomaly-detail-block .anomaly-block-title {
+  background: var(--red-bg);
+  color: var(--red);
+  font-size: 14px; font-weight: 600;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--red-bdr);
+}
+.anomaly-detail-block .detail-table thead th {
+  background: var(--red-bg);
+}
+.anomaly-detail-block .detail-table td {
+  background: #fff5f5;
+}
+
 .btn-add-row {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 14px; color: var(--blue); cursor: pointer;
@@ -864,6 +885,23 @@ var TYPE_LABEL   = { R: '一般', S: '特殊' };
 ════════════════════════════════ */
 var expandedRows = {};
 var anomalyOrderId = null;
+var ANOMALY_RECORDS = {}; // orderId → { type, resp, remedy, ar, ap, note }
+
+// 預設異常資料，與 ORDERS 中 status==='異常' 的假資料對應
+function initAnomalyRecords() {
+  ANOMALY_RECORDS[P0+'C00301C00301RL'] = {
+    type: '物流配送異常', resp: '物流', remedy: '折讓/扣款',
+    ar: '150', ap: '150', note: '餐點延誤到達，客戶已投訴',
+  };
+  ANOMALY_RECORDS[P2+'C00202C00202RL'] = {
+    type: '餐點品質異常', resp: '餐廳', remedy: '全單銷退',
+    ar: '0', ap: '200', note: '餐點發現異物，已全數退款',
+  };
+  ANOMALY_RECORDS[P5+'C00202C00202RL'] = {
+    type: '廚房出餐異常', resp: '公司吸收', remedy: '折讓/扣款',
+    ar: '120', ap: '0', note: '份量不足，部分折讓',
+  };
+}
 
 /* ════════════════════════════════
    檢視模式
@@ -1094,7 +1132,9 @@ function buildOrderRow(o) {
     '<td><span class="status-badge status-' + o.status + '">' + escHtml(o.status) + '</span></td>' +
     '<td><div class="action-group">' +
       '<button class="btn btn-sm" id="detailBtn-' + o.id + '" onclick="toggleDetail(\'' + o.id + '\')">明細</button>' +
-      '<button class="btn btn-sm" onclick="openAnomalyDrawer(\'' + o.id + '\')">異常處理</button>' +
+      (o.status === '異常'
+        ? '<button class="btn btn-sm" disabled style="opacity:.4;cursor:not-allowed">異常處理</button>'
+        : '<button class="btn btn-sm" onclick="openAnomalyDrawer(\'' + o.id + '\')">異常處理</button>') +
     '</div></td>';
   return tr;
 }
@@ -1114,12 +1154,32 @@ function buildDetailRow(orderId) {
       '</tr>';
   }).join('') : '<tr><td colspan="4" style="color:var(--text-3);padding:10px 12px">無明細資料</td></tr>';
 
+  var anomalyHtml = '';
+  var rec = ANOMALY_RECORDS[orderId];
+  if (rec) {
+    anomalyHtml =
+      '<div class="anomaly-detail-block">' +
+        '<div class="anomaly-block-title">異常明細</div>' +
+        '<table class="detail-table">' +
+        '<thead><tr><th>異常類別</th><th>責任歸屬</th><th>補救方案</th><th>應收扣款</th><th>應付扣款</th><th>處理備註</th></tr></thead>' +
+        '<tbody><tr>' +
+          '<td>' + escHtml(rec.type) + '</td>' +
+          '<td>' + escHtml(rec.resp) + '</td>' +
+          '<td>' + escHtml(rec.remedy) + '</td>' +
+          '<td>' + (rec.ar ? '$' + rec.ar : '—') + '</td>' +
+          '<td>' + (rec.ap ? '$' + rec.ap : '—') + '</td>' +
+          '<td>' + escHtml(rec.note || '—') + '</td>' +
+        '</tr></tbody>' +
+        '</table>' +
+      '</div>';
+  }
+
   tr.innerHTML = '<td colspan="10"><div class="detail-inner">' +
     '<div class="detail-title">訂單明細</div>' +
     '<table class="detail-table">' +
     '<thead><tr><th>品牌名稱</th><th>餐點名稱</th><th>餐點數量</th><th>餐點售價</th></tr></thead>' +
     '<tbody>' + detailRows + '</tbody>' +
-    '</table></div></td>';
+    '</table>' + anomalyHtml + '</div></td>';
   return tr;
 }
 
@@ -1171,9 +1231,17 @@ function saveAnomaly() {
     showToast('請填寫所有必填欄位');
     return;
   }
-  // 更新訂單狀態
+  // 更新訂單狀態並儲存異常記錄
   var order = ORDERS.find(function(o) { return o.id === anomalyOrderId; });
   if (order) order.status = '異常';
+  ANOMALY_RECORDS[anomalyOrderId] = {
+    type:   type,
+    resp:   resp,
+    remedy: remedy,
+    ar:     document.getElementById('anomalyAR').value,
+    ap:     document.getElementById('anomalyAP').value,
+    note:   document.getElementById('anomalyNote').value,
+  };
   closeAnomalyDrawer();
   renderTable();
   showToast('✅ 異常處理記錄已儲存');
@@ -1421,6 +1489,7 @@ var _today = new Date().toISOString().slice(0, 10);
 document.getElementById('dateFrom').value = daysAgo(6);
 document.getElementById('dateTo').value   = _today;
 updateDateRangeLabel();
+initAnomalyRecords();
 renderTable();
 </script>
 </body>
