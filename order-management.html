@@ -197,21 +197,6 @@ body {
 .cal-footer .btn-sm { font-size: 13px; }
 
 /* ─── 統計列 ─── */
-.summary-bar {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
-}
-.summary-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-  padding: 16px 20px; display: flex; flex-direction: column; gap: 4px;
-}
-.summary-label { font-size: 15px; color: var(--text-3); }
-.summary-value { font-size: 28px; font-weight: 700; color: var(--text); }
-@media (max-width: 600px) {
-  .summary-bar { grid-template-columns: repeat(2, 1fr); }
-}
-.summary-value.blue { color: var(--blue); }
-.summary-value.green { color: var(--green); }
-.summary-value.orange { color: var(--orange); }
 
 /* ─── 表格 ─── */
 .table-wrap {
@@ -408,8 +393,7 @@ td { padding: 10px 14px; vertical-align: middle; }
 }
 @media (max-width: 600px) {
   .hide-sm { display: none; }
-  .summary-bar { gap: 8px; }
-  .summary-card { min-width: 90px; padding: 8px 12px; }
+
 }
   </style>
 </head>
@@ -478,9 +462,6 @@ td { padding: 10px 14px; vertical-align: middle; }
       <button class="btn btn-sm btn-primary" onclick="calConfirm()">確認</button>
     </div>
   </div>
-
-  <!-- 統計列 -->
-  <div class="summary-bar" id="summaryBar"></div>
 
   <!-- 訂單列表 -->
   <div class="table-wrap">
@@ -1077,32 +1058,10 @@ function getFilteredOrders() {
 }
 
 /* ════════════════════════════════
-   渲染統計
-════════════════════════════════ */
-function renderSummary(orders) {
-  var total    = orders.length;
-  var completed = orders.filter(function(o) { return o.status === '已完成'; }).length;
-  var anomaly   = orders.filter(function(o) { return o.status === '異常'; }).length;
-  var pending   = total - completed - anomaly;
-
-  document.getElementById('summaryBar').innerHTML =
-    card('訂單總數', total, 'blue') +
-    card('已完成', completed, 'green') +
-    card('待處理', pending, '') +
-    card('異常', anomaly, 'orange');
-}
-
-function card(label, val, cls) {
-  return '<div class="summary-card"><div class="summary-label">' + label + '</div>' +
-    '<div class="summary-value' + (cls ? ' ' + cls : '') + '">' + val + '</div></div>';
-}
-
-/* ════════════════════════════════
    渲染表格
 ════════════════════════════════ */
 function renderTable() {
   var orders = getFilteredOrders();
-  renderSummary(orders);
   var tbody = document.getElementById('orderTbody');
 
   if (!orders.length) {
