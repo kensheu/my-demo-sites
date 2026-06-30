@@ -278,7 +278,7 @@ td { padding: 10px 14px; vertical-align: middle; }
   width: 460px;
 }
 .drawer.open { transform: translateX(0); }
-.drawer-lg { width: 620px; }
+.drawer-lg { width: 800px; }
 
 .drawer-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -344,8 +344,7 @@ td { padding: 10px 14px; vertical-align: middle; }
   border: 1px solid var(--border); border-radius: 8px; overflow-x: auto;
   margin-bottom: 10px;
 }
-.new-detail-table { min-width: 640px; }
-.new-detail-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.new-detail-table { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
 .new-detail-table th {
   background: var(--bg-2); color: var(--text-3); font-weight: 600;
   padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border);
@@ -354,7 +353,7 @@ td { padding: 10px 14px; vertical-align: middle; }
 .new-detail-table td { padding: 7px 8px; border-bottom: 1px solid var(--border-2); vertical-align: middle; }
 .new-detail-table tr:last-child td { border-bottom: none; }
 .new-detail-table .form-select, .new-detail-table .form-input {
-  padding: 5px 8px; font-size: 14px;
+  padding: 5px 8px; font-size: 14px; width: 100%; box-sizing: border-box;
 }
 .new-detail-table .form-input[readonly] { background: var(--bg-2); min-width: 60px; }
 
@@ -619,7 +618,7 @@ td { padding: 10px 14px; vertical-align: middle; }
           <tbody id="newDetailTbody"></tbody>
         </table>
       </div>
-      <button class="btn-add-row" onclick="addDetailRow()">＋ 新增明細</button>
+      <button class="btn-add-row" id="btnFirstAddRow" onclick="addDetailRow()">＋ 新增明細</button>
     </div>
   </div>
   <div class="drawer-footer">
@@ -1270,6 +1269,10 @@ function addDetailRow() {
   }).join('');
   var tr = document.createElement('tr');
   tr.id = 'dr-' + rid;
+  // 底部按鈕：第一筆顯示「新增明細」，之後改為「新增下一筆」
+  var firstBtn = document.getElementById('btnFirstAddRow');
+  if (firstBtn) firstBtn.textContent = '＋ 新增下一筆';
+
   tr.innerHTML =
     '<td><select class="form-select" id="dr-brand-' + rid + '" onchange="onBrandChange(' + rid + ')">' +
       '<option value="">請選擇</option>' + brandOpts +
@@ -1293,13 +1296,16 @@ function removeDetailRow(rid) {
   if (!newDetailRows.length) {
     var tbody = document.getElementById('newDetailTbody');
     tbody.innerHTML = '<tr data-empty><td colspan="7" style="text-align:center;color:var(--text-3);padding:16px">尚未新增明細，請點擊下方「新增明細」按鈕</td></tr>';
+    var firstBtn = document.getElementById('btnFirstAddRow');
+    if (firstBtn) firstBtn.textContent = '＋ 新增明細';
   }
 }
 
 function renderDetailRows() {
-  // 僅在 drawer 開啟初始化時呼叫，清空並顯示提示
   var tbody = document.getElementById('newDetailTbody');
   tbody.innerHTML = '<tr data-empty><td colspan="7" style="text-align:center;color:var(--text-3);padding:16px">尚未新增明細，請點擊下方「新增明細」按鈕</td></tr>';
+  var firstBtn = document.getElementById('btnFirstAddRow');
+  if (firstBtn) firstBtn.style.display = '';
 }
 
 function onBrandChange(rid) {
