@@ -240,11 +240,10 @@ td { padding: 10px 14px; vertical-align: middle; }
   display: inline-block; padding: 3px 10px; border-radius: 100px;
   font-size: 13px; font-weight: 600;
 }
-.status-已完成  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bdr); }
-.status-處理中  { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-bdr); }
+.status-待確認  { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-bdr); }
 .status-已成立  { background: var(--blue-bg);   color: var(--blue-text); border: 1px solid var(--blue-border); }
-.status-異常    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bdr); }
 .status-已取消  { background: var(--bg-3);      color: var(--text-3); border: 1px solid var(--border); }
+.status-異常    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bdr); }
 
 /* 操作欄 */
 .action-group { display: flex; gap: 6px; flex-wrap: nowrap; }
@@ -653,44 +652,44 @@ var P0 = mkP(D0), P1 = mkP(D1), P2 = mkP(D2), P3 = mkP(D3),
 
 var ORDERS = [
   // ── today (D0) ──
-  { id: P0+'C00101C00101RB', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
-  { id: P0+'C00102C00102RB', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P0+'C00101C00101RB', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已取消' },
+  { id: P0+'C00102C00102RB', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '待確認' },
   { id: P0+'C00201C00201RL', createdAt: D0, mealDate: D0, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
-  { id: P0+'C00202C00202RL', createdAt: D0, mealDate: D0, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '處理中' },
+  { id: P0+'C00202C00202RL', createdAt: D0, mealDate: D0, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '待確認' },
   { id: P0+'C00301C00301RL', createdAt: D0, mealDate: D0, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '異常' },
   { id: P0+'C00101C00101SL', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
   { id: P0+'C00201C00201RD', createdAt: D0, mealDate: D0, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
-  { id: P0+'C00102C00102RD', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'D', memberId: 'C00102', phone: '0912-567-890', status: '處理中' },
+  { id: P0+'C00102C00102RD', createdAt: D0, mealDate: D0, site: 'C001 新竹廠一區', type: 'R', period: 'D', memberId: 'C00102', phone: '0912-567-890', status: '待確認' },
   // ── D-1 ──
-  { id: P1+'C00101C00101RB', createdAt: D1, mealDate: D1, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
-  { id: P1+'C00201C00201RL', createdAt: D1, mealDate: D1, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已完成' },
+  { id: P1+'C00101C00101RB', createdAt: D1, mealDate: D1, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已取消' },
+  { id: P1+'C00201C00201RL', createdAt: D1, mealDate: D1, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
   { id: P1+'C00301C00301RL', createdAt: D1, mealDate: D1, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
   { id: P1+'C00202C00202RD', createdAt: D1, mealDate: D1, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
   // ── D-2 ──
-  { id: P2+'C00102C00102RB', createdAt: D2, mealDate: D2, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P2+'C00102C00102RB', createdAt: D2, mealDate: D2, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已取消' },
   { id: P2+'C00201C00201RL', createdAt: D2, mealDate: D2, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
   { id: P2+'C00202C00202RL', createdAt: D2, mealDate: D2, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '異常' },
   { id: P2+'C00101C00101SL', createdAt: D2, mealDate: D2, site: 'C001 新竹廠一區', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
   { id: P2+'C00301C00301RD', createdAt: D2, mealDate: D2, site: 'C003 台中廠',     type: 'R', period: 'D', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
   // ── D-3 ──
-  { id: P3+'C00101C00101RB', createdAt: D3, mealDate: D3, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
-  { id: P3+'C00102C00102RL', createdAt: D3, mealDate: D3, site: 'C001 新竹廠一區', type: 'R', period: 'L', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
-  { id: P3+'C00301C00301RL', createdAt: D3, mealDate: D3, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '處理中' },
+  { id: P3+'C00101C00101RB', createdAt: D3, mealDate: D3, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已取消' },
+  { id: P3+'C00102C00102RL', createdAt: D3, mealDate: D3, site: 'C001 新竹廠一區', type: 'R', period: 'L', memberId: 'C00102', phone: '0912-567-890', status: '已成立' },
+  { id: P3+'C00301C00301RL', createdAt: D3, mealDate: D3, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '待確認' },
   { id: P3+'C00201C00201RD', createdAt: D3, mealDate: D3, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
   // ── D-4 ──
-  { id: P4+'C00102C00102RB', createdAt: D4, mealDate: D4, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
+  { id: P4+'C00102C00102RB', createdAt: D4, mealDate: D4, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已取消' },
   { id: P4+'C00201C00201RL', createdAt: D4, mealDate: D4, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
   { id: P4+'C00301C00301RL', createdAt: D4, mealDate: D4, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
-  { id: P4+'C00202C00202RD', createdAt: D4, mealDate: D4, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已完成' },
+  { id: P4+'C00202C00202RD', createdAt: D4, mealDate: D4, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
   { id: P4+'C00101C00101SL', createdAt: D4, mealDate: D4, site: 'C001 新竹廠一區', type: 'S', period: 'L', memberId: 'C00101', phone: '0912-345-678', status: '已成立' },
   // ── D-5 ──
-  { id: P5+'C00101C00101RB', createdAt: D5, mealDate: D5, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '已完成' },
+  { id: P5+'C00101C00101RB', createdAt: D5, mealDate: D5, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00101', phone: '0912-345-678', status: '待確認' },
   { id: P5+'C00202C00202RL', createdAt: D5, mealDate: D5, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00202', phone: '0934-555-666', status: '異常' },
   { id: P5+'C00301C00301RL', createdAt: D5, mealDate: D5, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
-  { id: P5+'C00101C00101RD', createdAt: D5, mealDate: D5, site: 'C001 新竹廠一區', type: 'R', period: 'D', memberId: 'C00101', phone: '0912-345-678', status: '處理中' },
+  { id: P5+'C00101C00101RD', createdAt: D5, mealDate: D5, site: 'C001 新竹廠一區', type: 'R', period: 'D', memberId: 'C00101', phone: '0912-345-678', status: '待確認' },
   // ── D-6 ──
-  { id: P6+'C00102C00102RB', createdAt: D6, mealDate: D6, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已完成' },
-  { id: P6+'C00201C00201RL', createdAt: D6, mealDate: D6, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已完成' },
+  { id: P6+'C00102C00102RB', createdAt: D6, mealDate: D6, site: 'C001 新竹廠一區', type: 'R', period: 'B', memberId: 'C00102', phone: '0912-567-890', status: '已取消' },
+  { id: P6+'C00201C00201RL', createdAt: D6, mealDate: D6, site: 'C002 新竹廠二區', type: 'R', period: 'L', memberId: 'C00201', phone: '0934-111-222', status: '已成立' },
   { id: P6+'C00301C00301RL', createdAt: D6, mealDate: D6, site: 'C003 台中廠',     type: 'R', period: 'L', memberId: 'C00301', phone: '0956-333-444', status: '已成立' },
   { id: P6+'C00202C00202RD', createdAt: D6, mealDate: D6, site: 'C002 新竹廠二區', type: 'R', period: 'D', memberId: 'C00202', phone: '0934-555-666', status: '已成立' },
 ];
