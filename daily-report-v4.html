@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <link rel="icon" type="image/png" href="圖片/LOGO.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日報表 V4 — 內部後台</title>
+  <link rel="stylesheet" href="shared-nav.css">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f3f2ef;
+  --card:        #ffffff;
+  --bg-2:        #fafaf9;
+  --bg-3:        #eeece9;
+  --border:      #e5e5e4;
+  --border-2:    #efefed;
+  --text:        #1c1b1a;
+  --text-2:      #57534e;
+  --text-3:      #78716c;
+  --blue:        #1d4ed8;
+  --blue-bg:     #eff6ff;
+  --blue-border: #bfdbfe;
+  --blue-text:   #1e40af;
+  --green:       #15803d;
+  --green-bg:    #f0fdf4;
+  --green-bdr:   #bbf7d0;
+  --orange:      #c2410c;
+  --orange-bg:   #fff7ed;
+  --orange-bdr:  #fed7aa;
+  --red:         #b91c1c;
+  --red-bg:      #fef2f2;
+  --red-bdr:     #fecaca;
+  --yellow:      #a16207;
+  --yellow-bg:   #fefce8;
+  --yellow-bdr:  #fde68a;
+  --gray-disabled: #d1d5db;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+               "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 18px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page { max-width: 1400px; margin: 0 auto; padding: 12px 20px 80px; }
+
+/* ─── 麵包屑 ─── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 16px;
+  font-size: 14px; color: var(--text-3);
+}
+.bc-item { color: var(--text-2); }
+.bc-home { font-weight: 600; color: var(--text); }
+.bc-sep  { color: var(--text-3); }
+.bc-link { cursor: pointer; }
+.bc-link:hover { color: var(--blue); text-decoration: underline; }
+
+/* ─── Header ─── */
+.page-header { margin-bottom: 12px; }
+.page-title  { font-size: 22px; font-weight: 600; }
+.page-sub    { font-size: 15px; color: var(--text-3); margin-top: 3px; }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+}
+.toolbar-label { font-size: 15px; color: var(--text-2); white-space: nowrap; }
+.toolbar-tilde { color: var(--text-3); font-size: 15px; }
+.date-input {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 15px; color: var(--text); background: var(--card); cursor: pointer;
+  font-family: inherit;
+}
+.date-input:focus { outline: none; border-color: var(--blue); }
+
+/* ─── 按鈕 ─── */
+.btn {
+  padding: 7px 14px; border-radius: 6px;
+  font-size: 15px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card); color: var(--text-2);
+  transition: all .12s; display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap; font-family: inherit;
+}
+.btn:hover { border-color: #a8a29e; color: var(--text); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { background: #1e40af; border-color: #1e40af; color: #fff; }
+
+/* ─── 操作按鈕（表格內） ─── */
+.btn-edit {
+  padding: 5px 14px; border-radius: 6px;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--text-2); transition: all .12s; white-space: nowrap;
+  font-family: inherit;
+}
+.btn-edit:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.btn-edit:disabled {
+  background: var(--bg-3); color: var(--text-3);
+  border-color: var(--border); cursor: not-allowed; opacity: 0.6;
+}
+
+/* 第三層「標記完成」按鈕 */
+.btn-done {
+  padding: 5px 14px; border-radius: 6px;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--green-bdr); background: var(--green-bg);
+  color: var(--green); transition: all .12s; white-space: nowrap;
+  font-family: inherit;
+}
+.btn-done:hover:not(:disabled) { background: #dcfce7; border-color: #86efac; }
+.btn-done:disabled {
+  background: var(--bg-3); color: var(--text-3);
+  border-color: var(--border); cursor: not-allowed; opacity: 0.6;
+}
+
+/* ─── 表格 ─── */
+.table-wrap { overflow-x: auto; }
+.data-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--card); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.data-table th {
+  padding: 10px 14px; background: var(--bg-2);
+  font-size: 14px; font-weight: 600; color: var(--text-2);
+  text-align: left; white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 13px 14px; font-size: 18px; color: var(--text);
+  border-bottom: 1px solid var(--border-2);
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--bg-2); }
+.num-col { text-align: right !important; font-variant-numeric: tabular-nums; }
+.profit-col { font-weight: 700; }
+.profit-pos { color: var(--green); }
+.profit-neg { color: var(--red); }
+
+/* ─── 狀態 Badge ─── */
+.badge-done {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  background: var(--green-bg); color: var(--green);
+  border: 1px solid var(--green-bdr);
+  font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+.badge-done::before { content: '●'; font-size: 8px; }
+
+.badge-pending {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  background: var(--yellow-bg); color: var(--yellow);
+  border: 1px solid var(--yellow-bdr);
+  font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+.badge-pending::before { content: '●'; font-size: 8px; }
+
+/* 第一層複合燈號 */
+.badge-mixed {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; white-space: nowrap;
+}
+.badge-mixed .done-part {
+  display: inline-flex; align-items: center; gap: 3px;
+  color: var(--green); font-weight: 600;
+}
+.badge-mixed .pending-part {
+  display: inline-flex; align-items: center; gap: 3px;
+  color: var(--yellow); font-weight: 600;
+}
+.badge-mixed .dot { font-size: 8px; }
+
+/* ─── 層切換 ─── */
+.layer { display: none; }
+.layer.layer-active { display: block; }
+
+/* ─── 空狀態 ─── */
+.empty-state {
+  padding: 48px; text-align: center;
+  color: var(--text-3); font-size: 16px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; margin-top: 4px;
+}
+
+/* ─── 訂單編號 ─── */
+.td-mono { font-family: 'SF Mono', Consolas, monospace; font-size: 14px; font-weight: 400; color: var(--text-3); }
+
+/* ─── RWD ─── */
+@media (max-width: 900px) {
+  .data-table th, .data-table td { padding: 9px 10px; }
+  .data-table td { font-size: 16px; }
+  .hide-md { display: none; }
+}
+@media (max-width: 640px) {
+  .toolbar { gap: 6px; }
+  .date-input { width: 130px; font-size: 14px; }
+  .hide-sm { display: none; }
+}
+  </style>
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<div class="page">
+
+  <!-- 麵包屑 -->
+  <nav class="breadcrumb" id="breadcrumb">
+    <span class="bc-item bc-home">日報表 V4</span>
+    <span class="bc-sep" id="bc-sep-2" style="display:none">›</span>
+    <span class="bc-item bc-link" id="bc-layer2" style="display:none" onclick="goLayer2(currentDate)"></span>
+    <span class="bc-sep" id="bc-sep-3" style="display:none">›</span>
+    <span class="bc-item" id="bc-layer3" style="display:none"></span>
+  </nav>
+
+  <!-- ══════════════════════════════════════════
+       第一層：日期總攬
+  ══════════════════════════════════════════ -->
+  <section id="layer-1" class="layer layer-active">
+    <div class="page-header">
+      <div class="page-title">日報表 V4</div>
+      <div class="page-sub">各據點每日財務匯總（含交通補助、人力補助）</div>
+    </div>
+    <div class="toolbar">
+      <span class="toolbar-label">日期區間</span>
+      <input type="date" id="l1-date-from" class="date-input">
+      <span class="toolbar-tilde">～</span>
+      <input type="date" id="l1-date-to" class="date-input">
+      <button class="btn btn-primary" onclick="queryLayer1()">查詢</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="l1-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>星期</th>
+            <th class="num-col">總應收</th>
+            <th class="num-col hide-md">應收扣款</th>
+            <th class="num-col">總應付</th>
+            <th class="num-col hide-md">應付扣款</th>
+            <th class="num-col">實際應收</th>
+            <th class="num-col">實際應付</th>
+            <th class="num-col">交通補助</th>
+            <th class="num-col">人力補助</th>
+            <th class="num-col profit-col">利潤</th>
+            <th>狀態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="l1-tbody"></tbody>
+      </table>
+      <div id="l1-empty" class="empty-state" style="display:none">查無此區間的日報資料</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       第二層：各據點總攬
+  ══════════════════════════════════════════ -->
+  <section id="layer-2" class="layer">
+    <div class="page-header">
+      <div class="page-title">各據點總攬</div>
+      <div class="page-sub" id="l2-subtitle"></div>
+    </div>
+    <div class="toolbar">
+      <span class="toolbar-label">日期</span>
+      <input type="date" id="l2-date" class="date-input">
+      <button class="btn btn-primary" onclick="queryLayer2()">查詢</button>
+      <button class="btn" style="margin-left:auto" onclick="goLayer1()">← 返回</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="l2-table">
+        <thead>
+          <tr>
+            <th>據點名稱</th>
+            <th class="num-col">應收金額</th>
+            <th class="num-col hide-md">應收扣款</th>
+            <th class="num-col">應付金額</th>
+            <th class="num-col hide-md">應付扣款</th>
+            <th class="num-col">實際應收</th>
+            <th class="num-col">實際應付</th>
+            <th class="num-col">交通補助</th>
+            <th class="num-col">人力補助</th>
+            <th class="num-col profit-col">利潤</th>
+            <th>狀態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="l2-tbody"></tbody>
+      </table>
+      <div id="l2-empty" class="empty-state" style="display:none">此日期無據點資料</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       第三層：據點明細
+  ══════════════════════════════════════════ -->
+  <section id="layer-3" class="layer">
+    <div class="page-header">
+      <div class="page-title">據點明細</div>
+      <div class="page-sub" id="l3-subtitle"></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" style="margin-left:auto" onclick="goLayer2Back()">← 返回</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="l3-table">
+        <thead>
+          <tr>
+            <th>出餐日期</th>
+            <th>據點名稱</th>
+            <th>訂單編號</th>
+            <th class="num-col">應收金額</th>
+            <th class="num-col hide-md">應收扣款</th>
+            <th class="num-col">應付金額</th>
+            <th class="num-col hide-md">應付扣款</th>
+            <th>訂單狀態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="l3-tbody"></tbody>
+      </table>
+      <div id="l3-empty" class="empty-state" style="display:none">此據點無待確認訂單</div>
+    </div>
+  </section>
+
+</div><!-- /.page -->
+
+<!-- ── 二次確認 Modal ── -->
+<div id="confirm-overlay" style="
+  display:none; position:fixed; inset:0; z-index:2000;
+  background:rgba(0,0,0,.45); align-items:center; justify-content:center;
+">
+  <div style="
+    background:var(--card); border-radius:12px; padding:28px 28px 20px;
+    width:360px; max-width:90vw; box-shadow:0 8px 32px rgba(0,0,0,.18);
+  ">
+    <div style="font-size:18px; font-weight:600; margin-bottom:8px;">確認標記為完成</div>
+    <div style="font-size:15px; color:var(--text-2); margin-bottom:20px;">
+      訂單 <span id="confirm-order-id" style="font-family:'SF Mono',Consolas,monospace; font-weight:400; color:var(--text);"></span> 將標記為已完成，此操作無法撤銷。
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button class="btn" onclick="closeConfirm()">取消</button>
+      <button class="btn btn-primary" onclick="confirmDone()">確認完成</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   Mock 資料（模擬四個資料表）
+════════════════════════════════════════════════════ */
+
+function dateStr(offset) {
+  var d = new Date();
+  d.setDate(d.getDate() + offset);
+  var y  = d.getFullYear();
+  var m  = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + dd;
+}
+
+var DATES = {
+  d6: dateStr(-6),
+  d5: dateStr(-5),
+  d4: dateStr(-4),
+  d3: dateStr(-3),
+  d2: dateStr(-2),
+  d1: dateStr(-1)
+};
+
+var SITES = [
+  { siteId: 'C001', siteName: '台北南港廠' },
+  { siteId: 'C002', siteName: '新竹竹科廠' },
+  { siteId: 'C003', siteName: '桃園中壢廠' },
+  { siteId: 'C004', siteName: '台中精科廠' },
+  { siteId: 'C005', siteName: '高雄楠梓廠' }
+];
+
+/* ── RECEIVABLES、DEDUCTIONS 先宣告，供 ORDERS IIFE 填入 ── */
+var RECEIVABLES = [];
+var DEDUCTIONS = [];
+
+/* ── ORDERS：訂單資料表 ── */
+var ORDERS = (function() {
+  var rows = [];
+  var siteSeq = {};  /* 每個 siteId 的序號，模擬會員編號 */
+
+  function addOrder(date, siteId, siteName, status, rec, pay, recDed, payDed) {
+    var p = date.replace(/-/g, '').slice(2);   /* 日期後6碼，例 260701 */
+    siteSeq[siteId] = (siteSeq[siteId] || 0) + 1;
+    var memberId = siteId + String(siteSeq[siteId]).padStart(2, '0');  /* 例 C00101 */
+    var id = p + memberId + memberId + 'RL';   /* 格式同訂單管理：260701C00101C00101RL */
+    rows.push({ orderId: id, date: date, siteId: siteId, siteName: siteName, orderStatus: status });
+    RECEIVABLES.push({ orderId: id, receivable: rec, payable: pay });
+    DEDUCTIONS.push({ orderId: id, receivableDeduction: recDed, payableDeduction: payDed });
+  }
+
+  /* T-6 ~ T-4：全部已完成 */
+  ['d6', 'd5', 'd4'].forEach(function(dk) {
+    var D = DATES[dk];
+    addOrder(D, 'C001', '台北南港廠', '已完成', 8450,  5900, 0,   0);
+    addOrder(D, 'C001', '台北南港廠', '已完成', 6300,  4410, 0,   0);
+    addOrder(D, 'C001', '台北南港廠', '已完成', 3480,  2436, 0,   0);
+    addOrder(D, 'C002', '新竹竹科廠', '已完成', 10580, 7406, 100, 0);
+    addOrder(D, 'C002', '新竹竹科廠', '已完成', 4225,  2958, 0,   0);
+    addOrder(D, 'C002', '新竹竹科廠', '已完成', 2030,  1421, 0,   0);
+    addOrder(D, 'C003', '桃園中壢廠', '已完成', 5825,  4078, 0,   0);
+    addOrder(D, 'C003', '桃園中壢廠', '已完成', 9320,  6524, 0,   0);
+    addOrder(D, 'C003', '桃園中壢廠', '已完成', 4700,  3290, 0,   0);
+    addOrder(D, 'C004', '台中精科廠', '已完成', 5456,  3820, 0,   0);
+    addOrder(D, 'C004', '台中精科廠', '已完成', 5240,  3668, 0,   0);
+    addOrder(D, 'C004', '台中精科廠', '已完成', 7500,  5250, 0,   0);
+    addOrder(D, 'C005', '高雄楠梓廠', '已完成', 2700,  1890, 0,   0);
+    addOrder(D, 'C005', '高雄楠梓廠', '已完成', 8330,  5831, 0,   0);
+    addOrder(D, 'C005', '高雄楠梓廠', '已完成', 3960,  2772, 0,   0);
+  });
+
+  /* T-3：C001、C002、C005 已完成，C003、C004 部分已成立 */
+  var D3 = DATES.d3;
+  addOrder(D3, 'C001', '台北南港廠', '已完成', 8200,  5740, 0,   0);
+  addOrder(D3, 'C001', '台北南港廠', '已完成', 6550,  4585, 0,   0);
+  addOrder(D3, 'C001', '台北南港廠', '已完成', 3200,  2240, 0,   0);
+  addOrder(D3, 'C002', '新竹竹科廠', '已完成', 10120, 7084, 0,   0);
+  addOrder(D3, 'C002', '新竹竹科廠', '已完成', 3900,  2730, 0,   0);
+  addOrder(D3, 'C002', '新竹竹科廠', '已完成', 2160,  1512, 0,   0);
+  addOrder(D3, 'C003', '桃園中壢廠', '已完成', 5240,  3668, 0,   0);
+  addOrder(D3, 'C003', '桃園中壢廠', '已成立', 8800,  6160, 220, 0);  /* 待確認 */
+  addOrder(D3, 'C003', '桃園中壢廠', '已成立', 4350,  3045, 0,   0);  /* 待確認 */
+  addOrder(D3, 'C004', '台中精科廠', '已完成', 5600,  3920, 0,   0);
+  addOrder(D3, 'C004', '台中精科廠', '已成立', 4850,  3395, 0,   0);  /* 待確認 */
+  addOrder(D3, 'C004', '台中精科廠', '已成立', 7200,  5040, 0,   0);  /* 待確認 */
+  addOrder(D3, 'C005', '高雄楠梓廠', '已完成', 2520,  1764, 0,   0);
+  addOrder(D3, 'C005', '高雄楠梓廠', '已完成', 8050,  5635, 0,   0);
+  addOrder(D3, 'C005', '高雄楠梓廠', '已完成', 3780,  2646, 0,   0);
+
+  /* T-2：C001、C003 已完成，C002、C004、C005 有已成立 */
+  var D2 = DATES.d2;
+  addOrder(D2, 'C001', '台北南港廠', '已完成', 8640,  6048, 0,   0);
+  addOrder(D2, 'C001', '台北南港廠', '已完成', 6120,  4284, 0,   0);
+  addOrder(D2, 'C001', '台北南港廠', '已完成', 3250,  2275, 0,   0);
+  addOrder(D2, 'C002', '新竹竹科廠', '已完成', 9450,  6615, 0,   0);
+  addOrder(D2, 'C002', '新竹竹科廠', '已成立', 4560,  3192, 0,   0);  /* 待確認 */
+  addOrder(D2, 'C002', '新竹竹科廠', '已成立', 2090,  1463, 0,   0);  /* 待確認 */
+  addOrder(D2, 'C003', '桃園中壢廠', '已完成', 5760,  4032, 0,   0);
+  addOrder(D2, 'C003', '桃園中壢廠', '已完成', 8930,  6251, 0,   0);
+  addOrder(D2, 'C003', '桃園中壢廠', '已完成', 4680,  3276, 0,   0);
+  addOrder(D2, 'C004', '台中精科廠', '已完成', 5800,  4060, 0,   0);
+  addOrder(D2, 'C004', '台中精科廠', '已成立', 5040,  3528, 0,   0);  /* 待確認 */
+  addOrder(D2, 'C004', '台中精科廠', '已成立', 7680,  5376, 0,   0);  /* 待確認 */
+  addOrder(D2, 'C005', '高雄楠梓廠', '已完成', 2640,  1848, 0,   0);
+  addOrder(D2, 'C005', '高雄楠梓廠', '已成立', 8450,  5915, 0,   0);  /* 待確認 */
+  addOrder(D2, 'C005', '高雄楠梓廠', '已成立', 4020,  2814, 0,   0);  /* 待確認 */
+
+  /* T-1：C001 已完成，C002～C005 都有已成立 */
+  var D1 = DATES.d1;
+  addOrder(D1, 'C001', '台北南港廠', '已完成', 9200,  6440, 0,   0);
+  addOrder(D1, 'C001', '台北南港廠', '已完成', 6800,  4760, 0,   0);
+  addOrder(D1, 'C001', '台北南港廠', '已完成', 3600,  2520, 0,   0);
+  addOrder(D1, 'C002', '新竹竹科廠', '已成立', 10360, 7252, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C002', '新竹竹科廠', '已成立', 4320,  3024, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C002', '新竹竹科廠', '已成立', 2200,  1540, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C003', '桃園中壢廠', '已成立', 5950,  4165, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C003', '桃園中壢廠', '已成立', 9100,  6370, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C003', '桃園中壢廠', '已成立', 4800,  3360, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C004', '台中精科廠', '已成立', 6240,  4368, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C004', '台中精科廠', '已成立', 5120,  3584, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C004', '台中精科廠', '已成立', 7920,  5544, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C005', '高雄楠梓廠', '已成立', 2880,  2016, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C005', '高雄楠梓廠', '已成立', 8760,  6132, 0,   0);  /* 待確認 */
+  addOrder(D1, 'C005', '高雄楠梓廠', '已成立', 4200,  2940, 0,   0);  /* 待確認 */
+
+  return rows;
+})();
+
+/* ── SUBSIDIES：補助主表（依出餐日期 + 據點） ── */
+var SUBSIDIES = (function() {
+  var rows = [];
+  Object.keys(DATES).forEach(function(dk) {
+    var D = DATES[dk];
+    rows.push({ date: D, siteId: 'C001', trafficSubsidy: 100, laborSubsidy: 0   });
+    rows.push({ date: D, siteId: 'C002', trafficSubsidy: 0,   laborSubsidy: 0   });
+    rows.push({ date: D, siteId: 'C003', trafficSubsidy: 0,   laborSubsidy: 0   });
+    rows.push({ date: D, siteId: 'C004', trafficSubsidy: 0,   laborSubsidy: 200 });
+    rows.push({ date: D, siteId: 'C005', trafficSubsidy: 0,   laborSubsidy: 0   });
+  });
+  return rows;
+})();
+
+/* ════════════════════════════════════════════════════
+   狀態變數
+════════════════════════════════════════════════════ */
+var currentLayer  = 1;
+var currentDate   = null;
+var currentSiteId = null;
+
+/* ════════════════════════════════════════════════════
+   工具函式
+════════════════════════════════════════════════════ */
+var WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+
+function fmt(n) {
+  return Number(n).toLocaleString('zh-TW');
+}
+
+function formatDate(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + dd;
+}
+
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr + 'T00:00:00');
+  return dateStr + '（' + WEEKDAYS[d.getDay()] + '）';
+}
+
+/* 根據 orderId 取得應收應付 */
+function getReceivable(orderId) {
+  return RECEIVABLES.find(function(r) { return r.orderId === orderId; }) || { receivable: 0, payable: 0 };
+}
+function getDeduction(orderId) {
+  return DEDUCTIONS.find(function(r) { return r.orderId === orderId; }) || { receivableDeduction: 0, payableDeduction: 0 };
+}
+
+/* 取得補助 */
+function getSubsidy(date, siteId) {
+  return SUBSIDIES.find(function(s) { return s.date === date && s.siteId === siteId; }) || { trafficSubsidy: 0, laborSubsidy: 0 };
+}
+
+/* 取得某日已完成的訂單 */
+function getDoneOrders(date) {
+  return ORDERS.filter(function(o) { return o.date === date && o.orderStatus === '已完成'; });
+}
+
+/* 取得某日、某據點的已成立訂單 */
+function getPendingOrders(date, siteId) {
+  return ORDERS.filter(function(o) { return o.date === date && o.siteId === siteId && o.orderStatus === '已成立'; });
+}
+
+/* ── 計算某日第一層彙總 ── */
+function calcDaily(date) {
+  var doneOrders = getDoneOrders(date);
+  var allSiteIds = [];
+  ORDERS.filter(function(o) { return o.date === date; }).forEach(function(o) {
+    if (allSiteIds.indexOf(o.siteId) === -1) allSiteIds.push(o.siteId);
+  });
+
+  var tRec = 0, tRecDed = 0, tPay = 0, tPayDed = 0;
+  doneOrders.forEach(function(o) {
+    var rv = getReceivable(o.orderId);
+    var dv = getDeduction(o.orderId);
+    tRec    += rv.receivable;
+    tRecDed += dv.receivableDeduction;
+    tPay    += rv.payable;
+    tPayDed += dv.payableDeduction;
+  });
+
+  var tTraffic = 0, tLabor = 0;
+  allSiteIds.forEach(function(sid) {
+    var sub = getSubsidy(date, sid);
+    tTraffic += sub.trafficSubsidy;
+    tLabor   += sub.laborSubsidy;
+  });
+
+  var ar = tRec - tRecDed + tTraffic + tLabor;
+  var ap = tPay - tPayDed;
+
+  /* 狀態：以據點維度計算完成 / 未完成 */
+  var doneCount = 0, pendingCount = 0;
+  allSiteIds.forEach(function(sid) {
+    var hasPending = ORDERS.some(function(o) { return o.date === date && o.siteId === sid && o.orderStatus === '已成立'; });
+    if (hasPending) pendingCount++;
+    else doneCount++;
+  });
+
+  return {
+    totalRec: tRec, totalRecDed: tRecDed,
+    totalPay: tPay, totalPayDed: tPayDed,
+    trafficSubsidy: tTraffic, laborSubsidy: tLabor,
+    actualRec: ar, actualPay: ap, profit: ar - ap,
+    doneCount: doneCount, pendingCount: pendingCount
+  };
+}
+
+/* ── 計算某日、某據點第二層彙總 ── */
+function calcSite(date, siteId) {
+  var doneOrders = ORDERS.filter(function(o) { return o.date === date && o.siteId === siteId && o.orderStatus === '已完成'; });
+  var rec = 0, recDed = 0, pay = 0, payDed = 0;
+  doneOrders.forEach(function(o) {
+    var rv = getReceivable(o.orderId);
+    var dv = getDeduction(o.orderId);
+    rec    += rv.receivable;
+    recDed += dv.receivableDeduction;
+    pay    += rv.payable;
+    payDed += dv.payableDeduction;
+  });
+  var sub = getSubsidy(date, siteId);
+  var ar = rec - recDed + sub.trafficSubsidy + sub.laborSubsidy;
+  var ap = pay - payDed;
+  var hasPending = ORDERS.some(function(o) { return o.date === date && o.siteId === siteId && o.orderStatus === '已成立'; });
+  return {
+    receivable: rec, receivableDeduction: recDed,
+    payable: pay, payableDeduction: payDed,
+    trafficSubsidy: sub.trafficSubsidy, laborSubsidy: sub.laborSubsidy,
+    actualRec: ar, actualPay: ap, profit: ar - ap,
+    isDone: !hasPending
+  };
+}
+
+/* ════════════════════════════════════════════════════
+   層切換
+════════════════════════════════════════════════════ */
+function showLayer(n) {
+  document.querySelectorAll('.layer').forEach(function(el) {
+    el.classList.remove('layer-active');
+  });
+  document.getElementById('layer-' + n).classList.add('layer-active');
+  currentLayer = n;
+  updateBreadcrumb();
+  window.scrollTo(0, 0);
+}
+
+function goLayer1() {
+  showLayer(1);
+}
+
+function goLayer2(date) {
+  if (!date) return;
+  currentDate = date;
+  document.getElementById('l2-date').value = date;
+  document.getElementById('l2-subtitle').textContent = formatDateDisplay(date);
+  renderLayer2(date);
+  showLayer(2);
+}
+
+function goLayer2Back() {
+  renderLayer2(currentDate);
+  showLayer(2);
+}
+
+function goLayer3(siteId) {
+  currentSiteId = siteId;
+  renderLayer3(currentDate, siteId);
+  showLayer(3);
+}
+
+/* ── 麵包屑更新 ── */
+function updateBreadcrumb() {
+  var sep2 = document.getElementById('bc-sep-2');
+  var bc2  = document.getElementById('bc-layer2');
+  var sep3 = document.getElementById('bc-sep-3');
+  var bc3  = document.getElementById('bc-layer3');
+
+  sep2.style.display = currentLayer >= 2 ? '' : 'none';
+  bc2.style.display  = currentLayer >= 2 ? '' : 'none';
+  sep3.style.display = currentLayer >= 3 ? '' : 'none';
+  bc3.style.display  = currentLayer >= 3 ? '' : 'none';
+
+  if (currentLayer >= 2) {
+    bc2.textContent = formatDateDisplay(currentDate);
+  }
+  if (currentLayer >= 3) {
+    var site = SITES.find(function(s) { return s.siteId === currentSiteId; });
+    bc3.textContent = site ? site.siteName : currentSiteId;
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   第一層
+════════════════════════════════════════════════════ */
+function initDefaultDates() {
+  var today = new Date();
+  var yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  var start = new Date(yesterday);
+  start.setDate(yesterday.getDate() - 5);
+  document.getElementById('l1-date-from').value = formatDate(start);
+  document.getElementById('l1-date-to').value   = formatDate(yesterday);
+}
+
+function queryLayer1() {
+  var from = document.getElementById('l1-date-from').value;
+  var to   = document.getElementById('l1-date-to').value;
+  if (!from || !to) { alert('請選擇完整日期區間'); return; }
+  if (from > to)    { alert('起始日期不能晚於結束日期'); return; }
+
+  /* 取得範圍內有資料的日期（不重複） */
+  var datesInRange = [];
+  ORDERS.forEach(function(o) {
+    if (o.date >= from && o.date <= to && datesInRange.indexOf(o.date) === -1) {
+      datesInRange.push(o.date);
+    }
+  });
+  datesInRange.sort(function(a, b) { return b.localeCompare(a); });
+
+  renderLayer1Table(datesInRange);
+}
+
+function renderLayer1Table(dates) {
+  var tbody = document.getElementById('l1-tbody');
+  var empty = document.getElementById('l1-empty');
+
+  if (dates.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = dates.map(function(date) {
+    var t = calcDaily(date);
+    var d = new Date(date + 'T00:00:00');
+    var wd = '（' + WEEKDAYS[d.getDay()] + '）';
+    var profCls = t.profit >= 0 ? 'profit-pos' : 'profit-neg';
+    var isAllDone = t.pendingCount === 0;
+
+    /* 狀態 badge */
+    var statusHtml;
+    if (t.pendingCount === 0 && t.doneCount === 0) {
+      statusHtml = '<span class="badge-pending">無資料</span>';
+    } else {
+      statusHtml = '<span class="badge-mixed">';
+      if (t.doneCount > 0) {
+        statusHtml += '<span class="done-part"><span class="dot">●</span>' + t.doneCount + ' 已完成</span>';
+      }
+      if (t.pendingCount > 0) {
+        statusHtml += '<span class="pending-part"><span class="dot">●</span>' + t.pendingCount + ' 未完成</span>';
+      }
+      statusHtml += '</span>';
+    }
+
+    var editBtn = isAllDone
+      ? '<button class="btn-edit" disabled>編輯</button>'
+      : '<button class="btn-edit" onclick="goLayer2(\'' + date + '\')">編輯</button>';
+
+    return (
+      '<tr>' +
+        '<td>' + date + '</td>' +
+        '<td>' + wd + '</td>' +
+        '<td class="num-col">' + fmt(t.totalRec) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(t.totalRecDed) + '</td>' +
+        '<td class="num-col">' + fmt(t.totalPay) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(t.totalPayDed) + '</td>' +
+        '<td class="num-col">' + fmt(t.actualRec) + '</td>' +
+        '<td class="num-col">' + fmt(t.actualPay) + '</td>' +
+        '<td class="num-col">' + (t.trafficSubsidy > 0 ? fmt(t.trafficSubsidy) : '—') + '</td>' +
+        '<td class="num-col">' + (t.laborSubsidy > 0 ? fmt(t.laborSubsidy) : '—') + '</td>' +
+        '<td class="num-col profit-col ' + profCls + '">' + fmt(t.profit) + '</td>' +
+        '<td>' + statusHtml + '</td>' +
+        '<td>' + editBtn + '</td>' +
+      '</tr>'
+    );
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   第二層
+════════════════════════════════════════════════════ */
+function queryLayer2() {
+  var date = document.getElementById('l2-date').value;
+  if (!date) return;
+  currentDate = date;
+  document.getElementById('l2-subtitle').textContent = formatDateDisplay(date);
+  renderLayer2(date);
+}
+
+function renderLayer2(date) {
+  var tbody = document.getElementById('l2-tbody');
+  var empty = document.getElementById('l2-empty');
+
+  /* 取得該日有訂單的據點（依 siteId 排序） */
+  var siteIds = [];
+  ORDERS.forEach(function(o) {
+    if (o.date === date && siteIds.indexOf(o.siteId) === -1) siteIds.push(o.siteId);
+  });
+  siteIds.sort();
+
+  if (siteIds.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = siteIds.map(function(siteId) {
+    var site = SITES.find(function(s) { return s.siteId === siteId; });
+    var siteName = site ? site.siteName : siteId;
+    var c = calcSite(date, siteId);
+    var profCls = c.profit >= 0 ? 'profit-pos' : 'profit-neg';
+
+    var statusHtml = c.isDone
+      ? '<span class="badge-done">已完成</span>'
+      : '<span class="badge-pending">未完成</span>';
+
+    var editBtn = c.isDone
+      ? '<button class="btn-edit" disabled>編輯</button>'
+      : '<button class="btn-edit" onclick="goLayer3(\'' + siteId + '\')">編輯</button>';
+
+    return (
+      '<tr>' +
+        '<td>' + siteName + '</td>' +
+        '<td class="num-col">' + fmt(c.receivable) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(c.receivableDeduction) + '</td>' +
+        '<td class="num-col">' + fmt(c.payable) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(c.payableDeduction) + '</td>' +
+        '<td class="num-col">' + fmt(c.actualRec) + '</td>' +
+        '<td class="num-col">' + fmt(c.actualPay) + '</td>' +
+        '<td class="num-col">' + (c.trafficSubsidy > 0 ? fmt(c.trafficSubsidy) : '—') + '</td>' +
+        '<td class="num-col">' + (c.laborSubsidy > 0 ? fmt(c.laborSubsidy) : '—') + '</td>' +
+        '<td class="num-col profit-col ' + profCls + '">' + fmt(c.profit) + '</td>' +
+        '<td>' + statusHtml + '</td>' +
+        '<td>' + editBtn + '</td>' +
+      '</tr>'
+    );
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   第三層
+════════════════════════════════════════════════════ */
+function renderLayer3(date, siteId) {
+  var site = SITES.find(function(s) { return s.siteId === siteId; });
+  var siteName = site ? site.siteName : siteId;
+
+  document.getElementById('l3-subtitle').textContent =
+    siteName + '　' + formatDateDisplay(date);
+
+  var tbody = document.getElementById('l3-tbody');
+  var empty = document.getElementById('l3-empty');
+  var orders = ORDERS.filter(function(o) {
+    return o.date === date && o.siteId === siteId && (o.orderStatus === '已成立' || o.orderStatus === '已完成');
+  });
+
+  if (orders.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = orders.map(function(o) {
+    var rv = getReceivable(o.orderId);
+    var dv = getDeduction(o.orderId);
+    var isDone = o.orderStatus === '已完成';
+    var statusBadge = isDone
+      ? '<span class="badge-done">已完成</span>'
+      : '<span class="badge-pending">已成立</span>';
+    var actionBtn = isDone
+      ? '<button class="btn-done" disabled>已完成</button>'
+      : '<button class="btn-done" onclick="openConfirm(\'' + o.orderId + '\')">標記為完成</button>';
+    return (
+      '<tr id="row-' + o.orderId + '">' +
+        '<td>' + o.date + '</td>' +
+        '<td>' + o.siteName + '</td>' +
+        '<td class="td-mono">' + o.orderId + '</td>' +
+        '<td class="num-col">' + fmt(rv.receivable) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(dv.receivableDeduction) + '</td>' +
+        '<td class="num-col">' + fmt(rv.payable) + '</td>' +
+        '<td class="num-col hide-md">' + fmt(dv.payableDeduction) + '</td>' +
+        '<td>' + statusBadge + '</td>' +
+        '<td>' + actionBtn + '</td>' +
+      '</tr>'
+    );
+  }).join('');
+}
+
+/* ── 二次確認 Modal ── */
+var pendingOrderId = null;
+
+function openConfirm(orderId) {
+  pendingOrderId = orderId;
+  document.getElementById('confirm-order-id').textContent = orderId;
+  var overlay = document.getElementById('confirm-overlay');
+  overlay.style.display = 'flex';
+}
+
+function closeConfirm() {
+  pendingOrderId = null;
+  document.getElementById('confirm-overlay').style.display = 'none';
+}
+
+function confirmDone() {
+  var id = pendingOrderId;
+  closeConfirm();
+  if (id) markOrderDone(id);
+}
+
+document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+
+/* ── 標記單筆訂單完成 ── */
+function markOrderDone(orderId) {
+  var order = ORDERS.find(function(o) { return o.orderId === orderId; });
+  if (!order) return;
+  order.orderStatus = '已完成';
+
+  /* 更新該列 UI */
+  var row = document.getElementById('row-' + orderId);
+  if (row) {
+    /* 更新訂單狀態 badge */
+    var statusCell = row.cells[7];
+    statusCell.innerHTML = '<span class="badge-done">已完成</span>';
+    /* 停用完成按鈕 */
+    var btn = row.cells[8].querySelector('button');
+    if (btn) { btn.disabled = true; btn.textContent = '已完成'; }
+  }
+
+  /* 重新計算第一層（讓按鈕 disabled 狀態同步）*/
+  queryLayer1();
+
+  /* 若該據點已無待確認訂單，顯示全部完成提示並延遲返回第二層 */
+  var remaining = getPendingOrders(currentDate, currentSiteId);
+  if (remaining.length === 0) {
+    document.getElementById('l3-subtitle').textContent += '　✓ 已全部完成';
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   初始化
+════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+  initDefaultDates();
+  queryLayer1();
+});
+</script>
+</body>
+</html>

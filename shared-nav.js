@@ -117,7 +117,7 @@
             label: '統計報表',
             group: true,
             url: 'daily-report.html',
-            match: function (p) { return p.file === 'daily-report.html' || p.file === 'daily-report-v2.html' || p.file === 'daily-report-v3.html'; },
+            match: function (p) { return p.file === 'daily-report.html' || p.file === 'daily-report-v2.html' || p.file === 'daily-report-v3.html' || p.file === 'daily-report-v4.html'; },
             children: [
               {
                 label: '日報表',
@@ -133,6 +133,11 @@
                 label: '日報表 V3',
                 url: 'daily-report-v3.html',
                 match: function (p) { return p.file === 'daily-report-v3.html'; }
+              },
+              {
+                label: '日報表 V4',
+                url: 'daily-report-v4.html',
+                match: function (p) { return p.file === 'daily-report-v4.html'; }
               }
             ]
           },
