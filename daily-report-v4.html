@@ -334,25 +334,6 @@ body {
 
 </div><!-- /.page -->
 
-<!-- ── 二次確認 Modal ── -->
-<div id="confirm-overlay" style="
-  display:none; position:fixed; inset:0; z-index:2000;
-  background:rgba(0,0,0,.45); align-items:center; justify-content:center;
-">
-  <div style="
-    background:var(--card); border-radius:12px; padding:28px 28px 20px;
-    width:360px; max-width:90vw; box-shadow:0 8px 32px rgba(0,0,0,.18);
-  ">
-    <div style="font-size:18px; font-weight:600; margin-bottom:8px;">確認標記為完成</div>
-    <div style="font-size:15px; color:var(--text-2); margin-bottom:20px;">
-      訂單 <span id="confirm-order-id" style="font-family:'SF Mono',Consolas,monospace; font-weight:400; color:var(--text);"></span> 將標記為已完成，此操作無法撤銷。
-    </div>
-    <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button class="btn" onclick="closeConfirm()">取消</button>
-      <button class="btn btn-primary" onclick="confirmDone()">確認完成</button>
-    </div>
-  </div>
-</div>
 
 <script>
 /* ════════════════════════════════════════════════════
@@ -857,7 +838,7 @@ function renderLayer3(date, siteId) {
       : '<span class="badge-pending">已成立</span>';
     var actionBtn = isDone
       ? '<button class="btn-done" disabled>已完成</button>'
-      : '<button class="btn-done" onclick="openConfirm(\'' + o.orderId + '\')">標記為完成</button>';
+      : '<button class="btn-done" onclick="markOrderDone(\'' + o.orderId + '\')">標記為完成</button>';
     return (
       '<tr id="row-' + o.orderId + '">' +
         '<td>' + o.date + '</td>' +
@@ -873,31 +854,6 @@ function renderLayer3(date, siteId) {
     );
   }).join('');
 }
-
-/* ── 二次確認 Modal ── */
-var pendingOrderId = null;
-
-function openConfirm(orderId) {
-  pendingOrderId = orderId;
-  document.getElementById('confirm-order-id').textContent = orderId;
-  var overlay = document.getElementById('confirm-overlay');
-  overlay.style.display = 'flex';
-}
-
-function closeConfirm() {
-  pendingOrderId = null;
-  document.getElementById('confirm-overlay').style.display = 'none';
-}
-
-function confirmDone() {
-  var id = pendingOrderId;
-  closeConfirm();
-  if (id) markOrderDone(id);
-}
-
-document.getElementById('confirm-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeConfirm();
-});
 
 /* ── 標記單筆訂單完成 ── */
 function markOrderDone(orderId) {
